@@ -1,0 +1,10 @@
+- name: Download Artemis.war to {{ artemis_working_directory }}
+  get_url:
+    url: "{{ artemis_war_url }}"
+    dest: "{{ artemis_working_directory }}/artemis.war"
+    owner: "{{ artemis_user_name }}"
+    group: "{{ artemis_user_group }}"
+    mode: '0644'
+#    checksum: "sha1:{{ artemis_war_checksum }}" #TODO
+  notify: restart artemis
+

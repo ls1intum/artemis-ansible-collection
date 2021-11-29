@@ -1,0 +1,203 @@
+{{ ansible_managed | comment }}
+
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    url: jdbc:mysql://{{ artemis_database_host }}:3306/{{ artemis_database_dbname }}?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding={{ artemis_database_encoding }}&allowPublicKeyRetrieval=true&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
+    username: {{ artemis_database_username }}
+    password: {{ artemis_database_password }}
+    hikari:
+      poolName: Hikari
+      auto-commit: false
+      maximumPoolSize: 100
+      data-source-properties:
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
+        useServerPrepStmts: true
+  jpa:
+    hibernate:
+      connection:
+        charSet: {{ artemis_database_encoding }}
+        characterEncoding: {{ artemis_database_encoding }}
+        useUnicode: true
+{% if broker is defined %}
+  websocket:
+    broker:
+      username: {{ broker.username }}
+      password: {{ broker.password }}
+      addresses: "{{ broker.hostnames }}"
+{% endif %}
+{% if hazelcast_address is defined %}
+  hazelcast:
+    interface: "{{ hazelcast_address }}"
+{% endif %}
+  prometheus:
+    monitoringIp: "{{ shared_monitoring_host_v4 }}"
+  mail:
+    host: {{ mail.hostname }}
+    port: {{ mail.port }}
+    username: {{ mail.username }}
+    password: {{ mail.password }}
+    protocol: {{ mail.protocol }}
+    tls: true
+    properties.mail.smtp:
+      auth: true
+      starttls:
+        enable: true
+      ssl:
+        trust: {{ mail.ssl_trust }}
+
+server:
+  port: {{ artemis_server_port }}
+  url: {{ artemis_server_url }}
+  use-forward-headers: true
+  tomcat:
+    remoteip:
+      internal-proxies: 10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|169\.254\.\d{1,3}\.\d{1,3}|127\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.1[6-9]{1}\.\d{1,3}\.\d{1,3}|172\.2[0-9]{1}\.\d{1,3}\.\d{1,3}|172\.3[0-1]{1}\.\d{1,3}\.\d{1,3}|0:0:0:0:0:0:0:1|::1|fcfe::f:1|fcfe:0:0:0:0:0:f:1
+
+artemis:
+  course-archives-path: {{ artemis_repo_basepath }}/course-archives
+  repo-clone-path: {{ artemis_repo_basepath }}/repos
+  repo-download-clone-path: repos-download
+  file-upload-path: {{ artemis_repo_basepath }}/uploads
+  submission-export-path: exports
+  encryption-password: {{ artemis_encryption_password }}
+  user-management:
+{% if user_management.jira is defined %}
+    use-external: true
+    external:
+      url: {{ artemis_jira_url }}
+      user: {{ artemis_atlassian_user }}
+      password: {{ artemis_atlassian_password }}
+      admin-group-name: {{ artemis_admin_group }}
+{% else %}
+    use-external: false
+{% endif %}
+{% if ldap.url is defined and ldap.user_dn is defined and ldap.base is defined and ldap.password is defined %}
+    ldap:
+      url: {{ ldap.url }}
+      user-dn: {{ ldap.user_dn }}
+      base: {{ ldap.base }}
+      password: "{{ ldap.password }}"
+      allowed-username-pattern: '^([a-z]{2}\d{2}[a-z]{3})$'
+{% endif %}
+    internal-admin:
+      username: {{ internal_admin_user }}
+      password: {{ internal_admin_password }}
+    login:
+      account-name: {{ artemis_account_login_info }}
+
+{% if version_control.bitbucket is defined %}
+  version-control:
+    url: {{ version_control.bitbucket.url }}
+    user: {{ user_management.jira.user }}
+    password: {{ user_management.jira.password }}
+    token: {{ version_control.bitbucket.token }}
+    ssh-template-clone-url: {{ version_control.bitbucket.ssh_url }}
+    ssh-keys-url-path: /plugins/servlet/ssh/account/keys
+    ssh-private-key-folder-path: {{ artemis_ssh_key_path }}
+{% if artemis_ssh_key_password is defined and artemis_ssh_key_password is not none %}
+    ssh-private-key-password: {{ artemis_ssh_key_password }}
+{% endif %}
+{% endif %}
+
+{% if continuous_integration.bamboo is defined %}
+  continuous-integration:
+    url: {{ artemis.bamboo.url }}
+    user: {{ user_management.jira.user }}
+    password: {{ user_management.jira.password }}
+    token: {{ continuous_integration.bamboo.token }}
+    vcs-application-link-name: {{ continuous_integration.bamboo.bitbucket_link_name }}
+    empty-commit-necessary: true
+    artemis-authentication-token-value: {{ continuous_integration.bamboo.token }}
+{% endif %}
+
+{% if lti is defined %}
+  lti:
+    id: artemis_lti
+    oauth-key: artemis_lti_key
+    oauth-secret: {{ lti.oauth_secret }}
+    user-prefix-edx: edx_
+    user-prefix-u4i: u4i_
+    user-group-name-edx: edx
+    user-group-name-u4i: u4i
+{% endif %}
+
+  git:
+    name: artemis
+    email: {{ artemis_email }}
+
+{% if athene is defined %}
+  athene:
+    url: {{ athene.url }}
+    base64-secret: {{ athene.secret }}
+    token-validity-in-seconds: 10800
+{% endif %}
+
+{% if apollon_url is defined %}
+  apollon:
+    conversion-service-url: apollon_url
+{% endif %}
+
+jhipster:
+  security:
+    authentication:
+      jwt:
+        base64-secret: {{ artemis_jhipster_jwt }}
+        token-validity-in-seconds: 259200                   # Token is valid 3 days
+        token-validity-in-seconds-for-remember-me: 2592000  # Token is valid 30 days
+  registry:
+    password: {{ artemis_jhipster_registry_password }}
+  mail:
+    base-url: {{ artemis_server_url }}
+    from: '{{artemis_notification_from}} <{{ artemis_email.split("@")[0] }}+notification@{{ artemis_email.split("@")[1] }}>'
+
+# Properties to be exposed on the /info management endpoint
+info:
+  guided-tour:
+    courseShortName: 'artemistutorial'
+    tours:
+      - cancel_tour: ''
+      - code_editor_tour: 'tutorial'
+      - course_overview_tour: ''
+      - course_exercise_overview_tour: 'tutorial'
+      - modeling_tour: 'UML Class Diagram'
+      - programming_exercise_fail_tour: 'tutorial'
+      - programming_exercise_success_tour: 'tutorial'
+  contact: {{ artemis_email }}
+  imprint: https://ase.in.tum.de/lehrstuhl_1/component/content/article/179-imprint
+{% if is_testserver is defined and is_testserver is sameas true %}
+  test-server: true
+{% endif %}
+{% if is_testserver is defined and is_testserver is sameas false %}
+  test-server: false
+{% endif %}
+  text-assessment-analytics-enabled: true
+  sentry:
+    dsn: https://ceeb3e72ec094684aefbb132f87231f2@sentry.ase.in.tum.de/2
+
+{% if artemis_eureka_urls is defined and cluster_ipv4_address is defined %}
+# Eureka configuration
+eureka:
+  client:
+    enabled: true
+    service-url:
+      defaultZone: {{ artemis_eureka_urls }}
+  instance:
+    prefer-ip-address: true
+    ip-address: "[{{ cluster_ipv4_address }}]"
+    appname: Artemis
+    instanceId: Artemis:{{ artemis_eureka_instance_id }}
+{% endif %}
+
+logging:
+  file:
+    name: '{{ artemis_working_directory }}/artemis.log'
+
+management:
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+

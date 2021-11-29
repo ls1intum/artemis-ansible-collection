@@ -1,0 +1,154 @@
+---
+artemis_version: 5.2.3
+is_testserver: false
+
+artemis_server_url: https://artemis.ase.in.tum.de
+artemis_server_port: 8080
+
+install_artemis: true
+upgrade_artemis: false
+
+check_variables: true
+
+
+##############################################################################
+# Artemis Linux Users
+##############################################################################
+
+# Artemis service user configuration
+artemis_user_name: artemis
+artemis_user_group: artemis
+artemis_user_uid: 1337
+artemis_user_gid: 1337
+
+# Artemis deployment user configuration
+artemis_create_deployment_user: false
+artemis_deployment_user_name: deploymentuser
+artemis_deployment_user_uid: 1338
+artemis_deployment_user_public_key: ""
+artemis_deployment_user_comment: "User to deploy artemis to this host"
+
+
+##############################################################################
+# Java Setup
+##############################################################################
+
+openjdk_version: 17
+
+
+##############################################################################
+# Artemis 
+##############################################################################
+
+artemis_internal_admin_user: artemis_admin
+artemis_internal_admin_password: 
+
+artemis_jhipster_jwt: 
+artemis_jhipster_registry_password:
+
+artemis_eureka_urls:
+
+artemis_email: artemis.in@tum.de
+artemis_notification_from: "Artemis Notification"
+
+artemis_working_directory: "/opt/artemis"
+artemis_repo_basepath: "."
+
+artemis_ssh_key_path: /opt/keys
+artemis_ssh_key_name: "artemis_ssh_key"
+artemis_ssh_priv_key_value: ""
+artemis_ssh_key_password: 
+
+artemis_force_restart: false        # Will restart the artemis service on all nodes (unless artemis_force_no_restart) is set
+artemis_force_no_restart: false     # Will prevent the restart of the artemis service on all nodes
+
+artemis_build_version: "{{ artemis_version }}"
+artemis_war_version: "{{ artemis_build_version }}"
+artemis_war_url: "https://github.com/ls1intum/Artemis/releases/download/{{ artemis_war_version }}/Artemis.war"
+
+artemis_system_ram_proportion: 0.8  # How much % of the system RAM to allocate to the Artemis service (Default here: 80%)
+
+artemis_database_host: localhost
+artemis_database_dbname: artemis
+artemis_database_username: artemis
+artemis_database_password: 
+artemis_database_encoding: utf8mb4
+
+artemis_encryption_password:
+
+artemis_account_login_info: "TUM"
+
+ldap:
+  url: "ldaps://iauth.tum.de:636"
+  user_dn: "cn=TUINI01-Artemis,ou=bindDNs,ou=iauth,dc=tum,dc=de"
+  base: "ou=users,ou=data,ou=prod,ou=iauth,dc=tum,dc=de"
+  password: 
+
+user_management:
+  jira:
+    url:
+    user: 
+    password: 
+    
+version_control:
+  bitbucket:
+    hostname: 
+    url: "https://{{ version_control.bitbucket.hostname }}/"
+    ssh_url: "ssh://git@{{ version_control.bitbucket.hostname }}:7999/"
+    token: 
+
+  gitlab:
+    #TODO
+
+continuous_integration: 
+  bamboo:
+    url: 
+    token: 
+    bitbucket_link_name: 
+
+  jenkins:
+    #TODO
+
+athene: 
+  url: 
+  secret: 
+    
+apollon_url: #https://apollon.ase.in.tum.de/api/converter
+
+lti: 
+  oauth_secret:
+
+mail: 
+  host:
+  port: 
+  user:
+  password:
+  protocol: 
+  ssl_trust:
+
+
+##############################################################################
+# Message Broker
+##############################################################################
+
+broker: 
+  url:
+  user: 
+  password: 
+
+hazelcast_address:
+
+
+##############################################################################
+# Auto-generated Variables - No not alter!
+##############################################################################
+
+# Compute Spring Profiles from set variables
+artemis_spring_profile_env: "{% if artemis_is_testserver is true %}dev{% else %}prod{% endif %}"
+artemis_spring_profile_user_management: "{% if user_management.jira is defined and user_management.jira is not none %},jira{% endif %}" # none HAS to be lowercase ¯\_(ツ)_/¯
+artemis_spring_profile_ldap: "{% if ldap.password is defined and ldap.password is not none %},ldap{% endif %}"
+artemis_spring_profile_version_control: "{% if version_control.bitbucket is defined and version_control.bitbucket is not none %},bitbucket{% elif version_control.gitlab is defined and version_control.gitlab is not none %},gitlab{% endif %}"
+artemis_spring_profile_continuous_integration: "{% if continuous_integration.bamboo is defined and continuous_integration.bamboo is not none %},bamboo{% elif continuous_integration.jenkins is defined and continuous_integration.jenkins is not none %},jenkins{% endif %}"
+artemis_spring_profile_athene: "{% if athene is defined and athene is not none %},athene{% endif %}"
+artemis_spring_profile_scheduling: "{% if node_id is defined and node_id == 1 %},scheduling{% endif %}"
+artemis_spring_profiles: "{{ artemis_spring_profile_env }}{{ artemis_spring_profile_user_management }}{{ artemis_spring_profile_ldap }}{{ artemis_spring_profile_version_control }}{{ artemis_spring_profile_continuous_integration }}{{ artemis_spring_profile_athene }}{{ artemis_spring_profile_scheduling }}"

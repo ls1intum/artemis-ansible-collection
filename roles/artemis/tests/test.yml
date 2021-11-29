@@ -1,0 +1,17 @@
+---
+
+- hosts: localhost
+  connection: local
+  roles:
+    - role: artemis
+      vars:
+        artemis_database_password: asdfasdf
+        user_management:
+          jira: 
+            url: "test"
+            user: "test"
+            password: "asdf"
+        version_control:
+        continuous_integration:
+          #bitbucket:
+          #hostname: "test"

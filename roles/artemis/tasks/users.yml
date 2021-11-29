@@ -1,0 +1,40 @@
+- name: Ensure artemis group {{ artemis_user_group }} exists
+  become: yes
+  group:
+    name: "{{ artemis_user_group }}"
+    gid: "{{ artemis_user_gid }}"
+    state: present
+
+- name: Ensure artemis user {{ artemis_user_name }} exists
+  become: yes
+  user:
+    name: "{{ artemis_user_name }}"
+    state: present
+    uid: "{{ artemis_user_uid }}"
+    group: "{{ artemis_user_group }}"
+
+- name: Ensure deployment user {{ artemis_deployment_user_name }} exists
+  user:
+    name: "{{ artemis_deployment_user_name }}"
+    comment: "{{ artemis_deployment_user_comment }}"
+    state: present
+    uid: "{{ artemis_deployment_user_uid }}"
+    group: "{{ artemis_user_group }}"
+    groups: sudo
+    append: yes
+  when: (artemis_create_deployment_user | bool)
+
+- name: Ensure (limited) sudo privileges for user {{ artemis_deployment_user_name }}
+  template:
+    src: artemis_deployment_sudoers.j2
+    dest: /etc/sudoers.d/artemis_deployment
+    validate: 'visudo -cf %s'
+    mode: 0440
+  when: (artemis_create_deployment_user | bool)
+
+- name: Authorize ssh-key for deployment user
+  authorized_key:
+    user: "{{ artemis_deployment_user_name }}"
+    state: present
+    key: "{{ artemis_deployment_user_public_key }}"
+  when: (artemis_create_deployment_user | bool)

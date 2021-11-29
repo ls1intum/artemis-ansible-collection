@@ -1,0 +1,115 @@
+- name: Ensure locale en_US.UTF-8 exists
+  become: true
+  locale_gen:
+    name: en_US.UTF-8
+    state: present
+
+- name: Ensure locale is set in /etc/environment
+  become: true
+  lineinfile:
+    path: /etc/environment
+    regexp: '^LC_ALL='
+    line: LC_ALL=en_US.UTF-8
+    state: present
+
+- name: Ensure language is set in /etc/environment
+  become: true
+  lineinfile:
+    path: /etc/environment
+    regexp: '^LANG='
+    line: LANG=en_US.UTF-8
+    state: present
+
+- name: Install Artemis requirements
+  become: true
+  apt:
+    name:
+      - git
+      - mysql-client
+      - graphviz
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Create artemis directory
+  become: true
+  file:
+    path: "{{ artemis_working_directory }}"
+    state: directory
+    mode: '0775'
+
+- name: Copy application-prod.yml to artemis directory
+  become: true
+  template:
+    src: "templates/artemis_application-prod.yml.j2"
+    dest: "{{ artemis_working_directory }}/application-prod.yml"
+    owner: "{{ artemis_user_name }}"
+    group: "{{ artemis_user_group }}"
+    mode: 0640
+  register: config
+  notify: restart artemis
+
+- name: Set permissions for artemis directory
+  become: true
+  file:
+    path: "{{ artemis_working_directory }}"
+    state: directory
+    recurse: no
+    owner: "{{ artemis_user_name }}"
+    group: "{{ artemis_user_group }}"
+  register: permissions
+  notify: restart artemis
+
+- name: Create artemis ssh key directory
+  become: true
+  file:
+    path: "{{ artemis_ssh_key_path }}"
+    state: directory
+    mode: '0775'
+
+- name: Copy ssh key
+  become: true
+  copy: 
+    content: "{{ artemis_ssh_key_value }}" 
+    dest: "{{ artemis_ssh_key_path }}/{{ artemis_ssh_key_name }}"
+  register: ssh_key
+  notify: restart artemis
+
+- name: Set permissions for artemis ssh key directory
+  become: true
+  file:
+    path: "{{ artemis_ssh_key_path }}"
+    state: directory
+    recurse: yes
+    owner: "{{ artemis_user_name }}"
+    group: "{{ artemis_user_group }}"
+
+- name: Copy artemis.service systemd configuration
+  become: true
+  template:
+    src: artemis_artemis.service.j2
+    dest: "/etc/systemd/system/artemis.service"
+    mode: 0644
+  register: service
+  notify: restart artemis
+
+- name: Enable artemis service
+  become: true
+  systemd:
+    daemon_reload: yes
+    name: artemis
+    enabled: yes
+    masked: no
+  notify: start artemis
+
+- name: Stop node if something changed or artemis_force_restart is set (unless artemis_force_no_restart is set)
+  become: true
+  service:
+    name: artemis
+    state: stopped
+  failed_when: false    # e.g. if file exists but service does not
+  changed_when: true    # e.g. if service was already stopped
+  when: (config.changed or permissions.changed or service.changed or ssh_key.changed or artemis_force_restart) and not artemis_force_no_restart
+  notify: restart artemis
+  throttle: 1
+

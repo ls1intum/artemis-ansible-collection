@@ -1,0 +1,141 @@
+---
+##############################################################################
+# Check Secrets
+##############################################################################
+
+- name: Check if database password is set
+  fail: 
+    msg: "No database password is configured!"
+  when: 
+    - artemis_database_password is undefined or artemis_database_password is none
+
+- name: Check if artemis_encryption_password is set
+  fail: 
+    msg: "No artemis_encryption_password is configured!"
+  when: 
+    - artemis_encryption_password is undefined or artemis_encryption_password is none
+      
+- name: Check if artemis_internal_admin_password is set
+  fail: 
+    msg: "No artemis_internal_admin_password is configured!"
+  when: 
+    - artemis_internal_admin_password is undefined or artemis_internal_admin_password is none
+      
+- name: Check if artemis_ssh_priv_key_value is set
+  fail: 
+    msg: "No artemis_ssh_priv_key_value is configured!"
+  when: 
+    - artemis_ssh_priv_key_value is undefined or artemis_ssh_priv_key_value is none
+      
+- name: Check if artemis_jhipster_jwt is set
+  fail: 
+    msg: "No artemis_jhipster_jwt is configured!"
+  when: 
+    - artemis_jhipster_jwt is undefined or artemis_jhipster_jwt is none
+
+- name: Check if artemis_jhipster_registry_password is set
+  fail: 
+    msg: "No artemis_jhipster_registry_password is configured!"
+  when: 
+    - artemis_jhipster_registry_password is undefined or artemis_jhipster_registry_password is none
+
+##############################################################################
+# Check Jira Variables
+##############################################################################
+
+- name: jira variables set
+  debug: 
+    msg: " User Management Jira Variables: {{ user_management.jira }}"
+  when: 
+    - user_management.jira is defined
+
+- name: Check if jira url variables is set
+  fail: 
+    msg: "Jira configuration is incomplete - Make sure to add Jira url"
+  when: 
+    - user_management.jira is defined
+    - user_management.jira.url is undefined or user_management.jira.url is none
+      
+- name: Check if jira user variables is set
+  fail: 
+    msg: "Jira configuration is incomplete - Make sure to add Jira user"
+  when: 
+    - user_management.jira is defined
+    - user_management.jira.user is undefined or user_management.jira.user is none
+
+- name: Check if jira password variables is set
+  fail: 
+    msg: "Jira configuration is incomplete - Make sure to add Jira password"
+  when: 
+    - user_management.jira is defined
+    - user_management.jira.password is undefined or user_management.jira.password is none
+
+##############################################################################
+# Check Bitbucket Variables
+##############################################################################
+
+- name: bitbucket variables set
+  debug: 
+    msg: "Version Control bitbucket Variables: {{ version_control.bitbucket }}"
+  when: 
+    - version_control.bitbucket is defined
+
+- name: Check if bitbucket hostname variables is set
+  fail: 
+    msg: "bitbucket configuration is incomplete - Make sure to add bitbucket url"
+  when: 
+    - version_control.bitbucket is defined
+    - version_control.bitbucket.hostname is undefined or version_control.bitbucket.hostname is none
+      
+- name: Check if bitbucket token variables is set
+  fail: 
+    msg: "bitbucket configuration is incomplete - Make sure to add bitbucket token"
+  when: 
+    - version_control.bitbucket is defined
+    - version_control.bitbucket.token is undefined or version_control.bitbucket.token is none
+
+- name: Check if bitbucket url variables is set
+  fail: 
+    msg: "bitbucket configuration is incomplete - Make sure to add bitbucket url"
+  when: 
+    - version_control.bitbucket is defined
+    - version_control.bitbucket.url is undefined or version_control.bitbucket.url is none
+
+- name: Check if bitbucket ssh_url variables is set
+  fail: 
+    msg: "bitbucket configuration is incomplete - Make sure to add bitbucket ssh_url"
+  when: 
+    - version_control.bitbucket is defined
+    - version_control.bitbucket.ssh_url is undefined or version_control.bitbucket.ssh_url is none
+
+##############################################################################
+# Check bamboo Variables
+##############################################################################
+
+- name: bamboo variables set
+  debug: 
+    msg: "Version Control bamboo Variables: {{ continuous_integration.bamboo }}"
+  when: 
+    - continuous_integration.bamboo is defined
+      
+- name: Check if bamboo url variables is set
+  fail: 
+    msg: "bamboo configuration is incomplete - Make sure to add bamboo url"
+  when: 
+    - continuous_integration.bamboo is defined
+    - continuous_integration.bamboo.url is undefined or continuous_integration.bamboo.url is none
+
+- name: Check if bamboo token variables is set
+  fail: 
+    msg: "bamboo configuration is incomplete - Make sure to add bamboo token"
+  when: 
+    - continuous_integration.bamboo is defined
+    - continuous_integration.bamboo.token is undefined or continuous_integration.bamboo.token is none
+
+- name: Check if bamboo bitbucket_link_name variables is set
+  fail: 
+    msg: "bamboo configuration is incomplete - Make sure to add bamboo bitbucket_link_name"
+  when: 
+    - continuous_integration.bamboo is defined
+    - continuous_integration.bamboo.bitbucket_link_name is undefined or continuous_integration.bamboo.bitbucket_link_name is none
+

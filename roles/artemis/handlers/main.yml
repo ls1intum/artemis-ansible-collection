@@ -1,0 +1,36 @@
+---
+# handlers file for artemis
+
+- name: restart artemis on node 1
+  service:
+    name: artemis
+    state: restarted
+  when: node_id == 1 and not artemis_force_no_restart
+  listen: "restart artemis"
+  throttle: 1
+
+- name: wait for node 1 being started
+  wait_for:
+    timeout: 60
+  when: node_id == 1
+  listen: "restart artemis"
+  throttle: 1
+
+- name: restart artemis on other nodes
+  service:
+    name: artemis
+    state: restarted
+  when: not (node_id == 1) and not artemis_force_no_restart
+  listen: "restart artemis"
+  throttle: 1
+
+- name: start artemis
+  service:
+    name: artemis
+    state: started
+  listen: "start artemis"
+  throttle: 1
+
+- name: reboot system
+  reboot:
+
