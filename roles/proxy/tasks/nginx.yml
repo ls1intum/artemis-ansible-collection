@@ -1,0 +1,126 @@
+- name: Install nginx package
+  become: true
+  apt:
+    name: nginx
+    state: latest
+  notify: restart nginx
+
+- name: Enable nginx service
+  systemd:
+    daemon_reload: yes
+    name: nginx
+    enabled: yes
+    masked: no
+  notify: restart nginx
+
+- name: Start nginx
+  become: true
+  service:
+    name: nginx
+    state: started
+
+- name: Generate DH Parameters
+  openssl_dhparam:
+    path: /etc/nginx/dhparam.pem
+    size: 4096
+
+- name: Adjust worker_rlimit_nofile in nginx.conf
+  lineinfile:
+    path: /etc/nginx/nginx.conf
+    regexp: '^worker_rlimit_nofile'
+    line: "worker_rlimit_nofile {{ proxy_worker_rlmmiit_nofile }};"
+    insertbefore: BOF
+    state: present
+  notify: restart nginx
+
+- name: Adjust worker_connections in nginx.conf
+  lineinfile:
+    path: /etc/nginx/nginx.conf
+    regexp: '^\tworker_connections'
+    line: "\tworker_connections {{ proxy_worker_connections }};"
+    insertafter: "events {"
+    firstmatch: yes
+    state: present
+  notify: restart nginx
+
+- name: Adjust worker_connections in nginx.conf
+  lineinfile:
+    path: /etc/nginx/nginx.conf
+    regexp: '^\t(# )?server_names_hash_bucket_size'
+    line: "\tserver_names_hash_bucket_size {{ proxy_server_names_hash_bucket_size }};"
+    insertafter: "events {"
+    firstmatch: yes
+    state: present
+  notify: restart nginx
+
+- name: Copy timeouts.conf
+  template:
+    src: nginx_timeouts.conf.j2
+    dest: /etc/nginx/conf.d/timeouts.conf
+    mode: 0644
+  notify: restart nginx
+
+- name: Copy {{ proxy_site_template }}.conf
+  template:
+    src: nginx_{{ proxy_site_template }}.conf.j2
+    dest: /etc/nginx/sites-available/{{ proxy_site_template }}.conf
+    mode: 0644
+  notify: reload nginx
+
+- name: Enable {{ proxy_site_template }} site config
+  file:
+    src: /etc/nginx/sites-available/{{ proxy_site_template }}.conf
+    dest: /etc/nginx/sites-enabled/{{ proxy_site_template }}.conf
+    owner: root
+    group: root
+    state: link
+  notify: reload nginx
+
+- name: Disable default site config
+  file:
+    dest: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: reload nginx
+
+- name: Copy nginx 502.html
+  copy:
+    src: files/nginx_502.html
+    dest: /usr/share/nginx/html/502.html
+    mode: 0644
+  notify: reload nginx
+
+- name: Validate nginx config
+  command: nginx -t
+  changed_when: false
+
+- name: Ensure file-max limit in sysctl.conf
+  lineinfile:
+    path: /etc/sysctl.conf
+    regexp: '^fs.file-max='
+    line: fs.file-max=2000000
+    state: present
+  register: sysctlfile
+
+- name: Apply sysctl config
+  command: sysctl -p
+  when: sysctlfile.changed
+
+- name: Copy security-limits nginx.conf
+  copy:
+    src: files/nginx_security_limits.conf
+    dest: /etc/security/limits.d/nginx.conf
+    mode: 0644
+  notify: reboot system
+
+- name: Ensure systemd.conf.d folder exists
+  file:
+    path: /etc/systemd/system.conf.d/
+    state: directory
+    mode: '0755'
+
+- name: Copy systemd-limits nginx.conf
+  copy:
+    src: files/nginx_systemd_limits.conf
+    dest: /etc/systemd/system.conf.d/limits.conf
+    mode: 0644
+  notify: reboot system
