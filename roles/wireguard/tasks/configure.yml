@@ -1,0 +1,14 @@
+- name: Copy wg0.conf
+  template:
+    src: wireguard_wg0.conf.j2
+    dest: /etc/wireguard/wg0.conf
+    mode: 0644
+  notify: restart wireguard
+
+- name: Enable wg0 service
+  systemd:
+    daemon_reload: yes
+    name: wg-quick@wg0.service
+    enabled: yes
+    masked: no
+  notify: restart wireguard

@@ -1,0 +1,16 @@
+
+- name: Check if wireguard is installed
+  package_facts:
+    manager: "apt"
+
+- name: Install wireguard
+  apt:
+    name: wireguard
+    state: latest
+    update_cache: yes
+  register: wireinstall
+
+- name: Reboot after first install
+  reboot:
+    reboot_timeout: 3600
+  when: "'wireguard' not in ansible_facts.packages and wireinstall.changed"
