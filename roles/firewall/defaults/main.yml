@@ -1,0 +1,6 @@
+wireguard_port: 51820
+#firewall_hostgroup: group1   # For use of other iptables rules file
+#
+# Management Networks - used to allow SSH / HTTP access to Hosts and services  
+management_network_ipv4: "172.24.152.0/24"
+management_network_ipv6: "2a09:80c0:ac18:9800::/64"

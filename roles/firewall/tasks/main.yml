@@ -1,0 +1,27 @@
+- name: Install iptables-persistent
+  apt:
+    name: iptables-persistent
+    state: latest
+    update_cache: yes
+
+- name: Copy rules.v4
+  template:
+    src: rules_{{ firewall_hostgroup | default('default') }}.v4.j2
+    dest: /etc/iptables/rules.v4
+    mode: 0644
+  register: copy4
+
+- name: Copy rules.v6
+  template:
+    src: rules_{{ firewall_hostgroup | default('default') }}.v6.j2
+    dest: /etc/iptables/rules.v6
+    mode: 0644
+  register: copy6
+
+- name: Load IPv4 rules
+  shell: "iptables-restore < /etc/iptables/rules.v4"
+  changed_when: copy4.changed
+
+- name: Load IPv6 rules
+  shell: "ip6tables-restore < /etc/iptables/rules.v6"
+  changed_when: copy6.changed
