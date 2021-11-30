@@ -1,0 +1,12 @@
+---
+# defaults file for storage-provider
+artemis_uid: 1337
+artemis_gid: 1337
+artemis_user: artemis
+artemis_group: artemis
+
+# Storage server definition
+storage_export:  /srv/artemis
+
+# Storage Network 
+storage_network: 172.24.27.0/25
