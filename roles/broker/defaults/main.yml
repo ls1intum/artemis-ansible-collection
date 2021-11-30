@@ -17,11 +17,8 @@ activemq_install_directory: /opt/activemq-distribution
 activemq_working_directory: /opt/broker/broker1
 activemq_username: brokeruser
 activemq_password: test1234
-broker_host_role: ''   # Either primary or backup, leave out for standalone
 broker_primary_host: broker1.artemis.ase.in.tum.de
 broker_public_primary_host: broker1.artemis.ase.in.tum.de
-broker_backup_host: broker2.artemis.ase.in.tum.de
-broker_public_backup_host: broker2.artemis.ase.in.tum.de
 
 # registry.yml task
 registry_version: 6.7.1
