@@ -1,0 +1,8 @@
+artemis_uid: 1337
+artemis_gid: 1337
+artemis_user: artemis
+artemis_group: artemis
+
+# Storage server definition
+storage_address: 172.24.70.132
+storage_export:  /srv/artemis

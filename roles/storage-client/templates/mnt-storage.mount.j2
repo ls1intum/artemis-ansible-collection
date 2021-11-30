@@ -1,0 +1,14 @@
+{{ ansible_managed | comment }}
+
+[Unit]
+Description=Things devices
+After=network.target
+
+[Mount]
+What={{ storage_address }}:{{ storage_export }}
+Where=/mnt/storage
+Type=nfs
+Options=_netdev,auto
+
+[Install]
+WantedBy=multi-user.target

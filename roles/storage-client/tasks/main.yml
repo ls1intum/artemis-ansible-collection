@@ -1,0 +1,51 @@
+- name: Ensure group {{ artemis_group }} exists
+  become: yes
+  group:
+    name: "{{ artemis_group }}"
+    gid: "{{ artemis_gid }}"
+    state: present
+
+- name: Ensure user {{ artemis_user }} exists
+  become: yes
+  user:
+    name: "{{ artemis_user }}"
+    state: present
+    uid: "{{ artemis_uid }}"
+    group: "{{ artemis_group }}"
+
+- name: Install NFS client 
+  apt: 
+    name: nfs-common 
+    update_cache: yes
+    state: present 
+  become: true
+
+- name: Unmount NFS share if present 
+  systemd:
+    name: mnt-storage.mount
+    state: stopped 
+  become: true
+
+- name: Make sure the mountmoint exists
+  file: 
+    path: /mnt/storage
+    state: directory
+    owner: "{{ artemis_user }}"
+    group: "{{ artemis_group }}"
+  become: true
+
+- name: Add mount system.d service 
+  template: 
+    src: mnt-storage.mount.j2
+    dest: "/etc/systemd/system/mnt-storage.mount" 
+  register: service 
+  become: true
+
+- name: Enable systemd mount sevice 
+  systemd: 
+    daemon_reload: yes
+    name: mnt-storage.mount
+    state: started
+    enabled: yes
+  become: true
+
