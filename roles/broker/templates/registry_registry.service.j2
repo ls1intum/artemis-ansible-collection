@@ -1,0 +1,20 @@
+{{ ansible_managed | comment }}
+
+[Unit]
+Description=Registry
+After=syslog.target
+
+[Service]
+User={{ artemis_user_name }}
+WorkingDirectory={{ registry_working_directory }}
+ExecStart=/usr/bin/java \
+    -Xmx256m \
+    --illegal-access=permit \
+    -jar registry.jar \
+    --spring.profiles.active=prod,native
+SuccessExitStatus=143
+StandardOutput=/opt/registry/registry.log
+#StandardError=inherit
+
+[Install]
+WantedBy=multi-user.target

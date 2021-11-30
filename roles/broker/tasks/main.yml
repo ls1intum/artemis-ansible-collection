@@ -1,0 +1,14 @@
+# Create artemis user
+- include_tasks: user.yml
+
+# Install Java JDK
+- include_tasks: jdk.yml
+
+# Install ActiveMQ Broker
+- include_tasks: install.yml
+
+# Configure ActiveMQ Broker
+- include_tasks: configure.yml
+
+# Install and configure JHipster Registry
+- include_tasks: registry.yml

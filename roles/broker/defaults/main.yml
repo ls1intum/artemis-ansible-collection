@@ -1,0 +1,39 @@
+# user.yml task
+artemis_user_name: artemis
+artemis_user_comment: Artemis
+artemis_user_group: artemis
+# Important for directory permissions e.g. in NFS-shares
+artemis_user_uid: 1337
+artemis_user_gid: 1337
+
+# jdk.yml task
+jdk_openjdk_version: 16
+
+# install.yml task
+activemq_version: 2.17.0
+activemq_install_directory: /opt/activemq-distribution
+
+# configure.yml task
+activemq_working_directory: /opt/broker/broker1
+activemq_username: brokeruser
+activemq_password: test1234
+broker_host_role: ''   # Either primary or backup, leave out for standalone
+broker_primary_host: broker1.artemis.ase.in.tum.de
+broker_public_primary_host: broker1.artemis.ase.in.tum.de
+broker_backup_host: broker2.artemis.ase.in.tum.de
+broker_public_backup_host: broker2.artemis.ase.in.tum.de
+
+# registry.yml task
+registry_version: 6.7.1
+registry_working_directory: /opt/registry
+registry_application_prod_file: "{{ registry_working_directory }}/application-prod.yml"
+registry_application_prod_jwt: THESAMETOKENTHATISUSEDONTHEARTEMISINSTANCES
+registry_application_prod_registry_password: ANADMINPASSWORDTHATMUSTBECHANGED
+registry_application_prod_spring_password: ANADMINPASSWORDTHATMUSTBECHANGED
+registry_bootstrap_prod_file: "{{ registry_working_directory }}/bootstrap-prod.yml"
+registry_bootstrap_prod_jwt: THESAMETOKENTHATISUSEDONTHEARTEMISINSTANCES
+registry_application_file: "{{ registry_working_directory }}/config-server/application.yml"
+registry_application_jwt: THESAMETOKENTHATISUSEDONTHEARTEMISINSTANCES
+registry_instance_id: registry:1
+
+proxy_site_template: registry # Name of the site loaded within nginx

@@ -1,0 +1,13 @@
+{{ ansible_managed | comment }}
+
+[Unit]
+Description=ActiveMQ-Broker
+After=network.target
+
+[Service]
+User={{ artemis_user_name }}
+WorkingDirectory={{ activemq_working_directory }}
+ExecStart={{ activemq_working_directory }}/bin/artemis run
+
+[Install]
+WantedBy=multi-user.target

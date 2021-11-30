@@ -1,0 +1,9 @@
+- name: restart registry
+  service:
+    name: registry
+    state: restarted
+
+- name: restart broker
+  service:
+    name: broker1
+    state: restarted

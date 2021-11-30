@@ -1,0 +1,71 @@
+- name: Create registry directory
+  file:
+    path: "{{ registry_working_directory }}"
+    state: directory
+    mode: '0775'
+  notify: restart registry
+
+- name: Create registry config directory
+  file:
+    path: "{{ registry_working_directory }}/config-server"
+    state: directory
+    mode: '0755'
+  notify: restart registry
+
+- name: Download jhipster v{{ registry_version }}
+  get_url:
+    url: "https://github.com/jhipster/jhipster-registry/releases/download/v{{ registry_version }}/jhipster-registry-{{ registry_version }}.jar"
+    dest: "{{ registry_working_directory }}/registry.jar"
+    mode: '0644'
+  notify: restart registry
+
+- name: Set permissions for registry directory
+  file:
+    path: "{{ registry_working_directory }}"
+    state: directory
+    recurse: yes
+    owner: "{{ artemis_user_name }}"
+    group: "{{ artemis_user_group }}"
+  notify: restart registry
+
+- name: Copy registry.service systemd configuration
+  template:
+    src: registry_registry.service.j2
+    dest: "/etc/systemd/system/registry.service"
+    mode: 0644
+  notify: restart registry
+
+- name: Enable registry service
+  systemd:
+    daemon_reload: yes
+    name: registry
+    enabled: yes
+    masked: no
+  notify: restart registry
+
+- name: Copy application-prod.yml
+  template:
+    src: registry_application-prod.yml.j2
+    dest: "{{ registry_working_directory }}/application-prod.yml"
+    owner: "{{ artemis_user_name }}"
+    group: "{{ artemis_user_group }}"
+    mode: 0644
+  notify: restart registry
+
+- name: Copy bootstrap-prod.yml
+  template:
+    src: registry_bootstrap-prod.yml.j2
+    dest: "{{ registry_working_directory }}/bootstrap-prod.yml"
+    owner: "{{ artemis_user_name }}"
+    group: "{{ artemis_user_group }}"
+    mode: 0644
+  notify: restart registry
+
+- name: Copy application.yml
+  template:
+    src: registry_application.yml.j2
+    dest: "{{ registry_working_directory }}/config-server/application.yml"
+    owner: "{{ artemis_user_name }}"
+    group: "{{ artemis_user_group }}"
+    mode: 0644
+  notify: restart registry

@@ -1,0 +1,25 @@
+{{ ansible_managed | comment }}
+
+logging:
+  file:
+    name: '{{ registry_working_directory }}/registry.log'
+
+jhipster:
+  security:
+    authentication:
+      jwt:
+        base64-secret: {{ registry_application_prod_jwt }}
+  registry:
+    password: {{ registry_application_prod_registry_password }}
+  cors:
+    allowed-origins: https://{{ broker_public_primary_host }}
+    allowed-methods: GET, PUT, POST, DELETE, OPTIONS
+    allowed-headers: "*"
+    exposed-headers:
+    allow-credentials: true
+    max-age: 1800
+
+spring:
+  security:
+    user:
+      password: {{ registry_application_prod_spring_password }}
