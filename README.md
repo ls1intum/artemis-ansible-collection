@@ -7,11 +7,16 @@ This collection contains all ansible roles necessary to deploy [Artemis](https:/
 ## Installation 
 TODO
 
+## Documentation
+
+You can find the documentation for Artemis [here](https://docs.artemis.ase.in.tum.de). 
+The documentation for this ansible collection can be found in the `docs` folder. Each role also includes a readme which might help in certain situations. 
+
 ## Deployment Strategies 
 
 Artemis can be deployed in different ways. Depending on the use case the ansible configuration differs. 
 
-You can find examples for each configuration in the examples folder. 
+You can find examples for each configuration in the `examples` folder. 
 
 ### Single Node installation 
 All Artemis components are deployed to a single host. This is the prefered deployment strategy for small installations or testing/evaluation purposes. 
@@ -34,7 +39,7 @@ Artemis relies on external services to handle version control and continuous int
 - Jira, Bitbucket, Bamboo
 - Gitlab, Jenkins
 
-The ansible configuration has to be adapted accordingly. Again, you can find examples for both in the examples folder. 
+The ansible configuration has to be adapted accordingly. Again, you can find examples for both in the `examples` folder. 
 
 ## Test Servers 
 
@@ -43,6 +48,6 @@ This collection also allows to provision test servers/clusters. To provision a t
 ```
 is_testserver: true
 ```
-variable in your group_vars.
+variable in your `group_vars`.
 
 
