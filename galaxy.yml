@@ -1,20 +1,10 @@
-### REQUIRED
-# The namespace of the collection. This can be a company/brand/organization or product namespace under which all
-# content lives. May only contain alphanumeric lowercase characters and underscores. Namespaces cannot start with
-# underscores or numbers and cannot contain consecutive underscores
 namespace: ls1intum
-
-# The name of the collection. Has the same character restrictions as 'namespace'
 name: artemis
 
-# The version of the collection. Must be compatible with semantic versioning
 version: 0.0.1
 
-# The path to the Markdown (.md) readme file. This path is relative to the root of the collection
 readme: README.md
 
-# A list of the collection's content authors. Can be just the name or in the format 'Full Name <email> (url)
-# @nicks:irc/im.site#channel'
 authors:
 - Matthias Linhuber <matthias@linhuber.org> (https://mtze.me)
 - Simon Leiss <hello@sleiss.me> (https://sleiss.me)
@@ -22,29 +12,14 @@ authors:
 - Jan Philip Bernius <janphilip.bernius@tum.de> (https://ase.in.tum.de/lehrstuhl_1/bernius)
 - Prof. Dr. Stephan Krusche <krusche@in.tum.de> (https://ase.in.tum.de/krusche)
 
-
-### OPTIONAL but strongly recommended
-# A short summary description of the collection
 description: Set up, configure and update Artemis servers / clusters. 
 
-# Either a single license or a list of licenses for content inside of a collection. Ansible Galaxy currently only
-# accepts L(SPDX,https://spdx.org/licenses/) licenses. This key is mutually exclusive with 'license_file'
-#license:
-#- MIT
-
-# The path to the license file for the collection. This path is relative to the root of the collection. This key is
-# mutually exclusive with 'license'
 license_file: 'LICENSE'
 
-# A list of tags you want to associate with the collection for indexing/searching. A tag name has the same character
-# requirements as 'namespace' and 'name'
 tags: [ls1intum, artemis]
 
-# Collections that this collection requires to be installed for it to be usable. The key of the dict is the
-# collection label 'namespace.name'. The value is a version range
-# L(specifiers,https://python-semanticversion.readthedocs.io/en/latest/#requirement-specification). Multiple version
-# range specifiers can be set and are separated by ','
-dependencies: {geerlingguy.mysql}
+dependencies: 
+  - "geerlingguy.mysql": "*"
 
 # The URL of the originating SCM repository
 repository: https://github.com/ls1intum/ls1intum.artemis
