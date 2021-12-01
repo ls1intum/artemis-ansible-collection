@@ -87,7 +87,7 @@
 - name: Copy artemis.service systemd configuration
   become: true
   template:
-    src: artemis_artemis.service.j2
+    src: artemis.service.j2
     dest: "/etc/systemd/system/artemis.service"
     mode: 0644
   register: service
