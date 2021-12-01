@@ -1,4 +1,5 @@
 - name: Download Artemis.war to {{ artemis_working_directory }}
+  become: true
   get_url:
     url: "{{ artemis_war_url }}"
     dest: "{{ artemis_working_directory }}/artemis.war"
