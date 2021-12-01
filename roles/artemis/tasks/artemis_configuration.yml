@@ -41,7 +41,7 @@
 - name: Copy application-prod.yml to artemis directory
   become: true
   template:
-    src: "templates/artemis_application-prod.yml.j2"
+    src: "templates/application-prod.yml.j2"
     dest: "{{ artemis_working_directory }}/application-prod.yml"
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
