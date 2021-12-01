@@ -38,7 +38,7 @@ server {
     ssl_stapling on;
     ssl_stapling_verify on;
 #   ssl_early_data on;
-    resolver {{ proxy_resolver }}
+    resolver {{ proxy_resolver }};
     resolver_timeout 5s;
     add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload";
     client_max_body_size 10m;

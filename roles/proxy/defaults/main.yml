@@ -9,7 +9,6 @@ proxy_resolver: "127.0.0.53 valid=300s"
 proxy_available_nodes:
   - hostname: localhost
 
-proxy_primary_node_url: "http://node1.artemis.ase.in.tum.de"
 
 # Service Port on nodes for load balancing; If differing for each node fall back to
 # manual list of proxy_available_nodes and comment out proxy_node_port variable declaration
@@ -28,6 +27,7 @@ proxy_worker_connections: 20000
 proxy_server_names_hash_bucket_size: 256
 
 proxy_athene_baseurl: 
+proxy_primary_node_url: 
 
 # Used for the /mailto enpoint - Has to be a valid mail address. 
 proxy_mailto:
