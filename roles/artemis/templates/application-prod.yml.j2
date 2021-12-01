@@ -110,7 +110,7 @@ artemis:
 
 {% if continuous_integration.bamboo is defined %}
   continuous-integration:
-    url: {{ artemis.bamboo.url }}
+    url: {{ continuous_integration.bamboo.url }}
     user: {{ user_management.jira.user }}
     password: {{ user_management.jira.password }}
     token: {{ continuous_integration.bamboo.token }}
