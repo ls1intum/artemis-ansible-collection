@@ -6,6 +6,7 @@
   notify: restart nginx
 
 - name: Enable nginx service
+  become: true
   systemd:
     daemon_reload: yes
     name: nginx
@@ -20,11 +21,13 @@
     state: started
 
 - name: Generate DH Parameters
+  become: true
   openssl_dhparam:
     path: /etc/nginx/dhparam.pem
     size: 4096
 
 - name: Adjust worker_rlimit_nofile in nginx.conf
+  become: true
   lineinfile:
     path: /etc/nginx/nginx.conf
     regexp: '^worker_rlimit_nofile'
@@ -34,6 +37,7 @@
   notify: restart nginx
 
 - name: Adjust worker_connections in nginx.conf
+  become: true
   lineinfile:
     path: /etc/nginx/nginx.conf
     regexp: '^\tworker_connections'
@@ -44,6 +48,7 @@
   notify: restart nginx
 
 - name: Adjust worker_connections in nginx.conf
+  become: true
   lineinfile:
     path: /etc/nginx/nginx.conf
     regexp: '^\t(# )?server_names_hash_bucket_size'
@@ -54,6 +59,7 @@
   notify: restart nginx
 
 - name: Copy timeouts.conf
+  become: true
   template:
     src: nginx_timeouts.conf.j2
     dest: /etc/nginx/conf.d/timeouts.conf
@@ -61,6 +67,7 @@
   notify: restart nginx
 
 - name: Copy {{ proxy_site_template }}.conf
+  become: true
   template:
     src: nginx_{{ proxy_site_template }}.conf.j2
     dest: /etc/nginx/sites-available/{{ proxy_site_template }}.conf
@@ -68,6 +75,7 @@
   notify: reload nginx
 
 - name: Enable {{ proxy_site_template }} site config
+  become: true
   file:
     src: /etc/nginx/sites-available/{{ proxy_site_template }}.conf
     dest: /etc/nginx/sites-enabled/{{ proxy_site_template }}.conf
@@ -77,12 +85,14 @@
   notify: reload nginx
 
 - name: Disable default site config
+  become: true
   file:
     dest: /etc/nginx/sites-enabled/default
     state: absent
   notify: reload nginx
 
 - name: Copy nginx 502.html
+  become: true
   copy:
     src: files/nginx_502.html
     dest: /usr/share/nginx/html/502.html
@@ -90,10 +100,12 @@
   notify: reload nginx
 
 - name: Validate nginx config
+  become: true
   command: nginx -t
   changed_when: false
 
 - name: Ensure file-max limit in sysctl.conf
+  become: true
   lineinfile:
     path: /etc/sysctl.conf
     regexp: '^fs.file-max='
@@ -102,10 +114,12 @@
   register: sysctlfile
 
 - name: Apply sysctl config
+  become: true
   command: sysctl -p
   when: sysctlfile.changed
 
 - name: Copy security-limits nginx.conf
+  become: true
   copy:
     src: files/nginx_security_limits.conf
     dest: /etc/security/limits.d/nginx.conf
@@ -113,12 +127,14 @@
   notify: reboot system
 
 - name: Ensure systemd.conf.d folder exists
+  become: true
   file:
     path: /etc/systemd/system.conf.d/
     state: directory
     mode: '0755'
 
 - name: Copy systemd-limits nginx.conf
+  become: true
   copy:
     src: files/nginx_systemd_limits.conf
     dest: /etc/systemd/system.conf.d/limits.conf
