@@ -80,66 +80,66 @@ artemis_encryption_password:
 
 artemis_account_login_info: "TUM"
 
-ldap:
-  url: "ldaps://iauth.tum.de:636"
-  user_dn: "cn=TUINI01-Artemis,ou=bindDNs,ou=iauth,dc=tum,dc=de"
-  base: "ou=users,ou=data,ou=prod,ou=iauth,dc=tum,dc=de"
-  password: 
-
-user_management:
-  jira:
-    url:
-    user: 
-    password: 
-    
-bitbucket_hostname: bitbucket.example.com 
-version_control:
-  bitbucket:
-    url: "https://{{ bitbucket_hostname }}/"
-    ssh_url: "ssh://git@{{ bitbucket_hostname }}:7999/"
-    token: 
-
-  gitlab:
-    #TODO
-
-continuous_integration: 
-  bamboo:
-    url: 
-    token: 
-    bitbucket_link_name: 
-    result_plugin_token: 
-
-  jenkins:
-    #TODO
-
-athene: 
-  url: 
-  secret: 
-    
-apollon_url: #https://apollon.ase.in.tum.de/api/converter
-
-lti: 
-  oauth_secret:
-
-mail: 
-  host:
-  port: 
-  user:
-  password:
-  protocol: 
-  ssl_trust:
-
-
-##############################################################################
-# Message Broker
-##############################################################################
-
-broker: 
-  url:
-  user: 
-  password: 
-
-hazelcast_address:
+  #ldap:
+  #  url: "ldaps://iauth.tum.de:636"
+  #  user_dn: "cn=TUINI01-Artemis,ou=bindDNs,ou=iauth,dc=tum,dc=de"
+  #  base: "ou=users,ou=data,ou=prod,ou=iauth,dc=tum,dc=de"
+  #  password: 
+  #
+  #user_management:
+  #  jira:
+  #    url:
+  #    user: 
+  #    password: 
+  #    
+  #bitbucket_hostname: bitbucket.example.com 
+  #version_control:
+  #  bitbucket:
+  #    url: "https://{{ bitbucket_hostname }}/"
+  #    ssh_url: "ssh://git@{{ bitbucket_hostname }}:7999/"
+  #    token: 
+  #
+  #  gitlab:
+  #    #TODO
+  #
+  #continuous_integration: 
+  #  bamboo:
+  #    url: 
+  #    token: 
+  #    bitbucket_link_name: 
+  #    result_plugin_token: 
+  #
+  #  jenkins:
+  #    #TODO
+  #
+  #athene: 
+  #  url: 
+  #  secret: 
+  #    
+  #apollon_url: #https://apollon.ase.in.tum.de/api/converter
+  #
+  #lti: 
+  #  oauth_secret:
+  #
+  #mail: 
+  #  host:
+  #  port: 
+  #  user:
+  #  password:
+  #  protocol: 
+  #  ssl_trust:
+  #
+  #
+  ###############################################################################
+  ## Message Broker
+  ###############################################################################
+  #
+  #broker: 
+  #  url:
+  #  user: 
+  #  password: 
+  #
+  #hazelcast_address:
 
 
 ##############################################################################

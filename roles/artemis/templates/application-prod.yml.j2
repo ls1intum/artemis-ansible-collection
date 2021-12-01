@@ -34,6 +34,7 @@ spring:
 {% endif %}
   prometheus:
     monitoringIp: "{{ shared_monitoring_host_v4 }}"
+{% if mail is defined and mail is not null %}
   mail:
     host: {{ mail.hostname }}
     port: {{ mail.port }}
@@ -47,6 +48,7 @@ spring:
         enable: true
       ssl:
         trust: {{ mail.ssl_trust }}
+{% endif %}
 
 server:
   port: {{ artemis_server_port }}
