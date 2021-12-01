@@ -3,7 +3,7 @@
 spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:mysql://{{ artemis_database_host }}:3306/{{ artemis_database_dbname }}?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding={{ artemis_database_encoding }}&allowPublicKeyRetrieval=true&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
+    url: jdbc:mysql://{{ artemis_database_host }}:3306/{{ artemis_database_dbname }}?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
     username: {{ artemis_database_username }}
     password: {{ artemis_database_password }}
     hikari:
@@ -147,6 +147,8 @@ artemis:
 {% endif %}
 
 jhipster:
+
+{% if is_multinode_install|bool == true and artemis_jhipster_jwt is not none and artemis_jhipster_registry_password is not none  %}
   security:
     authentication:
       jwt:
@@ -155,6 +157,8 @@ jhipster:
         token-validity-in-seconds-for-remember-me: 2592000  # Token is valid 30 days
   registry:
     password: {{ artemis_jhipster_registry_password }}
+{% endif %}
+
   mail:
     base-url: {{ artemis_server_url }}
     from: '{{artemis_notification_from}} <{{ artemis_email.split("@")[0] }}+notification@{{ artemis_email.split("@")[1] }}>'
