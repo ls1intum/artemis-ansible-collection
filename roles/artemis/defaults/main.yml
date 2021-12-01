@@ -92,11 +92,11 @@ user_management:
     user: 
     password: 
     
+bitbucket_hostname: bitbucket.example.com 
 version_control:
   bitbucket:
-    hostname: 
-    url: "https://{{ version_control.bitbucket.hostname }}/"
-    ssh_url: "ssh://git@{{ version_control.bitbucket.hostname }}:7999/"
+    url: "https://{{ bitbucket_hostname }}/"
+    ssh_url: "ssh://git@{{ bitbucket_hostname }}:7999/"
     token: 
 
   gitlab:

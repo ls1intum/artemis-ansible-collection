@@ -81,13 +81,6 @@
     msg: "Version Control bitbucket Variables: {{ version_control.bitbucket }}"
   when: 
     - version_control.bitbucket is defined
-
-- name: Check if bitbucket hostname variables is set
-  fail: 
-    msg: "bitbucket configuration is incomplete - Make sure to add bitbucket url"
-  when: 
-    - version_control.bitbucket is defined
-    - version_control.bitbucket.hostname is undefined or version_control.bitbucket.hostname is none
       
 - name: Check if bitbucket token variables is set
   fail: 
