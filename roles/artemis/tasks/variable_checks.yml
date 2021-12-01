@@ -32,12 +32,14 @@
     msg: "No artemis_jhipster_jwt is configured!"
   when: 
     - artemis_jhipster_jwt is undefined or artemis_jhipster_jwt is none
+    - is_multinode_install|bool == true
 
 - name: Check if artemis_jhipster_registry_password is set
   fail: 
     msg: "No artemis_jhipster_registry_password is configured!"
   when: 
     - artemis_jhipster_registry_password is undefined or artemis_jhipster_registry_password is none
+    - is_multinode_install|bool == true
 
 ##############################################################################
 # Check Jira Variables
