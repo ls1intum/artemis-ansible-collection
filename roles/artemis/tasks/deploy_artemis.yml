@@ -1,3 +1,5 @@
+#TODO check if war is allredy present - If so fail and prompt user to use the uprade instead 
+
 - name: Download Artemis.war to {{ artemis_working_directory }}
   become: true
   get_url:
@@ -6,6 +8,5 @@
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
     mode: '0644'
-#    checksum: "sha1:{{ artemis_war_checksum }}" #TODO
   notify: restart artemis
 

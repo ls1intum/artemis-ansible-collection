@@ -1,6 +1,14 @@
 ---
 # handlers file for artemis
 
+- name: restart artemis
+  service:
+    name: artemis
+    state: restarted
+  when: node_id is undefined not artemis_force_no_restart
+  listen: "restart artemis"
+  throttle: 1
+
 - name: restart artemis on node 1
   service:
     name: artemis
