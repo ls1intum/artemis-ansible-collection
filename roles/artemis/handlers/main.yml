@@ -2,6 +2,7 @@
 # handlers file for artemis
 
 - name: restart artemis
+  become: true
   service:
     name: artemis
     state: restarted
@@ -10,6 +11,7 @@
   throttle: 1
 
 - name: restart artemis on node 1
+  become: true
   service:
     name: artemis
     state: restarted
@@ -18,6 +20,7 @@
   throttle: 1
 
 - name: wait for node 1 being started
+  become: true
   wait_for:
     timeout: 60
   when: node_id == 1
@@ -25,6 +28,7 @@
   throttle: 1
 
 - name: restart artemis on other nodes
+  become: true
   service:
     name: artemis
     state: restarted
@@ -33,6 +37,7 @@
   throttle: 1
 
 - name: start artemis
+  become: true
   service:
     name: artemis
     state: started
@@ -40,5 +45,6 @@
   throttle: 1
 
 - name: reboot system
+  become: true
   reboot:
 
