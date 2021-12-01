@@ -1,26 +1,33 @@
-# /etc/nginx/nginx.conf
-proxy_worker_rlmmiit_nofile: 30000
-proxy_worker_connections: 20000
-proxy_server_names_hash_bucket_size: 256
+
+proxy_ssl_certificate_path:  
+proxy_ssl_certificate_key_path: 
+
+proxy_resolver: "127.0.0.53 valid=300s"
+
+# Nodes for load balancing; Either define a host-group or manually list all nodes
+#proxy_available_nodes: "{{ groups.artemisnodes }}" # will not work anymore
+proxy_available_nodes:
+  - hostname: localhost
+
+proxy_primary_node_url: "http://node1.artemis.ase.in.tum.de"
+
+# Service Port on nodes for load balancing; If differing for each node fall back to
+# manual list of proxy_available_nodes and comment out proxy_node_port variable declaration
+proxy_node_port: 8080
+
+# Protocol used to communicate with nodes (either http or https)
+proxy_node_protocol: http
 
 # /etc/nginx/sites-available/artemis.conf
 # Uncomment to change load balancing method from default (which is round robin)
 # Can be "least_conn" or "ip_hash"
 #proxy_load_balancing_method: ip_hash
 
-# Nodes for load balancing; Either define a host-group or manually list all nodes
-#proxy_available_nodes: "{{ groups.artemisnodes }}" # will not work anymore
-proxy_available_nodes:
-  - hostname: node1.artemis.ase.in.tum.de
-  - hostname: node2.artemis.ase.in.tum.de
+proxy_worker_rlmmiit_nofile: 30000
+proxy_worker_connections: 20000
+proxy_server_names_hash_bucket_size: 256
 
-proxy_primary_node_url: "http://node1.artemis.ase.in.tum.de"
+proxy_athene_baseurl: 
 
-# Service Port on nodes for load balancing; If differing for each node fall back to
-# manual list of proxy_available_nodes and comment out proxy_node_port variable declaration
-#proxy_node_port: 8080
-
-# Protocol used to communicate with nodes (either http or https)
-proxy_node_protocol: http
-
-proxy_athene_baseurl: "https://athene01.ase.in.tum.de"
+# Used for the /mailto enpoint - Has to be a valid mail address. 
+proxy_mailto:
