@@ -1,0 +1,10 @@
+---
+
+- hosts: artemis_single_atlassian
+  
+  roles: 
+    - role: geerlingguy.mysql
+      become: true
+    - role: ls1intum.artemis.proxy
+    - role: ls1intum.artemis.artemis
+

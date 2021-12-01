@@ -1,0 +1,98 @@
+---
+is_testserver: true
+artemis_server_url: "https://artemistest1.ase.in.tum.de"
+
+artemis_build_version: 5.3.2
+
+artemis_database_dbname: "Artemis"
+artemis_database_username: "Artemis"
+artemis_database_password: #FIXME
+
+artemis_encryption_password: #FIXME
+
+artemis_internal_admin_user: artemis_admin 
+artemis_internal_admin_password: #FIXME
+
+artemis_ssh_key_path: "/opt/artemis/sshkeys"
+artemis_ssh_key_name: "id_rsa"
+artemis_ssh_key_value: | #FIXME
+  -----BEGIN OPENSSH PRIVATE KEY-----
+  ¯\_(ツ)_/¯
+  -----END OPENSSH PRIVATE KEY-----
+
+artemis_system_ram_proportion: 0.6 # Limit Artemis to 60% RAM (also runs DB on same VM)
+
+##############################################################################
+# External Systems Configuration
+##############################################################################
+
+user_management:
+  jira:
+    url: https://jira-prelive.ase.in.tum.de
+    user: artemis
+    password: #FIXME
+    admin_group: artemis-dev
+
+bitbucket_hostname: bitbucket-prelive.ase.in.tum.de
+version_control:
+  bitbucket:
+    url: "https://{{ bitbucket_hostname }}/"
+    ssh_url: "ssh://git@{{ bitbucket_hostname }}:7999/"
+    token: <token_here> #FIXME
+
+continuous_integration: 
+  bamboo:
+    url: https://bamboo-prelive.ase.in.tum.de
+    token: <token_here> #FIXME
+    bitbucket_link_name: Bitbucket Prelive
+    result_plugin_token: <token_here> #FIXME
+
+
+##############################################################################
+# Proxy Configuration
+##############################################################################
+
+proxy_ssl_certificate_path:  #FIXME
+proxy_ssl_certificate_key_path: #FIXME
+
+##############################################################################
+# MySQL Configuration
+##############################################################################
+
+mysql_packages:
+  - mysql-common
+  - mysql-server
+  - python3-mysqldb
+mysql_bind_address: '*'
+
+# Performance
+mysql_key_buffer_size: "256M"
+mysql_table_open_cache: "4000"
+mysql_sort_buffer_size: "4M"
+mysql_read_buffer_size: "1M"
+mysql_innodb_buffer_pool_size: "2G"
+mysql_max_connections: "2000"
+mysql_thread_cache_size: "256"
+mysql_max_allowed_packet: "512M"
+mysql_innodb_force_recovery: "0"
+mysql_character_set_server: "{{ artemis_database_encoding }}"
+mysql_collation_server: "{{ artemis_database_encoding }}"
+mysql_default_storage_engine: "INNODB"
+mysql_innodb_log_file_size: "512M"
+mysql_mysqldump_max_allowed_packet: "512M"
+mysql_isamchk_key_buffer: "16M"
+
+# Databases
+mysql_databases:
+  - name: "{{ artemis_database_dbname }}"
+    collation: "{{ artemis_database_collation }}"
+    encoding: "{{ artemis_database_encoding }}"
+    replicate: 1
+
+# Users
+mysql_users:
+  - name: "{{ artemis_database_username }}"
+    host: "{{ artemis_database_host }}"
+    password: "{{ artemis_database_password }}"
+    priv: "*.*:ALL"   
+
