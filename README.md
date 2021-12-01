@@ -9,8 +9,11 @@ TODO
 
 [Ansible does not support role dependencies for collections](https://github.com/ansible/ansible/issues/76030) - So you need to install the dependencies by hand :(. 
 
-```
-ansible-galaxy install -r requirements.yml 
+
+```bash
+#This command will only work if you installed the collections to the default location!
+
+ansible-galaxy install -r ~/.ansible/collections/ansible_collections/ls1intum/artemis/requirements.yml
 ```
 
 ## Documentation
