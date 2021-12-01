@@ -5,7 +5,7 @@
   service:
     name: artemis
     state: restarted
-  when: node_id is undefined not artemis_force_no_restart
+  when: node_id is undefined and not artemis_force_no_restart
   listen: "restart artemis"
   throttle: 1
 
