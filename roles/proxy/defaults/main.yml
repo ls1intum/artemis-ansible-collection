@@ -7,7 +7,7 @@ proxy_resolver: "127.0.0.53 valid=300s"
 # Nodes for load balancing; Either define a host-group or manually list all nodes
 #proxy_available_nodes: "{{ groups.artemisnodes }}" # will not work anymore
 proxy_available_nodes:
-  - hostname: localhost
+  - hostname: 127.0.0.1
 
 
 # Service Port on nodes for load balancing; If differing for each node fall back to
