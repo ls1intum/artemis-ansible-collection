@@ -18,8 +18,8 @@ license_file: 'LICENSE'
 
 tags: [ls1intum, artemis]
 
-dependencies: 
-  "https://github.com/geerlingguy/ansible-role-mysql.git": "master"
+dependencies: {}
+  # Ansible collections cannot depend on roles... So the user has to install the dependencies by hand *sadface*. Details -> https://github.com/ansible/ansible/issues/76030
 
 # The URL of the originating SCM repository
 repository: https://github.com/ls1intum/ls1intum.artemis

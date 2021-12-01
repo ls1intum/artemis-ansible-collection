@@ -7,6 +7,12 @@ This collection contains all ansible roles necessary to deploy [Artemis](https:/
 ## Installation 
 TODO
 
+[Ansible does not support role dependencies for collections](https://github.com/ansible/ansible/issues/76030) - So you need to install the dependencies by hand :(. 
+
+```
+ansible-galaxy install -r requirements.yml 
+```
+
 ## Documentation
 
 You can find the documentation for Artemis [here](https://docs.artemis.ase.in.tum.de). 
