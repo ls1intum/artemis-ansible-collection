@@ -73,6 +73,7 @@ artemis_database_dbname: artemis
 artemis_database_username: artemis
 artemis_database_password: 
 artemis_database_encoding: utf8mb4
+artemis_database_collation: utf8mb4_unicode_ci
 
 artemis_encryption_password:
 
@@ -105,6 +106,7 @@ continuous_integration:
     url: 
     token: 
     bitbucket_link_name: 
+    result_plugin_token: 
 
   jenkins:
     #TODO

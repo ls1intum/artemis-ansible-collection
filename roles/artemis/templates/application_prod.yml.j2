@@ -110,7 +110,7 @@ artemis:
     token: {{ continuous_integration.bamboo.token }}
     vcs-application-link-name: {{ continuous_integration.bamboo.bitbucket_link_name }}
     empty-commit-necessary: true
-    artemis-authentication-token-value: {{ continuous_integration.bamboo.token }}
+    artemis-authentication-token-value: {{ continuous_integration.bamboo.result_plugin_token }}
 {% endif %}
 
 {% if lti is defined %}
