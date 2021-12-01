@@ -1,38 +1,135 @@
 Role Name
 =========
 
-A brief description of the role goes here.
-
-Requirements
-------------
-
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+This role installs artemis on a host. The role supports single node installations as well as multi node installations.
 
 Role Variables
 --------------
+Default variables can be found in the `defaults/main.yml` file. 
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+### Variables that have to be configured for a single node installation: 
 
-Dependencies
-------------
+```
+artemis_server_url: "https://artemis.example.de"
+artemis_database_password: #FIXME
+artemis_encryption_password: #FIXME
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+artemis_internal_admin_password: #FIXME
 
-Example Playbook
-----------------
+proxy_ssl_certificate_path:  #FIXME
+proxy_ssl_certificate_key_path: #FIXME
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+```
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
 
-License
--------
+### Additional Variables for external systems 
+To configure LDAP access for artemis, add the following variables:
+```
+ldap:
+  url: "ldaps://iauth.tum.de:636"
+  user_dn: "cn=TUINI01-Artemis,ou=bindDNs,ou=iauth,dc=tum,dc=de"
+  base: "ou=users,ou=data,ou=prod,ou=iauth,dc=tum,dc=de"
+  password: 
+```
+---
 
-BSD
+To configure Jira as user management server add: 
 
-Author Information
-------------------
+```
+user_management:
+  jira:
+    url: 
+    user: 
+    password: 
+    admin_group: # Jira group that will have admin access in the artemis web ui
+```
+---
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+Bitbucket configuration: 
+```
+    
+bitbucket_hostname: bitbucket.example.com 
+version_control:
+  bitbucket:
+    url: "https://{{ bitbucket_hostname }}/"
+    ssh_url: "ssh://git@{{ bitbucket_hostname }}:7999/"
+    token: 
+```
+---
+
+Bamboo configuration: 
+```
+continuous_integration: 
+  bamboo:
+    url: 
+    token: 
+    bitbucket_link_name: 
+    result_plugin_token: 
+```
+---
+---
+
+Gitlab configuration:
+```
+version_control:
+  gitlab:
+    #TODO
+
+```
+---
+
+
+Jenkins configuration:
+```
+  jenkins:
+    #TODO
+```
+---
+
+
+Athene configuration:    
+```
+athene: 
+  url: 
+  secret: 
+```
+---
+
+Apollon configuration:    
+```
+apollon_url: #https://apollon.ase.in.tum.de/api/converter
+```
+---
+
+Mail configuration: 
+```
+mail: 
+  host:
+  port: 
+  user:
+  password:
+  protocol: 
+  ssl_trust:
+```
+
+---
+
+LTI configuration:
+```
+lti: 
+  oauth_secret:
+```
+
+### Additional Variables for multi node installtions 
+
+
+```
+broker: 
+  url:
+  user: 
+  password: 
+
+hazelcast_address:
+```
+
+
