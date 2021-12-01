@@ -70,13 +70,13 @@ artemis:
   submission-export-path: exports
   encryption-password: {{ artemis_encryption_password }}
   user-management:
-{% if user_management.jira is defined %}
+{% if user_management.jira is defined and user_management.jira is not none %}
     use-external: true
     external:
-      url: {{ artemis_jira_url }}
-      user: {{ artemis_atlassian_user }}
-      password: {{ artemis_atlassian_password }}
-      admin-group-name: {{ artemis_admin_group }}
+      url: {{ user_management.jira.url }}
+      user: {{ user_management.jira.user }}
+      password: {{ user_management.jira.password }}
+      admin-group-name: {{ user_management.jira.admin_group}}
 {% else %}
     use-external: false
 {% endif %}

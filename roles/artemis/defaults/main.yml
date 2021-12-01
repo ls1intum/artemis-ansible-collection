@@ -92,6 +92,7 @@ shared_monitoring_host_v4:
   #    url:
   #    user: 
   #    password: 
+  #    admin_group:
   #    
   #bitbucket_hostname: bitbucket.example.com 
   #version_control:
