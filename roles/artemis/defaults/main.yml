@@ -80,6 +80,7 @@ artemis_encryption_password:
 
 artemis_account_login_info: "TUM"
 
+shared_monitoring_host_v4: 
   #ldap:
   #  url: "ldaps://iauth.tum.de:636"
   #  user_dn: "cn=TUINI01-Artemis,ou=bindDNs,ou=iauth,dc=tum,dc=de"

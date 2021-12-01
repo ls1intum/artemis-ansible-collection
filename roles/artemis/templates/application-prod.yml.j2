@@ -32,8 +32,12 @@ spring:
   hazelcast:
     interface: "{{ hazelcast_address }}"
 {% endif %}
+
+{% if shared_monitoring_host_v4 is not none %}
   prometheus:
     monitoringIp: "{{ shared_monitoring_host_v4 }}"
+{% endif %}
+
 {% if mail is defined and mail is not null %}
   mail:
     host: {{ mail.hostname }}
