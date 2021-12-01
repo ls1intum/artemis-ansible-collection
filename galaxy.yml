@@ -19,7 +19,7 @@ license_file: 'LICENSE'
 tags: [ls1intum, artemis]
 
 dependencies: 
-  "geerlingguy.mysql": "*"
+  "https://github.com/geerlingguy/ansible-role-mysql.git": "master"
 
 # The URL of the originating SCM repository
 repository: https://github.com/ls1intum/ls1intum.artemis
