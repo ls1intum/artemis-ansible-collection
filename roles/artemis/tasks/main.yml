@@ -3,19 +3,19 @@
 - include_tasks: variable_checks.yml
   when: check_variables
 
- # Create Artemis and (if desired) deployment users. 
- - include_tasks: users.yml
- 
- # Install JDK 
- - include_tasks: jdk.yml
- 
- # Configure the Artemis systemd service 
- - include_tasks: artemis_configuration.yml
- 
- # Install Artemis to the host
- - include_tasks: deploy_artemis.yml
-   when: install_artemis and not upgrade_artemis
- 
- # Upgrade Artemis to specified version 
- - include_tasks: upgrade_artemis.yml
-   when: not (install_artemis | bool) and (upgrade_artemis | bool)
+# Create Artemis and (if desired) deployment users. 
+- include_tasks: users.yml
+
+# Install JDK 
+- include_tasks: jdk.yml
+
+# Configure the Artemis systemd service 
+- include_tasks: artemis_configuration.yml
+
+# Install Artemis to the host
+- include_tasks: deploy_artemis.yml
+  when: install_artemis and not upgrade_artemis
+
+# Upgrade Artemis to specified version 
+- include_tasks: upgrade_artemis.yml
+  when: not (install_artemis | bool) and (upgrade_artemis | bool)
