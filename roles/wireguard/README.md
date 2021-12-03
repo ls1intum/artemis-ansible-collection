@@ -20,7 +20,23 @@ wireguard_pubkey:
 wireguard_privkey: 
 ```
 
-The wireguard keys can be genereated with: 
+This role contains a python script to generate the `host_var` files. 
+
+You have to configure the host_prefix for your variables: 
+
+```
+python3 host_var_gen.py --hostprefix artemis_ 
+```
+You can access the CLI help with: 
+
+```
+python3 host_var_gen.py -h
+```
+
+
+
+
+The wireguard keys can be genereated by hand with: 
 ```
 wg genkey | tee peer_A.priv | wg pubkey > peer_A.pub
 ```
