@@ -1,3 +1,15 @@
+---
+- name: Need address from ansible facts?
+  debug: var=hostvars[inventory_hostname]['ansible_default_ipv6']['address']
+  when: 
+    - wireguard_host_ipv6_address is undefined or wireguard_host_ipv6_address is none
+
+- name: Make auto-resolved address usable in the playbook
+  set_fact: 
+    wireguard_host_ipv6_address: "{{ hostvars[inventory_hostname]['ansible_default_ipv6']['address'] }}"
+  when: 
+    - wireguard_host_ipv6_address is undefined or wireguard_host_ipv6_address is none
+
 - name: Copy wg0.conf
   template:
     src: wireguard_wg0.conf.j2
