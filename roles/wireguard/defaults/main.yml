@@ -3,10 +3,3 @@ wireguard_hostgroup: "{{ groups.yourgroup }}"
 
 wireguard_port: 51820
 
-
-# Size of the VPN network 
-# Default is /96 because we then have many /112 for different service types (Proxy, DB, Broker, Nodes etc.)
-# In each /112 we can count up the number of nodes of that type 
-#
-# eg. Borker `::b:1` or Database `::b:1`
-wireguard_network_cidr: 96
