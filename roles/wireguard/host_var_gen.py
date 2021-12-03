@@ -20,9 +20,10 @@ def gen_key():
 def store_host_var_file(pub, priv, h_type, host_id, filename):
     print(pub, priv, host_id, filename)
 
-    content = f"""
-# IPv6 address (with CIDR!) which can be used to access the node
-wireguard_host_ipv6_address: # FIXME
+    content = """
+# IPv6 address (with CIDR!) which can be used to access the node - If left blank, ansible will use host facts to fill the address.
+wireguard_host_ipv6_address: 
+
 # Address of the node inside the network.
 wireguard_interface_address: "fcfe:0:0:0:0:0:{MAPPPING[h_type]}:{host_id}"
 
@@ -50,9 +51,13 @@ def main():
     parser.add_argument('--hostprefix', type=str, required=True,
                         help="Hostname prefix which is used to generate host_var files. (e.g. artemis_ -> artemis_proxy, artemis_node1)")
 
+    parser.add_argument('--hostsuffix', type=str, required=True,
+                        help="Hostname suffix which is used to generate host_var files. (e.g. .test.com -> proxy.test.com, node1.test.com)")
+
     args = vars(parser.parse_args())
 
     prefix = args['hostprefix']
+    suffix = args['hostsuffix']
 
     # Iterate over all host types
     for h_type in HOST_TYPES:
@@ -66,11 +71,10 @@ def main():
 
                 pub, priv = gen_key()
                 store_host_var_file(pub, priv, h_type, i + 1,
-                                    prefix + h_type + str(i + 1))
+                                    prefix + h_type + str(i) + suffix)
         else:
             pub, priv = gen_key()
-            store_host_var_file(pub, priv, h_type, 1, prefix + h_type)
-
+            store_host_var_file(pub, priv, h_type, 1, prefix + h_type + suffix)
 
     print("Files Written")
 
