@@ -1,7 +1,7 @@
 {{ ansible_managed | comment }}
 
 [Interface]
-Address = {{ wireguard_interface_address }}
+Address = {{ wireguard_interface_address }}/128
 ListenPort = {{ wireguard_port }}
 PrivateKey = {{ wireguard_privkey }}
 
@@ -12,5 +12,5 @@ PrivateKey = {{ wireguard_privkey }}
 {# see https://github.com/pallets/jinja/issues/623#issuecomment-265388574 regarding variable in variable magic #}
 PublicKey = {{ hostvars['%s' | format(peer)].wireguard_pubkey }}
 Endpoint = [{{ hostvars['%s' | format(peer)].wireguard_host_ipv6_address }}]:{{ wireguard_port }}
-AllowedIPs = {{ hostvars['%s' | format(peer)].wireguard_interface_address }}/{{ wireguard_network_cidr }}
+AllowedIPs = {{ hostvars['%s' | format(peer)].wireguard_interface_address }}/128
 {% endfor %}
