@@ -23,6 +23,6 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
       - name: Build and Deploy Collection
-        uses: docker://ghcr.io/artis3n/ansible_galaxy_collection@v2.4.2
+        uses: artis3n/ansible_galaxy_collection@v2
         with:
           api_key: '${{ secrets.GALAXY_API_KEY }}' 
