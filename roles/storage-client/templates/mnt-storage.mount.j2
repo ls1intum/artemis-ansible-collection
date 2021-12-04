@@ -1,11 +1,11 @@
 {{ ansible_managed | comment }}
 
 [Unit]
-Description=Things devices
+Description=Artemis Storage Mount
 After=network.target
 
 [Mount]
-What={{ storage_address }}:{{ storage_export }}
+What=[{{ storage_server_address }}]:{{ storage_export }}
 Where=/mnt/storage
 Type=nfs
 Options=_netdev,auto

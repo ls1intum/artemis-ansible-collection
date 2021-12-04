@@ -1,12 +1,12 @@
 - name: Ensure group {{ artemis_group }} exists
-  become: yes
+  become: true
   group:
     name: "{{ artemis_group }}"
     gid: "{{ artemis_gid }}"
     state: present
 
 - name: Ensure user {{ artemis_user }} exists
-  become: yes
+  become: true
   user:
     name: "{{ artemis_user }}"
     state: present
@@ -16,7 +16,7 @@
 - name: Install NFS client 
   apt: 
     name: nfs-common 
-    update_cache: yes
+    update_cache: true
     state: present 
   become: true
 
@@ -25,6 +25,7 @@
     name: mnt-storage.mount
     state: stopped 
   become: true
+  ignore_errors: true
 
 - name: Make sure the mountmoint exists
   file: 
@@ -43,9 +44,9 @@
 
 - name: Enable systemd mount sevice 
   systemd: 
-    daemon_reload: yes
+    daemon_reload: true
     name: mnt-storage.mount
     state: started
-    enabled: yes
+    enabled: true
   become: true
 

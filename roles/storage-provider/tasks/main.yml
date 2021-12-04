@@ -30,6 +30,16 @@
     owner: "{{ artemis_user }}"
     group: "{{ artemis_group }}"
 
+- name: Configure NFS Daemon 
+  become: true
+  template: 
+    src: nfs.conf.j2
+    dest: /etc/nfs.conf
+    owner: root
+    group: root
+    mode: "u=rw,g=r,o=r"
+  notify: restart nfs-server
+
 - name: Configure export
   become: true
   template: 

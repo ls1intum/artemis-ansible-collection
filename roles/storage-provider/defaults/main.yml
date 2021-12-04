@@ -9,4 +9,5 @@ artemis_group: artemis
 storage_export:  /srv/artemis
 
 # Storage Network 
-storage_network: 172.24.27.0/25
+storage_network: "fcfe:0:0:0:0:0:0:0/96"
+storage_server_address: "fcfe:0:0:0:0:0:9:1"
