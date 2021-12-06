@@ -29,5 +29,7 @@ proxy_server_names_hash_bucket_size: 256
 proxy_athene_baseurl: 
 proxy_primary_node_url: 
 
+proxy_site_template: artemis
+
 # Used for the /mailto enpoint - Has to be a valid mail address. 
 proxy_mailto:
