@@ -1,4 +1,5 @@
 - name: Create registry directory
+  become: true
   file:
     path: "{{ registry_working_directory }}"
     state: directory
@@ -6,6 +7,7 @@
   notify: restart registry
 
 - name: Create registry config directory
+  become: true
   file:
     path: "{{ registry_working_directory }}/config-server"
     state: directory
@@ -13,6 +15,7 @@
   notify: restart registry
 
 - name: Download jhipster v{{ registry_version }}
+  become: true
   get_url:
     url: "https://github.com/jhipster/jhipster-registry/releases/download/v{{ registry_version }}/jhipster-registry-{{ registry_version }}.jar"
     dest: "{{ registry_working_directory }}/registry.jar"
@@ -20,6 +23,7 @@
   notify: restart registry
 
 - name: Set permissions for registry directory
+  become: true
   file:
     path: "{{ registry_working_directory }}"
     state: directory
@@ -29,6 +33,7 @@
   notify: restart registry
 
 - name: Copy registry.service systemd configuration
+  become: true
   template:
     src: registry_registry.service.j2
     dest: "/etc/systemd/system/registry.service"
@@ -36,6 +41,7 @@
   notify: restart registry
 
 - name: Enable registry service
+  become: true
   systemd:
     daemon_reload: yes
     name: registry
@@ -44,6 +50,7 @@
   notify: restart registry
 
 - name: Copy application-prod.yml
+  become: true
   template:
     src: registry_application-prod.yml.j2
     dest: "{{ registry_working_directory }}/application-prod.yml"
@@ -53,6 +60,7 @@
   notify: restart registry
 
 - name: Copy bootstrap-prod.yml
+  become: true
   template:
     src: registry_bootstrap-prod.yml.j2
     dest: "{{ registry_working_directory }}/bootstrap-prod.yml"
@@ -62,6 +70,7 @@
   notify: restart registry
 
 - name: Copy application.yml
+  become: true
   template:
     src: registry_application.yml.j2
     dest: "{{ registry_working_directory }}/config-server/application.yml"

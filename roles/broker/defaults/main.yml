@@ -6,16 +6,17 @@ artemis_user_uid: 1337
 artemis_user_gid: 1337
 
 # jdk.yml task
-jdk_openjdk_version: 17
+jdk_openjdk_version: 16
 
 # broker.yml task
-activemq_version: 2.17.0
+activemq_version: 2.19.0
 activemq_install_directory: /opt/activemq-distribution
 
 # configure.yml task
 activemq_working_directory: /opt/broker
-activemq_username: brokeruser
-activemq_password: #FIXME
+activemq_username: "{{ broker.user }}"
+activemq_password: "{{ broker.password }}"
+
 
 # Configure the borker ip address - by default it uses the wireguard network 
 activemq_ip_address: "{{ wireguard_interface_address }}"
@@ -24,8 +25,8 @@ activemq_ip_address: "{{ wireguard_interface_address }}"
 # Registry
 ##############################################################################
 
-registry_password: #FIXME
-registry_jwt: #FIXME
+registry_password: "{{ artemis_jhipster_registry_password }}"
+registry_jwt: "{{ artemis_jhipster_jwt }}"
 
 registry_version: 6.7.1
 registry_working_directory: /opt/registry

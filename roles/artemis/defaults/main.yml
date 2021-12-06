@@ -44,10 +44,8 @@ openjdk_version: 17
 artemis_internal_admin_user: artemis_admin
 artemis_internal_admin_password: 
 
-artemis_jhipster_jwt: 
-artemis_jhipster_registry_password:
-
-artemis_eureka_urls:
+artemis_jhipster_jwt: #FIXME Multinode
+artemis_jhipster_registry_password: #FIXME Multinode
 
 artemis_email: artemis.in@tum.de
 artemis_notification_from: "Artemis Notification"
@@ -57,7 +55,7 @@ artemis_repo_basepath: "."
 
 artemis_ssh_key_path: /opt/keys
 artemis_ssh_key_name: "artemis_ssh_key"
-artemis_ssh_priv_key_value: ""
+artemis_ssh_priv_key_value: #FIXME
 artemis_ssh_key_password: 
 
 artemis_force_restart: false        # Will restart the artemis service on all nodes (unless artemis_force_no_restart) is set
@@ -72,11 +70,11 @@ artemis_system_ram_proportion: 0.8  # How much % of the system RAM to allocate t
 artemis_database_host: localhost
 artemis_database_dbname: artemis
 artemis_database_username: artemis
-artemis_database_password: 
+artemis_database_password: #FIXME
 artemis_database_encoding: utf8mb4
 artemis_database_collation: utf8mb4_unicode_ci
 
-artemis_encryption_password:
+artemis_encryption_password: #FIXME
 
 artemis_account_login_info: "TUM"
 
@@ -136,13 +134,16 @@ shared_monitoring_host_v4:
   ## Message Broker
   ###############################################################################
   #
-  #broker: 
+  #broker:  #FIXME Multinode
   #  url:
   #  user: 
   #  password: 
   #
-  #hazelcast_address:
 
+# Define node local hazelcast_address - Uses wireguard net by default
+hazelcast_address: "{% if is_multinode_install is defined and is_multinode_install|bool == true %}{{ wireguard_interface_address }}{% endif %}"
+
+artemis_eureka_urls: "{% if broker.url is defined and broker.url is not none %}http://admin:${jhipster.registry.password}@[{{ broker.url }}]:8761/eureka/{% endif %}"
 
 ##############################################################################
 # Auto-generated Variables - No not alter!

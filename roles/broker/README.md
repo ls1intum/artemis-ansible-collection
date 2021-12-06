@@ -1,38 +1,27 @@
 Role Name
 =========
 
-A brief description of the role goes here.
-
-Requirements
-------------
-
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+This role installes activemq and the jhipster registry and configures both for the use with artemis. 
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+Default variables can be found in the `defaults/main.yml` file. 
 
-Dependencies
-------------
+You have to configure the follwoing varaibles in your ansible `group_vars`: 
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+```
+broker: 
+  url: # Broker hostname (Only used in the Artemis role)
+  user: # Broker username (Also used by the Artemis role)
+  password: # Broker password (Also used by the Artemis role)
+```
 
-Example Playbook
-----------------
+and 
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+```
+artemis_jhipster_jwt: #(Also used by the Artemis role)
+artemis_jhipster_registry_password: # (Also used by the Artemis role)
+```
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
-
-License
--------
-
-BSD
-
-Author Information
-------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+The Token can be generated with: `openssl rand -base64 64`. Consult the artemis role readme for details.

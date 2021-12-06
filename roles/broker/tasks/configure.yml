@@ -1,9 +1,11 @@
 - name: Check if broker is installed
+  become: true
   stat:
     path: "{{ activemq_working_directory }}"
   register: broker_install_result
 
 - name: Create broker in {{ activemq_working_directory }} (NOT IDEMPOTENT)
+  become: true
   command: ./artemis create --user {{ activemq_username }} --password {{ activemq_password }} --require-login --force {{ activemq_working_directory }}
   args:
     chdir: "{{ activemq_install_directory }}/apache-artemis-{{ activemq_version }}/bin"
@@ -11,12 +13,15 @@
   when: not broker_install_result.stat.exists
 
 - name: Copy primary broker.xml file
+  become: true
   template:
     src: activemq_primary_broker.xml.j2
     dest: "{{ activemq_working_directory }}/etc/broker.xml"
     mode: 0644
+  notify: restart broker
 
 - name: Set permissions for broker working directory
+  become: true
   file:
     path: "{{ activemq_working_directory }}"
     state: directory
@@ -26,6 +31,7 @@
   notify: restart broker
 
 - name: Copy broker.service systemd configuration
+  become: true
   template:
     src: activemq_broker.service.j2
     dest: "/etc/systemd/system/broker.service"
@@ -33,6 +39,7 @@
   notify: restart broker
 
 - name: Ensure correct broker version is installed
+  become: true
   lineinfile:
     path: "{{ activemq_working_directory }}/etc/artemis.profile"
     regexp: '^ARTEMIS_HOME='
@@ -40,6 +47,7 @@
   notify: restart broker
 
 - name: Enable broker service
+  become: true
   systemd:
     daemon_reload: yes
     name: broker

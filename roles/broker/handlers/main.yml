@@ -1,9 +1,11 @@
 - name: restart registry
+  become: true
   service:
     name: registry
     state: restarted
 
 - name: restart broker
+  become: true
   service:
-    name: broker1
+    name: broker
     state: restarted

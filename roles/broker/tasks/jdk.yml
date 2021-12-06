@@ -1,4 +1,5 @@
 - name: Install openjdk-{{ jdk_openjdk_version }}-jdk
+  become: true
   apt:
     name: "openjdk-{{ jdk_openjdk_version }}-jdk"
     state: latest

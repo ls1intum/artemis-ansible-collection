@@ -1,4 +1,5 @@
 - name: Ensure group {{ artemis_user_group }} exists
+  become: true
   group:
     name: "{{ artemis_user_group }}"
     gid: "{{ artemis_user_gid }}"

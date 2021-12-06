@@ -67,7 +67,6 @@ continuous_integration:
     result_plugin_token: 
 ```
 ---
----
 
 Gitlab configuration:
 ```
@@ -122,14 +121,24 @@ lti:
 
 ### Additional Variables for multi node installtions 
 
+Registry Configuration:
+```
+artemis_jhipster_jwt: #FIXME Multinode
+artemis_jhipster_registry_password: #FIXME Multinode
 
 ```
-broker: 
-  url:
-  user: 
-  password: 
+The Token can be generated with: `openssl rand -base64 64`
 
-hazelcast_address:
+---
+
+
+Active MQ configuration
+```
+broker: 
+  url: "fcfe:0:0:0:0:0:b:1" # Default address in the wireguard network
+  user: brokeruser
+  password: #FIXME
+
 ```
 
 
