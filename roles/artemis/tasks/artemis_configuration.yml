@@ -70,7 +70,7 @@
 - name: Copy ssh key
   become: true
   copy: 
-    content: "{{ artemis_ssh_key_value }}" 
+    content: "{{ artemis_ssh_priv_key_value }}" 
     dest: "{{ artemis_ssh_key_path }}/{{ artemis_ssh_key_name }}"
   register: ssh_key
   notify: restart artemis
