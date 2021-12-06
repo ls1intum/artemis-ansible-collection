@@ -13,7 +13,7 @@ You have to configure the follwoing varaibles in your ansible `group_vars`:
 ```
 broker: 
   url: # Broker hostname (Only used in the Artemis role)
-  user: # Broker username (Also used by the Artemis role)
+  username: # Broker username (Also used by the Artemis role)
   password: # Broker password (Also used by the Artemis role)
 ```
 

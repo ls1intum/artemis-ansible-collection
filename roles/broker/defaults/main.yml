@@ -14,7 +14,7 @@ activemq_install_directory: /opt/activemq-distribution
 
 # configure.yml task
 activemq_working_directory: /opt/broker
-activemq_username: "{{ broker.user }}"
+activemq_username: "{{ broker.username }}"
 activemq_password: "{{ broker.password }}"
 
 

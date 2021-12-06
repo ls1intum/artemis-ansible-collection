@@ -136,7 +136,7 @@ Active MQ configuration
 ```
 broker: 
   url: "fcfe:0:0:0:0:0:b:1" # Default address in the wireguard network
-  user: brokeruser
+  username: brokeruser
   password: #FIXME
 
 ```
