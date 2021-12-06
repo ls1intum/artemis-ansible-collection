@@ -2,35 +2,47 @@
 artemis_user_name: artemis
 artemis_user_comment: Artemis
 artemis_user_group: artemis
-# Important for directory permissions e.g. in NFS-shares
 artemis_user_uid: 1337
 artemis_user_gid: 1337
 
 # jdk.yml task
-jdk_openjdk_version: 16
+jdk_openjdk_version: 17
 
-# install.yml task
+# broker.yml task
 activemq_version: 2.17.0
 activemq_install_directory: /opt/activemq-distribution
 
 # configure.yml task
-activemq_working_directory: /opt/broker/broker1
+activemq_working_directory: /opt/broker
 activemq_username: brokeruser
-activemq_password: test1234
-broker_primary_host: broker1.artemis.ase.in.tum.de
-broker_public_primary_host: broker1.artemis.ase.in.tum.de
+activemq_password: #FIXME
 
-# registry.yml task
+# Configure the borker ip address - by default it uses the wireguard network 
+activemq_ip_address: "{{ wireguard_interface_address }}"
+
+##############################################################################
+# Registry
+##############################################################################
+
+registry_password: #FIXME
+registry_jwt: #FIXME
+
 registry_version: 6.7.1
 registry_working_directory: /opt/registry
+
+registry_application_prod_registry_password: "{{ registry_password }}"
+registry_application_prod_spring_password: "{{ registry_password }}"
+
+# Configure the registry ip address - by default it uses the wireguard network 
+registry_ip_address: "{{ wireguard_interface_address }}"
+
+registry_application_prod_jwt: "{{ registry_jwt }}"
+registry_application_jwt:  "{{ registry_jwt }}"
+registry_bootstrap_prod_jwt:  "{{ registry_jwt }}"
+
 registry_application_prod_file: "{{ registry_working_directory }}/application-prod.yml"
-registry_application_prod_jwt: THESAMETOKENTHATISUSEDONTHEARTEMISINSTANCES
-registry_application_prod_registry_password: ANADMINPASSWORDTHATMUSTBECHANGED
-registry_application_prod_spring_password: ANADMINPASSWORDTHATMUSTBECHANGED
 registry_bootstrap_prod_file: "{{ registry_working_directory }}/bootstrap-prod.yml"
-registry_bootstrap_prod_jwt: THESAMETOKENTHATISUSEDONTHEARTEMISINSTANCES
 registry_application_file: "{{ registry_working_directory }}/config-server/application.yml"
-registry_application_jwt: THESAMETOKENTHATISUSEDONTHEARTEMISINSTANCES
 registry_instance_id: registry:1
 
 proxy_site_template: registry # Name of the site loaded within nginx

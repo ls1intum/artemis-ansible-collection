@@ -8,43 +8,20 @@
    <core xmlns="urn:activemq:core" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="urn:activemq:core ">
  
-      <name>{{ wireguard_interface_address }}</name>
+      <name>{{ activemq_ip_address }}</name>
  
       <journal-pool-files>10</journal-pool-files>
  
       <acceptors>
          <!-- Acceptor for every supported protocol -->
-         <acceptor name="artemis">tcp://[{{ wireguard_interface_address }}]:61616?tcpSendBufferSize=1048576;tcpReceiveBufferSize=1048576;amqpMinLargeMessageSize=102400;protocols=CORE,AMQP,STOMP,HORNETQ,MQTT,OPENWIRE;useEpoll=true;amqpCredits=1000;amqpLowCredits=300;amqpDuplicateDetection=true</acceptor>
+         <acceptor name="artemis">tcp://[{{ activemq_ip_address }}]:61616?tcpSendBufferSize=1048576;tcpReceiveBufferSize=1048576;amqpMinLargeMessageSize=102400;protocols=CORE,AMQP,STOMP,HORNETQ,MQTT,OPENWIRE;useEpoll=true;amqpCredits=1000;amqpLowCredits=300;amqpDuplicateDetection=true</acceptor>
  
          <!-- STOMP Acceptor. -->
-         <acceptor name="stomp">tcp://[{{ wireguard_interface_address }}]:61613?tcpSendBufferSize=1048576;tcpReceiveBufferSize=1048576;protocols=STOMP;useEpoll=true;heartBeatToConnectionTtlModifier=6</acceptor>
+         <acceptor name="stomp">tcp://[{{ activemq_ip_address }}]:61613?tcpSendBufferSize=1048576;tcpReceiveBufferSize=1048576;protocols=STOMP;useEpoll=true;heartBeatToConnectionTtlModifier=6</acceptor>
       </acceptors>
  
       <connectors>
-         <connector name="netty-connector">tcp://[{{ wireguard_interface_address }}]:61616</connector>
-         <!-- The following line is only required if a secondary broker is used. We currently do not use one. 
-         <connector name="server2-connector">tcp://-- broker_backup_host --:61616</connector>
-         -->
-      </connectors>
- 
-      <ha-policy>
-         <replication>
-            <master>
-               <check-for-live-server>true</check-for-live-server>
-            </master>
-         </replication>
-      </ha-policy>
- 
-      <cluster-connections>
-         <cluster-connection name="my-cluster">
-            <connector-ref>netty-connector</connector-ref>
-            <!-- The following lines are only required if a secondary broker is used. We currently do not use one. 
-            <static-connectors>
-               <connector-ref>server2-connector</connector-ref>
-            </static-connectors>
-            -->
-         </cluster-connection>
-      </cluster-connections>
+         <connector name="netty-connector">tcp://[{{ activemq_ip_address }}]:61616</connector>
  
       <security-settings>
          <security-setting match="#">

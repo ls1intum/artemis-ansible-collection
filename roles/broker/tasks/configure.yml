@@ -25,10 +25,10 @@
     group: "{{ artemis_user_group }}"
   notify: restart broker
 
-- name: Copy broker1.service systemd configuration
+- name: Copy broker.service systemd configuration
   template:
-    src: activemq_broker1.service.j2
-    dest: "/etc/systemd/system/broker1.service"
+    src: activemq_broker.service.j2
+    dest: "/etc/systemd/system/broker.service"
     mode: 0644
   notify: restart broker
 
@@ -39,10 +39,10 @@
     line: "ARTEMIS_HOME='/opt/activemq-distribution/apache-artemis-{{ activemq_version }}'"
   notify: restart broker
 
-- name: Enable broker1 service
+- name: Enable broker service
   systemd:
     daemon_reload: yes
-    name: broker1
+    name: broker
     enabled: yes
     masked: no
   notify: restart broker

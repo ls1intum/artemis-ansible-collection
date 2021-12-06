@@ -15,7 +15,7 @@ jhipster:
 eureka:
   instance:
     prefer-ip-address: true
-    ip-address: "[{{ wireguard_interface_address }}]"
+    ip-address: "[{{ registry_ip_address }}]"
     instanceId: {{ registry_instance_id }}
   server:
     enable-self-preservation: false
@@ -24,10 +24,3 @@ eureka:
     eviction-interval-timer-in-ms: 30000
     peer-eureka-nodes-update-interval-ms: 30000
     renewal-threshold-update-interval-ms: 15000
-  # The registry can register itself to a second registry and replicate the data. We do, however, currently not use this setup.
-  # Uncomment the following lines to enable.
-  #client:
-  #  fetch-registry: true
-  #  register-with-eureka: true
-  #  serviceUrl:
-  #    defaultZone: http://admin:{{ registry_application_prod_registry_password }}@{% if broker_host_role == 'primary' %}-- broker_backup_host --{% else %}{{ broker_primary_host }}{% endif %}:8761/eureka/
