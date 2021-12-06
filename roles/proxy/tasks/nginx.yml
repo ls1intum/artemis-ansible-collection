@@ -20,11 +20,13 @@
     name: nginx
     state: started
 
-- name: Generate DH Parameters
+- name: Generate DH Parameters (This will take a while....)
   become: true
   openssl_dhparam:
     path: /etc/nginx/dhparam.pem
-    size: 4096
+    size: 409
+  when: 
+    - proxy_generate_dh_param|bool == true
 
 - name: Adjust worker_rlimit_nofile in nginx.conf
   become: true

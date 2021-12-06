@@ -31,5 +31,7 @@ proxy_primary_node_url:
 
 proxy_site_template: artemis
 
+proxy_generate_dh_param: true
+
 # Used for the /mailto enpoint - Has to be a valid mail address. 
 proxy_mailto:
