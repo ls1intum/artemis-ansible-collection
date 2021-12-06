@@ -144,6 +144,7 @@ shared_monitoring_host_v4:
 hazelcast_address: "{% if is_multinode_install is defined and is_multinode_install|bool == true %}{{ wireguard_interface_address }}{% endif %}"
 
 artemis_eureka_urls: "{% if broker.url is defined and broker.url is not none %}http://admin:${jhipster.registry.password}@[{{ broker.url }}]:8761/eureka/{% endif %}"
+artemis_eureka_instance_id: "{{ node_id }}"
 
 ##############################################################################
 # Auto-generated Variables - No not alter!
