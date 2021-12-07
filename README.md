@@ -4,19 +4,6 @@ This collection contains all ansible roles necessary to deploy [Artemis](https:/
 
 > This is a work in progress repository - Please open issues if you encounter problems.
 
-_Tested (on ubuntu 20.04):_
-- artemis single node install 
-- proxy single node install 
-- wireguard role
-- artemis multi node install 
-- broker role 
-- proxy multi node 
-- storage server
-- storage client 
-
-_To be tested:_
-- firewall role
-
 # Installation 
 ## Installation via ansible-galaxy: 
 
@@ -97,4 +84,6 @@ is_testserver: true
 ```
 variable in your `group_vars`.
 
+## Tests 
 
+All roles have been tested on ubuntu 20.04 LTS
