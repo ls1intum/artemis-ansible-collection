@@ -3,6 +3,8 @@
   apt:
     name: nginx
     state: latest
+    update_cache: yes
+
   notify: restart nginx
 
 - name: Enable nginx service
