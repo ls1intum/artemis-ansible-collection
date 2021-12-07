@@ -1,0 +1,13 @@
+---
+
+- name: Setup Artemis Broker and Registry
+  hosts: artemis_cluster_broker
+
+  roles:
+    - role: ls1intum.artemis.broker
+    - role: ls1intum.artemis.proxy
+      vars: 
+        proxy_site_template: registry
+        proxy_generate_dh_param: false
+        proxy_ssl_certificate_path: #FIXME
+        proxy_ssl_certificate_key_path: #FIXME

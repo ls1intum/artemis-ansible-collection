@@ -1,0 +1,20 @@
+---
+
+# Cluster Network
+- import_playbook: artemistest-cluster.yml
+  
+# Cluster Storage
+- import_playbook: artemistest-cluster-storage.yml
+
+# Cluster Databse
+- import_playbook: artemistest-cluster-db.yml
+
+# Cluster Broker
+- import_playbook: artemistest-cluster-broker.yml
+
+# Cluster Proxy
+- import_playbook: artemistest-cluster-proxy.yml
+
+# Cluster Artemis Nodes
+- import_playbook: artemistest-cluster-nodes.yml
+

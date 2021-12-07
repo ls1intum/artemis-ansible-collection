@@ -1,0 +1,119 @@
+---
+is_testserver: false
+artemis_server_url: "https://artemis-cluster.ase.in.tum.de"
+
+artemis_build_version: 5.3.2
+
+artemis_database_dbname: "Artemis"
+artemis_database_username: "Artemis"
+artemis_database_password: "" #FIXME
+
+artemis_encryption_password: "" #FIXME
+
+artemis_internal_admin_user: artemis_admin 
+artemis_internal_admin_password: "" #FIXME
+
+artemis_ssh_key_password: ""
+artemis_ssh_key_path: "/opt/artemis/sshkeys"
+artemis_ssh_key_name: "id_rsa"
+artemis_ssh_priv_key_value: | #FIXME
+  -----BEGIN OPENSSH PRIVATE KEY-----
+  -----END OPENSSH PRIVATE KEY-----
+
+
+##############################################################################
+# External Systems Configuration
+##############################################################################
+
+user_management:
+  jira:
+    url: https://jira-prelive.ase.in.tum.de #FIXME
+    user: artemis
+    password: "" #FIXME
+    admin_group: artemis-dev #FIXME
+
+bitbucket_hostname: bitbucket-prelive.ase.in.tum.de #FIXME
+version_control:
+  bitbucket:
+    url: "https://{{ bitbucket_hostname }}"
+    ssh_url: "ssh://git@{{ bitbucket_hostname }}:7999"
+    token: "" #FIXME
+
+continuous_integration: 
+  bamboo:
+    url: https://bamboo-prelive.ase.in.tum.de #FIXME
+    token: #FIXME
+    bitbucket_link_name: Bitbucket Prelive #FIXME
+    result_plugin_token: #FIXME
+
+
+##############################################################################
+# Proxy Configuration
+##############################################################################
+
+proxy_ssl_certificate_path: #FIXME
+proxy_ssl_certificate_key_path: #FIXME
+
+proxy_site_template: artemis # Name of the site loaded within nginx
+
+
+##############################################################################
+# Broker and Registry Configuration
+##############################################################################
+
+is_multinode_install: true
+
+broker: 
+  url: "fcfe:0:0:0:0:0:b:1" 
+  username: brokeruser
+  password: #FIXME
+
+artemis_jhipster_jwt: #FIXME 
+artemis_jhipster_registry_password: #FIXME
+artemis_eureka_instance_id: "{{ node_id }}"
+
+
+##############################################################################
+# MySQL Configuration
+##############################################################################
+
+artemis_database_encoding: utf8mb4
+artemis_database_collation: utf8mb4_unicode_ci
+artemis_database_host: "fcfe:0:0:0:0:0:d:1"
+
+mysql_packages:
+  - mysql-common
+  - mysql-server
+  - python3-mysqldb
+mysql_bind_address: '{{ artemis_database_host }}'
+
+# Performance
+mysql_key_buffer_size: "256M"
+mysql_table_open_cache: "4000"
+mysql_sort_buffer_size: "4M"
+mysql_read_buffer_size: "1M"
+mysql_innodb_buffer_pool_size: "2G"
+mysql_max_connections: "2000"
+mysql_thread_cache_size: "256"
+mysql_max_allowed_packet: "512M"
+mysql_innodb_force_recovery: "0"
+mysql_character_set_server: "{{ artemis_database_encoding }}"
+mysql_collation_server: "{{ artemis_database_encoding }}"
+mysql_default_storage_engine: "INNODB"
+mysql_innodb_log_file_size: "512M"
+mysql_mysqldump_max_allowed_packet: "512M"
+mysql_isamchk_key_buffer: "16M"
+
+# Databases
+mysql_databases:
+  - name: "{{ artemis_database_dbname }}"
+    collation: "{{ artemis_database_collation }}"
+    encoding: "{{ artemis_database_encoding }}"
+
+# Users
+mysql_users:
+  - name: "{{ artemis_database_username }}"
+    host: "fcfe::a:%"
+    password: "{{ artemis_database_password }}"
+    priv: "*.*:ALL"   
+

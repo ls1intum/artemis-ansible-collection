@@ -1,0 +1,7 @@
+---
+
+- name: Setup Artemis shared storage provider
+  hosts: artemis_cluster_storage
+
+  roles:
+    - role: ls1intum.artemis.storage_provider
