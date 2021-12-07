@@ -1,10 +1,12 @@
 - name: Install iptables-persistent
+  become: true
   apt:
     name: iptables-persistent
     state: latest
     update_cache: yes
 
 - name: Copy rules.v4
+  become: true
   template:
     src: rules_{{ firewall_hostgroup | default('default') }}.v4.j2
     dest: /etc/iptables/rules.v4
@@ -12,6 +14,7 @@
   register: copy4
 
 - name: Copy rules.v6
+  become: true
   template:
     src: rules_{{ firewall_hostgroup | default('default') }}.v6.j2
     dest: /etc/iptables/rules.v6
@@ -19,9 +22,11 @@
   register: copy6
 
 - name: Load IPv4 rules
+  become: true
   shell: "iptables-restore < /etc/iptables/rules.v4"
   changed_when: copy4.changed
 
 - name: Load IPv6 rules
+  become: true
   shell: "ip6tables-restore < /etc/iptables/rules.v6"
   changed_when: copy6.changed
