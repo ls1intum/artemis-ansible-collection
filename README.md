@@ -18,13 +18,27 @@ _To be tested:_
 - firewall role
 
 # Installation 
-
-## Installation via git: 
-
-
 ## Installation via ansible-galaxy: 
 
 Not possible yet - We're working on it! 
+
+## Installation via git: 
+
+### Manual install: 
+
+```
+ansible-galaxy collection install git+https://github.com/ls1intum/artemis-ansible-collection.git,main
+```
+
+### Install via requirements file: 
+
+Add the following to your ansible requirements: 
+```
+collections:
+  - name: https://github.com/ls1intum/artemis-ansible-collection.git
+    type: git
+    version: main # You can also specify a spcific version here! 
+```
 
 ## Install dependencies
 
