@@ -8,20 +8,29 @@ _Tested (on ubuntu 20.04):_
 - artemis single node install 
 - proxy single node install 
 - wireguard role
-
-_To be tested:_
 - artemis multi node install 
-- firewall role
 - broker role 
 - proxy multi node 
 - storage server
 - storage client 
 
-## Installation 
-TODO
+_To be tested:_
+- firewall role
+
+# Installation 
+
+## Installation via git: 
+
+
+## Installation via ansible-galaxy: 
+
+Not possible yet - We're working on it! 
+
+## Install dependencies
 
 [Ansible does not support role dependencies for collections](https://github.com/ansible/ansible/issues/76030) - So you need to install the dependencies by hand :(. 
 
+The repository contains a `requirements.yml` file which contains all the external roles used in artemis. Please install these with ansible galaxy:  
 
 ```bash
 #This command will only work if you installed the collections to the default location!
@@ -29,21 +38,23 @@ TODO
 ansible-galaxy install -r ~/.ansible/collections/ansible_collections/ls1intum/artemis/requirements.yml
 ```
 
-## Documentation
+# Documentation
 
 You can find the documentation for Artemis [here](https://docs.artemis.ase.in.tum.de). 
-The documentation for this ansible collection can be found in the `docs` folder. Each role also includes a readme which might help in certain situations. 
+Each role includes a readme and default configuration. Consult these for more information.
 
-## Deployment Strategies 
+ **Use the examples in the examples folder as starting point for your deployment**
+
+# Deployment Strategies 
 
 Artemis can be deployed in different ways. Depending on the use case the ansible configuration differs. 
 
 You can find examples for each configuration in the `examples` folder. 
 
-### Single Node installation 
+## Single Node installation 
 All Artemis components are deployed to a single host. This is the prefered deployment strategy for small installations or testing/evaluation purposes. 
 
-### Multi Node installation (Cluster)
+## Multi Node installation (Cluster)
 Artemis components are installed on different hosts. Currently the following components need to be set up for an Artemis cluster: 
 
 - Artemis application servers (1..n - Also referred to as "Artemis node")
