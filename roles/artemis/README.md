@@ -51,8 +51,8 @@ Bitbucket configuration:
 bitbucket_hostname: bitbucket.example.com 
 version_control:
   bitbucket:
-    url: "https://{{ bitbucket_hostname }}/"
-    ssh_url: "ssh://git@{{ bitbucket_hostname }}:7999/"
+    url: "https://{{ bitbucket_hostname }}"
+    ssh_url: "ssh://git@{{ bitbucket_hostname }}:7999"
     token: 
 ```
 ---
