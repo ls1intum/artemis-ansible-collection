@@ -24,7 +24,7 @@
   become: true
   openssl_dhparam:
     path: /etc/nginx/dhparam.pem
-    size: 409
+    size: 4096
   when: 
     - proxy_generate_dh_param|bool == true
 
