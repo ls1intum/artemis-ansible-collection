@@ -9,8 +9,8 @@ authors:
 - Matthias Linhuber <matthias@linhuber.org> (https://mtze.me)
 - Simon Leiss <hello@sleiss.me> (https://sleiss.me)
 - Linus Michel
-- Jan Philip Bernius <janphilip.bernius@tum.de> (https://ase.in.tum.de/lehrstuhl_1/bernius)
-- Prof. Dr. Stephan Krusche <krusche@in.tum.de> (https://ase.in.tum.de/krusche)
+- Jan Philip Bernius <janphilip.bernius@tum.de>
+- Prof. Dr. Stephan Krusche <krusche@in.tum.de>
 
 description: Set up, configure and update Artemis servers / clusters. 
 
