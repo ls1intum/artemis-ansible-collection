@@ -4,13 +4,13 @@
 ##############################################################################
 
 - name: Check if registry_password is set
-  fail: 
+  fail:
     msg: "No registry_password is configured!"
-  when: 
+  when:
     - registry_password is undefined or registry_password is none
 
 - name: Check if registry_jwt is set
-  fail: 
+  fail:
     msg: "No registry_jwt is configured!"
-  when: 
+  when:
     - registry_jwt is undefined or registry_jwt is none

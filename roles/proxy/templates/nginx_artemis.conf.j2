@@ -17,7 +17,7 @@ server {
     listen 80 default_server;
     listen [::]:80 default_server;
     server_name _;
- 
+
     return 301 https://$host$request_uri;
 }
 
@@ -83,12 +83,12 @@ server {
         client_max_body_size 2g;
     }
 {% endif %}
-    
+
     location /api/authenticate {
         proxy_pass http://artemis/api/authenticate;
         limit_req zone=loginlimit burst=5 nodelay;
     }
-    
+
     location /favicon.ico {
         return 404;
     }

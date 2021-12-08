@@ -12,7 +12,7 @@ authors:
 - Jan Philip Bernius <janphilip.bernius@tum.de>
 - Prof. Dr. Stephan Krusche <krusche@in.tum.de>
 
-description: Set up, configure and update Artemis servers / clusters. 
+description: Set up, configure and update Artemis servers / clusters.
 
 license_file: 'LICENSE'
 

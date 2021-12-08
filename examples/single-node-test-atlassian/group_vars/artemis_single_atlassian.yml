@@ -10,7 +10,7 @@ artemis_database_password: #FIXME
 
 artemis_encryption_password: #FIXME
 
-artemis_internal_admin_user: artemis_admin 
+artemis_internal_admin_user: artemis_admin
 artemis_internal_admin_password: #FIXME
 
 artemis_ssh_key_path: "/opt/artemis/sshkeys"
@@ -40,7 +40,7 @@ version_control:
     ssh_url: "ssh://git@{{ bitbucket_hostname }}:7999/"
     token: <token_here> #FIXME
 
-continuous_integration: 
+continuous_integration:
   bamboo:
     url: https://bamboo-prelive.ase.in.tum.de
     token: <token_here> #FIXME
@@ -94,5 +94,5 @@ mysql_users:
   - name: "{{ artemis_database_username }}"
     host: "{{ artemis_database_host }}"
     password: "{{ artemis_database_password }}"
-    priv: "*.*:ALL"   
+    priv: "*.*:ALL"
 

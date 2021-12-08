@@ -1,23 +1,23 @@
 Role Name
 =========
 
-This role installes activemq and the jhipster registry and configures both for the use with artemis. 
+This role installes activemq and the jhipster registry and configures both for the use with artemis.
 
 Role Variables
 --------------
 
-Default variables can be found in the `defaults/main.yml` file. 
+Default variables can be found in the `defaults/main.yml` file.
 
-You have to configure the follwoing varaibles in your ansible `group_vars`: 
+You have to configure the follwoing varaibles in your ansible `group_vars`:
 
 ```
-broker: 
+broker:
   url: # Broker hostname (Only used in the Artemis role)
   username: # Broker username (Also used by the Artemis role)
   password: # Broker password (Also used by the Artemis role)
 ```
 
-and 
+and
 
 ```
 artemis_jhipster_jwt: #(Also used by the Artemis role)

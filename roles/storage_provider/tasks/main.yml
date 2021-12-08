@@ -24,15 +24,15 @@
 
 - name: Make sure the export exists
   become: true
-  file: 
+  file:
     path: "{{ storage_export }}"
     state: directory
     owner: "{{ artemis_user }}"
     group: "{{ artemis_group }}"
 
-- name: Configure NFS Daemon 
+- name: Configure NFS Daemon
   become: true
-  template: 
+  template:
     src: nfs.conf.j2
     dest: /etc/nfs.conf
     owner: root
@@ -42,7 +42,7 @@
 
 - name: Configure export
   become: true
-  template: 
+  template:
     src: exports.j2
     dest: /etc/exports
     owner: root

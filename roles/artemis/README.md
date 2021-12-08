@@ -5,9 +5,9 @@ This role installs artemis on a host. The role supports single node installation
 
 Role Variables
 --------------
-Default variables can be found in the `defaults/main.yml` file. 
+Default variables can be found in the `defaults/main.yml` file.
 
-### Variables that have to be configured for a single node installation: 
+### Variables that have to be configured for a single node installation:
 
 ```
 artemis_server_url: "https://artemis.example.de"
@@ -22,49 +22,49 @@ proxy_ssl_certificate_key_path: #FIXME
 ```
 
 
-### Additional Variables for external systems 
+### Additional Variables for external systems
 To configure LDAP access for artemis, add the following variables:
 ```
 ldap:
   url: "ldaps://iauth.tum.de:636"
   user_dn: "cn=TUINI01-Artemis,ou=bindDNs,ou=iauth,dc=tum,dc=de"
   base: "ou=users,ou=data,ou=prod,ou=iauth,dc=tum,dc=de"
-  password: 
+  password:
 ```
 ---
 
-To configure Jira as user management server add: 
+To configure Jira as user management server add:
 
 ```
 user_management:
   jira:
-    url: 
-    user: 
-    password: 
+    url:
+    user:
+    password:
     admin_group: # Jira group that will have admin access in the artemis web ui
 ```
 ---
 
-Bitbucket configuration: 
+Bitbucket configuration:
 ```
-    
-bitbucket_hostname: bitbucket.example.com 
+
+bitbucket_hostname: bitbucket.example.com
 version_control:
   bitbucket:
     url: "https://{{ bitbucket_hostname }}"
     ssh_url: "ssh://git@{{ bitbucket_hostname }}:7999"
-    token: 
+    token:
 ```
 ---
 
-Bamboo configuration: 
+Bamboo configuration:
 ```
-continuous_integration: 
+continuous_integration:
   bamboo:
-    url: 
-    token: 
-    bitbucket_link_name: 
-    result_plugin_token: 
+    url:
+    token:
+    bitbucket_link_name:
+    result_plugin_token:
 ```
 ---
 
@@ -86,28 +86,28 @@ Jenkins configuration:
 ---
 
 
-Athene configuration:    
+Athene configuration:
 ```
-athene: 
-  url: 
-  secret: 
+athene:
+  url:
+  secret:
 ```
 ---
 
-Apollon configuration:    
+Apollon configuration:
 ```
 apollon_url: #https://apollon.ase.in.tum.de/api/converter
 ```
 ---
 
-Mail configuration: 
+Mail configuration:
 ```
-mail: 
+mail:
   host:
-  port: 
+  port:
   user:
   password:
-  protocol: 
+  protocol:
   ssl_trust:
 ```
 
@@ -115,11 +115,11 @@ mail:
 
 LTI configuration:
 ```
-lti: 
+lti:
   oauth_secret:
 ```
 
-### Additional Variables for multi node installtions 
+### Additional Variables for multi node installtions
 
 Registry Configuration:
 ```
@@ -134,7 +134,7 @@ The Token can be generated with: `openssl rand -base64 64`
 
 Active MQ configuration
 ```
-broker: 
+broker:
   url: "fcfe:0:0:0:0:0:b:1" # Default address in the wireguard network
   username: brokeruser
   password: #FIXME

@@ -1,6 +1,6 @@
 ---
 
-- name: Setup Artemis Nodes 
+- name: Setup Artemis Nodes
   hosts: artemis_cluster_nodes
 
   roles:

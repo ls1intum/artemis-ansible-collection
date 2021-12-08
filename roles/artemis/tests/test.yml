@@ -7,7 +7,7 @@
       vars:
         artemis_database_password: asdfasdf
         user_management:
-          jira: 
+          jira:
             url: "test"
             user: "test"
             password: "asdf"

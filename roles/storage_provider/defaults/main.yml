@@ -8,6 +8,6 @@ artemis_group: artemis
 # Storage server definition
 storage_export:  /srv/artemis
 
-# Storage Network 
+# Storage Network
 storage_network: "fcfe:0:0:0:0:0:0:0/96"
 storage_server_address: "fcfe:0:0:0:0:0:9:1"

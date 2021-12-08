@@ -6,6 +6,6 @@
   roles:
     - role: ls1intum.artemis.wireguard
       become: true
-      vars: 
+      vars:
         wireguard_hostgroup: "{{ groups.artemistest_cluster }}"
 

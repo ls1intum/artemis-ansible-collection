@@ -69,8 +69,8 @@
 
 - name: Copy ssh key
   become: true
-  copy: 
-    content: "{{ artemis_ssh_priv_key_value }}" 
+  copy:
+    content: "{{ artemis_ssh_priv_key_value }}"
     dest: "{{ artemis_ssh_key_path }}/{{ artemis_ssh_key_name }}"
   register: ssh_key
   notify: restart artemis
@@ -109,7 +109,7 @@
     state: stopped
   failed_when: false    # e.g. if file exists but service does not
   changed_when: true    # e.g. if service was already stopped
-  when: (config.changed or permissions.changed or service.changed or ssh_key.changed or artemis_force_restart) and not artemis_force_no_restart
+  when: (config.changed or permissions.changed or service.changed or ssh_key.changed or artemis_force_restart) and not artemis_force_no_restart # noqa 503
   notify: restart artemis
   throttle: 1
 

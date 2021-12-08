@@ -10,6 +10,10 @@
     name: nginx
     state: restarted
 
+- name: apply sysctl
+  become: true
+  command: sysctl -p
+
 - name: reboot system
   become: true
   reboot:

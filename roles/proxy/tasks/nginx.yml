@@ -27,8 +27,8 @@
   openssl_dhparam:
     path: /etc/nginx/dhparam.pem
     size: 4096
-  when: 
-    - proxy_generate_dh_param|bool == true
+  when:
+    - proxy_generate_dh_param|bool
 
 - name: Adjust worker_rlimit_nofile in nginx.conf
   become: true
@@ -115,12 +115,10 @@
     regexp: '^fs.file-max='
     line: fs.file-max=2000000
     state: present
-  register: sysctlfile
+  notify: apply sysctl
 
-- name: Apply sysctl config
-  become: true
-  command: sysctl -p
-  when: sysctlfile.changed
+- name: Flush handlers
+  meta: flush_handlers
 
 - name: Copy security-limits nginx.conf
   become: true

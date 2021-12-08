@@ -13,4 +13,4 @@
 - name: Reboot after first install
   reboot:
     reboot_timeout: 3600
-  when: "'wireguard' not in ansible_facts.packages and wireinstall.changed"
+  when: "'wireguard' not in ansible_facts.packages and wireinstall.changed" # noqa 503

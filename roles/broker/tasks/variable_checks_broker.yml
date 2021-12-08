@@ -4,13 +4,13 @@
 ##############################################################################
 
 - name: Check if activemq_password is set
-  fail: 
+  fail:
     msg: "No broker password is configured!"
-  when: 
+  when:
     - activemq_password is undefined or activemq_password is none
 
 - name: Check if activemq_username is set
-  fail: 
+  fail:
     msg: "No activemq_username is configured!"
-  when: 
+  when:
     - activemq_username is undefined or activemq_username is none
