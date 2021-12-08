@@ -5,9 +5,11 @@ This collection contains all ansible roles necessary to deploy [Artemis](https:/
 > This is a work in progress repository - Please open issues if you encounter problems.
 
 # Installation
-## Installation via ansible-galaxy:
+## Installation via [ansible-galaxy](https://galaxy.ansible.com/ls1intum/artemis):
 
-Not possible yet - We're working on it!
+```
+ansible-galaxy collection install ls1intum.artemis
+```
 
 ## Installation via git:
 
@@ -87,3 +89,13 @@ variable in your `group_vars`.
 ## Tests
 
 All roles have been tested on ubuntu 20.04 LTS
+
+# Ansible Development Setup 
+
+It is a good idea to install ansible and ansible-lint to a venv: 
+
+```
+virtualenv venv
+. venv/bin/activate.fish
+pip3 install -r requirements.txt
+```
