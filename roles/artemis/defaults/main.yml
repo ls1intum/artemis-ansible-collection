@@ -38,11 +38,11 @@ openjdk_version: 17
 
 
 ##############################################################################
-# Artemis 
+# Artemis
 ##############################################################################
 
 artemis_internal_admin_user: artemis_admin
-artemis_internal_admin_password: 
+artemis_internal_admin_password:
 
 artemis_jhipster_jwt: #FIXME Multinode
 artemis_jhipster_registry_password: #FIXME Multinode
@@ -56,7 +56,7 @@ artemis_repo_basepath: "."
 artemis_ssh_key_path: /opt/keys
 artemis_ssh_key_name: "artemis_ssh_key"
 artemis_ssh_priv_key_value: #FIXME
-artemis_ssh_key_password: 
+artemis_ssh_key_password:
 
 artemis_force_restart: false        # Will restart the artemis service on all nodes (unless artemis_force_no_restart) is set
 artemis_force_no_restart: false     # Will prevent the restart of the artemis service on all nodes
@@ -78,55 +78,55 @@ artemis_encryption_password: #FIXME
 
 artemis_account_login_info: "TUM"
 
-shared_monitoring_host_v4: 
+shared_monitoring_host_v4:
   #ldap:
   #  url: "ldaps://iauth.tum.de:636"
   #  user_dn: "cn=TUINI01-Artemis,ou=bindDNs,ou=iauth,dc=tum,dc=de"
   #  base: "ou=users,ou=data,ou=prod,ou=iauth,dc=tum,dc=de"
-  #  password: 
+  #  password:
   #
   #user_management:
   #  jira:
   #    url:
-  #    user: 
-  #    password: 
+  #    user:
+  #    password:
   #    admin_group:
-  #    
-  #bitbucket_hostname: bitbucket.example.com 
+  #
+  #bitbucket_hostname: bitbucket.example.com
   #version_control:
   #  bitbucket:
   #    url: "https://{{ bitbucket_hostname }}/"
   #    ssh_url: "ssh://git@{{ bitbucket_hostname }}:7999/"
-  #    token: 
+  #    token:
   #
   #  gitlab:
   #    #TODO
   #
-  #continuous_integration: 
+  #continuous_integration:
   #  bamboo:
-  #    url: 
-  #    token: 
-  #    bitbucket_link_name: 
-  #    result_plugin_token: 
+  #    url:
+  #    token:
+  #    bitbucket_link_name:
+  #    result_plugin_token:
   #
   #  jenkins:
   #    #TODO
   #
-  #athene: 
-  #  url: 
-  #  secret: 
-  #    
+  #athene:
+  #  url:
+  #  secret:
+  #
   #apollon_url: #https://apollon.ase.in.tum.de/api/converter
   #
-  #lti: 
+  #lti:
   #  oauth_secret:
   #
-  #mail: 
+  #mail:
   #  host:
-  #  port: 
+  #  port:
   #  user:
   #  password:
-  #  protocol: 
+  #  protocol:
   #  ssl_trust:
   #
   #
@@ -136,8 +136,8 @@ shared_monitoring_host_v4:
   #
   #broker:  #FIXME Multinode
   #  url:
-  #  user: 
-  #  password: 
+  #  user:
+  #  password:
   #
 
 # Define node local hazelcast_address - Uses wireguard net by default

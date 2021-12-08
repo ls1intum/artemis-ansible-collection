@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: Push to Ansible Galaxy 
+name: Push to Ansible Galaxy
 
 # Controls when the workflow will run
 on:
@@ -25,4 +25,4 @@ jobs:
       - name: Build and Deploy Collection
         uses: artis3n/ansible_galaxy_collection@v2
         with:
-          api_key: '${{ secrets.GALAXY_API_KEY }}' 
+          api_key: '${{ secrets.GALAXY_API_KEY }}'

@@ -22,12 +22,12 @@ def store_host_var_file(pub, priv, h_type, host_id, filename):
 
     content = """
 # IPv6 address (with CIDR!) which can be used to access the node - If left blank, ansible will use host facts to fill the address.
-wireguard_host_ipv6_address: 
+wireguard_host_ipv6_address:
 
 # Address of the node inside the network.
 wireguard_interface_address: "fcfe:0:0:0:0:0:{MAPPPING[h_type]}:{host_id}"
 
-# Wireguard Keys - Autmatically generated! 
+# Wireguard Keys - Autmatically generated!
 wireguard_pubkey: {pub}
 wireguard_privkey: {priv}
 

@@ -1,4 +1,4 @@
-#TODO check if war is allredy present - If so fail and prompt user to use the uprade instead 
+#TODO check if war is allredy present - If so fail and prompt user to use the uprade instead
 
 - name: Download Artemis.war to {{ artemis_working_directory }}
   become: true

@@ -1,8 +1,8 @@
 # Node storage setup role
 
-This role adds an systemd service which automatically mounts the defined NFS export to /etc/storage. 
+This role adds an systemd service which automatically mounts the defined NFS export to /etc/storage.
 
-Variables that can be configured (See `defaults/main.yml`: 
+Variables that can be configured (See `defaults/main.yml`:
 
 ```
 artemis_uid: 1337

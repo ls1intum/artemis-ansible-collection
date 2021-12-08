@@ -6,8 +6,8 @@
   service:
     name: artemis
     state: restarted
-  when: 
-    - node_id is undefined 
+  when:
+    - node_id is undefined
     - not artemis_force_no_restart
   listen: "restart artemis"
   throttle: 1
@@ -17,9 +17,9 @@
   service:
     name: artemis
     state: restarted
-  when: 
-    - node_id is defined 
-    - node_id == 1 
+  when:
+    - node_id is defined
+    - node_id == 1
     - not artemis_force_no_restart
   listen: "restart artemis"
   throttle: 1
@@ -28,8 +28,8 @@
   become: true
   wait_for:
     timeout: 60
-  when: 
-    - node_id is defined 
+  when:
+    - node_id is defined
     - node_id == 1
   listen: "restart artemis"
   throttle: 1
@@ -39,9 +39,9 @@
   service:
     name: artemis
     state: restarted
-  when: 
-    - node_id is defined 
-    - not (node_id == 1) 
+  when:
+    - node_id is defined
+    - not (node_id == 1)
     - not artemis_force_no_restart
   listen: "restart artemis"
   throttle: 1

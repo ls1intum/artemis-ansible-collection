@@ -6,13 +6,13 @@ artemis-cluster-node2.example.com
 
 [artemis_cluster_broker]
 artemis-cluster-broker.example.com
-        
+
 [artemis_cluster_db]
 artemis-cluster-db.example.com
 
 [artemis_cluster_proxy]
 artemis-cluster-proxy.example.com
-        
+
 [artemis_cluster_storage]
 artemis-cluster-storage.example.com
 

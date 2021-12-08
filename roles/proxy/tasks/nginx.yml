@@ -27,7 +27,7 @@
   openssl_dhparam:
     path: /etc/nginx/dhparam.pem
     size: 4096
-  when: 
+  when:
     - proxy_generate_dh_param|bool
 
 - name: Adjust worker_rlimit_nofile in nginx.conf

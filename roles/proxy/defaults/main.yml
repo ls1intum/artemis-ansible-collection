@@ -1,6 +1,6 @@
 
-proxy_ssl_certificate_path:  
-proxy_ssl_certificate_key_path: 
+proxy_ssl_certificate_path:
+proxy_ssl_certificate_key_path:
 
 proxy_resolver: "127.0.0.53 valid=300s"
 
@@ -26,12 +26,12 @@ proxy_worker_rlmmiit_nofile: 30000
 proxy_worker_connections: 20000
 proxy_server_names_hash_bucket_size: 256
 
-proxy_athene_baseurl: 
-proxy_primary_node_url: 
+proxy_athene_baseurl:
+proxy_primary_node_url:
 
 proxy_site_template: artemis
 
 proxy_generate_dh_param: true
 
-# Used for the /mailto enpoint - Has to be a valid mail address. 
+# Used for the /mailto enpoint - Has to be a valid mail address.
 proxy_mailto:

@@ -10,7 +10,7 @@ artemis_database_password: "" #FIXME
 
 artemis_encryption_password: "" #FIXME
 
-artemis_internal_admin_user: artemis_admin 
+artemis_internal_admin_user: artemis_admin
 artemis_internal_admin_password: "" #FIXME
 
 artemis_ssh_key_password: ""
@@ -39,7 +39,7 @@ version_control:
     ssh_url: "ssh://git@{{ bitbucket_hostname }}:7999"
     token: "" #FIXME
 
-continuous_integration: 
+continuous_integration:
   bamboo:
     url: https://bamboo-prelive.ase.in.tum.de #FIXME
     token: #FIXME
@@ -63,12 +63,12 @@ proxy_site_template: artemis # Name of the site loaded within nginx
 
 is_multinode_install: true
 
-broker: 
-  url: "fcfe:0:0:0:0:0:b:1" 
+broker:
+  url: "fcfe:0:0:0:0:0:b:1"
   username: brokeruser
   password: #FIXME
 
-artemis_jhipster_jwt: #FIXME 
+artemis_jhipster_jwt: #FIXME
 artemis_jhipster_registry_password: #FIXME
 artemis_eureka_instance_id: "{{ node_id }}"
 
@@ -115,5 +115,5 @@ mysql_users:
   - name: "{{ artemis_database_username }}"
     host: "fcfe::a:%"
     password: "{{ artemis_database_password }}"
-    priv: "*.*:ALL"   
+    priv: "*.*:ALL"
 
