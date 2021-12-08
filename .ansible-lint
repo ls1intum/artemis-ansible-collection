@@ -1,5 +1,3 @@
 skip_list:
-  - 'package-latest'
-  - 'risky-file-permissions'
-  - 'ignore-errors'
-  - 'no-tabs'   # LOL -> https://github.com/ansible-community/ansible-lint/issues/1334
+  - '403'  # Package installs should not use latest
+  - '208'  # File permissions unset or incorrect
