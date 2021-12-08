@@ -2,3 +2,4 @@ skip_list:
   - 'package-latest'
   - 'risky-file-permissions'
   - 'ignore-errors'
+  - 'no-tabs'   # LOL -> https://github.com/ansible-community/ansible-lint/issues/1334
