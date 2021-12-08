@@ -1,0 +1,4 @@
+skip_list:
+  - 'package-latest'
+  - 'risky-file-permissions'
+  - 'ignore-errors'
