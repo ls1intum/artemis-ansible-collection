@@ -115,12 +115,10 @@
     regexp: '^fs.file-max='
     line: fs.file-max=2000000
     state: present
-  register: sysctlfile
+  notify: apply sysctl
 
-- name: Apply sysctl config
-  become: true
-  command: sysctl -p
-  when: sysctlfile.changed
+- name: Flush handlers
+  meta: flush_handlers
 
 - name: Copy security-limits nginx.conf
   become: true
