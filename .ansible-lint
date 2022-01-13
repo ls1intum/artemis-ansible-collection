@@ -1,3 +1,9 @@
+exclude_paths:
+- .cache/  
+- .github/
+
+
 skip_list:
   - '403'  # Package installs should not use latest
   - '208'  # File permissions unset or incorrect
+  - no-tabs
