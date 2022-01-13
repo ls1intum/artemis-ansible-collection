@@ -25,7 +25,7 @@
     name: mnt-storage.mount
     state: stopped
   become: true
-  ignore_errors: true
+  ignore_errors: true # noqa ignore-errors
 
 - name: Make sure the mountmoint exists
   file:
