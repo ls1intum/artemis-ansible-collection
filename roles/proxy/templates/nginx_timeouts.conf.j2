@@ -1,6 +1,6 @@
 {{ ansible_managed | comment }}
 
-proxy_send_timeout 900s;
-proxy_read_timeout 900s;
-fastcgi_send_timeout 900s;
-fastcgi_read_timeout 900s;
+proxy_send_timeout {{ proxy_send_timeout }};
+proxy_read_timeout {{ proxy_read_timeout }};
+fastcgi_send_timeout {{ fastcgi_send_timeout }};
+fastcgi_read_timeout {{ fastcgi_read_timeout }};
