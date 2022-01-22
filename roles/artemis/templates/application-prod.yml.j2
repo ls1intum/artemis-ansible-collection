@@ -78,10 +78,10 @@ artemis:
       password: {{ user_management.jira.password }}
       admin-group-name: {{ user_management.jira.admin_group}}
 	password-reset:
-	  credential-provider: TUMOnline
+	  credential-provider: {{artemis_external_password_provider }}
 	  links:
-		en: 'https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/pl/ui/$ctx/co_loc_password_reset.main?$ctx=design=ca2;header=max;lang=en'
-		de: 'https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/pl/ui/$ctx/co_loc_password_reset.main?$ctx=design=ca2;header=max;lang=de'
+		en: '{{ artemis_external_password_reset_link_en }}'
+		de: '{{ artemis_external_password_reset_link_de }}'
 {% else %}
     use-external: false
 {% endif %}
