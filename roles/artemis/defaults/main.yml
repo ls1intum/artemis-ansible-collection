@@ -79,6 +79,12 @@ artemis_encryption_password: #FIXME
 artemis_account_login_info: "TUM"
 
 shared_monitoring_host_v4:
+
+# If the password of some users is stored externally, you need to provide a name and the reset links. They will be displayed as a hint in the reset form of Artemis.
+# You need to at least provide the provider and the English reset link.
+artemis_external_password_provider: TUMOnline
+artemis_external_password_reset_link_en: "https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/pl/ui/$ctx/co_loc_password_reset.main?$ctx=design=ca2;header=max;lang=en"
+artemis_external_password_reset_link_de: "https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/pl/ui/$ctx/co_loc_password_reset.main?$ctx=design=ca2;header=max;lang=de"
   #ldap:
   #  url: "ldaps://iauth.tum.de:636"
   #  user_dn: "cn=TUINI01-Artemis,ou=bindDNs,ou=iauth,dc=tum,dc=de"
