@@ -77,11 +77,11 @@ artemis:
       user: {{ user_management.jira.user }}
       password: {{ user_management.jira.password }}
       admin-group-name: {{ user_management.jira.admin_group}}
-      password-reset:
-        credential-provider: {{artemis_external_password_provider }}
-        links:
-          en: '{{ artemis_external_password_reset_link_en }}'
-          de: '{{ artemis_external_password_reset_link_de }}'
+    password-reset:
+      credential-provider: {{artemis_external_password_provider }}
+      links:
+        en: '{{ artemis_external_password_reset_link_en }}'
+        de: '{{ artemis_external_password_reset_link_de }}'
 {% else %}
     use-external: false
 {% endif %}
