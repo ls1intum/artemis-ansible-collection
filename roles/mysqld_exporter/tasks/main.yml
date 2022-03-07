@@ -1,7 +1,4 @@
-# https://docs.ansible.com/ansible/2.9/modules/mysql_user_module.html#mysql-user-module
-#
-# CREATE USER 'exporter'@'localhost' IDENTIFIED BY 'XXXXXXXX' WITH MAX_USER_CONNECTIONS 3;
-# GRANT PROCESS, REPLICATION CLIENT, SELECT ON *.* TO 'exporter'@'localhost';
+---
 
 - name: Create database user with password and PROCESS, REPLICATION CLIENT privileges
   mysql_user:
@@ -10,7 +7,7 @@
     priv: '*.*:PROCESS,REPLICATION CLIENT'
     state: present
 
-- name: Install MySQLd exporter
+- name: Install mysqld_exporter
   include_role:
     name: cloudalchemy.mysqld_exporter
   vars:
