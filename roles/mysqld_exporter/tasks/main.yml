@@ -7,10 +7,9 @@
     priv: '*.*:PROCESS,REPLICATION CLIENT'
     state: present
 
-- name: Install mysqld_exporter
+- name: Install mysqld exporter
   include_role:
     name: cloudalchemy.mysqld_exporter
   vars:
     mysqld_exporter_version: "{{ mysql_exporter_version }}"
-    mysqld_exporter_dsn: "{{ mysql_exporter_dsn }}"
-
+    mysqld_exporter_dsn: "{{ mysql_exporter_dsn }}"
