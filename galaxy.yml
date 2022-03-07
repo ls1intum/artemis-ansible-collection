@@ -1,7 +1,7 @@
 namespace: ls1intum
 name: artemis
 
-version: 0.2.2
+version: 0.2.3
 
 readme: README.md
 
@@ -9,6 +9,7 @@ authors:
 - Matthias Linhuber <matthias@linhuber.org> (https://mtze.me)
 - Simon Leiss <hello@sleiss.me> (https://sleiss.me)
 - Linus Michel
+- Vincent Picking 
 - Jan Philip Bernius <janphilip.bernius@tum.de>
 - Prof. Dr. Stephan Krusche <krusche@in.tum.de>
 
