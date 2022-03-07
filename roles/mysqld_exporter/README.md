@@ -9,6 +9,7 @@ Role Variables
 --------------
 
 Default variables can be found in the `defaults/main.yml` file.
+
 Important: Change database user password!
 
 Dependencies
