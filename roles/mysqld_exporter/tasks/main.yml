@@ -1,0 +1,21 @@
+---
+
+- name: Check if database password is set
+  assert:
+    that:
+      - mysql_exporter_password | length > 0
+    fail_msg: "You must set the mysql_exporter_password variable"
+
+- name: Create database user with password and PROCESS, REPLICATION CLIENT privileges
+  mysql_user:
+    name: "{{ mysql_exporter_user }}"
+    password: "{{ mysql_exporter_password }}"
+    priv: '*.*:PROCESS,REPLICATION CLIENT'
+    state: present
+
+- name: Install mysqld exporter
+  include_role:
+    name: cloudalchemy.mysqld_exporter
+  vars:
+    mysqld_exporter_version: "{{ mysql_exporter_version }}"
+    mysqld_exporter_dsn: "{{ mysql_exporter_dsn }}"

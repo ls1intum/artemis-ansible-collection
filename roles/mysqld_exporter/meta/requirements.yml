@@ -1,0 +1,2 @@
+- name: cloudalchemy.mysqld_exporter
+  src: https://github.com/ls1admin/ansible-mysqld_exporter.git
