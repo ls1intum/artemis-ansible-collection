@@ -20,7 +20,7 @@ def gen_key():
 def store_host_var_file(pub, priv, h_type, host_id, filename):
     print(pub, priv, host_id, filename)
 
-    content = """
+    content = f"""
 # IPv6 address (with CIDR!) which can be used to access the node - If left blank, ansible will use host facts to fill the address.
 wireguard_host_ipv6_address:
 
@@ -72,7 +72,7 @@ def main():
 
                 pub, priv = gen_key()
                 store_host_var_file(pub, priv, h_type, i + 1,
-                                    prefix + h_type + str(i) + suffix)
+                                    prefix + h_type + str(i + 1) + suffix)
         else:
             pub, priv = gen_key()
             store_host_var_file(pub, priv, h_type, 1, prefix + h_type + suffix)
