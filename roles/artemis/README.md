@@ -77,7 +77,7 @@ version_control:
     user: 
     password: 
     token: # Access token for $user
-    ci-token: # Jenkins secret push token
+    ci_token: # Jenkins secret push token
     health_api_token: # Access token for health API
     ssh_url: # Full SSH clone URL 
 ```
@@ -87,7 +87,13 @@ version_control:
 Jenkins configuration:
 ```
   jenkins:
-    #TODO
+    url: 
+    user: 
+    password:
+    secret_push_token:
+    vcs_credentials:
+    artemis_auth_token_key:
+    artemis_auth_token_value:
 ```
 ---
 
