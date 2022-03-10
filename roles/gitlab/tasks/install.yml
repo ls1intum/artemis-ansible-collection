@@ -56,7 +56,6 @@
     state: started
     recreate: true
     restart_policy: unless-stopped
-    env:
     volumes:
       - /opt/gitlab/data:/var/opt/gitlab
       - /opt/gitlab/logs:/var/log/gitlab
