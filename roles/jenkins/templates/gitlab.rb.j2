@@ -1,8 +1,0 @@
-{{ ansible_managed | comment }}
-
-gitlab_rails['monitoring_whitelist'] = {{ gitlab_monitoring_whitelist }}
-gitlab_rails['gitlab_shell_ssh_port'] = {{ gitlab_ssh_port }}
-
-external_url "{{ gitlab_external_url }}"
-
-nginx['redirect_http_to_https'] = false
