@@ -6,7 +6,7 @@ upstream artemis {
     {{ proxy_load_balancing_method }};
 {% endif %}
 {% for node in proxy_available_nodes %}
-    server {{ node.hostname }}{% if proxy_node_port is defined %}:{{ proxy_node_port }}{% endif %}{% if node.weight is defined %} weight={{ node.weight }}{% endif %};
+    server {{ node.hostname }}{% if proxy_target_port is defined %}:{{ proxy_target_port }}{% endif %}{% if node.weight is defined %} weight={{ node.weight }}{% endif %};
 {% endfor %}
 }
 

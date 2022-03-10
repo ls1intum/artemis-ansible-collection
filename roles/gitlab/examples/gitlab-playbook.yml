@@ -1,0 +1,11 @@
+---
+  - name: "Playing with Ansible and Git"
+    hosts: gitlab-test.artemis.in.tum.de
+    roles:
+      - role: geerlingguy.docker
+        become: true
+      - role: ../../proxy
+        become: true
+        vars:
+          proxy_target_port: 8761
+      - role: ../gitlab

@@ -11,8 +11,8 @@ proxy_available_nodes:
 
 
 # Service Port on nodes for load balancing; If differing for each node fall back to
-# manual list of proxy_available_nodes and comment out proxy_node_port variable declaration
-proxy_node_port: 8080
+# manual list of proxy_available_nodes and comment out proxy_target_port variable declaration
+proxy_target_port: 8080
 
 # Protocol used to communicate with nodes (either http or https)
 proxy_node_protocol: http
