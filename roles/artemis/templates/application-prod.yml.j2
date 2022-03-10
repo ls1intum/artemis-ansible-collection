@@ -144,6 +144,20 @@ artemis:
     artemis-authentication-token-value: {{ continuous_integration.bamboo.result_plugin_token }}
 {% endif %}
 
+{% if continuous_integration.jenkins is defined %}
+ continuous-integration:
+    url: {{ continuous_integration.jenkins.url }}
+    user: {{ continuous_integration.jenkins.user }}
+    password: {{ continuous_integration.jenkins.password }}
+    empty-commit-necessary: false
+    secret-push-token: {{ continuous_integration.jenkins.secret_push_token }}
+    vcs-credentials: {{ continuous_integration.jenkins.vcs_credentials }}
+    artemis-authentication-token-key: {{ continuous_integration.jenkins.artemis_auth_token_key }}
+    artemis-authentication-token-value: {{ continuous_integration.jenkins.artemis_auth_token_value }}
+{% endif %}
+
+
+
 {% if lti is defined %}
   lti:
     id: artemis_lti
