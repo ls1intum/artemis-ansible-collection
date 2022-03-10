@@ -169,7 +169,7 @@ artemis_eureka_instance_id: "{{ node_id }}"
 ##############################################################################
 
 # Compute Spring Profiles from set variables
-artemis_spring_profile_env: "{% if artemis_is_testserver is true %}dev{% else %}prod{% endif %}"
+artemis_spring_profile_env: "prod"
 artemis_spring_profile_user_management: "{% if user_management.jira is defined and user_management.jira is not none %},jira{% endif %}" # none HAS to be lowercase ¯\_(ツ)_/¯
 artemis_spring_profile_ldap: "{% if ldap.password is defined and ldap.password is not none %},ldap{% endif %}"
 artemis_spring_profile_version_control: "{% if version_control.bitbucket is defined and version_control.bitbucket is not none %},bitbucket{% elif version_control.gitlab is defined and version_control.gitlab is not none %},gitlab{% endif %}"
