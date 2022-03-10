@@ -43,6 +43,15 @@ user_management:
     password:
     admin_group: # Jira group that will have admin access in the artemis web ui
 ```
+
+To allow internal user registration: 
+```
+user_management: 
+  registration: 
+    allowed_email_pattern:  ([a-zA-Z0-9_\-\.\+]+)@((tum\.de)|(in\.tum\.de)|(mytum\.de))
+    allowed_email_pattern_readable: '@tum.de, @in.tum.de, @mytum.de'
+    cleanup_time_minutes: 2
+```
 ---
 
 Bitbucket configuration:

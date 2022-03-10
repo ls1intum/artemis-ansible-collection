@@ -96,6 +96,13 @@ artemis:
     internal-admin:
       username: {{ artemis_internal_admin_user }}
       password: {{ artemis_internal_admin_password }}
+{% if user_management.registration is defined %}
+    registration:
+      enabled: true
+      allowed-email-pattern: {{ user_management.registration.allowed_email_pattern }}
+      allowed-email-pattern-readable: {{ user_management.registration.allowed_email_pattern_readable }}
+      cleanup-time-minutes: {{ user_management.registration.cleanup_time_minutes }}
+{% endif %}
     login:
       account-name: {{ artemis_account_login_info }}
 
