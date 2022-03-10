@@ -71,9 +71,15 @@ continuous_integration:
 Gitlab configuration:
 ```
 version_control:
-  gitlab:
-    #TODO
 
+  gitlab:
+    url: 
+    user: 
+    password: 
+    token: # Access token for $user
+    ci-token: # Jenkins secret push token
+    health_api_token: # Access token for health API
+    ssh_url: # Full SSH clone URL 
 ```
 ---
 
