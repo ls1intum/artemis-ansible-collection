@@ -45,8 +45,6 @@
       - "/usr/bin/docker:/usr/bin/docker:ro"
     ports:
       - "{{ jenkins_internal_port }}:8080"
-    env:
-      JENKINS_OPTS: "--argumentsRealm.roles.user={{ jenkins_admin_name }} --argumentsRealm.passwd.admin={{ jenkins_admin_password }} --argumentsRealm.roles.admin=admin"
 
 - name: Wait for Jenkins to come up
   uri:

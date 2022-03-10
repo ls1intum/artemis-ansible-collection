@@ -1,5 +1,5 @@
 ---
-  - name: "Playing with Ansible and Git"
+  - name: "Setup Gitlab"
     hosts: gitlab-test.artemis.in.tum.de
     roles:
       - role: geerlingguy.docker

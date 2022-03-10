@@ -4,6 +4,3 @@ jenkins_internal_port: 8082
 jenkins_data_dir: "/opt/jenkins/data"
 
 jenkins_docker_tag: "lts"
-
-jenkins_admin_name: "artemis"
-jenkins_admin_password: #FIXME
