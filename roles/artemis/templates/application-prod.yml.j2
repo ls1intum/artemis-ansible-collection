@@ -21,14 +21,14 @@ spring:
         charSet: {{ artemis_database_encoding }}
         characterEncoding: {{ artemis_database_encoding }}
         useUnicode: true
-{% if broker is defined %}
+{% if is_multinode_install and broker is defined %}
   websocket:
     broker:
       username: {{ broker.username }}
       password: {{ broker.password }}
       addresses: "{{ broker.url }}:61613"
 {% endif %}
-{% if hazelcast_address is defined %}
+{% if is_multinode_install and hazelcast_address is defined %}
   hazelcast:
     interface: "{{ hazelcast_address }}"
 {% endif %}
@@ -192,7 +192,7 @@ info:
   sentry:
     dsn: https://ceeb3e72ec094684aefbb132f87231f2@sentry.ase.in.tum.de/2
 
-{% if artemis_eureka_urls is defined and hazelcast_address is defined %}
+{% if is_multinode_install and artemis_eureka_urls is defined and hazelcast_address is defined %}
 # Eureka configuration
 eureka:
   client:
