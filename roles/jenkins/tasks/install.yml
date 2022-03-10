@@ -1,0 +1,69 @@
+- name: Check if python3-pip is installed
+  command: dpkg-query -l python3-pip
+  register: pip_check
+  ignore_errors: true 
+
+- name: Install python3-pip
+  become: true
+  apt:
+    name: python3-pip
+  when: pip_check.stdout.find('no packages found') == -1
+
+- name: Install python docker module
+  become: true
+  pip:
+    name: docker
+
+
+- name: Create data directory
+  become: true
+  file:
+    path: "{{ jenkins_data_dir }}"
+    state: directory
+
+- name: Pull image from docker hub
+  become: true
+  community.docker.docker_container:
+    name: jenkins
+    state: present
+    image: "jenkins/jenkins:{{ jenkins_docker_tag }}"
+
+
+- name: Start jenkins container
+  become: true
+  community.docker.docker_container:
+    name: jenkins
+    image: "jenkins/jenkins:{{ jenkins_docker_tag }}"
+    hostname: jenkins-test.artemis.in.tum.de
+    state: started
+    recreate: true
+    restart_policy: unless-stopped
+    user: root
+    volumes:
+      - "{{ jenkins_data_dir }}:/var/jenkins_home"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "/usr/bin/docker:/usr/bin/docker:ro"
+    ports:
+      - "{{ jenkins_internal_port }}:8080"
+    env:
+      JENKINS_OPTS: "--argumentsRealm.roles.user={{ jenkins_admin_name }} --argumentsRealm.passwd.admin={{ jenkins_admin_password }} --argumentsRealm.roles.admin=admin"
+
+- name: Wait for Jenkins to come up
+  uri:
+    url: "http://127.0.0.1:{{ jenkins_internal_port }}"
+    status_code: 403
+  register: result
+  until: result.status == 403
+  retries: 60
+  delay: 5
+
+- name: "Extract Jenkins initial password"
+  become: true
+  community.docker.docker_container_exec:
+    container: jenkins
+    command: "cat /var/jenkins_home/secrets/initialAdminPassword"
+  register: initialAdminPassword
+
+- name: Print initial Jenkins password
+  debug:
+    msg: "Initial password: {{ initialAdminPassword }}"

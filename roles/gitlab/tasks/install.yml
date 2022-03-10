@@ -17,19 +17,19 @@
 - name: Create config directory
   become: true
   file:
-    path: /opt/gitlab/config
+    path: "{{ gitlab_config_dir }}"
     state: directory
 
 - name: Create data directory
   become: true
   file:
-    path: /opt/gitlab/data
+    path: "{{ gitlab_data_dir }}"
     state: directory
 
 - name: Create logs directory
   become: true
   file:
-    path: /opt/gitlab/logs
+    path: "{{ gitlab_logs_dir }}"
     state: directory
 
 - name: Copy gitlab config
@@ -45,35 +45,31 @@
   community.docker.docker_container:
     name: gitlab-ce
     state: present
-    image: "gitlab/gitlab-ce:latest"
+    image: "gitlab/gitlab-ce:{{ gitlab_docker_tag }}"
 
 
 - name: Start gitlab container
   become: true
   community.docker.docker_container:
     name: gitlab
-    image: "gitlab/gitlab-ce:latest"
+    image: "gitlab/gitlab-ce:{{ gitlab_docker_tag }}"
+    hostname: gitlab-test.artemis.in.tum.de
     state: started
     recreate: true
     restart_policy: unless-stopped
     volumes:
-      - /opt/gitlab/data:/var/opt/gitlab
-      - /opt/gitlab/logs:/var/log/gitlab
-      - /opt/gitlab/config:/etc/gitlab
+      - "{{ gitlab_data_dir }}:/var/opt/gitlab"
+      - "{{ gitlab_logs_dir }}:/var/log/gitlab"
+      - "{{ gitlab_config_dir }}:/etc/gitlab"
     ports:
-      - "8081:80"
-      - "8443:22"
+      - "{{ gitlab_internal_port }}:80"
+      - "{{ gitlab_ssh_port }}:22"
     env:
-        GITLAB_ROOT_PASSWORD: "jFDguYU6$qE#YvkR"
-
-#- name: Reconfigure Gitlab
-#  become: true
-#  shell: "docker exec gitlab gitlab-ctl reconfigure"
-#  changed_when: copyConf.changed
+        GITLAB_ROOT_PASSWORD: "{{ gitlab_root_password }}"
 
 - name: Wait for Gitlab to come up
   uri:
-    url: "http://127.0.0.1:8081"
+    url: "http://127.0.0.1:{{ gitlab_internal_port }}"
     status_code: 200
   register: result
   until: result.status == 200
