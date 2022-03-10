@@ -110,7 +110,7 @@ artemis_external_password_reset_link_de: "https://campus.tum.de/tumonline/ee/ui/
   #    user: 
   #    password: 
   #    token: 
-  #    ci-token: 
+  #    ci_token: 
   #    health_api_token: 
   #    ssh_url:
   #
@@ -122,7 +122,13 @@ artemis_external_password_reset_link_de: "https://campus.tum.de/tumonline/ee/ui/
   #    result_plugin_token:
   #
   #  jenkins:
-  #    #TODO
+  #    url: 
+  #    user: 
+  #    password:
+  #    secret_push_token:
+  #    vcs_credentials:
+  #    artemis_auth_token_key:
+  #    artemis_auth_token_value:
   #
   #athene:
   #  url:

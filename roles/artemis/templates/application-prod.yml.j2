@@ -96,6 +96,13 @@ artemis:
     internal-admin:
       username: {{ artemis_internal_admin_user }}
       password: {{ artemis_internal_admin_password }}
+{% if user_management.registration is defined %}
+    registration:
+      enabled: true
+      allowed-email-pattern: {{ user_management.registration.allowed_email_pattern }}
+      allowed-email-pattern-readable: {{ user_management.registration.allowed_email_pattern_readable }}
+      cleanup-time-minutes: {{ user_management.registration.cleanup_time_minutes }}
+{% endif %}
     login:
       account-name: {{ artemis_account_login_info }}
 
@@ -120,7 +127,7 @@ artemis:
     user: {{ version_control.gitlab.user }}
     password: {{ version_control.gitlab.password }}
     token: {{ version_control.gitlab.token }}
-    ci-token: {{ version_control.gitlab.ci-token }}
+    ci-token: {{ version_control.gitlab.ci_token }}
     health-api-token: {{ version_control.gitlab.health_api_token }}
     ssh-template-clone-url: {{ version_control.gitlab.ssh_url }}
     ssh-keys-url-path: /-/profile/keys
@@ -143,6 +150,20 @@ artemis:
     empty-commit-necessary: true
     artemis-authentication-token-value: {{ continuous_integration.bamboo.result_plugin_token }}
 {% endif %}
+
+{% if continuous_integration.jenkins is defined %}
+ continuous-integration:
+    url: {{ continuous_integration.jenkins.url }}
+    user: {{ continuous_integration.jenkins.user }}
+    password: {{ continuous_integration.jenkins.password }}
+    empty-commit-necessary: false
+    secret-push-token: {{ continuous_integration.jenkins.secret_push_token }}
+    vcs-credentials: {{ continuous_integration.jenkins.vcs_credentials }}
+    artemis-authentication-token-key: {{ continuous_integration.jenkins.artemis_auth_token_key }}
+    artemis-authentication-token-value: {{ continuous_integration.jenkins.artemis_auth_token_value }}
+{% endif %}
+
+
 
 {% if lti is defined %}
   lti:
