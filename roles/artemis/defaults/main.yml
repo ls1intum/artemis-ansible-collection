@@ -106,7 +106,13 @@ artemis_external_password_reset_link_de: "https://campus.tum.de/tumonline/ee/ui/
   #    token:
   #
   #  gitlab:
-  #    #TODO
+  #    url: 
+  #    user: 
+  #    password: 
+  #    token: 
+  #    ci-token: 
+  #    health_api_token: 
+  #    ssh_url:
   #
   #continuous_integration:
   #  bamboo:
