@@ -38,7 +38,7 @@ spring:
     monitoringIp: "{{ shared_monitoring_host_v4 }}"
 {% endif %}
 
-{% if mail is defined and mail is not null %}
+{% if mail is defined and mail is not none %}
   mail:
     host: {{ mail.hostname }}
     port: {{ mail.port }}
