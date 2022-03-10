@@ -99,8 +99,8 @@ artemis:
 {% if user_management.registration is defined %}
     registration:
       enabled: true
-      allowed-email-pattern: {{ user_management.registration.allowed_email_pattern }}
-      allowed-email-pattern-readable: {{ user_management.registration.allowed_email_pattern_readable }}
+      allowed-email-pattern: "{{ user_management.registration.allowed_email_pattern }}"
+      allowed-email-pattern-readable: "{{ user_management.registration.allowed_email_pattern_readable }}"
       cleanup-time-minutes: {{ user_management.registration.cleanup_time_minutes }}
 {% endif %}
     login:
