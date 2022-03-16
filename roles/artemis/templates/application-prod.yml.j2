@@ -242,7 +242,7 @@ eureka:
       defaultZone: {{ artemis_eureka_urls }}
   instance:
     prefer-ip-address: true
-    ip-address: "[{{ hazelcast_address }}]"
+    ip-address: "{{ hazelcast_address }}"
     appname: Artemis
     instanceId: Artemis:{{ artemis_eureka_instance_id }}
 {% endif %}
