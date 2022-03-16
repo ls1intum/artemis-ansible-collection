@@ -100,7 +100,7 @@ artemis:
     registration:
       enabled: true
       allowed-email-pattern: {{ user_management.registration.allowed_email_pattern }}
-      allowed-email-pattern-readable: {{ user_management.registration.allowed_email_pattern_readable }}
+      allowed-email-pattern-readable: '{{ user_management.registration.allowed_email_pattern_readable }}'
       cleanup-time-minutes: {{ user_management.registration.cleanup_time_minutes }}
 {% endif %}
     login:
@@ -152,7 +152,7 @@ artemis:
 {% endif %}
 
 {% if continuous_integration.jenkins is defined %}
- continuous-integration:
+  continuous-integration:
     url: {{ continuous_integration.jenkins.url }}
     user: {{ continuous_integration.jenkins.user }}
     password: {{ continuous_integration.jenkins.password }}
