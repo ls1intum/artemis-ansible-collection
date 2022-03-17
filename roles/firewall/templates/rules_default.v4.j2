@@ -16,7 +16,8 @@
 {% endif %}
 {% if monitoring_host_ipv4 is not none %}
 -A INPUT -s {{ monitoring_host_ipv4 }} -p udp --dport 161 -m comment --comment "Allow Monitoring" -j ACCEPT
--A INPUT -s {{ monitoring_host_ipv4 }} -p tcp --dport 9100 -m comment --comment "Allow Monitoring" -j ACCEPT
+-A INPUT -s {{ monitoring_host_ipv4 }} -p tcp --dport 9100 -m comment --comment "Allow Monitoring NodeExporter" -j ACCEPT
+-A INPUT -s {{ monitoring_host_ipv4 }} -p tcp --dport 9104 -m comment --comment "Allow Monitoring MySQL" -j ACCEPT
 {% endif %}
 COMMIT
 # Completed on Thu Jun 20 10:00:00 2020
