@@ -1,0 +1,12 @@
+---
+  - name: "Setup Jenkins"
+    hosts: jenkins-test.artemis.in.tum.de
+    roles:
+      - role: geerlingguy.docker
+        become: true
+      - role: ../../proxy
+        become: true
+        vars:
+          proxy_target_port: 8082
+          proxy_site_template: reverse_proxy
+      - role: ../../jenkins

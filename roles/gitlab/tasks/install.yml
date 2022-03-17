@@ -1,0 +1,76 @@
+- name: Check if python3-pip is installed
+  command: dpkg-query -l python3-pip
+  register: pip_check
+  ignore_errors: true 
+
+- name: Install python3-pip
+  become: true
+  apt:
+    name: python3-pip
+  when: pip_check.stdout.find('no packages found') == -1
+
+- name: Install python docker module
+  become: true
+  pip:
+    name: docker
+
+- name: Create config directory
+  become: true
+  file:
+    path: "{{ gitlab_config_dir }}"
+    state: directory
+
+- name: Create data directory
+  become: true
+  file:
+    path: "{{ gitlab_data_dir }}"
+    state: directory
+
+- name: Create logs directory
+  become: true
+  file:
+    path: "{{ gitlab_logs_dir }}"
+    state: directory
+
+- name: Copy gitlab config
+  become: true
+  template:
+    src: gitlab.rb.j2
+    dest: /opt/gitlab/config/gitlab.rb
+    mode: 0644
+
+- name: Pull image from docker hub
+  become: true
+  community.docker.docker_container:
+    name: gitlab-ce
+    state: present
+    image: "gitlab/gitlab-ce:{{ gitlab_docker_tag }}"
+
+
+- name: Start gitlab container
+  become: true
+  community.docker.docker_container:
+    name: gitlab
+    image: "gitlab/gitlab-ce:{{ gitlab_docker_tag }}"
+    hostname: gitlab-test.artemis.in.tum.de
+    state: started
+    recreate: true
+    restart_policy: unless-stopped
+    volumes:
+      - "{{ gitlab_data_dir }}:/var/opt/gitlab"
+      - "{{ gitlab_logs_dir }}:/var/log/gitlab"
+      - "{{ gitlab_config_dir }}:/etc/gitlab"
+    ports:
+      - "{{ gitlab_internal_port }}:80"
+      - "{{ gitlab_ssh_port }}:22"
+    env:
+        GITLAB_ROOT_PASSWORD: "{{ gitlab_root_password }}"
+
+- name: Wait for Gitlab to come up
+  uri:
+    url: "http://127.0.0.1:{{ gitlab_internal_port }}"
+    status_code: 302
+  register: result
+  until: result.status == 302
+  retries: 60
+  delay: 5

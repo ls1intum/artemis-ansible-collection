@@ -43,6 +43,15 @@ user_management:
     password:
     admin_group: # Jira group that will have admin access in the artemis web ui
 ```
+
+To allow internal user registration: 
+```
+user_management: 
+  registration: 
+    allowed_email_pattern:  ([a-zA-Z0-9_\-\.\+]+)@((tum\.de)|(in\.tum\.de)|(mytum\.de))
+    allowed_email_pattern_readable: '@tum.de, @in.tum.de, @mytum.de'
+    cleanup_time_minutes: 2
+```
 ---
 
 Bitbucket configuration:
@@ -71,9 +80,15 @@ continuous_integration:
 Gitlab configuration:
 ```
 version_control:
-  gitlab:
-    #TODO
 
+  gitlab:
+    url: 
+    user: 
+    password: 
+    token: # Access token for $user
+    ci_token: # Jenkins secret push token
+    health_api_token: # Access token for health API
+    ssh_url: # Full SSH clone URL 
 ```
 ---
 
@@ -81,7 +96,13 @@ version_control:
 Jenkins configuration:
 ```
   jenkins:
-    #TODO
+    url: 
+    user: 
+    password:
+    secret_push_token:
+    vcs_credentials:
+    artemis_auth_token_key:
+    artemis_auth_token_value:
 ```
 ---
 

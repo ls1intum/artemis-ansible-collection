@@ -1,0 +1,14 @@
+# Gitlab config
+gitlab_internal_port: 8081
+gitlab_ssh_port: 8443
+gitlab_external_url: # FIXME
+
+gitlab_config_dir: "/opt/gitlab/config"
+gitlab_data_dir: "/opt/gitlab/data"
+gitlab_logs_dir: "/opt/gitlab/logs"
+
+gitlab_docker_tag: "latest"
+
+gitlab_root_password: #FIXME
+
+gitlab_monitoring_whitelist: "['0.0.0.0/32']"

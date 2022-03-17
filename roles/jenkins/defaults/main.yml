@@ -1,0 +1,6 @@
+# Jenins config
+jenkins_internal_port: 8082
+
+jenkins_data_dir: "/opt/jenkins/data"
+
+jenkins_docker_tag: "lts"
