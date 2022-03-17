@@ -14,6 +14,7 @@
     group: "{{ artemis_user_group }}"
 
 - name: Ensure deployment user {{ artemis_deployment_user_name }} exists
+  become: yes
   user:
     name: "{{ artemis_deployment_user_name }}"
     comment: "{{ artemis_deployment_user_comment }}"
@@ -25,6 +26,7 @@
   when: (artemis_create_deployment_user | bool)
 
 - name: Ensure (limited) sudo privileges for user {{ artemis_deployment_user_name }}
+  become: yes
   template:
     src: artemis_deployment_sudoers.j2
     dest: /etc/sudoers.d/artemis_deployment
@@ -33,6 +35,7 @@
   when: (artemis_create_deployment_user | bool)
 
 - name: Authorize ssh-key for deployment user
+  become: yes
   authorized_key:
     user: "{{ artemis_deployment_user_name }}"
     state: present
