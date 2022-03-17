@@ -9,4 +9,4 @@
         vars:
           proxy_target_port: 8082
           proxy_site_template: reverse_proxy
-      - role: ../jenkins
+      - role: ../../jenkins

@@ -38,7 +38,6 @@
     src: gitlab.rb.j2
     dest: /opt/gitlab/config/gitlab.rb
     mode: 0644
-  register: copyConf
 
 - name: Pull image from docker hub
   become: true

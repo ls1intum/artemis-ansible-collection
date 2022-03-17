@@ -60,8 +60,8 @@
   community.docker.docker_container_exec:
     container: jenkins
     command: "cat /var/jenkins_home/secrets/initialAdminPassword"
-  register: initialAdminPassword
+  register: initial_admin_password
 
 - name: Print initial Jenkins password
   debug:
-    msg: "Initial password: {{ initialAdminPassword }}"
+    msg: "Initial password: {{ initial_admin_password }}"
