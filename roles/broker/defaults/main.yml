@@ -28,7 +28,7 @@ activemq_ip_address: "{{ wireguard_interface_address }}"
 registry_password: "{{ artemis_jhipster_registry_password }}"
 registry_jwt: "{{ artemis_jhipster_jwt }}"
 
-registry_version: 6.7.1
+registry_version: 7.3.0
 registry_working_directory: /opt/registry
 
 registry_application_prod_registry_password: "{{ registry_password }}"
