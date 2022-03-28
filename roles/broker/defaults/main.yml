@@ -37,6 +37,8 @@ registry_application_prod_spring_password: "{{ registry_password }}"
 # Configure the registry ip address - by default it uses the wireguard network
 registry_ip_address: "{{ wireguard_interface_address }}"
 
+registry_external_host: "" # External host under which the registry UI should be reachable (excluding https://)
+
 registry_application_prod_jwt: "{{ registry_jwt }}"
 registry_application_jwt:  "{{ registry_jwt }}"
 registry_bootstrap_prod_jwt:  "{{ registry_jwt }}"
