@@ -75,6 +75,7 @@ artemis_database_encoding: utf8mb4
 artemis_database_collation: utf8mb4_unicode_ci
 
 artemis_encryption_password: #FIXME
+artemis_bcrypt_salt_rounds: 11
 
 artemis_account_login_info: "TUM"
 
