@@ -1,6 +1,7 @@
 exclude_paths:
 - .cache/  
 - .github/
+- ../../../.cache/ #Strange github action behaviour 
 
 
 skip_list:
