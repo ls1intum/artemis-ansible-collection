@@ -69,6 +69,7 @@ artemis:
   file-upload-path: {{ artemis_repo_basepath }}/uploads
   submission-export-path: exports
   encryption-password: {{ artemis_encryption_password }}
+  bcrypt-salt-rounds: {{ artemis_bcrypt_salt_rounds }}
   user-management:
 {% if user_management.jira is defined and user_management.jira is not none %}
     use-external: true
