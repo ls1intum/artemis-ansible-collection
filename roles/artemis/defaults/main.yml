@@ -11,6 +11,7 @@ upgrade_artemis: false
 
 check_variables: true
 
+only_update_artemis_config: false
 
 ##############################################################################
 # Artemis Linux Users
