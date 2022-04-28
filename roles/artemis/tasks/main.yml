@@ -1,21 +1,33 @@
 ---
 # Check if variables are set correctly
 - include_tasks: variable_checks.yml
-  when: check_variables
+  when: 
+    - (check_variables | bool)
+    - not (only_update_artemis_config | bool)
 
 # Create Artemis and (if desired) deployment users.
 - include_tasks: users.yml
+  when: 
+    - not (only_update_artemis_config | bool)
 
 # Install JDK
 - include_tasks: jdk.yml
+  when: 
+    - not (only_update_artemis_config | bool)
 
 # Configure the Artemis systemd service
 - include_tasks: artemis_configuration.yml
 
 # Install Artemis to the host
 - include_tasks: deploy_artemis.yml
-  when: install_artemis and not upgrade_artemis
+  when: 
+    - (install_artemis | bool)
+    - not (upgrade_artemis | bool)
+    - not (only_update_artemis_config | bool)
 
 # Upgrade Artemis to specified version
 - include_tasks: upgrade_artemis.yml
-  when: not (install_artemis | bool) and (upgrade_artemis | bool)
+  when: 
+    - not (install_artemis | bool) 
+    - (upgrade_artemis | bool)
+    - not (only_update_artemis_config | bool)
