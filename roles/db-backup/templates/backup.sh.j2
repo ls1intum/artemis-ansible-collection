@@ -1,0 +1,31 @@
+#!/bin/bash
+
+database=false
+
+function usage {
+    cat << HELP
+Usage:
+$(basename $0) [options]
+
+Options:
+-d                          Perform Database Backup.
+-p                          Prune backups older than 7 days
+HELP
+}
+
+while getopts ":dph" opt; do case ${opt} in
+    h ) usage; exit 0;;
+    d ) database=true;;
+    p ) prune=true;;
+    \? ) printf "Invalid Option: -$OPTARG\n\n" 1>&2; logs_help; exit 1;;
+esac; done
+if [ $OPTIND -eq 1 ]; then printf "Invalid Option: $(basename $0) requires options.\nRun $(basename $0) -h for help.\n" 1>&2; exit 1; fi
+shift $((OPTIND -1))
+
+if [ $prune = true ]; then # Prune old backups
+    find /srv/artemis-db/ -mtime +7 -type f -delete
+fi
+
+if [ $database = true ]; then # Database Backup
+    mysqldump --single-transaction --quick --lock-tables=false --databases {{ artemis_database_dbname }} | gzip --best > {{ artemis_database_backup_dir }}/artemis_database_dump_`date +%Y-%m-%d"_"%H_%M_%S`.sql.gz
+fi
