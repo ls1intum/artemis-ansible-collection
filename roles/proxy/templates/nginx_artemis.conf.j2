@@ -11,7 +11,7 @@ upstream artemis {
 }
 
 # rate limit for the login REST call, at most 2 requests per second
-limit_req_zone $binary_remote_addr zone=loginlimit:10m rate=5r/s;
+limit_req_zone $binary_remote_addr zone=loginlimit:10m rate=30r/m;
 
 server {
     listen 80 default_server;
@@ -86,7 +86,7 @@ server {
 
     location /api/authenticate {
         proxy_pass http://artemis/api/authenticate;
-        limit_req zone=loginlimit burst=5 delay=0 rate=1r/s;
+        limit_req zone=loginlimit burst=3 delay=2;
     }
 
     location /favicon.ico {
