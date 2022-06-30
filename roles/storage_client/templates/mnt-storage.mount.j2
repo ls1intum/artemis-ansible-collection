@@ -2,7 +2,7 @@
 
 [Unit]
 Description=Artemis Storage Mount
-After=network.target
+After=wg-quick@wg0.service
 
 [Mount]
 What=[{{ storage_server_address }}]:{{ storage_export }}
