@@ -10,10 +10,8 @@ upstream artemis {
 {% endfor %}
 }
 
-http {
-	# Remove nginx version from HTTP response
-	server_tokens off;
-}
+# Remove nginx version from HTTP response
+server_tokens off;
 
 # Rate limit for the login REST call, at most one requests per two seconds
 limit_req_zone $binary_remote_addr zone=loginlimit:10m rate=30r/m;
