@@ -16,6 +16,7 @@
 {% if monitoring_host_ipv4 is not none %}
 -A INPUT -s {{ monitoring_host_ipv4 }} -p udp --dport 161 -m comment --comment "Allow Monitoring" -j ACCEPT
 -A INPUT -s {{ monitoring_host_ipv4 }} -p tcp --dport 9100 -m comment --comment "Allow Monitoring" -j ACCEPT
+-A INPUT -s {{ monitoring_host_ipv4 }} -p tcp --dport 9104 -m comment --comment "Allow Monitoring MySQL" -j ACCEPT
 {% endif %}
 -A INPUT -p tcp -m conntrack --ctstate NEW -m tcp --dport 80 -m comment --comment "Allow HTTP" -j ACCEPT
 -A INPUT -p tcp -m conntrack --ctstate NEW -m tcp --dport 443 -m comment --comment "Allow HTTPS" -j ACCEPT
