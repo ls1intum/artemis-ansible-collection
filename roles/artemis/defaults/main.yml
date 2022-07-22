@@ -75,6 +75,12 @@ artemis_database_password: #FIXME
 artemis_database_encoding: utf8mb4
 artemis_database_collation: utf8mb4_unicode_ci
 
+# mysql or postgresql 
+artemis_database_protocol: mysql
+#TODO: Auto generate this port depending on `artemis_database_protocol`
+artemis_database_port: 3306
+artemis_database_connection_string_options: "?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC"
+
 artemis_encryption_password: #FIXME
 artemis_bcrypt_salt_rounds: 11
 

@@ -3,7 +3,7 @@
 spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:mysql://{{ artemis_database_host }}:3306/{{ artemis_database_dbname }}?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
+    url: jdbc:{{ artemis_database_protocol }}://{{ artemis_database_host }}:{{ artemis_database_port }}/{{ artemis_database_dbname }}{{ artemis_database_connection_string_options }}
     username: {{ artemis_database_username }}
     password: {{ artemis_database_password }}
     hikari:
@@ -16,6 +16,12 @@ spring:
         prepStmtCacheSqlLimit: 2048
         useServerPrepStmts: true
   jpa:
+    database: {{ artemis_database_protocol | upper }}
+    {% if artemis_database_protocol == "mysql" %}
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    {% elif artemis_database_protocol == "postgresql" %}
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    {% endif %}
     hibernate:
       connection:
         charSet: {{ artemis_database_encoding }}
