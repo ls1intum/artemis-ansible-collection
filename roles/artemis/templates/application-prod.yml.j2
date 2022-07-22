@@ -17,11 +17,11 @@ spring:
         useServerPrepStmts: true
   jpa:
     database: {{ artemis_database_protocol | upper }}
-    {% if artemis_database_protocol == "mysql" %}
+    {% if artemis_database_protocol == "mysql" -%}
     database-platform: org.hibernate.dialect.MySQL8Dialect
-    {% elif artemis_database_protocol == "postgresql" %}
+    {% elif artemis_database_protocol == "postgresql" -%}
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-    {% endif %}
+    {% endif -%}
     hibernate:
       connection:
         charSet: {{ artemis_database_encoding }}
