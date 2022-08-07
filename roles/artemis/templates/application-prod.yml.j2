@@ -250,6 +250,21 @@ eureka:
     instanceId: Artemis:{{ artemis_eureka_instance_id }}
 {% endif %}
 
+{% if saml2 is defined %}
+saml2:
+  username-pattern: "{{ saml2.username_pattern }}"
+  first-name-pattern: "{{ saml2.first_name_pattern }}"
+  last-name-pattern: "{{ saml2.last_name_pattern }}"
+  email-pattern: "{{ saml2.email_pattern }}"
+  registration-number-pattern: "{{ saml2.registration_number_pattern }}"
+  identity-providers:
+        - metadata: "{{ saml2.idp_metadata_url }}"
+          registration-id: "{{ saml2.idp_registration_id }}"
+          entity-id: "{{ saml2.idp_entity_id }}"
+          cert-file: "{{ saml2.idp_cert_file_path }}"
+          key-file: "{{ saml2.idp_key_file_path }}"
+{% endif %}
+
 logging:
   file:
     name: '{{ artemis_working_directory }}/artemis.log'
