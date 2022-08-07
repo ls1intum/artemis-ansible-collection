@@ -130,7 +130,9 @@ artemis:
     token: {{ version_control.gitlab.token }}
     ci-token: {{ version_control.gitlab.ci_token }}
     health-api-token: {{ version_control.gitlab.health_api_token }}
+{% if version_control.gitlab.ssh_url is defined and version_control.gitlab.ssh_url is not none %}
     ssh-template-clone-url: {{ version_control.gitlab.ssh_url }}
+{% endif %}
     ssh-keys-url-path: /-/profile/keys
     ssh-private-key-folder-path:  {{ artemis_ssh_key_path }}
 {% if artemis_ssh_key_password is defined and artemis_ssh_key_password is not none %}
