@@ -263,6 +263,9 @@ saml2:
           entity-id: "{{ saml2.idp_entity_id }}"
           cert-file: "{{ saml2.idp_cert_file_path }}"
           key-file: "{{ saml2.idp_key_file_path }}"
+
+info.saml2.button-label: "{{ saml2.button_label }}"
+info.saml2.enable-password: {{ saml2.enable_password }}
 {% endif %}
 
 logging:
