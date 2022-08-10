@@ -2,6 +2,8 @@
 is_testserver: true
 artemis_server_url: "https://artemistest1.ase.in.tum.de"
 
+node_id: 1
+
 artemis_build_version: 5.3.2
 
 artemis_database_dbname: "Artemis"
@@ -15,7 +17,7 @@ artemis_internal_admin_password: #FIXME
 
 artemis_ssh_key_path: "/opt/artemis/sshkeys"
 artemis_ssh_key_name: "id_rsa"
-artemis_ssh_key_value: | #FIXME
+artemis_ssh_priv_key_value: | #FIXME
   -----BEGIN OPENSSH PRIVATE KEY-----
   ¯\_(ツ)_/¯
   -----END OPENSSH PRIVATE KEY-----
