@@ -61,6 +61,9 @@ server {
         proxy_read_timeout 900s;
         proxy_max_temp_file_size 0;
         proxy_buffering off;
+        proxy_buffer_size 16k;
+        proxy_buffers 8 16k;
+        proxy_busy_buffers_size 16k;
         fastcgi_send_timeout 900s;
         fastcgi_read_timeout 900s;
         client_max_body_size 128M;
