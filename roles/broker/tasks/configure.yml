@@ -6,7 +6,7 @@
 
 - name: Create broker in {{ activemq_working_directory }} (NOT IDEMPOTENT)
   become: true
-  command: ./artemis create --user {{ activemq_username }} --password {{ activemq_password }} --require-login --force {{ activemq_working_directory }} --java-options "-Xmx{{ (activemq_system_ram_proportion * ansible_memory_mb.real.total) | int }}m"
+  command: ./artemis create --user {{ activemq_username }} --password {{ activemq_password }} --require-login --force {{ activemq_working_directory }} --java-options "-Xms{{ (activemq_system_ram_proportion * ansible_memory_mb.real.total) | int }}m -Xmx{{ (activemq_system_ram_proportion * ansible_memory_mb.real.total) | int }}m"
   args:
     chdir: "{{ activemq_install_directory }}/apache-artemis-{{ activemq_version }}/bin"
   notify: restart broker
