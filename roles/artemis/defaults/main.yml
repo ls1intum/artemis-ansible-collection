@@ -68,7 +68,11 @@ artemis_war_url: "https://github.com/ls1intum/Artemis/releases/download/{{ artem
 
 artemis_system_ram_proportion: 0.8  # How much % of the system RAM to allocate to the Artemis service (Default here: 80%)
 
+artemis_database_schema: mysql
+artemis_database_type: MYSQL
+artemis_database_platform: org.hibernate.dialect.MySQL8Dialect
 artemis_database_host: localhost
+artemis_database_port: 3306
 artemis_database_dbname: artemis
 artemis_database_username: artemis
 artemis_database_password: #FIXME
