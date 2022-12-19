@@ -68,12 +68,15 @@ artemis_war_url: "https://github.com/ls1intum/Artemis/releases/download/{{ artem
 
 artemis_system_ram_proportion: 0.8  # How much % of the system RAM to allocate to the Artemis service (Default here: 80%)
 
+artemis_database_type: mysql # The type of the database used. Used in the JDBC URL and as uppercase for the JPA database type (Default of Artemis is currently mysql/MYSQL)
+artemis_database_platform: org.hibernate.dialect.MySQL8Dialect # The Hibernate dialect class to use (Default for Artemis is currently org.hibernate.dialect.MySQL8Dialect)
 artemis_database_host: localhost
+artemis_database_port: 3306 # The port that the database is reachable on (MySQL default: 3306)
 artemis_database_dbname: artemis
 artemis_database_username: artemis
 artemis_database_password: #FIXME
-artemis_database_encoding: utf8mb4
-artemis_database_collation: utf8mb4_unicode_ci
+artemis_database_encoding: utf8mb4 # MySQL specific default encoding
+artemis_database_collation: utf8mb4_unicode_ci # MySQL specific default collation
 
 artemis_encryption_password: #FIXME
 artemis_bcrypt_salt_rounds: 11
