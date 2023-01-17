@@ -146,6 +146,7 @@ artemis:
 {% if version_control.localvcs is defined %}
   version-control:
     url: {{ version_control.localvcs.url }}
+    user: {{ version_control.localvcs.user }}
     local-vcs-repo-path: {{ version_control.localvcs.local_repo_path }}
 {% endif %}
 
