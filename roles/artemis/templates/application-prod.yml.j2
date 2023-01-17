@@ -143,6 +143,18 @@ artemis:
 {% endif %}
 
 
+{% if version_control.localvcs is defined %}
+  version-control:
+    url: {{ version_control.gitlab.url }}
+    local-vcs-repo-path: {{ version_control.localvcs.local_repo_path }}
+{% if artemis_ssh_key_password is defined and artemis_ssh_key_password is not none %}
+    ssh-private-key-password: {{ artemis_ssh_key_password }}
+{% endif %}
+    default-branch: main
+    versionControlAccessToken: true
+{% endif %}
+
+
 {% if continuous_integration.bamboo is defined %}
   continuous-integration:
     url: {{ continuous_integration.bamboo.url }}
