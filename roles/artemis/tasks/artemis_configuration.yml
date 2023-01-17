@@ -72,7 +72,7 @@
   copy:
     content: "{{ artemis_ssh_priv_key_value }}"
     dest: "{{ artemis_ssh_key_path }}/{{ artemis_ssh_key_name }}"
-  when: (artemis_ssh_priv_key_value is defined and artemis_ssh_priv_key_value is not None)
+  when: (artemis_ssh_priv_key_value is defined and artemis_ssh_priv_key_value is not none)
   register: ssh_key
   notify: restart artemis
 
