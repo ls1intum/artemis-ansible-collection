@@ -21,11 +21,11 @@
   when:
     - artemis_internal_admin_password is undefined or artemis_internal_admin_password is none
 
-- name: Check if artemis_ssh_priv_key_value is set
-  fail:
-    msg: "No artemis_ssh_priv_key_value is configured!"
-  when:
-    - artemis_ssh_priv_key_value is undefined or artemis_ssh_priv_key_value is none
+#- name: Check if artemis_ssh_priv_key_value is set
+#  fail:
+#    msg: "No artemis_ssh_priv_key_value is configured!"
+#  when:
+#    - artemis_ssh_priv_key_value is undefined or artemis_ssh_priv_key_value is none
 
 - name: Check if artemis_jhipster_jwt is set
   fail:
