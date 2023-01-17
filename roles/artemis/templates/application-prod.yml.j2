@@ -145,7 +145,7 @@ artemis:
 
 {% if version_control.localvcs is defined %}
   version-control:
-    url: {{ version_control.gitlab.url }}
+    url: {{ version_control.localvcs.url }}
     local-vcs-repo-path: {{ version_control.localvcs.local_repo_path }}
 {% endif %}
 
