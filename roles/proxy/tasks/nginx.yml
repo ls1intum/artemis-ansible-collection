@@ -1,4 +1,5 @@
 - name: Add repo for the latest stable ngnix version 
+  become: true
   block:
     - name: ngnix |no apt key
       ansible.builtin.get_url:
