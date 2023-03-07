@@ -1,3 +1,15 @@
+- name: Add repo for the latest stable ngnix version 
+  block:
+    - name: ngnix |no apt key
+      ansible.builtin.get_url:
+        url: http://nginx.org/keys/nginx_signing.key
+        dest: /etc/apt/trusted.gpg.d/nginx.asc
+
+    - name: nginx | apt source
+      ansible.builtin.apt_repository:
+        repo: "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/nginx.asc] http://nginx.org/packages/mainline/ubuntu/ {{ ansible_distribution_release }} nginx"
+        state: present
+
 - name: Install nginx package
   become: true
   apt:
