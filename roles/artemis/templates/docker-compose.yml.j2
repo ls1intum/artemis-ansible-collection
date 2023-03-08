@@ -24,8 +24,8 @@ services:
       file: ./Artmis/src/main/docker/artemis-prod-postgres.yml
       service: artemis-nginx
     volumes:
-      - {{ proxy_ssl_certificate_path }}:/certs/fullchain.pem:ro
-      - {{ proxy_ssl_certificate_key_path }}:/certs/priv_key.pem:ro
+      - "{{ proxy_ssl_certificate_path }}:/certs/fullchain.pem:ro"
+      - "{{ proxy_ssl_certificate_key_path }}:/certs/priv_key.pem:ro"
 
 {% if artemis_database_type == "mysql" %}
   mysql:
