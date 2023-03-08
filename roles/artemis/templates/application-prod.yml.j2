@@ -67,9 +67,9 @@ server:
 artemis:
   course-archives-path: {{ artemis_repo_basepath }}/course-archives
   repo-clone-path: {{ artemis_repo_basepath }}/repos
-  repo-download-clone-path: repos-download
+  repo-download-clone-path: {{ artemis_repo_basepath }}/repos-download
   file-upload-path: {{ artemis_repo_basepath }}/uploads
-  submission-export-path: exports
+  submission-export-path: {{ artemis_repo_basepath }}/exports
   encryption-password: {{ artemis_encryption_password }}
   bcrypt-salt-rounds: {{ artemis_bcrypt_salt_rounds }}
   user-management:

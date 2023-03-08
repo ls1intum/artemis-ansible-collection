@@ -8,6 +8,7 @@ artemis_server_port: 8080
 
 install_artemis: true
 upgrade_artemis: false
+use_docker: false
 
 check_variables: true
 
