@@ -59,14 +59,14 @@
   become: true
   command: docker-compose up -d
   args:
-    chdir: ${{ artemis_working_directory }}
+    chdir: "{{ artemis_working_directory }}"
   listen: "restart docker artemis"
 
 - name: start docker compose artemis
   become: true
   command: docker-compose restart
   args:
-    chdir: ${{ artemis_working_directory }}
+    chdir: "{{ artemis_working_directory }}"
   listen: "start docker artemis"
 
 - name: reboot system
