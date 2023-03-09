@@ -12,6 +12,7 @@
     state: present
     uid: "{{ artemis_user_uid }}"
     group: "{{ artemis_user_group }}"
+    groups: "docker"
 
 - name: Ensure deployment user {{ artemis_deployment_user_name }} exists
   become: yes
@@ -21,7 +22,7 @@
     state: present
     uid: "{{ artemis_deployment_user_uid }}"
     group: "{{ artemis_user_group }}"
-    groups: sudo
+    groups: "sudo,docker"
     append: yes
   when: (artemis_create_deployment_user | bool)
 

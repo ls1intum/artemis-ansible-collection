@@ -5,12 +5,12 @@
     state: directory
     mode: '0775'
 
-- name: Create artemis config directory
+- name: Create artemis data directory
   become: true
   file:
-    path: "{{ artemis_working_directory }}/config"
+    path: "{{ artemis_working_directory }}/data"
     state: directory
-    mode: '0775'
+    mode: '0660'
 
 - name: Set permissions for artemis directory
   become: true
@@ -21,17 +21,6 @@
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
   register: permissions
-  notify: restart docker artemis
-
-- name: Copy application-prod.yml to artemis config directory
-  become: true
-  template:
-    src: "templates/application-prod.yml.j2"
-    dest: "{{ artemis_working_directory }}/config/application-prod.yml"
-    owner: "{{ artemis_user_name }}"
-    group: "{{ artemis_user_group }}"
-    mode: 0640
-  register: config
   notify: restart docker artemis
 
 - name: Copy docker-compose.yml to artemis directory
@@ -52,7 +41,7 @@
     dest: "{{ artemis_working_directory }}/.env"
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
-    mode: 0640
+    mode: 0660
   register: config
   notify: restart docker artemis
 
@@ -79,7 +68,3 @@
     recurse: yes
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
-
-# - name: Start artemis with docker
-#   become: true
-#   notify: start docker artemis

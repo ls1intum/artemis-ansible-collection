@@ -14,14 +14,13 @@ services:
         condition: service_healthy
     restart: on-failure:3
     volumes:
-      - /opt/artemis/config:/opt/artemis/config
-      - artemis-data:/opt/artemis/data
-      - /opt/artemis/logs/artemis.log:{{ artemis_working_directory }}/artemis.log
+      - /opt/artemis/data:/opt/artemis/data
+      - {{ artemis_ssh_key_path }}:{{ artemis_ssh_key_path }}
     env_file:
       - ./.env
     environment:
       _JAVA_OPTIONS: -Xmx3g -Xms1g
-      SPRING_PROFILES_ACTIVE: artemis,scheduling,athene,prod,docker
+      SPRING_PROFILES_ACTIVE: {{ artemis_spring_profiles }}
 
   artemis-nginx:
     extends:
@@ -81,5 +80,3 @@ networks:
 volumes:
   artemis-{{ artemis_database_type }}-data:
     name: artemis-{{ artemis_database_type }}-data
-  artemis-data:
-    name: artemis-data
