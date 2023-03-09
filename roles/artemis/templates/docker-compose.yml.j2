@@ -7,6 +7,8 @@ services:
     extends:
       file: ./Artemis/src/main/docker/artemis/artemis.yml
       service: artemis-app
+    image: ghcr.io/ls1intum/artemis:$ARTEMIS_TAG
+    pull_policy: always
     depends_on:
       {{ artemis_database_type }}:
         condition: service_healthy
@@ -21,16 +23,20 @@ services:
 
   artemis-nginx:
     extends:
-      file: ./Artmis/src/main/docker/artemis-prod-postgres.yml
+      file: ./Artemis/src/main/docker/artemis-prod-mysql.yml
       service: artemis-nginx
     volumes:
-      - "{{ proxy_ssl_certificate_path }}:/certs/fullchain.pem:ro"
-      - "{{ proxy_ssl_certificate_key_path }}:/certs/priv_key.pem:ro"
+      - type: bind
+        source: "{{ proxy_ssl_certificate_path }}"
+        target: "/certs/fullchain.pem"
+      - type: bind
+        source: "{{ proxy_ssl_certificate_key_path }}"
+        target: "/certs/priv_key.pem"
 
 {% if artemis_database_type == "mysql" %}
   mysql:
     extends:
-      file: ./Artemis/src/main/docker/mysql.yml
+      file: ./Artemis/src/main/docker/artemis-prod-mysql.yml
       service: mysql
     restart: on-failure:3
     environment:
@@ -46,7 +52,7 @@ services:
     image: docker.io/library/postgres:15-alpine
     pull_policy: always
     volumes:
-      - artemis-postgres-data:/var/lib/postgresql/data
+      - artemis-postgresql-data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: "{{ artemis_database_username }}"
       POSTGRES_PASSWORD: "{{ artemis_database_password }}"

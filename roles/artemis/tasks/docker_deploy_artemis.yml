@@ -45,6 +45,17 @@
   register: config
   notify: restart docker artemis
 
+- name: Copy .env to artemis directory
+  become: true
+  template:
+    src: "templates/.env.j2"
+    dest: "{{ artemis_working_directory }}/.env"
+    owner: "{{ artemis_user_name }}"
+    group: "{{ artemis_user_group }}"
+    mode: 0640
+  register: config
+  notify: restart docker artemis
+
 - name: Create artemis ssh key directory
   become: true
   file:
