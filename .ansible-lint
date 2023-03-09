@@ -7,6 +7,7 @@ exclude_paths:
 skip_list:
   - '403'  # Package installs should not use latest
   - '208'  # File permissions unset or incorrect
+  - '602'  # Allow empty string comparison
   - no-tabs
   - 'ignore-errors'
   - 'no-changed-when'
