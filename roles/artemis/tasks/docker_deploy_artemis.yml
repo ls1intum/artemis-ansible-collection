@@ -68,3 +68,10 @@
     recurse: yes
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
+
+- name: Clone the Artemis repo
+  become: true
+  command: "git clone {{ artemis_git_repository_url }} -b '{{ artemis_branch }}' Artemis"
+  args:
+    chdir: "{{ artemis_working_directory }}"
+  notify: restart docker artemis

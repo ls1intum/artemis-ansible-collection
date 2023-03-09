@@ -67,6 +67,9 @@ artemis_build_version: "{{ artemis_version }}"
 artemis_war_version: "{{ artemis_build_version }}"
 artemis_war_url: "https://github.com/ls1intum/Artemis/releases/download/{{ artemis_war_version }}/Artemis.war"
 
+artemis_git_repository_url: https://github.com/ls1intum/Artemis.git
+artemis_branch: develop
+
 artemis_system_ram_proportion: 0.8  # How much % of the system RAM to allocate to the Artemis service (Default here: 80%)
 
 artemis_database_type: mysql # The type of the database used. Used in the JDBC URL and as uppercase for the JPA database type (Default of Artemis is currently mysql/MYSQL)
