@@ -71,7 +71,9 @@
 
 - name: Clone the Artemis repo
   become: true
-  command: "git clone {{ artemis_git_repository_url }} -b '{{ artemis_branch }}' Artemis"
-  args:
-    chdir: "{{ artemis_working_directory }}"
+  git:
+    repo: "{{ artemis_git_repository_url }}"
+    dest: "{{ artemis_working_directory }}/Artemis"
+    version: "{{ artemis_branch }}"
   notify: restart docker artemis
+
