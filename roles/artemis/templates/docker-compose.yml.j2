@@ -17,6 +17,8 @@ services:
       - /opt/artemis/config:/opt/artemis/config
       - artemis-data:/opt/artemis/data
       - /opt/artemis/logs/artemis.log:{{ artemis_working_directory }}/artemis.log
+    env_file:
+      - ./.env
     environment:
       _JAVA_OPTIONS: -Xmx3g -Xms1g
       SPRING_PROFILES_ACTIVE: artemis,scheduling,athene,prod,docker
