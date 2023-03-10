@@ -69,6 +69,12 @@
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
 
+- name: Remove the Artemis repo folder
+  become: true
+  file:
+    path: "{{ artemis_working_directory }}/Artemis"
+    state: absent
+
 - name: Clone the Artemis repo
   become: true
   git:

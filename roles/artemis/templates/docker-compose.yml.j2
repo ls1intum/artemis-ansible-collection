@@ -15,12 +15,12 @@ services:
     restart: on-failure:3
     volumes:
       - /opt/artemis/data:/opt/artemis/data
-      - {{ artemis_ssh_key_path }}:{{ artemis_ssh_key_path }}
+      - "{{ artemis_ssh_key_path }}:{{ artemis_ssh_key_path }}"
     env_file:
       - ./.env
     environment:
       _JAVA_OPTIONS: -Xmx3g -Xms1g
-      SPRING_PROFILES_ACTIVE: {{ artemis_spring_profiles }}
+      SPRING_PROFILES_ACTIVE: "{{ artemis_spring_profiles }}"
 
   artemis-nginx:
     extends:
