@@ -70,7 +70,6 @@ artemis:
   repo-download-clone-path: {{ artemis_repo_basepath }}/repos-download
   file-upload-path: {{ artemis_repo_basepath }}/uploads
   submission-export-path: {{ artemis_repo_basepath }}/exports
-  encryption-password: {{ artemis_encryption_password }}
   bcrypt-salt-rounds: {{ artemis_bcrypt_salt_rounds }}
   user-management:
 {% if user_management.jira is defined and user_management.jira is not none %}

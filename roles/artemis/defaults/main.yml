@@ -82,7 +82,6 @@ artemis_database_password: #FIXME
 artemis_database_encoding: utf8mb4 # MySQL specific default encoding
 artemis_database_collation: utf8mb4_unicode_ci # MySQL specific default collation
 
-artemis_encryption_password: #FIXME
 artemis_bcrypt_salt_rounds: 11
 
 artemis_account_login_info: "TUM"
