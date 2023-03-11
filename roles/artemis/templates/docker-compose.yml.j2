@@ -12,7 +12,7 @@ services:
     depends_on:
       {{ artemis_database_type }}:
         condition: service_healthy
-    restart: on-failure:3
+    restart: always
     volumes:
       - /opt/artemis/data:/opt/artemis/data
       - "{{ artemis_ssh_key_path }}:{{ artemis_ssh_key_path }}"
@@ -26,6 +26,7 @@ services:
     extends:
       file: ./Artemis/src/main/docker/artemis-prod-mysql.yml
       service: artemis-nginx
+    restart: always
     volumes:
       - type: bind
         source: "{{ proxy_ssl_certificate_path }}"
@@ -39,7 +40,7 @@ services:
     extends:
       file: ./Artemis/src/main/docker/artemis-prod-mysql.yml
       service: mysql
-    restart: on-failure:3
+    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: "{{ artemis_database_password }}"
       MYSQL_USER: "{{ artemis_database_username }}"
@@ -54,6 +55,7 @@ services:
     pull_policy: always
     volumes:
       - artemis-postgresql-data:/var/lib/postgresql/data
+    restart: always
     environment:
       POSTGRES_USER: "{{ artemis_database_username }}"
       POSTGRES_PASSWORD: "{{ artemis_database_password }}"
