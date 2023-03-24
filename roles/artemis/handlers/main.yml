@@ -57,14 +57,16 @@
 
 - name: restart docker compose artemis
   become: true
-  command: su artemis -c "docker compose down && docker compose up -d --pull always --no-build"
+  shell: |
+    ./artemis-docker.sh down
+    ./artemis-docker.sh up -d --pull always --no-build
   args:
     chdir: "{{ artemis_working_directory }}"
   listen: "restart docker artemis"
 
 - name: start docker compose artemis
   become: true
-  command: su artemis -c "docker compose up -d --pull always --no-build"
+  command: ./artemis-docker.sh up -d --pull always --no-build
   args:
     chdir: "{{ artemis_working_directory }}"
   listen: "start docker artemis"

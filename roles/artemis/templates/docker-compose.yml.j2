@@ -5,7 +5,7 @@
 services:
   artemis-app:
     extends:
-      file: ./Artemis/src/main/docker/artemis/artemis.yml
+      file: ./artemis.yml
       service: artemis-app
     image: ghcr.io/ls1intum/artemis:$ARTEMIS_TAG
     pull_policy: always
@@ -17,15 +17,15 @@ services:
       - /opt/artemis/data:/opt/artemis/data
       - "{{ artemis_ssh_key_path }}:{{ artemis_ssh_key_path }}"
     env_file:
-      - ./.env
+      - ../../.env
     environment:
       _JAVA_OPTIONS: -Xmx3g -Xms1g
       SPRING_PROFILES_ACTIVE: "{{ artemis_spring_profiles }}"
 
   artemis-nginx:
     extends:
-      file: ./Artemis/src/main/docker/artemis-prod-mysql.yml
-      service: artemis-nginx
+      file: ./artemis-prod-mysql.yml
+      service: nginx
     restart: always
     volumes:
       - type: bind
@@ -38,7 +38,7 @@ services:
 {% if artemis_database_type == "mysql" %}
   mysql:
     extends:
-      file: ./Artemis/src/main/docker/artemis-prod-mysql.yml
+      file: ./artemis-prod-mysql.yml
       service: mysql
     restart: always
     environment:

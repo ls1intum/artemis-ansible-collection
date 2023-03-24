@@ -10,7 +10,7 @@
   file:
     path: "{{ artemis_working_directory }}/data"
     state: directory
-    mode: '0660'
+    mode: '0666'
 
 - name: Set permissions for artemis directory
   become: true
@@ -68,6 +68,17 @@
     recurse: yes
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
+    mode: '0660'
+
+- name: Copy artemis-docker.sh helper script
+  become: true
+  copy:
+    src: files/artemis-docker.sh
+    dest: "{{ artemis_working_directory }}/artemis-docker.sh"
+    owner: "{{ artemis_user_name }}"
+    group: "{{ artemis_user_group }}"
+    mode: 0770
+  register: config
 
 - name: Remove the Artemis repo folder
   become: true
