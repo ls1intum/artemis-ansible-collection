@@ -79,18 +79,6 @@
     group: "{{ artemis_user_group }}"
     mode: 0770
   register: config
-
-- name: Remove the Artemis repo folder
-  become: true
-  file:
-    path: "{{ artemis_working_directory }}/Artemis"
-    state: absent
-
-- name: Clone the Artemis repo
-  become: true
-  git:
-    repo: "{{ artemis_git_repository_url }}"
-    dest: "{{ artemis_working_directory }}/Artemis"
-    version: "{{ artemis_branch }}"
   notify: restart docker artemis
+
 

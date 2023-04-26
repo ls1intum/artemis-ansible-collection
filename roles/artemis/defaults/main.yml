@@ -185,4 +185,4 @@ artemis_spring_profile_continuous_integration: "{% if continuous_integration.bam
 artemis_spring_profile_athene: "{% if athene is defined and athene is not none %},athene{% endif %}"
 artemis_spring_profile_scheduling: "{% if node_id is defined and node_id == 1 %},scheduling{% endif %}"
 artemis_spring_profile_docker: "{% if use_docker %},docker{% endif %}"
-artemis_spring_profiles: "{{ artemis_spring_profile_env }}{{ artemis_spring_profile_user_management }}{{ artemis_spring_profile_ldap }}{{ artemis_spring_profile_version_control }}{{ artemis_spring_profile_continuous_integration }}{{ artemis_spring_profile_athene }}{{ artemis_spring_profile_scheduling }}{{ artemis_spring_profile_docker }} }}"
+artemis_spring_profiles: "{{ artemis_spring_profile_env }}{{ artemis_spring_profile_user_management }}{{ artemis_spring_profile_ldap }}{{ artemis_spring_profile_version_control }}{{ artemis_spring_profile_continuous_integration }}{{ artemis_spring_profile_athene }}{{ artemis_spring_profile_scheduling }}{{ artemis_spring_profile_docker }}"
