@@ -25,7 +25,7 @@ function start {
   echo "Starting Artemis with PR tag: $pr_tag and branch: $pr_branch"
   rm -rf Artemis
   git clone https://github.com/ls1intum/Artemis.git -b "$pr_branch" Artemis
-  sed -i "s/ARTEMIS_TAG=\".*\"/ARTEMIS_TAG=\"$pr_tag\"/g" .env
+  sed -i "s/ARTEMIS_TAG=.*/ARTEMIS_TAG='$pr_tag'/g" .env
   docker compose --project-directory "$PROJECT_DIR" -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --pull always --no-build
 }
 
