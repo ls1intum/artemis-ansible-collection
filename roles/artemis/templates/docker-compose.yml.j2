@@ -15,7 +15,9 @@ services:
     restart: always
     volumes:
       - /opt/artemis/data:/opt/artemis/data
+{% if artemis_ssh_key_path is defined and artemis_ssh_key_path is not none and artemis_ssh_key_path != "" %}
       - "{{ artemis_ssh_key_path }}:{{ artemis_ssh_key_path }}"
+{% endif %}
     env_file:
       - ../../.env
     environment:

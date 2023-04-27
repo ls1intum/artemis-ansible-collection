@@ -10,7 +10,7 @@
   file:
     path: "{{ artemis_working_directory }}/data"
     state: directory
-    mode: '0666'
+    mode: '0777'
 
 - name: Set permissions for artemis directory
   become: true
@@ -51,6 +51,7 @@
     path: "{{ artemis_ssh_key_path }}"
     state: directory
     mode: '0775'
+  when: artemis_ssh_key_path is not none and artemis_ssh_key_path != ""
 
 - name: Copy ssh key
   become: true
@@ -59,6 +60,7 @@
     dest: "{{ artemis_ssh_key_path }}/{{ artemis_ssh_key_name }}"
   register: ssh_key
   notify: restart docker artemis
+  when: artemis_ssh_key_path is not none and artemis_ssh_key_path != ""
 
 - name: Set permissions for artemis ssh key directory
   become: true
@@ -69,6 +71,7 @@
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
     mode: '0660'
+  when: artemis_ssh_key_path is not none and artemis_ssh_key_path != ""
 
 - name: Copy artemis-docker.sh helper script
   become: true
