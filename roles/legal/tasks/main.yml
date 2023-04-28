@@ -1,0 +1,26 @@
+- name: Create legal directory
+  file:
+    state: directory
+    path: "{{ artemis_legal_dir }}"
+    owner: "{{ artemis_user }}"
+    group: "{{ artemis_group }}"
+    mode: '0755'
+  become: true
+
+- name: Copy privacy_statements into legal directory
+  copy:
+    src: files/privacy/ # KEEP THE /
+    dest: "{{ artemis_legal_dir }}"
+    owner: "{{ artemis_user }}"
+    group: "{{ artemis_user }}"
+    mode: '0644'
+  become: true
+
+- name: Copy imprints into legal directory
+  copy:
+    src: files/imprints/ # KEEP THE /
+    dest: "{{ artemis_legal_dir }}"
+    owner: "{{ artemis_user }}"
+    group: "{{ artemis_user }}"
+    mode: '0644'
+  become: true
