@@ -19,7 +19,7 @@
 - name: Copy imprints into legal directory
   copy:
     src: files/imprints/ # KEEP THE /
-    dest: "{{ artemis_legal_dir }}"
+    dest: "{{ artemis_legal_path }}"
     owner: "{{ artemis_user }}"
     group: "{{ artemis_user }}"
     mode: '0644'
