@@ -1,7 +1,7 @@
 - name: Create legal directory
   file:
     state: directory
-    path: "{{ artemis_legal_dir }}"
+    path: "{{ artemis_legal_path }}"
     owner: "{{ artemis_user }}"
     group: "{{ artemis_group }}"
     mode: '0755'
