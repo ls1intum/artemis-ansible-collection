@@ -54,6 +54,8 @@ artemis_notification_from: "Artemis Notification"
 artemis_working_directory: "/opt/artemis"
 artemis_repo_basepath: "."
 
+artemis_legal_path: /opt/artemis/legal
+
 artemis_ssh_key_path: /opt/keys
 artemis_ssh_key_name: "artemis_ssh_key"
 artemis_ssh_priv_key_value: #FIXME
