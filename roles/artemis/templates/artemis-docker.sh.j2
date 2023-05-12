@@ -1,8 +1,13 @@
 #!/bin/bash
 
-PROJECT_DIR="./Artemis/docker/"
-COMPOSE_FILE="docker-compose.yml"
-ENV_FILE="./.env"
+PROJECT_DIR="{{ artemis_working_directory }}/Artemis/docker"
+{% if artemis_database_type == "mysql" %}
+COMPOSE_FILE="test-server-mysql.yml"
+{% endif %}
+{% if artemis_database_type == "postgresql" %}
+COMPOSE_FILE="test-server-postgresql.yml"
+{% endif %}
+ENV_FILE="{{ artemis_working_directory }}/docker.env"
 
 # Function: Print general usage information
 function general_help {
@@ -25,15 +30,15 @@ function start {
   echo "Starting Artemis with PR tag: $pr_tag and branch: $pr_branch"
   rm -rf Artemis
   git clone https://github.com/ls1intum/Artemis.git -b "$pr_branch" Artemis
-  sed -i "s/ARTEMIS_TAG=.*/ARTEMIS_TAG='$pr_tag'/g" .env
-  docker compose --project-directory "$PROJECT_DIR" -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --pull always --no-build
+  sed -i "s/ARTEMIS_DOCKER_TAG=.*/ARTEMIS_TAG='$pr_tag'/g" $ENV_FILE
+  docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --pull always --no-build
 }
 
 function stop {
   # TODO: In the future extract pr_tag and pr_branch from env
 
   echo "Stopping Artemis"
-  docker compose --project-directory "$PROJECT_DIR" -f "$COMPOSE_FILE" --env-file "$ENV_FILE" stop artemis-app
+  docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" stop artemis-app
 }
 
 function restart {
@@ -42,7 +47,7 @@ function restart {
 }
 
 function run_docker_compose_cmd {
-   docker compose --project-directory "$PROJECT_DIR" -f "$COMPOSE_FILE" --env-file "$ENV_FILE" "$@"
+   docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" "$@"
 }
 
 # read subcommand `artemis-docker subcommand server` in variable and remove base command from argument list

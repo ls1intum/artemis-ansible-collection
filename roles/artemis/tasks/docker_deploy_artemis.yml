@@ -10,7 +10,7 @@
   file:
     path: "{{ artemis_working_directory }}/data"
     state: directory
-    mode: '0777'
+    mode: '0770'
 
 - name: Set permissions for artemis directory
   become: true
@@ -23,22 +23,33 @@
   register: permissions
   notify: restart docker artemis
 
-- name: Copy docker-compose.yml to artemis directory
+- name: Copy docker.env to artemis directory
   become: true
   template:
-    src: "templates/docker-compose.yml.j2"
-    dest: "{{ artemis_working_directory }}/docker-compose.yml"
+    src: "templates/docker.env.j2"
+    dest: "{{ artemis_working_directory }}/docker.env"
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
-    mode: 0640
+    mode: 0660
   register: config
   notify: restart docker artemis
 
-- name: Copy .env to artemis directory
+- name: Copy artemis.env to artemis directory
   become: true
   template:
-    src: "templates/.env.j2"
-    dest: "{{ artemis_working_directory }}/.env"
+    src: "templates/artemis.env.j2"
+    dest: "{{ artemis_working_directory }}/artemis.env"
+    owner: "{{ artemis_user_name }}"
+    group: "{{ artemis_user_group }}"
+    mode: 0660
+  register: config
+  notify: restart docker artemis
+
+- name: Copy database.env to artemis directory
+  become: true
+  template:
+    src: "templates/database.env.j2"
+    dest: "{{ artemis_working_directory }}/database.env"
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
     mode: 0660
@@ -70,13 +81,13 @@
     recurse: yes
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
-    mode: '0660'
+    mode: '0770'
   when: artemis_ssh_key_path is not none and artemis_ssh_key_path != ""
 
 - name: Copy artemis-docker.sh helper script
   become: true
-  copy:
-    src: files/artemis-docker.sh
+  template:
+    src: "templates/artemis-docker.sh.j2"
     dest: "{{ artemis_working_directory }}/artemis-docker.sh"
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
