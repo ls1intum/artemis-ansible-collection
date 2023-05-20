@@ -30,7 +30,7 @@ function start {
   echo "Starting Artemis with PR tag: $pr_tag and branch: $pr_branch"
   rm -rf Artemis
   git clone https://github.com/ls1intum/Artemis.git -b "$pr_branch" Artemis
-  sed -i "s/ARTEMIS_DOCKER_TAG=.*/ARTEMIS_TAG='$pr_tag'/g" $ENV_FILE
+  sed -i "s/ARTEMIS_DOCKER_TAG=.*/ARTEMIS_DOCKER_TAG='$pr_tag'/g" $ENV_FILE
   docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --pull always --no-build
 }
 
@@ -44,6 +44,14 @@ function stop {
 function restart {
     stop "$@"
     start "$@"
+}
+
+function artemis_logs {
+   docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" logs -f artemis-app
+}
+
+function all_logs {
+   docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" logs -f
 }
 
 function run_docker_compose_cmd {
@@ -68,6 +76,12 @@ case "$subcommand" in
         ;;
     restart)
         restart "$@"
+        ;;
+    logs-artemis)
+        artemis_logs "$@"
+        ;;
+    logs)
+        all_logs "$@"
         ;;
     run)
         run_docker_compose_cmd "$@"
