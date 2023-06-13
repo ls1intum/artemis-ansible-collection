@@ -9,12 +9,6 @@
   when:
     - artemis_database_password is undefined or artemis_database_password is none
 
-- name: Check if artemis_encryption_password is set
-  fail:
-    msg: "No artemis_encryption_password is configured!"
-  when:
-    - artemis_encryption_password is undefined or artemis_encryption_password is none
-
 - name: Check if artemis_internal_admin_password is set
   fail:
     msg: "No artemis_internal_admin_password is configured!"

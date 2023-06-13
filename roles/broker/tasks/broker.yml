@@ -16,7 +16,7 @@
 - name: Download and extract activemq {{ activemq_version }}
   become: true
   unarchive:
-    src: https://downloads.apache.org/activemq/activemq-artemis/{{ activemq_version }}/apache-artemis-{{ activemq_version }}-bin.tar.gz
+    src: https://dlcdn.apache.org/activemq/activemq-artemis/{{ activemq_version }}/apache-artemis-{{ activemq_version }}-bin.tar.gz
     dest: /opt/activemq-distribution
     remote_src: yes
   notify: restart broker

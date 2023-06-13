@@ -8,8 +8,6 @@ artemis_database_dbname: "Artemis"
 artemis_database_username: "Artemis"
 artemis_database_password: "" #FIXME
 
-artemis_encryption_password: "" #FIXME
-
 artemis_internal_admin_user: artemis_admin
 artemis_internal_admin_password: "" #FIXME
 

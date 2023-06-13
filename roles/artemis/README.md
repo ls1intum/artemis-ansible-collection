@@ -12,7 +12,6 @@ Default variables can be found in the `defaults/main.yml` file.
 ```
 artemis_server_url: "https://artemis.example.de"
 artemis_database_password: #FIXME
-artemis_encryption_password: #FIXME
 
 artemis_internal_admin_password: #FIXME
 

@@ -1,7 +1,7 @@
 namespace: ls1intum
 name: artemis
 
-version: 0.6.0
+version: 0.9.0
 
 readme: README.md
 
@@ -10,7 +10,7 @@ authors:
 - Simon Leiss <hello@sleiss.me> (https://sleiss.me)
 - Linus Michel
 - Vincent Picking 
-- Jan Philip Bernius <janphilip.bernius@tum.de>
+- Dr. Jan Philip Bernius <janphilip.bernius@tum.de>
 - Prof. Dr. Stephan Krusche <krusche@in.tum.de>
 
 description: Set up, configure and update Artemis servers / clusters.

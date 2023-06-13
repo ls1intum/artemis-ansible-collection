@@ -55,6 +55,21 @@
   listen: "start artemis"
   throttle: 1
 
+- name: restart docker compose artemis
+  become: true
+  shell: |
+    ./artemis-docker.sh restart {{ artemis_build_version }} {{ artemis_branch }}
+  args:
+    chdir: "{{ artemis_working_directory }}"
+  listen: "restart docker artemis"
+
+- name: start docker compose artemis
+  become: true
+  command: ./artemis-docker.sh start {{ artemis_build_version }} {{ artemis_branch }}
+  args:
+    chdir: "{{ artemis_working_directory }}"
+  listen: "start docker artemis"
+
 - name: reboot system
   become: true
   reboot:
