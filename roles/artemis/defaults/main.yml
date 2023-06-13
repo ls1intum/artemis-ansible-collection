@@ -8,6 +8,7 @@ artemis_server_port: 8080
 
 install_artemis: true
 upgrade_artemis: false
+use_docker: false
 
 check_variables: true
 
@@ -68,6 +69,9 @@ artemis_build_version: "{{ artemis_version }}"
 artemis_war_version: "{{ artemis_build_version }}"
 artemis_war_url: "https://github.com/ls1intum/Artemis/releases/download/{{ artemis_war_version }}/Artemis.war"
 
+artemis_git_repository_url: https://github.com/ls1intum/Artemis.git
+artemis_branch: develop
+
 artemis_system_ram_proportion: 0.8  # How much % of the system RAM to allocate to the Artemis service (Default here: 80%)
 
 artemis_database_type: mysql # The type of the database used. Used in the JDBC URL and as uppercase for the JPA database type (Default of Artemis is currently mysql/MYSQL)
@@ -80,7 +84,6 @@ artemis_database_password: #FIXME
 artemis_database_encoding: utf8mb4 # MySQL specific default encoding
 artemis_database_collation: utf8mb4_unicode_ci # MySQL specific default collation
 
-artemis_encryption_password: #FIXME
 artemis_bcrypt_salt_rounds: 11
 
 artemis_account_login_info: "TUM"
@@ -172,6 +175,16 @@ artemis_eureka_urls: "{% if broker.url is defined and broker.url is not none %}h
 artemis_eureka_instance_id: "{{ node_id }}"
 
 ##############################################################################
+# Iris Configuration
+##############################################################################
+iris_gpt35_url:
+iris_gpt35_api_key:
+iris_gpt35_model:
+iris_gpt35_temperature: 0.3
+iris_gpt35_maxgeneratedtokens: 100
+iris_gpt35_stopsequences:
+
+##############################################################################
 # Auto-generated Variables - No not alter!
 ##############################################################################
 
@@ -183,4 +196,6 @@ artemis_spring_profile_version_control: "{% if version_control.bitbucket is defi
 artemis_spring_profile_continuous_integration: "{% if continuous_integration.bamboo is defined and continuous_integration.bamboo is not none %},bamboo{% elif continuous_integration.jenkins is defined and continuous_integration.jenkins is not none %},jenkins{% endif %}"
 artemis_spring_profile_athene: "{% if athene is defined and athene is not none %},athene{% endif %}"
 artemis_spring_profile_scheduling: "{% if node_id is defined and node_id == 1 %},scheduling{% endif %}"
-artemis_spring_profiles: "{{ artemis_spring_profile_env }}{{ artemis_spring_profile_user_management }}{{ artemis_spring_profile_ldap }}{{ artemis_spring_profile_version_control }}{{ artemis_spring_profile_continuous_integration }}{{ artemis_spring_profile_athene }}{{ artemis_spring_profile_scheduling }}"
+artemis_spring_profile_docker: "{% if use_docker %},docker{% endif %}"
+artemis_spring_profile_iris: "{% if iris_gpt35_api_key is not none and iris_gpt35_url is not none and iris_gpt35_model is not none %},iris-gpt3_5{% endif %}"
+artemis_spring_profiles: "{{ artemis_spring_profile_env }}{{ artemis_spring_profile_user_management }}{{ artemis_spring_profile_ldap }}{{ artemis_spring_profile_version_control }}{{ artemis_spring_profile_continuous_integration }}{{ artemis_spring_profile_athene }}{{ artemis_spring_profile_scheduling }}{{ artemis_spring_profile_docker }}{{ artemis_spring_profile_iris }}"
