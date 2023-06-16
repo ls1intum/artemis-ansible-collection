@@ -56,6 +56,11 @@ artemis_working_directory: "/opt/artemis"
 artemis_repo_basepath: "."
 
 artemis_legal_path: /opt/artemis/legal
+artemis_data_export_path: /opt/artemis/data-exports
+# the following two values must be cron expressions
+artemis_scheduling_data_export_creation_time: 0 0 4 * * * # every day at 4 am
+artemis_scheduling_programming_exercises_cleanup_time: 0 0 3 * * * # every day at 3 am
+artemis_data_export_days_between_data_exports: 14
 
 artemis_ssh_key_path: /opt/keys
 artemis_ssh_key_name: "artemis_ssh_key"
