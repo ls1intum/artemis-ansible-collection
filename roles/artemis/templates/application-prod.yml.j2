@@ -71,6 +71,7 @@ artemis:
   file-upload-path: {{ artemis_repo_basepath }}/uploads
   submission-export-path: {{ artemis_repo_basepath }}/exports
   legal-path: {{ artemis_legal_path }}
+  data-export-path: {{ artemis_data_export_path }}
   bcrypt-salt-rounds: {{ artemis_bcrypt_salt_rounds }}
   user-management:
 {% if user_management.jira is defined and user_management.jira is not none %}
@@ -196,6 +197,11 @@ artemis:
   apollon:
     conversion-service-url: {{ apollon_url }}
 {% endif %}
+  scheduling:
+    data-export-creation-time: {{ artemis_scheduling_data_export_creation_time }}
+    programming-exercises-cleanup-time: {{ artemis_scheduling_programming_exercises_cleanup_time }}
+  data-export:
+    days-between-data-exports: {{ artemis_data_export_days_between_data_exports }}
 
 jhipster:
 
