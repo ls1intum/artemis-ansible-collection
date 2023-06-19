@@ -84,6 +84,24 @@
     mode: '0770'
   when: artemis_ssh_key_path is not none and artemis_ssh_key_path != ""
 
+- name: Create artemis data-export directory
+  become: true
+  file:
+    path: "{{ artemis_data_export_path }}"
+    state: directory
+    mode: '0775'
+  when: artemis_data_export_path is not none and artemis_data_export_path != ""
+
+- name: Set permissions for artemis data-export directory
+  become: true
+  file:
+    path: "{{ artemis_data_export_path }}"
+    state: directory
+    recurse: yes
+    owner: "{{ artemis_user_name }}"
+    group: "{{ artemis_user_group }}"
+  when: artemis_data_export_path is not none and artemis_data_export_path != ""
+
 - name: Copy artemis-docker.sh helper script
   become: true
   template:
