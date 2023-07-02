@@ -100,7 +100,7 @@
   file:
     path: "{{ artemis_data_export_path }}"
     state: directory
-    recurse: yes
+    recurse: true
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
   when: artemis_data_export_path is not none and artemis_data_export_path != ""
