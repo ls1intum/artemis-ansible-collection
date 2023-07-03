@@ -18,7 +18,7 @@ DE811193231 (in accordance with § 27a of the German VAT tax act - UStG)
 
 #### Responsible for content
 
-Dr. Stephan Krusche  
+Prof. Dr. Stephan Krusche  
 Boltzmannstrasse 3  
 85748 Garching
 
