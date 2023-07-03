@@ -76,12 +76,10 @@ server {
     }
 {% endif %}
 
-{% if proxy_athene_baseurl is not none %}
     location /api/athene-result/ {
         proxy_pass {{ proxy_primary_node_url }}/api/athene-result/;
         client_max_body_size 2g;
     }
-{% endif %}
 
     location /api/authenticate {
         proxy_pass http://artemis/api/authenticate;
