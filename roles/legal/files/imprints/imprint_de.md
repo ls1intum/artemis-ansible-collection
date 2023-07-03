@@ -18,7 +18,7 @@ DE811193231 (gemäß § 27a Umsatzsteuergesetz)
 
 #### Verantwortlich für den Inhalt
 
-Dr. Stephan Krusche  
+Prof. Dr. Stephan Krusche
 Boltzmannstraße 3  
 85748 Garching
 
