@@ -76,11 +76,6 @@ server {
     }
 {% endif %}
 
-    location /api/athene-result/ {
-        proxy_pass {{ proxy_primary_node_url }}/api/athene-result/;
-        client_max_body_size 2g;
-    }
-
     location /api/authenticate {
         proxy_pass http://artemis/api/authenticate;
 		# For a given violation of the rate limit defined in the zone
