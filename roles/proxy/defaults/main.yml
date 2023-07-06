@@ -26,7 +26,7 @@ proxy_worker_rlmmiit_nofile: 30000
 proxy_worker_connections: 20000
 proxy_server_names_hash_bucket_size: 256
 
-proxy_primary_node_url: "{{ proxy_available_nodes[0] }}"
+proxy_primary_node_url:
 
 proxy_site_template: artemis
 
