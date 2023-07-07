@@ -26,7 +26,6 @@ proxy_worker_rlmmiit_nofile: 30000
 proxy_worker_connections: 20000
 proxy_server_names_hash_bucket_size: 256
 
-
 proxy_site_template: artemis
 
 proxy_generate_dh_param: true
