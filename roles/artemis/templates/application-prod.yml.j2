@@ -188,10 +188,10 @@ artemis:
     name: artemis
     email: {{ artemis_email }}
 
-{% if athene is defined %}
-  athene:
-    url: {{ athene.url }}
-    base64-secret: {{ athene.secret }}
+{% if athena is defined %}
+  athena:
+    url: {{ athena.url }}
+    base64-secret: {{ athena.secret }}
     token-validity-in-seconds: 10800
 {% endif %}
 
