@@ -76,20 +76,6 @@ server {
     }
 {% endif %}
 
-{% if proxy_athene_baseurl is not none %}
-    location /athene-tracking {
-        proxy_pass {{ proxy_athene_baseurl }}/tracking;
-        proxy_set_header Host $host;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-
-    location /api/athene-result/ {
-        proxy_pass {{ proxy_primary_node_url }}/api/athene-result/;
-        client_max_body_size 2g;
-    }
-{% endif %}
-
     location /api/authenticate {
         proxy_pass http://artemis/api/authenticate;
 		# For a given violation of the rate limit defined in the zone
