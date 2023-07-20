@@ -61,6 +61,7 @@ artemis_data_export_path: /opt/artemis/data-exports
 # the following two values must be cron expressions
 artemis_scheduling_data_export_creation_time: 0 0 4 * * * # every day at 4 am
 artemis_scheduling_programming_exercises_cleanup_time: 0 0 3 * * * # every day at 3 am
+artemis_scheduling_continuous_plagiarism_control_trigger_time: 0 0 4 * * * # every day at 5 am
 
 artemis_data_export_days_between_data_exports: 14
 
