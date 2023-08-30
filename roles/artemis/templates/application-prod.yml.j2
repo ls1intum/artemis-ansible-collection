@@ -191,8 +191,7 @@ artemis:
 {% if athena is defined %}
   athena:
     url: {{ athena.url }}
-    base64-secret: {{ athena.secret }}
-    token-validity-in-seconds: 10800
+    secret: {{ athena.secret }}
 {% endif %}
 
 {% if apollon_url is defined %}
