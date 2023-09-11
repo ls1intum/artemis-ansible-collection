@@ -203,6 +203,12 @@ artemis:
   data-export:
     days-between-data-exports: {{ artemis_data_export_days_between_data_exports }}
 
+{% if iris is defined and iris is not none %}
+  iris:
+    url: {{ iris.url }}
+    secret-token: {{ iris.secret }}
+{% endif %}
+
 jhipster:
 
 {% if is_multinode_install|bool == true and artemis_jhipster_jwt is not none and artemis_jhipster_registry_password is not none  %}

@@ -184,12 +184,9 @@ artemis_eureka_instance_id: "{{ node_id }}"
 ##############################################################################
 # Iris Configuration
 ##############################################################################
-iris_gpt35_url:
-iris_gpt35_api_key:
-iris_gpt35_model:
-iris_gpt35_temperature: 0.3
-iris_gpt35_maxgeneratedtokens: 100
-iris_gpt35_stopsequences:
+#iris:
+#  url:
+#  secret:
 
 ##############################################################################
 # Auto-generated Variables - No not alter!
@@ -204,5 +201,5 @@ artemis_spring_profile_continuous_integration: "{% if continuous_integration.bam
 artemis_spring_profile_athene: "{% if athene is defined and athene is not none %},athene{% endif %}"
 artemis_spring_profile_scheduling: "{% if node_id is defined and node_id == 1 %},scheduling{% endif %}"
 artemis_spring_profile_docker: "{% if use_docker %},docker{% endif %}"
-artemis_spring_profile_iris: "{% if iris_gpt35_api_key is not none and iris_gpt35_url is not none and iris_gpt35_model is not none %},iris-gpt3_5{% endif %}"
+artemis_spring_profile_iris: "{% if iris is defined and iris is not none %},iris{% endif %}"
 artemis_spring_profiles: "{{ artemis_spring_profile_env }}{{ artemis_spring_profile_user_management }}{{ artemis_spring_profile_ldap }}{{ artemis_spring_profile_version_control }}{{ artemis_spring_profile_continuous_integration }}{{ artemis_spring_profile_athene }}{{ artemis_spring_profile_scheduling }}{{ artemis_spring_profile_docker }}{{ artemis_spring_profile_iris }}"
