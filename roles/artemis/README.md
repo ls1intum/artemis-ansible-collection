@@ -106,9 +106,9 @@ Jenkins configuration:
 ---
 
 
-Athene configuration:
+Athena configuration:
 ```
-athene:
+athena:
   url:
   secret:
 ```
