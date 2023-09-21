@@ -91,7 +91,7 @@ artemis_database_username: artemis
 artemis_database_password: #FIXME
 artemis_database_encoding: utf8mb4 # MySQL specific default encoding
 artemis_database_collation: utf8mb4_unicode_ci # MySQL specific default collation
-
+apollon_url: https://apollon.ase.in.tum.de/api/converter
 artemis_bcrypt_salt_rounds: 11
 
 artemis_account_login_info: "TUM"
@@ -152,7 +152,6 @@ artemis_external_password_reset_link_de: "https://campus.tum.de/tumonline/ee/ui/
   #  url:
   #  secret:
   #
-  #apollon_url: #https://apollon.ase.in.tum.de/api/converter
   #
   #lti:
   #  oauth_secret:
@@ -200,6 +199,7 @@ artemis_spring_profile_ldap: "{% if ldap.password is defined and ldap.password i
 artemis_spring_profile_version_control: "{% if version_control.bitbucket is defined and version_control.bitbucket is not none %},bitbucket{% elif version_control.gitlab is defined and version_control.gitlab is not none %},gitlab{% endif %}"
 artemis_spring_profile_continuous_integration: "{% if continuous_integration.bamboo is defined and continuous_integration.bamboo is not none %},bamboo{% elif continuous_integration.jenkins is defined and continuous_integration.jenkins is not none %},jenkins{% endif %}"
 artemis_spring_profile_athena: "{% if athena is defined and athena is not none %},athena{% endif %}"
+artemis_spring_profile_apollon: "{% if apollon_url is defined and apollon_url is not none %},apollon{% endif %}"
 artemis_spring_profile_scheduling: "{% if node_id is defined and node_id == 1 %},scheduling{% endif %}"
 artemis_spring_profile_docker: "{% if use_docker %},docker{% endif %}"
 artemis_spring_profile_iris: "{% if iris is defined and iris is not none %},iris{% endif %}"
