@@ -8,6 +8,9 @@ COMPOSE_FILE="test-server-mysql.yml"
 COMPOSE_FILE="test-server-postgresql.yml"
 {% endif %}
 ENV_FILE="{{ artemis_working_directory }}/docker.env"
+{% if version_control.localci is defined %}
+export DOCKER_GROUP_ID=$(getent group docker | cut -d: -f3)
+{% endif %}
 
 # Function: Print general usage information
 function general_help {
