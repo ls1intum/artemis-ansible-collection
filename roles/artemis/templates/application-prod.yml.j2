@@ -209,6 +209,12 @@ artemis:
   iris:
     url: {{ iris.url }}
     secret-token: {{ iris.secret }}
+    {% if iris.rate_limit is defined and iris.rate_limit is not none %}
+    rate-limit: {{ iris.rate_limit }}
+    {% endif %}
+    {% if iris.rate_limit_timeframe_hours is defined and iris.rate_limit_timeframe_hours is not none %}
+    rate-limit-timeframe-hours: {{ iris.rate_limit_timeframe_hours }}
+    {% endif %}
 {% endif %}
 
 jhipster:

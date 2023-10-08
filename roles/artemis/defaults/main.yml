@@ -187,6 +187,8 @@ artemis_eureka_instance_id: "{{ node_id }}"
 #iris:
 #  url:
 #  secret:
+#  rate_limit:
+#  rate_limit_timeframe_hours:
 
 ##############################################################################
 # Auto-generated Variables - No not alter!
