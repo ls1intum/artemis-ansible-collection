@@ -1,14 +1,23 @@
 #!/bin/bash
 
 PROJECT_DIR="{{ artemis_working_directory }}/Artemis/docker"
+{% if continuous_integration.localci is defined %}
+{% if artemis_database_type == "mysql" %}
+COMPOSE_FILE="test-server-mysql-localci.yml"
+{% endif %}
+{% if artemis_database_type == "postgresql" %}
+COMPOSE_FILE="test-server-postgresql-localci.yml"
+{% endif %}
+{% else %}
 {% if artemis_database_type == "mysql" %}
 COMPOSE_FILE="test-server-mysql.yml"
 {% endif %}
 {% if artemis_database_type == "postgresql" %}
 COMPOSE_FILE="test-server-postgresql.yml"
 {% endif %}
+{% endif %}
 ENV_FILE="{{ artemis_working_directory }}/docker.env"
-{% if version_control.localci is defined %}
+{% if continuous_integration.localci is defined %}
 export DOCKER_GROUP_ID=$(getent group docker | cut -d: -f3)
 {% endif %}
 

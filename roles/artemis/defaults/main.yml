@@ -203,4 +203,5 @@ artemis_spring_profile_apollon: "{% if apollon_url is defined and apollon_url is
 artemis_spring_profile_scheduling: "{% if node_id is defined and node_id == 1 %},scheduling{% endif %}"
 artemis_spring_profile_docker: "{% if use_docker %},docker{% endif %}"
 artemis_spring_profile_iris: "{% if iris is defined and iris is not none %},iris{% endif %}"
-artemis_spring_profiles: "{{ artemis_spring_profile_env }}{{ artemis_spring_profile_user_management }}{{ artemis_spring_profile_ldap }}{{ artemis_spring_profile_version_control }}{{ artemis_spring_profile_continuous_integration }}{{ artemis_spring_profile_athena }}{{ artemis_spring_profile_scheduling }}{{ artemis_spring_profile_docker }}{{ artemis_spring_profile_iris }}"
+artemis_spring_profile_lti: "{% if lti.oauth_secret is defined and lti.oauth_secret is not none %},lti{% endif %}"
+artemis_spring_profiles: "{{ artemis_spring_profile_env }}{{ artemis_spring_profile_user_management }}{{ artemis_spring_profile_ldap }}{{ artemis_spring_profile_version_control }}{{ artemis_spring_profile_continuous_integration }}{{ artemis_spring_profile_athena }}{{ artemis_spring_profile_scheduling }}{{ artemis_spring_profile_docker }}{{ artemis_spring_profile_iris }}{{ artemis_spring_profile_lti }}"

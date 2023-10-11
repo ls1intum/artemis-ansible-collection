@@ -178,7 +178,7 @@ artemis:
     artemis-authentication-token-value: {{ continuous_integration.jenkins.artemis_auth_token_value }}
 {% endif %}
 
-{% if version_control.localci is defined %}
+{% if continuous_integration.localci is defined %}
   continuous-integration:
     artemis-authentication-token-value: "demo"
 {% endif %}
