@@ -8,22 +8,6 @@ artemis_user_gid: 1337
 # jdk.yml task
 jdk_openjdk_version: 16
 
-# broker.yml task
-activemq_version: 2.28.0
-activemq_install_directory: /opt/activemq-distribution
-
-activemq_system_ram_proportion: 0.8
-activemq_force_reinstall: false # The broker will not be reinstalled if it already exists, unless this option is set
-
-# configure.yml task
-activemq_working_directory: /opt/broker
-activemq_username: "{{ broker.username }}"
-activemq_password: "{{ broker.password }}"
-
-
-# Configure the borker ip address - by default it uses the wireguard network
-activemq_ip_address: "{{ wireguard_interface_address }}"
-
 ##############################################################################
 # Registry
 ##############################################################################
