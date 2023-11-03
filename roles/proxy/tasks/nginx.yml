@@ -35,6 +35,20 @@
     name: nginx
     state: started
 
+- name: Ensure nginx sites-enabled exists
+  become: true
+  file:
+    path: /etc/nginx/sites-enabled
+    state: directory
+    mode: '0755'
+
+- name: Ensure nginx sites-available exists
+  become: true
+  file:
+    path: /etc/nginx/sites-available
+    state: directory
+    mode: '0755'
+
 - name: Generate DH Parameters (This will take a while....)
   become: true
   openssl_dhparam:
@@ -57,11 +71,9 @@
   become: true
   lineinfile:
     path: /etc/nginx/nginx.conf
-    regexp: '^\tworker_connections'
+    regexp: '^\s*worker_connections\s+\d+'
     line: "\tworker_connections {{ proxy_worker_connections }};"
-    insertafter: "events {"
-    firstmatch: yes
-    state: present
+    backrefs: true
   notify: restart nginx
 
 - name: Adjust worker_connections in nginx.conf
@@ -70,7 +82,18 @@
     path: /etc/nginx/nginx.conf
     regexp: '^\t(# )?server_names_hash_bucket_size'
     line: "\tserver_names_hash_bucket_size {{ proxy_server_names_hash_bucket_size }};"
-    insertafter: "events {"
+    insertafter: "http {"
+    firstmatch: yes
+    state: present
+  notify: restart nginx
+
+- name: Include sites-enabled in nginx.conf 
+  become: true
+  lineinfile:
+    path: /etc/nginx/nginx.conf
+    regexp: '^(\s*)include /etc/nginx/sites-enabled/\*;'
+    line: "\tinclude /etc/nginx/sites-enabled/*;"
+    insertafter: "http {"
     firstmatch: yes
     state: present
   notify: restart nginx

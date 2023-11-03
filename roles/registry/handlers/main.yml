@@ -1,5 +1,5 @@
-- name: restart broker
+- name: restart registry
   become: true
   service:
-    name: broker
+    name: registry
     state: restarted
