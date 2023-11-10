@@ -1,9 +1,6 @@
 # Check secrets for broker
 - include_tasks: variable_checks_broker.yml
 
-# Check secrets for registry
-- include_tasks: variable_checks_registry.yml
-
 # Create artemis user
 - include_tasks: user.yml
 
@@ -15,6 +12,3 @@
 
 # Configure ActiveMQ Broker
 - include_tasks: configure.yml
-
-# Install and configure JHipster Registry
-- include_tasks: registry.yml

@@ -1,7 +1,7 @@
 Role Name
 =========
 
-This role installes activemq and the jhipster registry and configures both for the use with artemis.
+This role installes activemq and configures it for the use with artemis.
 
 Role Variables
 --------------
@@ -16,12 +16,3 @@ broker:
   username: # Broker username (Also used by the Artemis role)
   password: # Broker password (Also used by the Artemis role)
 ```
-
-and
-
-```
-artemis_jhipster_jwt: #(Also used by the Artemis role)
-artemis_jhipster_registry_password: # (Also used by the Artemis role)
-```
-
-The Token can be generated with: `openssl rand -base64 64`. Consult the artemis role readme for details.

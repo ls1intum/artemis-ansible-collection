@@ -174,11 +174,13 @@ artemis_external_password_reset_link_de: "https://campus.tum.de/tumonline/ee/ui/
   #  user:
   #  password:
   #
+  #registry:  #FIXME Multinode
+  #  url:
 
 # Define node local hazelcast_address - Uses wireguard net by default
 hazelcast_address: "{% if is_multinode_install is defined and is_multinode_install|bool == true %}[{{ wireguard_interface_address }}]{% endif %}"
 
-artemis_eureka_urls: "{% if broker.url is defined and broker.url is not none %}http://admin:${jhipster.registry.password}@{{ broker.url }}:8761/eureka/{% endif %}"
+artemis_eureka_urls: "{% if registry.url is defined and registry.url is not none %}http://admin:${jhipster.registry.password}@{{ registry.url }}:8761/eureka/{% endif %}"
 artemis_eureka_instance_id: "{{ node_id }}"
 
 ##############################################################################
