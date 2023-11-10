@@ -1,21 +1,11 @@
 #!/bin/bash
 
 PROJECT_DIR="{{ artemis_working_directory }}/Artemis/docker"
-{% if continuous_integration.localci is defined %}
-{% if artemis_database_type == "mysql" %}
-COMPOSE_FILE="test-server-mysql-localci.yml"
-{% endif %}
-{% if artemis_database_type == "postgresql" %}
-COMPOSE_FILE="test-server-postgresql-localci.yml"
-{% endif %}
-{% else %}
-{% if artemis_database_type == "mysql" %}
-COMPOSE_FILE="test-server-mysql.yml"
-{% endif %}
-{% if artemis_database_type == "postgresql" %}
-COMPOSE_FILE="test-server-postgresql.yml"
-{% endif %}
-{% endif %}
+{% set default_compose_file = "test-server-" + artemis_database_type + ".yml" %}
+{% set localci_compose_file = "test-server-" + artemis_database_type + "-localci.yml" %}
+{% set multi_node_localci_compose_file = "test-server-multi-node-" + artemis_database_type + "-localci.yml" %}
+
+COMPOSE_FILE="{% if continuous_integration.localci is defined and is_multinode_install is defined %}{{ multi_node_localci_compose_file }}{% elif continuous_integration.localci is defined %}{{ localci_compose_file }}{% else %}{{ default_compose_file }}{% endif %}"
 ENV_FILE="{{ artemis_working_directory }}/docker.env"
 {% if continuous_integration.localci is defined %}
 export DOCKER_GROUP_ID=$(getent group docker | cut -d: -f3)
