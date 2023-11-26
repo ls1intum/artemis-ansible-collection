@@ -192,6 +192,9 @@ artemis:
   athena:
     url: {{ athena.url }}
     secret: {{ athena.secret }}
+    modules:
+      text: {{ athena.modules.text }}
+      programming: {{ athena.modules.programming }}
 {% endif %}
 
 {% if apollon_url is defined %}

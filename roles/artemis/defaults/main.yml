@@ -151,6 +151,9 @@ artemis_external_password_reset_link_de: "https://campus.tum.de/tumonline/ee/ui/
   #athena:
   #  url:
   #  secret:
+  #  modules:
+  #    text: module_text_cofee
+  #    programming: module_programming_themisml
   #
   #
   #lti:

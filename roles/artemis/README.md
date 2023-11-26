@@ -111,6 +111,9 @@ Athena configuration:
 athena:
   url:
   secret:
+  modules:
+    text: module_text_cofee
+    programming: module_programming_themisml
 ```
 ---
 
