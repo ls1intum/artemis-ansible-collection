@@ -112,8 +112,8 @@ athena:
   url:
   secret:
   modules:
-    text: module_text_cofee
-    programming: module_programming_themisml
+    text: # e.g. module_text_cofee or module_text_llm
+    programming: # e.g. module_programming_themisml or module_programming_llm
 ```
 ---
 
