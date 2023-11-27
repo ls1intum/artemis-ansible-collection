@@ -1,4 +1,4 @@
-Role Name
+Pyris
 =========
 
 This role installs Pyris on a host. The role supports single node installations via Docker
