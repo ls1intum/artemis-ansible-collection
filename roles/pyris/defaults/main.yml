@@ -1,0 +1,33 @@
+---
+pyris_build_version: "latest"
+pyris_working_directory: "/opt/pyris"
+
+##############################################################################
+# Pyris Linux Users
+##############################################################################
+
+pyris_user_name: "pyris"
+pyris_user_group: "pyris"
+pyris_user_uid: "1337"
+pyris_user_gid: "1337"
+
+pyris_create_deployment_user: false
+pyris_deployment_user_name: deployment
+pyris_deployment_user_uid: 1338
+pyris_deployment_user_public_key: ""
+pyris_deployment_user_comment: "User to deploy pyris to this host"
+
+
+##############################################################################
+# OpenAI Setup
+##############################################################################
+
+pyris_config: #FIXME
+
+
+##############################################################################
+# Nginx Setup
+##############################################################################
+
+proxy_ssl_certificate_path: #FIXME
+proxy_ssl_certificate_key_path: #FIXME

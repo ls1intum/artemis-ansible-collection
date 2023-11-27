@@ -1,0 +1,18 @@
+---
+# handlers file for pyris
+- name: restart docker compose pyris
+  become: true
+  shell: |
+    ./pyris-docker.sh restart {{ pyris_build_version }} {{ pyris_branch }}
+  args:
+    chdir: "{{ pyris_working_directory }}"
+  listen: "restart docker pyris"
+
+- name: start docker compose pyris
+  become: true
+  command: ./pyris-docker.sh start {{ pyris_build_version }} {{ pyris_branch }}
+  args:
+    chdir: "{{ pyris_working_directory }}"
+  listen: "start docker pyris"
+
+
