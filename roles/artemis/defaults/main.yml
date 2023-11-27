@@ -66,6 +66,8 @@ artemis_scheduling_continuous_plagiarism_control_trigger_time: 0 0 4 * * * # eve
 
 artemis_data_export_days_between_data_exports: 14
 
+artemis_plagiarism_checks_plagiarism_results_limit: 100
+
 artemis_ssh_key_path: /opt/keys
 artemis_ssh_key_name: "artemis_ssh_key"
 artemis_ssh_priv_key_value: #FIXME
