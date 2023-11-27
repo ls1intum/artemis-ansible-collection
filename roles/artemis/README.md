@@ -1,4 +1,4 @@
-Role Name
+Artemis
 =========
 
 This role installs artemis on a host. The role supports single node installations as well as multi node installations.

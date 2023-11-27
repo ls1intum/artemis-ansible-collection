@@ -1,0 +1,98 @@
+---
+- name: Ensure pyris group {{ pyris_user_group }} exists
+  become: yes
+  group:
+    name: "{{ pyris_user_group }}"
+    gid: "{{ pyris_user_gid }}"
+    state: present
+
+- name: Ensure pyris user {{ pyris_user_name }} exists
+  become: yes
+  user:
+    name: "{{ pyris_user_name }}"
+    state: present
+    uid: "{{ pyris_user_uid }}"
+    group: "{{ pyris_user_group }}"
+    groups: "docker"
+
+- name: Ensure deployment user {{ pyris_deployment_user_name }} exists
+  become: yes
+  user:
+    name: "{{ pyris_deployment_user_name }}"
+    comment: "{{ pyris_deployment_user_comment }}"
+    state: present
+    uid: "{{ pyris_deployment_user_uid }}"
+    group: "{{ pyris_user_group }}"
+    groups: "sudo,docker"
+    append: yes
+  when: (pyris_create_deployment_user | bool)
+
+- name: Ensure (limited) sudo privileges for user {{ pyris_deployment_user_name }}
+  become: yes
+  template:
+    src: pyris_deployment_sudoers.j2
+    dest: /etc/sudoers.d/pyris_deployment
+    validate: 'visudo -cf %s'
+    mode: 0440
+  when: (pyris_create_deployment_user | bool)
+
+- name: Authorize ssh-key for deployment user
+  become: yes
+  authorized_key:
+    user: "{{ pyris_deployment_user_name }}"
+    state: present
+    key: "{{ pyris_deployment_user_public_key }}"
+  when: (pyris_create_deployment_user | bool)
+
+- name: Create pyris directory
+  become: true
+  file:
+    path: "{{ pyris_working_directory }}"
+    state: directory
+    mode: '0775'
+
+- name: Set permissions for pyris directory
+  become: true
+  file:
+    path: "{{ pyris_working_directory }}"
+    state: directory
+    recurse: yes
+    owner: "{{ pyris_user_name }}"
+    group: "{{ pyris_user_group }}"
+  register: permissions
+  notify: restart docker pyris
+
+- name: Copy docker.env to pyris directory
+  become: true
+  template:
+    src: "templates/docker.env.j2"
+    dest: "{{ pyris_working_directory }}/docker.env"
+    owner: "{{ pyris_user_name }}"
+    group: "{{ pyris_user_group }}"
+    mode: 0660
+  register: config
+  notify: restart docker pyris
+
+- name: Copy application.yml to pyris directory
+  become: true
+  template:
+    src: "templates/application.yml.j2"
+    dest: "{{ pyris_working_directory }}/application.yml"
+    owner: "{{ pyris_user_name }}"
+    group: "{{ pyris_user_group }}"
+    mode: 0660
+  register: config
+  notify: restart docker pyris
+
+- name: Copy pyris-docker.sh helper script
+  become: true
+  template:
+    src: "templates/pyris-docker.sh.j2"
+    dest: "{{ pyris_working_directory }}/pyris-docker.sh"
+    owner: "{{ pyris_user_name }}"
+    group: "{{ pyris_user_group }}"
+    mode: 0770
+  register: config
+  notify: restart docker pyris
+
+
