@@ -56,6 +56,21 @@
   register: config
   notify: restart docker artemis
 
+- name: Copy node env files
+  loop: "{{ range(1, artemis_node_count + 1) }}"
+  loop_control:
+    loop_var: docker_node_id
+  when: is_multinode_install
+  become: true
+  template:
+    src: "templates/node.env.j2"
+    dest: "{{ artemis_working_directory }}/node{{ docker_node_id }}.env"
+    owner: "{{ artemis_user_name }}"
+    group: "{{ artemis_user_group }}"
+    mode: 0660
+  register: config
+  notify: restart docker artemis
+
 - name: Create artemis ssh key directory
   become: true
   file:

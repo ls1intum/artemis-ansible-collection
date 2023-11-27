@@ -9,6 +9,7 @@ artemis_server_port: 8080
 install_artemis: true
 upgrade_artemis: false
 use_docker: false
+artemis_node_count: 1
 
 check_variables: true
 
@@ -178,7 +179,7 @@ artemis_external_password_reset_link_de: "https://campus.tum.de/tumonline/ee/ui/
   #  url:
 
 # Define node local hazelcast_address - Uses wireguard net by default
-hazelcast_address: "{% if is_multinode_install is defined and is_multinode_install|bool == true %}[{{ wireguard_interface_address }}]{% endif %}"
+hazelcast_address: "{% if is_multinode_install is defined and is_multinode_install|bool == true and not use_docker%}[{{ wireguard_interface_address }}]{% endif %}"
 
 artemis_eureka_urls: "{% if registry.url is defined and registry.url is not none %}http://admin:${jhipster.registry.password}@{{ registry.url }}:8761/eureka/{% endif %}"
 artemis_eureka_instance_id: "{{ node_id }}"
@@ -197,12 +198,13 @@ artemis_eureka_instance_id: "{{ node_id }}"
 # Compute Spring Profiles from set variables
 artemis_spring_profile_env: "prod"
 artemis_spring_profile_user_management: "{% if user_management.jira is defined and user_management.jira is not none %},jira{% endif %}" # none HAS to be lowercase ¯\_(ツ)_/¯
-artemis_spring_profile_ldap: "{% if ldap.password is defined and ldap.password is not none %},ldap{% endif %}"
-artemis_spring_profile_version_control: "{% if version_control.bitbucket is defined and version_control.bitbucket is not none %},bitbucket{% elif version_control.gitlab is defined and version_control.gitlab is not none %},gitlab{% endif %}"
-artemis_spring_profile_continuous_integration: "{% if continuous_integration.bamboo is defined and continuous_integration.bamboo is not none %},bamboo{% elif continuous_integration.jenkins is defined and continuous_integration.jenkins is not none %},jenkins{% endif %}"
+artemis_spring_profile_ldap: "{% if ldap.password is defined and ldap.password is not none %}{% if user_management.jira is defined and user_management.jira is not none %},ldap{% else %},ldap-only{% endif %}{% endif %}"
+artemis_spring_profile_version_control: "{% if version_control.bitbucket is defined and version_control.bitbucket is not none %},bitbucket{% elif version_control.gitlab is defined and version_control.gitlab is not none %},gitlab{% elif version_control.localvc is defined and version_control.localvc is not none %},localvc{% endif %}"
+artemis_spring_profile_continuous_integration: "{% if continuous_integration.bamboo is defined and continuous_integration.bamboo is not none %},bamboo{% elif continuous_integration.jenkins is defined and continuous_integration.jenkins is not none %},jenkins{% elif continuous_integration.localci is defined and continuous_integration.localci is not none %},localci{% endif %}"
 artemis_spring_profile_athena: "{% if athena is defined and athena is not none %},athena{% endif %}"
 artemis_spring_profile_apollon: "{% if apollon_url is defined and apollon_url is not none %},apollon{% endif %}"
 artemis_spring_profile_scheduling: "{% if node_id is defined and node_id == 1 %},scheduling{% endif %}"
 artemis_spring_profile_docker: "{% if use_docker %},docker{% endif %}"
 artemis_spring_profile_iris: "{% if iris is defined and iris is not none %},iris{% endif %}"
-artemis_spring_profiles: "{{ artemis_spring_profile_env }}{{ artemis_spring_profile_user_management }}{{ artemis_spring_profile_ldap }}{{ artemis_spring_profile_version_control }}{{ artemis_spring_profile_continuous_integration }}{{ artemis_spring_profile_athena }}{{ artemis_spring_profile_scheduling }}{{ artemis_spring_profile_docker }}{{ artemis_spring_profile_iris }}"
+artemis_spring_profile_lti: "{% if lti.oauth_secret is defined and lti.oauth_secret is not none %},lti{% endif %}"
+artemis_spring_profiles: "{{ artemis_spring_profile_env }}{{ artemis_spring_profile_user_management }}{{ artemis_spring_profile_ldap }}{{ artemis_spring_profile_version_control }}{{ artemis_spring_profile_continuous_integration }}{{ artemis_spring_profile_athena }}{{ artemis_spring_profile_scheduling }}{{ artemis_spring_profile_docker }}{{ artemis_spring_profile_iris }}{{ artemis_spring_profile_lti }}"
