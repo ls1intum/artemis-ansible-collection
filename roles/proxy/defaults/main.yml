@@ -38,3 +38,6 @@ proxy_send_timeout: "900s"
 proxy_read_timeout: "900s"
 fastcgi_send_timeout: "900s"
 fastcgi_read_timeout: "900s"
+
+# Redirecting all requests from other URLs to the main URL
+proxy_redirect_main_url:
