@@ -23,33 +23,3 @@ activemq_password: "{{ broker.password }}"
 
 # Configure the borker ip address - by default it uses the wireguard network
 activemq_ip_address: "{{ wireguard_interface_address }}"
-
-##############################################################################
-# Registry
-##############################################################################
-
-registry_password: "{{ artemis_jhipster_registry_password }}"
-registry_jwt: "{{ artemis_jhipster_jwt }}"
-
-registry_version: 7.3.0
-registry_working_directory: /opt/registry
-
-registry_application_prod_registry_password: "{{ registry_password }}"
-registry_application_prod_spring_password: "{{ registry_password }}"
-
-# Configure the registry ip address - by default it uses the wireguard network
-registry_ip_address: "{{ wireguard_interface_address }}"
-
-registry_external_host: "" # External host under which the registry UI should be reachable (excluding https://)
-
-registry_application_prod_jwt: "{{ registry_jwt }}"
-registry_application_jwt:  "{{ registry_jwt }}"
-registry_bootstrap_prod_jwt:  "{{ registry_jwt }}"
-
-registry_application_prod_file: "{{ registry_working_directory }}/application-prod.yml"
-registry_bootstrap_prod_file: "{{ registry_working_directory }}/bootstrap-prod.yml"
-registry_application_file: "{{ registry_working_directory }}/config-server/application.yml"
-registry_instance_id: registry:1
-
-proxy_site_template: reverse_proxy # Name of the site loaded within nginx
-proxy_target_port: 8761

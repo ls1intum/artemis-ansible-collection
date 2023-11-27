@@ -147,6 +147,13 @@ artemis:
     versionControlAccessToken: true
 {% endif %}
 
+{% if version_control.localvc is defined %}
+  version-control:
+    url: {{ version_control.localvc.url }}
+    local-vcs-repo-path: {{ artemis_repo_basepath }}/local-vcs-repos
+    user: "demo"
+    password: "demo"
+{% endif %}
 
 {% if continuous_integration.bamboo is defined %}
   continuous-integration:
@@ -171,6 +178,10 @@ artemis:
     artemis-authentication-token-value: {{ continuous_integration.jenkins.artemis_auth_token_value }}
 {% endif %}
 
+{% if continuous_integration.localci is defined %}
+  continuous-integration:
+    artemis-authentication-token-value: "demo"
+{% endif %}
 
 
 {% if lti is defined %}
