@@ -10,6 +10,12 @@ upstream artemis {
 {% endfor %}
 }
 
+log_format quic '$remote_addr - $remote_user [$time_local] '
+                    '"$request" $status $body_bytes_sent '
+                    '"$http_referer" "$http_user_agent" "$http3"';
+
+access_log logs/access.log quic;
+
 # Remove nginx version from HTTP response
 server_tokens off;
 
@@ -25,8 +31,15 @@ server {
 }
 
 server {
-    listen 443 ssl http2;
-    listen [::]:443 ssl http2;
+    listen 443 ssl;
+    listen 443 quic reuseport;
+    listen [::]:443 ssl;
+    listen [::]:443 quic reuseport;
+    http2 on;
+    http3 on;
+    http3_hq on;
+    quic_retry on;
+    
     server_name _;
     ssl_certificate     {{ proxy_ssl_certificate_path }};
     ssl_certificate_key {{ proxy_ssl_certificate_key_path }};
@@ -40,7 +53,8 @@ server {
     ssl_session_tickets off;
     ssl_stapling on;
     ssl_stapling_verify on;
-#   ssl_early_data on;
+    ssl_early_data on;
+    quic_gso on;
     resolver {{ proxy_resolver }};
     resolver_timeout 5s;
     add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload";
@@ -67,14 +81,16 @@ server {
         fastcgi_send_timeout 900s;
         fastcgi_read_timeout 900s;
         client_max_body_size 128M;
+        # used to advertise the availability of HTTP/3
+        add_header alt-svc 'h3=":443"; ma=2592000,h3-29=":443"; ma=2592000';
     }
 
-{% if proxy_mailto is not none %}
+    {% if proxy_mailto is not none %}
     location /mailto {
         default_type text/html;
         return 200 '<html><head><meta http-equiv="Refresh" content="0; url=mailto:{{ proxy_mailto }}" /></head></html>';
     }
-{% endif %}
+    {% endif %}
 
     location /api/authenticate {
         proxy_pass http://artemis/api/authenticate;
