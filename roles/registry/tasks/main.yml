@@ -1,0 +1,11 @@
+# Check secrets for registry
+- include_tasks: variable_checks_registry.yml
+
+# Create artemis user
+- include_tasks: user.yml
+
+# Install Java JDK
+- include_tasks: jdk.yml
+
+# Install and configure JHipster Registry
+- include_tasks: registry.yml
