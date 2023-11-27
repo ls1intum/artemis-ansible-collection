@@ -50,14 +50,14 @@ server {
 
     return 301 https://{{ proxy_redirect_main_url }}$request_uri;
     }
-    {% endif %}
+{% endif %}
 
 server {
-    {% if proxy_redirect_main_url is not none %}
+{% if proxy_redirect_main_url is not none %}
     server_name {{ proxy_redirect_main_url }};
-    {% else %}
+{% else %}
     server_name _;
-    {% endif %}
+{% endif %}
     ssl_certificate     {{ proxy_ssl_certificate_path }};
     ssl_certificate_key {{ proxy_ssl_certificate_key_path }};
     ssl_protocols       TLSv1.2 TLSv1.3;
