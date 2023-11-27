@@ -85,12 +85,12 @@ server {
         add_header alt-svc 'h3=":443"; ma=2592000,h3-29=":443"; ma=2592000';
     }
 
-    {% if proxy_mailto is not none %}
+{% if proxy_mailto is not none %}
     location /mailto {
         default_type text/html;
         return 200 '<html><head><meta http-equiv="Refresh" content="0; url=mailto:{{ proxy_mailto }}" /></head></html>';
     }
-    {% endif %}
+{% endif %}
 
     location /api/authenticate {
         proxy_pass http://artemis/api/authenticate;
