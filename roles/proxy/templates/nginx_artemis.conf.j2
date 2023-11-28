@@ -53,6 +53,8 @@ server {
 {% endif %}
 
 server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
 {% if proxy_redirect_main_url is not none %}
     server_name {{ proxy_redirect_main_url }};
 {% else %}
