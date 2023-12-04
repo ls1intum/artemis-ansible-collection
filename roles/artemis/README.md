@@ -22,7 +22,7 @@ artemis_jhipster_jwt: #FIXME
 
 ```
 
-The JWT Token can be generated with: `openssl rand -base64 64`
+The JWT secret can be generated with: `openssl rand -base64 64 | tr -d '\n'`.
 
 
 ### Additional Variables for external systems
