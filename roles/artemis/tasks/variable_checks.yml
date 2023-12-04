@@ -26,7 +26,6 @@
     msg: "No artemis_jhipster_jwt is configured!"
   when:
     - artemis_jhipster_jwt is undefined or artemis_jhipster_jwt is none
-    - is_multinode_install|bool
 
 - name: Check if artemis_jhipster_registry_password is set
   fail:
