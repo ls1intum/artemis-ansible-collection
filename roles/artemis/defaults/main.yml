@@ -47,7 +47,7 @@ openjdk_version: 17
 artemis_internal_admin_user: artemis_admin
 artemis_internal_admin_password:
 
-artemis_jhipster_jwt: #FIXME Multinode
+artemis_jhipster_jwt: #FIXME
 artemis_jhipster_registry_password: #FIXME Multinode
 
 artemis_email: artemis.in@tum.de

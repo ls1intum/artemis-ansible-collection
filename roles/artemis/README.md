@@ -18,7 +18,11 @@ artemis_internal_admin_password: #FIXME
 proxy_ssl_certificate_path:  #FIXME
 proxy_ssl_certificate_key_path: #FIXME
 
+artemis_jhipster_jwt: #FIXME
+
 ```
+
+The JWT secret can be generated with: `openssl rand -base64 64 | tr -d '\n'`.
 
 
 ### Additional Variables for external systems
@@ -146,7 +150,6 @@ lti:
 
 Registry Configuration:
 ```
-artemis_jhipster_jwt: #FIXME Multinode
 artemis_jhipster_registry_password: #FIXME Multinode
 
 ```
