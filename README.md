@@ -43,7 +43,7 @@ ansible-galaxy install -r ~/.ansible/collections/ansible_collections/ls1intum/ar
 
 # Documentation
 
-You can find the documentation for Artemis [here](https://docs.artemis.ase.in.tum.de).
+You can find the documentation for Artemis [here](https://docs.artemis.cit.tum.de).
 Each role includes a readme and default configuration. Consult these for more information.
 
  **Use the examples in the examples folder as starting point for your deployment**

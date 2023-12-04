@@ -26,13 +26,13 @@ dependencies: {}
 repository: https://github.com/ls1intum/ls1intum.artemis
 
 # The URL to any online docs
-documentation: https://docs.artemis.ase.in.tum.de
+documentation: https://docs.artemis.cit.tum.de
 
 # The URL to the homepage of the collection/project
-homepage: https://artemis.ase.in.tum.de
+homepage: https://artemis.cit.tum.de
 
 # The URL to the collection issue tracker
-issues: https://github.com/ls1intum/ls1intum.artemis/issues
+issues: https://github.com/ls1intum/artemis-ansible-collection/issues
 
 # A list of file glob-like patterns used to filter any files or directories that should not be included in the build
 # artifact. A pattern is matched from the relative path of the file or directory of the collection directory. This
