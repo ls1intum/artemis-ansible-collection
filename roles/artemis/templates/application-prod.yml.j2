@@ -229,13 +229,16 @@ artemis:
 
 jhipster:
 
-{% if is_multinode_install|bool == true and artemis_jhipster_jwt is not none and artemis_jhipster_registry_password is not none  %}
+{% if artemis_jhipster_jwt is not none %}
   security:
     authentication:
       jwt:
         base64-secret: {{ artemis_jhipster_jwt }}
         token-validity-in-seconds: 259200                   # Token is valid 3 days
         token-validity-in-seconds-for-remember-me: 2592000  # Token is valid 30 days
+{% endif %}
+
+{% if is_multinode_install|bool == true and artemis_jhipster_registry_password is not none %}
   registry:
     password: {{ artemis_jhipster_registry_password }}
 {% endif %}
