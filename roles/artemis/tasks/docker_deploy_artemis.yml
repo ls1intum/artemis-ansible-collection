@@ -23,6 +23,19 @@
   register: permissions
   notify: restart docker artemis
 
+- name: Set permissions for postgres directory
+  become: true
+  file:
+    path: "{{ artemis_working_directory }}/data/database"
+    state: directory
+    recurse: yes
+    # Must match UID and GID used for the postgres user
+    # See e.g. https://hub.docker.com/layers/library/postgres/16.1-alpine/images/sha256-b788d196db04847b17df664f4ae18062e712328d225b9ff75d4d7cd91a16c374?context=explore
+    owner: "70"
+    group: "70"
+  when: artemis_database_type == "postgresql"
+  notify: restart docker artemis
+
 - name: Copy docker.env to artemis directory
   become: true
   template:
