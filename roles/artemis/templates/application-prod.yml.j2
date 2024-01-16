@@ -284,7 +284,13 @@ eureka:
     appname: Artemis
     instanceId: Artemis:{{ artemis_eureka_instance_id }}
 {% endif %}
-
+{% if aeolus.url is defined  %}
+aeolus:
+  url: {{ aeolus.url }}
+{% if aeolus.secret is defined  %}
+  secret-token: {{ aeolus.secret }}
+{% endif %}
+{% endif %}
 logging:
   file:
     name: '{{ artemis_working_directory }}/artemis.log'

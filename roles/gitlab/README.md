@@ -1,7 +1,7 @@
 Role Name
 =========
 
-This role installes GitLab inside a Docker container for the use with artemis.
+This role installs GitLab inside a Docker container for the use with artemis.
 
 Role Variables
 --------------
