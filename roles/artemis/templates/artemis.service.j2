@@ -15,6 +15,7 @@ ExecStart=/usr/bin/java \
     -Djava.security.egd=file:/dev/./urandom \
     -Xmx{{ (artemis_system_ram_proportion * ansible_memory_mb.real.total) | int }}m \
     -XX:+ShowCodeDetailsInExceptionMessages \
+    -XX:+HeapDumpOnOutOfMemoryError \
     --add-modules java.se \
     --add-exports java.base/jdk.internal.ref=ALL-UNNAMED \
     --add-exports java.naming/com.sun.jndi.ldap=ALL-UNNAMED \
