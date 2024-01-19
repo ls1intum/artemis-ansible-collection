@@ -227,6 +227,14 @@ artemis:
     secret-token: {{ iris.secret }}
 {% endif %}
 
+{% if aeolus.url is defined and aeolus.url is not none %}
+aeolus:
+  url: {{ aeolus.url }}
+{% if aeolus.secret is defined and aeolus.secret is not none %}
+  secret-token: {{ aeolus.secret }}
+{% endif %}
+{% endif %}
+
 jhipster:
 
 {% if artemis_jhipster_jwt is not none %}
@@ -284,13 +292,7 @@ eureka:
     appname: Artemis
     instanceId: Artemis:{{ artemis_eureka_instance_id }}
 {% endif %}
-{% if aeolus.url is defined  %}
-aeolus:
-  url: {{ aeolus.url }}
-{% if aeolus.secret is defined  %}
-  secret-token: {{ aeolus.secret }}
-{% endif %}
-{% endif %}
+
 logging:
   file:
     name: '{{ artemis_working_directory }}/artemis.log'
