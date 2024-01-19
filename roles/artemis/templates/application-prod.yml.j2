@@ -180,9 +180,20 @@ artemis:
 
 {% if continuous_integration.localci is defined %}
   continuous-integration:
-    artemis-authentication-token-value: "demo"
+    specify-thread-pool-size: {{ continuous_integration.localci.thread_pool_size is defined }}
+{% if continuous_integration.localci.thread_pool_size is defined %}
+    thread-pool-size: {{ continuous_integration.localci.thread_pool_size }}
 {% endif %}
-
+    artemis-authentication-token-value: "demo"
+{% if continuous_integration.localci.proxy is defined %}
+    proxies:
+      use-system-proxy: true
+      default:
+        http-proxy: {{ continuous_integration.localci.proxy.http_proxy }}
+        https-proxy: {{ continuous_integration.localci.proxy.https_proxy }}
+        no-proxy: {{ continuous_integration.localci.proxy.no_proxy }}
+{% endif %}
+{% endif %}
 
 {% if lti is defined %}
   lti:
