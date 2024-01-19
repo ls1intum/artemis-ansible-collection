@@ -183,6 +183,11 @@ artemis:
     artemis-authentication-token-value: "demo"
 {% endif %}
 
+{% if continuous_integration.gitlabci is defined %}
+  continuous-integration:
+    build-timeout: 30
+    artemis-authentication-token-value: {{ continuous_integration.gitlabci.result_token }}
+{% endif %}
 
 {% if lti is defined %}
   lti:
