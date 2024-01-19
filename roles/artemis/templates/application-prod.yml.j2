@@ -187,6 +187,7 @@ artemis:
   continuous-integration:
     build-timeout: 30
     artemis-authentication-token-value: {{ continuous_integration.gitlabci.result_token }}
+    notification-plugin: "ls1tum/artemis-notification-plugin:1.0.0"
 {% endif %}
 
 {% if lti is defined %}
