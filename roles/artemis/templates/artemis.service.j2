@@ -13,6 +13,7 @@ ExecStart=/usr/bin/java \
     -Dfile.encoding=UTF-8 \
     -Dsun.jnu.encoding=UTF-8 \
     -Djava.security.egd=file:/dev/./urandom \
+    -Dhazelcast.slow.operation.detector.stacktrace.logging.enabled=true \
     -Xmx{{ (artemis_system_ram_proportion * ansible_memory_mb.real.total) | int }}m \
     -XX:+ShowCodeDetailsInExceptionMessages \
     -XX:+HeapDumpOnOutOfMemoryError \
