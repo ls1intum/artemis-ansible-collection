@@ -181,6 +181,8 @@ artemis:
 {% if continuous_integration.localci is defined %}
   continuous-integration:
     artemis-authentication-token-value: "demo"
+    specify-concurrent-builds: true
+    concurrent-build-size: 4
 {% endif %}
 
 
