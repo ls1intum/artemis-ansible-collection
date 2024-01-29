@@ -228,8 +228,8 @@ artemis:
 {% if aeolus.url is defined and aeolus.url is not none %}
 aeolus:
   url: {{ aeolus.url }}
-{% if aeolus.secret is defined and aeolus.secret is not none %}
-  secret-token: {{ aeolus.secret }}
+{% if aeolus.token is defined and aeolus.token is not none %}
+  token: {{ aeolus.token }}
 {% endif %}
 {% endif %}
 
