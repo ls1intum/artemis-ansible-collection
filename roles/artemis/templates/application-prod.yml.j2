@@ -186,10 +186,11 @@ artemis:
 {% endif %}
 
 {% if continuous_integration.hades is defined %}
-  hades:
-    url: {{ continuous_integration.hades.url }}
+  continuous-integration:
     token: {{ continuous_integration.hades.token }}
 
+  hades:
+    url: {{ continuous_integration.hades.url }}
     images:
         clone-image: {{ continuous_integration.hades.clone_image }}
         result-image: {{ continuous_integration.hades.result_image }}
