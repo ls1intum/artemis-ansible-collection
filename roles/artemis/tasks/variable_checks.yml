@@ -127,3 +127,40 @@
     - continuous_integration.bamboo is defined
     - continuous_integration.bamboo.bitbucket_link_name is undefined or continuous_integration.bamboo.bitbucket_link_name is none
 
+##############################################################################
+# Check Hades Variables
+##############################################################################
+
+- name: hades variables set
+  debug:
+    msg: "Continuous Integration hades Variables: {{ continuous_integration.hades }}"
+  when:
+    - continuous_integration.hades is defined
+
+- name: Check if hades url variables is set
+  fail:
+    msg: "hades configuration is incomplete - Make sure to add hades url"
+  when:
+    - continuous_integration.hades is defined
+    - continuous_integration.hades.url is undefined or continuous_integration.hades.url is none
+
+- name: Check if hades token variables is set
+  fail:
+    msg: "hades configuration is incomplete - Make sure to add hades token"
+  when:
+    - continuous_integration.hades is defined
+    - continuous_integration.hades.token is undefined or continuous_integration.hades.token is none
+
+- name: Check if hades clone_image variables is set
+  fail:
+    msg: "hades configuration is incomplete - Make sure to add hades clone_image"
+  when:
+    - continuous_integration.hades is defined
+    - continuous_integration.hades.clone_image is undefined or continuous_integration.hades.clone_image is none
+
+- name: Check if hades result_image variables is set
+  fail:
+    msg: "hades configuration is incomplete - Make sure to add hades result_image"
+  when:
+    - continuous_integration.hades is defined
+    - continuous_integration.hades.result_image is undefined or continuous_integration.hades.result_image is none

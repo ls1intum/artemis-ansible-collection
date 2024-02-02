@@ -185,6 +185,15 @@ artemis:
     concurrent-build-size: 4
 {% endif %}
 
+{% if continuous_integration.hades is defined %}
+  hades:
+    url: {{ continuous_integration.hades.url }}
+    token: {{ continuous_integration.hades.token }}
+
+    images:
+        clone-image: {{ continuous_integration.hades.clone_image }}
+        result-image: {{ continuous_integration.hades.result_image }}
+{% endif %}
 
 {% if lti is defined %}
   lti:
