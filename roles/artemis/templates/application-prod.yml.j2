@@ -181,6 +181,8 @@ artemis:
 {% if continuous_integration.localci is defined %}
   continuous-integration:
     artemis-authentication-token-value: "demo"
+    specify-concurrent-builds: true
+    concurrent-build-size: 4
 {% endif %}
 
 
@@ -203,9 +205,7 @@ artemis:
   athena:
     url: {{ athena.url }}
     secret: {{ athena.secret }}
-    modules:
-      text: {{ athena.modules.text }}
-      programming: {{ athena.modules.programming }}
+    restricted-modules: {{ athena.restricted-modules }}
 {% endif %}
 
 {% if apollon_url is defined %}
