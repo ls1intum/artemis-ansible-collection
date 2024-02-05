@@ -127,3 +127,19 @@
     - continuous_integration.bamboo is defined
     - continuous_integration.bamboo.bitbucket_link_name is undefined or continuous_integration.bamboo.bitbucket_link_name is none
 
+##############################################################################
+# Check localci Variables
+##############################################################################
+
+- name: Check if is either build_agent or core_node
+  fail:
+    msg: "localci configuration is incomplete - Make sure that each node is either build agent or core node"
+  when:
+    - continuous_integration.localci is defined
+    - not continuous_integration.localci.is_core_node | default(false) and not continuous_integration.localci.is_build_agent | default(false)
+- name: Check that node 1 is a core_node
+  fail:
+    msg: "localci configuration is incomplete - Make sure that node 1 is a core_node"
+  when:
+    - continuous_integration.localci is defined
+    - node_id is defined and node_id == 1 and not continuous_integration.localci.is_core_node | default(false)
