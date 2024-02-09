@@ -154,6 +154,15 @@ artemis_external_password_reset_link_de: "https://campus.tum.de/tumonline/ee/ui/
   #  localci:
   #    is_core_node: true
   #    is_build_agent: true
+  #    concurrent_build_size: 2
+  #    thread_pool_size: 2
+  #    proxy:
+  #      http_proxy: "http://proxy:8080"
+  #      https_proxy: "http://proxy:8080"
+  #      no_proxy: "localhost"
+  #    image_cleanup:
+  #      expiry_days: 3
+  #      schedule_time: "0 0 4 * * *"
   #
   #athena:
   #  url:
