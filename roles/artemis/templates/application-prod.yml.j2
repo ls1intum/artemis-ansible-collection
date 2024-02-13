@@ -187,13 +187,14 @@ artemis:
 
 {% if continuous_integration.hades is defined %}
   continuous-integration:
-    token: {{ continuous_integration.hades.token }}
-
-  hades:
     url: {{ continuous_integration.hades.url }}
-    images:
-        clone-image: {{ continuous_integration.hades.clone_image }}
-        result-image: {{ continuous_integration.hades.result_image }}
+    artemis-authentication-token-value: {{ continuous_integration.hades.artemis_auth_token_value }}
+    hades:
+      username: {{ continuous_integration.hades.username }}
+      password: {{ continuous_integration.hades.password }}
+      images:
+          clone-image: {{ continuous_integration.hades.clone_image }}
+          result-image: {{ continuous_integration.hades.result_image }}
 {% endif %}
 
 {% if lti is defined %}

@@ -153,9 +153,13 @@ artemis_external_password_reset_link_de: "https://campus.tum.de/tumonline/ee/ui/
   #
   #  hades:
   #    url:
-  #    token:
-  #    clone_image:
-  #    result_image:
+  #    artemis_auth_token_value:
+  #    username:
+  #    password:
+  #    images:
+  #      clone_image:
+  #      result_image:
+  #    
   #
   #athena:
   #  url:

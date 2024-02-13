@@ -144,23 +144,37 @@
     - continuous_integration.hades is defined
     - continuous_integration.hades.url is undefined or continuous_integration.hades.url is none
 
-- name: Check if hades token variables is set
+- name: Check if hades username variables is set
   fail:
-    msg: "hades configuration is incomplete - Make sure to add hades token"
+    msg: "hades configuration is incomplete - Make sure to add hades username"
   when:
     - continuous_integration.hades is defined
-    - continuous_integration.hades.token is undefined or continuous_integration.hades.token is none
+    - continuous_integration.hades.username is undefined or continuous_integration.hades.username is none
+
+- name: Check if hades password variables is set
+  fail:
+    msg: "hades configuration is incomplete - Make sure to add hades password"
+  when:
+    - continuous_integration.hades is defined
+    - continuous_integration.hades.password is undefined or continuous_integration.hades.password is none
+
+- name: Check if hades artemis_auth_token_value variables is set
+  fail:
+    msg: "hades configuration is incomplete - Make sure to add hades artemis_auth_token_value"
+  when:
+    - continuous_integration.hades is defined
+    - continuous_integration.hades.artemis_auth_token_value is undefined or continuous_integration.hades.artemis_auth_token_value is none
 
 - name: Check if hades clone_image variables is set
   fail:
     msg: "hades configuration is incomplete - Make sure to add hades clone_image"
   when:
     - continuous_integration.hades is defined
-    - continuous_integration.hades.clone_image is undefined or continuous_integration.hades.clone_image is none
+    - continuous_integration.hades.images.clone_image is undefined or continuous_integration.hades.images.clone_image is none
 
 - name: Check if hades result_image variables is set
   fail:
     msg: "hades configuration is incomplete - Make sure to add hades result_image"
   when:
     - continuous_integration.hades is defined
-    - continuous_integration.hades.result_image is undefined or continuous_integration.hades.result_image is none
+    - continuous_integration.hades.images.result_image is undefined or continuous_integration.hades.images.result_image is none
