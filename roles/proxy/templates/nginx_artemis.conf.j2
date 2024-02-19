@@ -91,7 +91,7 @@ server {
         return 404;
     }
 
-    error_page 503 /503.html;
+    error_page 502 =503 /503.html;
     location /503.html {
         root /usr/share/nginx/html;
         internal;
