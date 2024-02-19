@@ -89,10 +89,13 @@
 
 - name: Create artemis data-export directory
   become: true
+  become_user: "{{ artemis_user_name }}"
   file:
     path: "{{ artemis_data_export_path }}"
     state: directory
     mode: '0775'
+    owner: "{{ artemis_user_name }}"
+    group: "{{ artemis_user_group }}"
   when: artemis_data_export_path is not none and artemis_data_export_path != ""
 
 - name: Set permissions for artemis data-export directory
