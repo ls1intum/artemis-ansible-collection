@@ -131,11 +131,17 @@
     state: absent
   notify: reload nginx
 
-- name: Copy nginx 502.html
+- name: Ensure old 502.html error page is removed
+  become: true
+  file:
+    path: /usr/share/nginx/html/502.html
+    state: absent
+
+- name: Copy nginx 503.html
   become: true
   copy:
-    src: files/nginx_502.html
-    dest: /usr/share/nginx/html/502.html
+    src: files/nginx_503.html
+    dest: /usr/share/nginx/html/503.html
     mode: 0644
   notify: reload nginx
 
