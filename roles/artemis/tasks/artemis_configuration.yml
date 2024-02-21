@@ -108,6 +108,13 @@
     group: "{{ artemis_user_group }}"
   when: artemis_data_export_path is not none and artemis_data_export_path != ""
 
+- name: Add artemis user to docker group
+  become: true
+  user:
+    name: "{{ artemis_user_name }}"
+    groups: docker
+    append: yes
+
 - name: Copy artemis.service systemd configuration
   become: true
   template:

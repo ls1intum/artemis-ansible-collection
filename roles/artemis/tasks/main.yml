@@ -5,6 +5,8 @@
     - (check_variables | bool)
     - not (only_update_artemis_config | bool)
 
+- include_tasks: node_checks.yml
+
 # Create Artemis and (if desired) deployment users.
 - include_tasks: users.yml
   when: 
