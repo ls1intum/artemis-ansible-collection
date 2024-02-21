@@ -181,10 +181,29 @@ artemis:
 {% if continuous_integration.localci is defined %}
   continuous-integration:
     artemis-authentication-token-value: "demo"
-    specify-concurrent-builds: true
-    concurrent-build-size: 4
+    specify-concurrent-builds: {{ (continuous_integration.localci.concurrent_build_size is defined) | lower }}
+{% if continuous_integration.localci.concurrent_build_size is defined %}
+    concurrent-build-size: {{ continuous_integration.localci.concurrent_build_size }}
 {% endif %}
-
+    specify-thread-pool-size: {{ (continuous_integration.localci.thread_pool_size is defined) | lower }}
+{% if continuous_integration.localci.thread_pool_size is defined %}
+    thread-pool-size: {{ continuous_integration.localci.thread_pool_size }}
+{% endif %}
+{% if continuous_integration.localci.proxy is defined %}
+    proxies:
+      use-system-proxy: true
+      default:
+        http-proxy: {{ continuous_integration.localci.proxy.http_proxy }}
+        https-proxy: {{ continuous_integration.localci.proxy.https_proxy }}
+        no-proxy: {{ continuous_integration.localci.proxy.no_proxy }}
+{% endif %}
+{% if continuous_integration.localci.image_cleanup is defined %}
+    image-cleanup:
+      enabled: true
+      expiry-days: {{ continuous_integration.localci.image_cleanup.expiry_days }}
+      cleanup-schedule-time: {{ continuous_integration.localci.image_cleanup.schedule_time }}
+{% endif %}
+{% endif %}
 
 {% if lti is defined %}
   lti:

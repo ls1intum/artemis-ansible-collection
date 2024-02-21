@@ -12,7 +12,7 @@
     state: present
     uid: "{{ artemis_user_uid }}"
     group: "{{ artemis_user_group }}"
-    groups: "{% if use_docker %}docker{% endif %}"
+    groups: "{% if use_docker or continuous_integration.localci %}docker{% endif %}"
 
 - name: Ensure deployment user {{ artemis_deployment_user_name }} exists
   become: yes
