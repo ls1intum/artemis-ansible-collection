@@ -151,6 +151,7 @@ artemis:
   version-control:
     url: {{ version_control.localvc.url }}
     local-vcs-repo-path: {{ artemis_repo_basepath }}/local-vcs-repos
+    default-branch: {{ artemis_version_control_default_branch_name }}
     user: "demo"
     password: "demo"
 {% endif %}
