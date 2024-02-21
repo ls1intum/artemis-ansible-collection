@@ -246,6 +246,14 @@ artemis:
     secret-token: {{ iris.secret }}
 {% endif %}
 
+{% if aeolus.url is defined and aeolus.url is not none %}
+aeolus:
+  url: {{ aeolus.url }}
+{% if aeolus.token is defined and aeolus.token is not none %}
+  token: {{ aeolus.token }}
+{% endif %}
+{% endif %}
+
 jhipster:
 
 {% if artemis_jhipster_jwt is not none %}
