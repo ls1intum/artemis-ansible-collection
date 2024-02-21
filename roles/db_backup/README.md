@@ -1,6 +1,6 @@
 # DB Backup 
 
-This role adds an cron job to the db host which creates regular DB backups.
+This role adds a cron job to the db host which creates regular DB backups.
 
 ## Configuration 
 The default configuration will create a DB backup every day at 4:30: 
