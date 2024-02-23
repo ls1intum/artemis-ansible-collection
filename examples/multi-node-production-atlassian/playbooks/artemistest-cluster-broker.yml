@@ -7,7 +7,6 @@
     - role: ls1intum.artemis.broker
     - role: ls1intum.artemis.proxy
       vars:
-        proxy_site_template: reverse_proxy
         proxy_target_port: 8761
         proxy_generate_dh_param: false
         proxy_ssl_certificate_path: #FIXME

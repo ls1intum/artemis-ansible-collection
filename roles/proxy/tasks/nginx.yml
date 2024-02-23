@@ -106,19 +106,19 @@
     mode: 0644
   notify: restart nginx
 
-- name: Copy {{ proxy_site_template }}.conf
+- name: Copy nginx_artemis.conf
   become: true
   template:
-    src: nginx_{{ proxy_site_template }}.conf.j2
-    dest: /etc/nginx/sites-available/{{ proxy_site_template }}.conf
+    src: nginx_artemis.conf.j2
+    dest: /etc/nginx/sites-available/nginx_artemis.conf
     mode: 0644
   notify: reload nginx
 
-- name: Enable {{ proxy_site_template }} site config
+- name: Enable nginx_artemis site config
   become: true
   file:
-    src: /etc/nginx/sites-available/{{ proxy_site_template }}.conf
-    dest: /etc/nginx/sites-enabled/{{ proxy_site_template }}.conf
+    src: /etc/nginx/sites-available/nginx_artemis.conf
+    dest: /etc/nginx/sites-enabled/nginx_artemis.conf
     owner: root
     group: root
     state: link
