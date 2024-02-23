@@ -298,6 +298,11 @@ info:
   text-assessment-analytics-enabled: true
   sentry:
     dsn: https://ceeb3e72ec094684aefbb132f87231f2@sentry.ase.in.tum.de/2
+{% if post_hog is defined %}
+  postHog:
+    host: {{ post_hog.host }}
+    token: {{ post_hog.token }}
+{% endif %}
 
 {% if is_multinode_install and artemis_eureka_urls is defined and hazelcast_address is defined %}
 # Eureka configuration

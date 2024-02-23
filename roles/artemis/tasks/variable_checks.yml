@@ -143,3 +143,21 @@
   when:
     - continuous_integration.localci is defined
     - node_id is defined and node_id == 1 and not continuous_integration.localci.is_core_node | default(false)
+
+##############################################################################
+# Check PostHog Variables
+##############################################################################
+
+- name: Check if posthog host is set
+  fail:
+    msg: "PostHog configuration is incomplete - Make sure to add PostHog host"
+  when:
+    - user_management.posthog is defined
+    - user_management.posthog.host is undefined or user_management.posthog.host is none
+
+- name: Check if posthog token is set
+  fail:
+    msg: "PostHog configuration is incomplete - Make sure to add PostHog token"
+  when:
+    - user_management.posthog is defined
+    - user_management.posthog.token is undefined or user_management.posthog.token is none
