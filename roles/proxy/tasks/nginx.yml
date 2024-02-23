@@ -17,7 +17,6 @@
     name: nginx
     state: latest
     update_cache: yes
-
   notify: restart nginx
 
 - name: Enable nginx service
@@ -106,30 +105,34 @@
     mode: 0644
   notify: restart nginx
 
-- name: Copy nginx_artemis.conf
+- name: Copy proxy.conf
   become: true
   template:
-    src: nginx_artemis.conf.j2
-    dest: /etc/nginx/sites-available/nginx_artemis.conf
+    src: nginx_proxy.conf.j2
+    dest: /etc/nginx/sites-available/proxy.conf
     mode: 0644
   notify: reload nginx
 
-- name: Enable nginx_artemis site config
+- name: Enable proxy site config
   become: true
   file:
-    src: /etc/nginx/sites-available/nginx_artemis.conf
-    dest: /etc/nginx/sites-enabled/nginx_artemis.conf
+    src: /etc/nginx/sites-available/proxy.conf
+    dest: /etc/nginx/sites-enabled/proxy.conf
     owner: root
     group: root
     state: link
   notify: reload nginx
 
-- name: Disable default site config
+- name: Disable default and legacy site config
   become: true
   file:
-    dest: /etc/nginx/sites-enabled/default
+    dest: "/etc/nginx/sites-enabled/{{ item }}"
     state: absent
   notify: reload nginx
+  with_items:
+    - "default"
+    - "artemis.conf"
+    - "reverse_proxy.conf"
 
 - name: Ensure old 502.html error page is removed
   become: true
