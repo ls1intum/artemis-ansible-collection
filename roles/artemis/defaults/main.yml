@@ -185,6 +185,9 @@ artemis_external_password_reset_link_de: "https://campus.tum.de/tumonline/ee/ui/
   #  protocol:
   #  ssl_trust:
   #
+  #post_hog:
+  #  host:
+  #  token:
   #
   ###############################################################################
   ## Message Broker
