@@ -152,12 +152,12 @@
   fail:
     msg: "PostHog configuration is incomplete - Make sure to add PostHog host"
   when:
-    - user_management.posthog is defined
-    - user_management.posthog.host is undefined or user_management.posthog.host is none
+    - post_hog is defined
+    - post_hog.host is undefined or post_hog.host is none
 
 - name: Check if posthog token is set
   fail:
     msg: "PostHog configuration is incomplete - Make sure to add PostHog token"
   when:
-    - user_management.posthog is defined
-    - user_management.posthog.token is undefined or user_management.posthog.token is none
+    - post_hog is defined
+    - post_hog.token is undefined or post_hog.token is none
