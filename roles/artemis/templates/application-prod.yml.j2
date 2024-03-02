@@ -250,7 +250,7 @@ artemis:
 {% if enable_science_event_logging is defined %}
   science:
     event-logging:
-      enable: {{ enable_science_event_logging }}
+      enable: {{ enable_science_event_logging | lower }}
 {% endif %}
 
 {% if aeolus.url is defined and aeolus.url is not none %}
