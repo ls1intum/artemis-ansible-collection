@@ -1,5 +1,5 @@
 ---
-artemis_version: 6.1.0
+artemis_version: 6.9.0
 is_testserver: false
 is_multinode_install: false
 
