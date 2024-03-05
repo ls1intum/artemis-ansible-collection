@@ -1,5 +1,5 @@
 ---
-artemis_version: 6.1.0
+artemis_version: 6.9.0
 is_testserver: false
 is_multinode_install: false
 
@@ -138,6 +138,11 @@ artemis_external_password_reset_link_de: "https://campus.tum.de/tumonline/ee/ui/
   #    ci_token: 
   #    health_api_token: 
   #    ssh_url:
+  # localvc:
+  #   url:
+  #   repo_storage_base_path:
+  #   user: # An artemis admin user for the local version control system
+  #   password: # The password of the artemis admin user for the local version control system
   #
   #continuous_integration:
   #  bamboo:

@@ -81,13 +81,18 @@ artemis:
       user: {{ user_management.jira.user }}
       password: {{ user_management.jira.password }}
       admin-group-name: {{ user_management.jira.admin_group}}
+{% elif ldap.url is defined and ldap.url is not none%}
+    use-external: true
+{% else %}
+    use-external: false
+{% endif %}
+
+{% if artemis_external_password_provider is defined and artemis_external_password_provider is not none %}
     password-reset:
       credential-provider: {{artemis_external_password_provider }}
       links:
         en: '{{ artemis_external_password_reset_link_en }}'
         de: '{{ artemis_external_password_reset_link_de }}'
-{% else %}
-    use-external: false
 {% endif %}
 {% if ldap.url is defined and ldap.user_dn is defined and ldap.base is defined and ldap.password is defined %}
     ldap:
@@ -109,7 +114,6 @@ artemis:
 {% endif %}
     login:
       account-name: {{ artemis_account_login_info }}
-
 {% if version_control.bitbucket is defined %}
   version-control:
     url: {{ version_control.bitbucket.url }}
@@ -150,10 +154,10 @@ artemis:
 {% if version_control.localvc is defined %}
   version-control:
     url: {{ version_control.localvc.url }}
-    local-vcs-repo-path: {{ artemis_repo_basepath }}/local-vcs-repos
+    local-vcs-repo-path: {{ version_control.localvc.repo_storage_base_path }}
     default-branch: {{ artemis_version_control_default_branch_name }}
-    user: "demo"
-    password: "demo"
+    user: {{ version_control.localvc.user }}
+    password: {{ version_control.localvc.password }}
 {% endif %}
 
 {% if continuous_integration.bamboo is defined %}
