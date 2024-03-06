@@ -103,6 +103,8 @@ shared_monitoring_host_v4:
 
 artemis_version_control_default_branch_name: main
 
+enable_science_event_logging: false
+
 # If the password of some users is stored externally, you need to provide a name and the reset links. They will be displayed as a hint in the reset form of Artemis.
 # You need to at least provide the provider and the English reset link.
 artemis_external_password_provider: TUMonline
@@ -247,4 +249,4 @@ artemis_spring_profile_lti: "{% if lti.oauth_secret is defined and lti.oauth_sec
 artemis_spring_profile_core: "{% if not (continuous_integration.localci is defined and continuous_integration.localci is not none) or (continuous_integration.localci.is_core_node is defined and continuous_integration.localci.is_core_node) %},core{{ artemis_spring_profile_user_management }}{{ artemis_spring_profile_ldap }}{{ artemis_spring_profile_version_control }}{{ artemis_spring_profile_continuous_integration }}{{ artemis_spring_profile_athena }}{{ artemis_spring_profile_scheduling }}{{ artemis_spring_profile_docker }}{{ artemis_spring_profile_iris }}{{ artemis_spring_profile_aeolus }}{{ artemis_spring_profile_lti }}{% endif %}"
 artemis_spring_profile_buildagent: "{% if continuous_integration.localci is defined and continuous_integration.localci is not none %}{% if continuous_integration.localci.is_build_agent is defined and continuous_integration.localci.is_build_agent is not none and continuous_integration.localci.is_build_agent %},buildagent{% endif %}{% endif %}"
 
-artemis_spring_profiles: "{{ artemis_spring_profile_env }}{{ artemis_spring_profile_core }}{{ artemis_spring_profile_buildagent }}"
+artemis_spring_profiles: "{{ artemis_spring_profile_env }}{{ artemis_spring_profile_buildagent }}{{ artemis_spring_profile_core }}"

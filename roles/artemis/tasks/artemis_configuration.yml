@@ -114,6 +114,9 @@
     name: "{{ artemis_user_name }}"
     groups: docker
     append: yes
+  when: 
+    - continuous_integration.localci is defined
+    - is_build_agent is defined and (is_build_agent | bool)
 
 - name: Copy artemis.service systemd configuration
   become: true
