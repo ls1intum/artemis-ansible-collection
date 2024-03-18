@@ -132,7 +132,7 @@ Athena configuration:
 athena:
   url:
   secret:
-  restricted-modules: # optional parameter to restrict access to specific modules, e.g. module_text_llm,module_programming_llm
+  restricted_modules: # optional parameter to restrict access to specific modules, e.g. module_text_llm,module_programming_llm
 ```
 ---
 

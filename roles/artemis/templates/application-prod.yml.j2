@@ -229,7 +229,7 @@ artemis:
   athena:
     url: {{ athena.url }}
     secret: {{ athena.secret }}
-    restricted-modules: {{ athena.restricted-modules }}
+    restricted-modules: {{ athena.restricted_modules }}
 {% endif %}
 
 {% if apollon_url is defined %}
