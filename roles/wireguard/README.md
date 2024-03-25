@@ -1,7 +1,7 @@
 Role Name
 =========
 
-This role creates a wireguard VPN between a group of servers. Each server in the host group can connecto to each other node.
+This role creates a wireguard VPN between a group of servers. Each server in the host group can connect to each other node.
 
 Role Variables
 --------------
