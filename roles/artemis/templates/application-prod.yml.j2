@@ -334,8 +334,8 @@ logging:
     name: '{{ artemis_working_directory }}/artemis.log'
 
 management:
-  metrics:
-    export:
-      prometheus:
+  prometheus:
+    metrics:
+      export:
         enabled: true
 
