@@ -182,8 +182,8 @@ artemis:
     url: {{ version_control.localvc.url }}
     local-vcs-repo-path: {{ version_control.localvc.repo_storage_base_path }}
     default-branch: {{ artemis_version_control_default_branch_name }}
-    user: {{ version_control.localvc.user }}
-    password: {{ version_control.localvc.password }}
+    user: {{ artemis_internal_admin_user }}
+    password: {{ artemis_internal_admin_password }}
 {% endif %}
 
 {% if continuous_integration.bamboo is defined %}
