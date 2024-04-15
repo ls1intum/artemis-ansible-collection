@@ -1,0 +1,80 @@
+- name: Check if python3-pip is installed
+  command: dpkg-query -l python3-pip
+  register: pip_check
+  ignore_errors: true 
+
+- name: Install python3-pip
+  become: true
+  apt:
+    name: python3-pip
+  when: pip_check.stdout.find('no packages found') == -1
+
+- name: Install python docker module
+  become: true
+  pip:
+    name:
+      - "docker==6.1.3"
+      - "docker-compose"
+
+- name: Create config directory
+  become: true
+  file:
+    path: "{{ gitlab_runner.dir }}"
+    state: directory
+
+- name: Check if GitLab Runner was already created
+  stat:
+    path: "{{ gitlab_runner.dir }}/.token"
+  register: "gitlab_runner_token_exists"
+
+- name: Create new GitLab Runner registration token
+  local_action:
+    module: uri
+    url: "{{ gitlab_runner.url }}/api/v4/user/runners"
+    method: POST
+    headers:
+      PRIVATE-TOKEN: "{{ gitlab_runner.gitlab_api_token }}"
+    body_format: form-urlencoded
+    body:
+      runner_type: "instance_type"
+      run_untagged: true
+      access_level: "not_protected"
+    status_code: 201
+  register: gitlab_runner_token
+  when: not gitlab_runner_token_exists.stat.exists
+
+- name: Write GitLab Runner registration token to file
+  become: true
+  copy:
+    content: "{{ gitlab_runner_token.json.token }}"
+    dest: "{{ gitlab_runner.dir }}/.token"
+    mode: 0400
+    owner: "root"
+    group: "root"
+  when: not gitlab_runner_token_exists.stat.exists
+
+- name: Read GitLab Runner registration token from file
+  become: true
+  slurp:
+    src: "{{ gitlab_runner.dir }}/.token"
+  register: gitlab_runner_token
+
+- name: Copy GitLab Runner config
+  become: true
+  template:
+    src: config.toml.j2
+    dest: "{{ gitlab_runner.dir }}/config.toml"
+    mode: 0700
+    owner: "root"
+    group: "root"
+  notify: "Restart GitLab Runner"
+
+- name: Copy docker-compose file
+  become: true
+  copy:
+    src: docker-compose.yml
+    dest: "{{ gitlab_runner.dir }}/docker-compose.yml"
+    mode: 0444
+    owner: "root"
+    group: "root"
+  notify: "Restart GitLab Runner"
