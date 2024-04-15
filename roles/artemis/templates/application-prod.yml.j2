@@ -205,6 +205,13 @@ artemis:
     artemis-authentication-token-value: {{ continuous_integration.jenkins.artemis_auth_token_value }}
 {% endif %}
 
+{% if continuous_integration.gitlabci is defined %}
+  continuous-integration:
+    build-timeout: 30
+    artemis-authentication-token-value: {{ continuous_integration.gitlabci.result_token }}
+    notification-plugin: "ls1tum/artemis-notification-plugin:1.0.0"
+{% endif %}
+
 {% if continuous_integration.localci is defined %}
   continuous-integration:
     artemis-authentication-token-value: "demo"
