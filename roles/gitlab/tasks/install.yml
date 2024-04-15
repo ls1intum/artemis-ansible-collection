@@ -36,7 +36,7 @@
   become: true
   template:
     src: gitlab.rb.j2
-    dest: /opt/gitlab/config/gitlab.rb
+    dest: "{{ gitlab_config_dir }}/gitlab.rb"
     mode: 0644
 
 - name: Pull image from docker hub
@@ -52,7 +52,7 @@
   community.docker.docker_container:
     name: gitlab
     image: "gitlab/gitlab-ce:{{ gitlab_docker_tag }}"
-    hostname: gitlab-test.artemis.in.tum.de
+    hostname: "{{ gitlab_hostname }}"
     state: started
     recreate: true
     restart_policy: unless-stopped

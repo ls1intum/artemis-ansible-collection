@@ -12,3 +12,10 @@ gitlab_docker_tag: "latest"
 gitlab_root_password: #FIXME
 
 gitlab_monitoring_whitelist: "['0.0.0.0/32']"
+
+# See https://docs.gitlab.com/ee/administration/auth/oidc.html#configure-keycloak
+# gitlab_openid:
+#   label: "Keycloak"
+#   issuer: #FIXME
+#   id: #FIXME
+#   secret: #FIXME
