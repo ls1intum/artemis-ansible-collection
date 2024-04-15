@@ -1,7 +1,7 @@
 Role Name
 =========
 
-This role installes Jenkins inside a Docker container for the use with artemis.
+This role installs Jenkins inside a Docker container for the use with artemis.
 
 Role Variables
 --------------
