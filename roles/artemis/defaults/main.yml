@@ -37,7 +37,7 @@ artemis_deployment_user_comment: "User to deploy artemis to this host"
 # Java Setup
 ##############################################################################
 
-openjdk_version: 17
+openjdk_version: 21
 
 
 ##############################################################################
@@ -232,6 +232,8 @@ artemis_eureka_instance_id: "{{ node_id }}"
 # Auto-generated Variables - No not alter!
 ##############################################################################
 
+artemis_computed_is_core_node: "{{ not (continuous_integration.localci is defined and continuous_integration.localci is not none) or (continuous_integration.localci.is_core_node is defined and continuous_integration.localci.is_core_node) }}"
+
 # Compute Spring Profiles from set variables
 artemis_spring_profile_env: "prod"
 artemis_spring_profile_user_management: "{% if user_management.jira is defined and user_management.jira is not none %},jira{% endif %}" # none HAS to be lowercase ¯\_(ツ)_/¯
@@ -246,7 +248,7 @@ artemis_spring_profile_iris: "{% if iris is defined and iris is not none %},iris
 artemis_spring_profile_aeolus: "{% if aeolus is defined and aeolus is not none %},aeolus{% endif %}"
 artemis_spring_profile_lti: "{% if lti.oauth_secret is defined and lti.oauth_secret is not none %},lti{% endif %}"
 
-artemis_spring_profile_core: "{% if not (continuous_integration.localci is defined and continuous_integration.localci is not none) or (continuous_integration.localci.is_core_node is defined and continuous_integration.localci.is_core_node) %},core{{ artemis_spring_profile_user_management }}{{ artemis_spring_profile_ldap }}{{ artemis_spring_profile_version_control }}{{ artemis_spring_profile_continuous_integration }}{{ artemis_spring_profile_athena }}{{ artemis_spring_profile_scheduling }}{{ artemis_spring_profile_docker }}{{ artemis_spring_profile_iris }}{{ artemis_spring_profile_aeolus }}{{ artemis_spring_profile_lti }}{% endif %}"
+artemis_spring_profile_core: "{% if artemis_computed_is_core_node %},core{{ artemis_spring_profile_user_management }}{{ artemis_spring_profile_ldap }}{{ artemis_spring_profile_version_control }}{{ artemis_spring_profile_continuous_integration }}{{ artemis_spring_profile_athena }}{{ artemis_spring_profile_scheduling }}{{ artemis_spring_profile_docker }}{{ artemis_spring_profile_iris }}{{ artemis_spring_profile_aeolus }}{{ artemis_spring_profile_lti }}{% endif %}"
 artemis_spring_profile_buildagent: "{% if continuous_integration.localci is defined and continuous_integration.localci is not none %}{% if continuous_integration.localci.is_build_agent is defined and continuous_integration.localci.is_build_agent is not none and continuous_integration.localci.is_build_agent %},buildagent{% endif %}{% endif %}"
 
 artemis_spring_profiles: "{{ artemis_spring_profile_env }}{{ artemis_spring_profile_buildagent }}{{ artemis_spring_profile_core }}"
