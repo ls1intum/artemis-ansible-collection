@@ -5,6 +5,11 @@
     state: latest
     update_cache: yes
 
+- name: Check if docker service exists
+  stat:
+    path: /etc/systemd/system/docker.service.d/
+  register: docker_service
+
 - name: Copy rules.v4
   become: true
   template:
@@ -12,6 +17,7 @@
     dest: /etc/iptables/rules.v4
     mode: 0644
   register: copy4
+  notify: restart docker
 
 - name: Copy rules.v6
   become: true
@@ -20,6 +26,7 @@
     dest: /etc/iptables/rules.v6
     mode: 0644
   register: copy6
+  notify: restart docker
 
 - name: Load IPv4 rules
   become: true
