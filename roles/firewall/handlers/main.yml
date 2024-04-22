@@ -1,0 +1,8 @@
+---
+
+- name: restart docker
+  become: true
+  service:
+    name: docker
+    state: restarted
+  when: docker_service.stat.exists is defined and docker_service.stat.exists
