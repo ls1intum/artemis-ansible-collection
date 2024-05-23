@@ -181,7 +181,7 @@ artemis:
     user: {{ artemis_internal_admin_user }}
     password: {{ artemis_internal_admin_password }}
 {% if version_control.localvc.ssh_key_path is defined and version_control.localvc.ssh_key_path|length > 0 %}
-  ssh-host-key-path: {{ version_control.localvc.ssh_key_path }}
+    ssh-host-key-path: {{ version_control.localvc.ssh_key_path }}
 {% endif %}
 {% endif %}
 
