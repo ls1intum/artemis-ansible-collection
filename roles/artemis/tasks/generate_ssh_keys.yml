@@ -1,0 +1,36 @@
+- name: Ensure SSH key directory is present
+  become: true
+  become_user: "{{ artemis_user_name }}"
+  file:
+    path: "{{ version_control.localvc.ssh_key_path }}"
+    state: directory
+    mode: '0770'
+    owner: "{{ artemis_user_name }}"
+    group: "{{ artemis_user_group }}"
+  throttle: 1
+
+- name: Generate SSH host key
+  become: true
+  become_user: "{{ artemis_user_name }}"
+  community.crypto.openssh_keypair:
+    comment: "Artemis"
+    force: false
+    mode: '0770'
+    owner: "{{ artemis_user_name }}"
+    group: "{{ artemis_user_group }}"
+    path: "{{ version_control.localvc.ssh_key_path }}/{{ item.type }}"
+    private_key_format: "auto"
+    regenerate: "never"
+    size: "{{ item.size }}"
+    type: "{{ item.type }}"
+  with_items:
+    - type: "rsa"
+      size: 4096
+    - type: "ecdsa"
+      size: 521
+    - type: "ed25519"
+      size: -1
+  throttle: 1
+  # https://github.com/ansible-collections/community.crypto/issues/416
+  # https://github.com/ansible/ansible/issues/77217
+  ignore_errors: true
