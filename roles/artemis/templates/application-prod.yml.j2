@@ -291,6 +291,11 @@ artemis:
 {% endif %}
 {% endif %}
 
+{% if artemis_theia_base_url is defined and artemis_theia_base_url is not none %}
+  theia:
+    portal-url: {{ artemis_theia_base_url }}
+{% endif %}
+
 {% if aeolus.url is defined and aeolus.url is not none %}
 aeolus:
   url: {{ aeolus.url }}
@@ -298,6 +303,8 @@ aeolus:
   token: {{ aeolus.token }}
 {% endif %}
 {% endif %}
+
+
 
 jhipster:
 
