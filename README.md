@@ -46,13 +46,13 @@ ansible-galaxy install -r ~/.ansible/collections/ansible_collections/ls1intum/ar
 You can find the documentation for Artemis [here](https://docs.artemis.cit.tum.de).
 Each role includes a readme and default configuration. Consult these for more information.
 
- **Use the examples in the examples folder as starting point for your deployment**
+ **Use the examples in the examples folder as starting point for your deployment (Warning: the examples are currently outdated and are being reworked)**
 
 # Deployment Strategies
 
 Artemis can be deployed in different ways. Depending on the use case the ansible configuration differs.
 
-You can find examples for each configuration in the `examples` folder.
+You can find examples for each configuration in the `examples` folder. **Warning: the examples are currently outdated and are being reworked**
 
 ## Single Node installation
 All Artemis components are deployed to a single host. This is the prefered deployment strategy for small installations or testing/evaluation purposes.
@@ -69,13 +69,14 @@ Artemis components are installed on different hosts. Currently the following com
 
 This setup allows to scale Artemis to support many concurrent users.
 
-## External Services
+## Version Control & Continuous Integration
 
-Artemis relies on external services to handle version control and continuous integration. Currently two configurations are supported by Artemis:
-- Jira, Bitbucket, Bamboo
+Artemis relies on (external) services to handle version control and continuous integration. Currently three configurations are supported by Artemis:
+- Integrated Code Lifecycle
 - Gitlab, Jenkins
+- GitlabCI
 
-The ansible configuration has to be adapted accordingly. Again, you can find examples for both in the `examples` folder.
+The ansible configuration has to be adapted accordingly. Again, you can find examples for both in the `examples` folder. **Warning: the examples are currently outdated and are being reworked**
 
 ## Test Servers
 
