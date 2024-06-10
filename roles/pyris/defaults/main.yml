@@ -1,6 +1,7 @@
 ---
 pyris_build_version: "latest"
 pyris_working_directory: "/opt/pyris"
+pyris_weaviate_directory: "{{ pyris_working_directory }}/weaviate"
 
 ##############################################################################
 # Pyris Linux Users

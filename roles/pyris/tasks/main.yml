@@ -62,6 +62,24 @@
   register: permissions
   notify: restart docker pyris
 
+- name: Create weaviate directory
+  become: true
+  file:
+    path: "{{ pyris_weaviate_directory }}"
+    state: directory
+    mode: '0777'
+
+- name: Set permissions for weaviate directory
+  become: true
+  file:
+    path: "{{ pyris_weaviate_directory }}"
+    state: directory
+    recurse: yes
+    owner: "{{ pyris_user_name }}"
+    group: "{{ pyris_user_group }}"
+  register: permissions
+  notify: restart docker pyris
+
 - name: Copy docker.env to pyris directory
   become: true
   template:
