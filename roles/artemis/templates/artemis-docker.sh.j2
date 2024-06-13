@@ -26,21 +26,26 @@ HELP
 }
 
 function start {
-  local pr_tag=$1
-  local pr_branch=$2
+    local pr_tag=$1
+    local pr_branch=$2
 
-  echo "Starting Artemis with PR tag: $pr_tag and branch: $pr_branch"
-  rm -rf Artemis
-  git clone https://github.com/ls1intum/Artemis.git -b "$pr_branch" Artemis
-  sed -i "s/ARTEMIS_DOCKER_TAG=.*/ARTEMIS_DOCKER_TAG='$pr_tag'/g" $ENV_FILE
-  docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --pull always --no-build
+    echo "Starting Artemis with PR tag: $pr_tag and branch: $pr_branch"
+    rm -rf Artemis
+    git clone https://github.com/ls1intum/Artemis.git -b "$pr_branch" Artemis
+    sed -i "s/ARTEMIS_DOCKER_TAG=.*/ARTEMIS_DOCKER_TAG='$pr_tag'/g" $ENV_FILE
+    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --pull always --no-build
 }
 
 function stop {
-  # TODO: In the future extract pr_tag and pr_branch from env
+    # TODO: In the future extract pr_tag and pr_branch from env
 
-  echo "Stopping Artemis"
-  docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" stop artemis-app
+    echo "Stopping Artemis"
+
+    # Get all docker-compose services matching artemis-app* to be multi-node and single-node compatible.
+    services=$(docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" ps --services)
+    artemis_services=$(echo "$services" | grep "^artemis-app")
+
+    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" stop $artemis_services
 }
 
 function restart {
@@ -49,15 +54,19 @@ function restart {
 }
 
 function artemis_logs {
-   docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" logs -f artemis-app
+    # Get all docker-compose services matching artemis-app* to be multi-node and single-node compatible.
+    services=$(docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" ps --services)
+    artemis_services=$(echo "$services" | grep "^artemis-app")
+
+    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" logs -f $artemis_services
 }
 
 function all_logs {
-   docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" logs -f
+    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" logs -f
 }
 
 function run_docker_compose_cmd {
-   docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" "$@"
+    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" "$@"
 }
 
 # read subcommand `artemis-docker subcommand server` in variable and remove base command from argument list
