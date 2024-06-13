@@ -297,9 +297,11 @@ artemis:
 {% endif %}
 {% endif %}
 
-{% if theia.portal_url is defined and theia.portal_url is not none %}
+{% if theia is defined and theia is not none %}
 theia:
+{% if theia.portal_url is defined and theia.portal_url is not none %}
   portal-url: {{ theia.portal_url }}
+{% endif %}
 {% endif %}
 
 {% if aeolus.url is defined and aeolus.url is not none %}
