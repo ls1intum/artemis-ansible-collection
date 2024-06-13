@@ -105,8 +105,8 @@ artemis_version_control_default_branch_name: main
 
 enable_science_event_logging: false
 
-theia:
-  portal_url: https://theia-yannik.k8s.ase.cit.tum.de
+#theia:
+#  portal_url: https://theia-yannik.k8s.ase.cit.tum.de
 
 # If the password of some users is stored externally, you need to provide a name and the reset links. They will be displayed as a hint in the reset form of Artemis.
 # You need to at least provide the provider and the English reset link.
