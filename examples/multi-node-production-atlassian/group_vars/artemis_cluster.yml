@@ -52,8 +52,6 @@ continuous_integration:
 proxy_ssl_certificate_path: #FIXME
 proxy_ssl_certificate_key_path: #FIXME
 
-proxy_site_template: artemis # Name of the site loaded within nginx
-
 
 ##############################################################################
 # Broker and Registry Configuration
