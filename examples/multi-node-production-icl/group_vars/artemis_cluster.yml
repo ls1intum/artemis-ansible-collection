@@ -1,0 +1,133 @@
+---
+is_testserver: false
+artemis_server_url: "https://artemis-cluster.example.com"
+artemis_email: # FIXME: Set a valid email address
+
+artemis_build_version: 7.0.0 # FIXME: Adjust to newest version
+
+artemis_database_dbname: "Artemis"
+artemis_database_username: "Artemis"
+artemis_database_password: # FIXME: Set a secure password
+
+# The built-in admin user
+artemis_internal_admin_user: artemis_admin
+artemis_internal_admin_password: "ZDrEGMfvFeK4AQBw6agEw98xjKSVCV"
+
+# Storage paths
+artemis_repo_basepath: "/mnt/storage"
+artemis_legal_path: "/mnt/storage/legal"
+artemis_data_export_path: "/mnt/storage/data-exports"
+
+##############################################################################
+# External Systems Configuration
+##############################################################################
+
+# Local Version Control configuration
+version_control:
+  localvc:
+    url: "{{ artemis_server_url }}"
+    repo_storage_base_path: "/mnt/storage/local-vcs-repos"
+    ssh_key_path: /mnt/storage/ssh-keys
+    build_agent_git_credentials:
+      user: "artemis-icl-build-agent"
+      password: # FIXME: Set a secure password
+
+# Local Continuous Integration configuration
+continuous_integration:
+  localci:
+    url: "{{ artemis_server_url }}"
+    concurrent_build_size: 3
+    image_cleanup:
+      enabled: true
+      expiry_days: 7
+      schedule_time: "0 0 3 * * *"
+
+##############################################################################
+# Proxy Configuration
+##############################################################################
+proxy_generate_dh_param: false
+
+proxy_ssl_certificate_path: # FIXME fullchain.pem
+proxy_ssl_certificate_key_path: #FIXME privkey.pem
+
+firewall_hostgroup: default
+proxy_site_template: artemis # Name of the site loaded within nginx
+
+##############################################################################
+# Broker and Registry Configuration
+##############################################################################
+is_multinode_install: true
+
+activemq_version: 2.31.2
+
+broker:
+  url: "[fcfe:0:0:0:0:0:b:1]" # Your broker VM hostname (e.g., Wireguard IP)
+  username: brokeruser
+  password: # FIXME: Set a secure password
+
+registry:
+  url: "[fcfe:0:0:0:0:0:b:2]" # Your registry VM hostname (e.g., Wireguard IP)
+
+artemis_jhipster_jwt: # FIXME: Set a secure JWT secret for JWT creation
+artemis_jhipster_registry_password: # FIXME: Set a secure password
+artemis_eureka_instance_id: "{{ node_id }}"
+
+registry_external_host: registry.artemis-cluster.example.com
+
+##############################################################################
+# MySQL Configuration
+##############################################################################
+artemis_database_encoding: utf8mb4 # Do not change this, unless you know what you are doing
+artemis_database_collation: utf8mb4_unicode_ci # Do not change this, unless you know what you are doing
+artemis_database_host: "fcfe:0:0:0:0:0:d:1" # Your database VM hostname (e.g., Wireguard IP)
+
+# MySQL packages to install. Add more if needed
+mysql_packages:
+  - mysql-common
+  - mysql-server
+  - python3-mysqldb
+
+# Bind address for MySQL. Needs to at least include "artemis_database_host"
+mysql_bind_address: '{{ artemis_database_host }},localhost'
+
+# Suggested performance settings for MySQL
+mysql_key_buffer_size: "512M"
+mysql_table_open_cache: "4000"
+mysql_sort_buffer_size: "4M"
+mysql_read_buffer_size: "1M"
+mysql_innodb_buffer_pool_size: "8G"
+mysql_max_connections: "2000"
+mysql_thread_cache_size: "256"
+mysql_max_allowed_packet: "512M"
+mysql_innodb_force_recovery: "0"
+mysql_character_set_server: "{{ artemis_database_encoding }}"
+mysql_collation_server: "{{ artemis_database_encoding }}"
+mysql_default_storage_engine: "INNODB"
+mysql_innodb_log_file_size: "512M"
+mysql_mysqldump_max_allowed_packet: "512M"
+mysql_isamchk_key_buffer: "16M"
+
+# Databases to create. One named the same as "artemis_database_dbname" is required for Artemis
+mysql_databases:
+  - name: "{{ artemis_database_dbname }}"
+    collation: "{{ artemis_database_collation }}"
+    encoding: "{{ artemis_database_encoding }}"
+
+# Users to create. One admin user named the same as "artemis_database_username" is required for Artemis
+# Add more users if needed
+mysql_users:
+  - name: "{{ artemis_database_username }}"
+    host: "fcfe::a:%" # Your network prefix (e.g., Wireguard artemis node prefix)
+    password: "{{ artemis_database_password }}"
+    priv: "*.*:ALL"
+
+##############################################################################################
+# Deployment User (Optional)
+##############################################################################################
+# The deployment user is used to deploy Artemis to this host via a CI/CD pipeline.
+##############################################################################################
+artemis_create_deployment_user: true
+artemis_deployment_user_name: deployment
+artemis_deployment_user_uid: 1338
+artemis_deployment_user_public_key: # FIXME: Add the public key of the deployment user
+artemis_deployment_user_comment: "User to deploy artemis to this host"
