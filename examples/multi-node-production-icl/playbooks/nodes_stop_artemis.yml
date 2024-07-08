@@ -1,0 +1,10 @@
+---
+
+- name: Stop Artemis service
+  hosts: artemis_cluster_nodes
+  tasks:
+    - name: Stop artemis service
+      become: true
+      service:
+        name: artemis
+        state: stopped

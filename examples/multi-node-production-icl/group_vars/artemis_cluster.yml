@@ -64,9 +64,18 @@ broker:
   url: "[fcfe:0:0:0:0:0:b:1]" # Your broker VM hostname (e.g., Wireguard IP)
   username: brokeruser
   password: # FIXME: Set a secure password
+  proxy:
+    generate_dh_param: false
+    ssl_certificate_path: # FIXME fullchain.pem
+    ssl_certificate_key_path: #FIXME privkey.pem
 
 registry:
   url: "[fcfe:0:0:0:0:0:b:2]" # Your registry VM hostname (e.g., Wireguard IP)
+  proxy:
+    generate_dh_param: false
+    ssl_certificate_path: # FIXME fullchain.pem
+    ssl_certificate_key_path: #FIXME privkey.pem
+
 
 artemis_jhipster_jwt: # FIXME: Set a secure JWT secret for JWT creation
 artemis_jhipster_registry_password: # FIXME: Set a secure password
@@ -120,6 +129,16 @@ mysql_users:
     host: "fcfe::a:%" # Your network prefix (e.g., Wireguard artemis node prefix)
     password: "{{ artemis_database_password }}"
     priv: "*.*:ALL"
+
+##############################################################################
+# Firewall Configuration (Optional)
+##############################################################################
+# Management Networks - used to allow SSH / HTTP access to Hosts and services
+firewall_management_network_ipv4: ""
+firewall_management_network_ipv6: ""
+# Monitoring Service
+firewall_monitoring_host_ipv4: ""
+firewall_monitoring_host_ipv6: ""
 
 ##############################################################################################
 # Deployment User (Optional)

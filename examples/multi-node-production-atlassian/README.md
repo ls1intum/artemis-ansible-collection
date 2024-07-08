@@ -2,7 +2,6 @@
 
 This is an example configuration for an artemis cluster consisting of three artemis nodes. In this example the cluster uses Jira, Bitbucket and Bamboo as external systems.
 
-
 # Setup
 
 Steps to uses this ansible configuration:
