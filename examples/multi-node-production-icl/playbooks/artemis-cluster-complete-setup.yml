@@ -1,7 +1,4 @@
 ---
-# Cluster Network
-- import_playbook: artemis-cluster-network-setup.yml
-
 # Cluster Wireguard
 - import_playbook: artemis-cluster-wireguard.yml
 
