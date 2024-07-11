@@ -11,7 +11,7 @@ artemis_database_password: # FIXME: Set a secure password
 
 # The built-in admin user
 artemis_internal_admin_user: artemis_admin
-artemis_internal_admin_password: "ZDrEGMfvFeK4AQBw6agEw98xjKSVCV"
+artemis_internal_admin_password: # FIXME: Set a secure password
 
 # Storage paths
 artemis_repo_basepath: "/mnt/storage"
@@ -48,7 +48,7 @@ continuous_integration:
 proxy_generate_dh_param: false
 
 proxy_ssl_certificate_path: # FIXME fullchain.pem
-proxy_ssl_certificate_key_path: #FIXME privkey.pem
+proxy_ssl_certificate_key_path: # FIXME privkey.pem
 
 firewall_hostgroup: default
 proxy_site_template: artemis # Name of the site loaded within nginx
