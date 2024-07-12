@@ -1,0 +1,5 @@
+---
+
+continuous_integration:
+  localci:
+    is_core_node: true

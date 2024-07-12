@@ -1,8 +1,7 @@
-
 [artemis_cluster_nodes]
-artemis-cluster-node0.example.com
 artemis-cluster-node1.example.com
 artemis-cluster-node2.example.com
+artemis-cluster-node3.example.com
 
 [artemis_cluster_broker]
 artemis-cluster-broker.example.com
@@ -15,6 +14,9 @@ artemis-cluster-proxy.example.com
 
 [artemis_cluster_storage]
 artemis-cluster-storage.example.com
+
+[artemis_cluster_registry]
+artemis-cluster-registry.example.com
 
 [artemis_cluster:children]
 artemis_cluster_nodes

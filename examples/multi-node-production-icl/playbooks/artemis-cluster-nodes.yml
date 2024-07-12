@@ -1,0 +1,24 @@
+---
+
+- name: Setup Artemis Nodes
+  hosts: artemis_cluster_nodes
+
+  roles:
+    - role: ls1intum.artemis.storage_client
+      tags:
+        - storage
+
+    - role: ls1intum.artemis.artemis
+      tags:
+        - artemis
+
+    - role: ls1intum.artemis.firewall
+      tags: firewall
+      vars:
+        firewall_hostgroup: nodes
+        # Management Networks - used to allow SSH / HTTP access to Hosts and services
+        management_network_ipv4: "{{ firewall_management_network_ipv4 }}"
+        management_network_ipv6: "{{ firewall_management_network_ipv6 }}"
+        # Monitoring Service
+        monitoring_host_ipv4: "{{ firewall_monitoring_host_ipv4 }}"
+        monitoring_host_ipv6: "{{ firewall_monitoring_host_ipv6 }}"

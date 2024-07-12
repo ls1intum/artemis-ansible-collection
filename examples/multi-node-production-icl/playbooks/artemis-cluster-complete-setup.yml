@@ -1,0 +1,21 @@
+---
+# Cluster Wireguard
+- import_playbook: artemis-cluster-wireguard.yml
+
+# Cluster Storage
+- import_playbook: artemis-cluster-storage.yml
+
+# Cluster Database
+- import_playbook: artemis-cluster-db.yml
+
+# Cluster Broker
+- import_playbook: artemis-cluster-broker.yml
+
+# Cluster Registry
+- import_playbook: artemis-cluster-registry.yml
+
+# Cluster Proxy
+- import_playbook: artemis-cluster-proxy.yml
+
+# Cluster Artemis Nodes
+- import_playbook: artemis-cluster-nodes.yml
