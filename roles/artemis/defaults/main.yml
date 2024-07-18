@@ -144,12 +144,16 @@ artemis_external_password_reset_link_de: "https://campus.tum.de/tumonline/ee/ui/
   # localvc:
   #   url:
   #   repo_storage_base_path:
-  #   user: # An artemis admin user for the local version control system
-  #   password: # The password of the artemis admin user for the local version control system
-  #   ssh_key_path: /opt/artemis/ssh-keys
-  #   build_agent_git_credentials:
+  #   ssh_key_path: /opt/artemis/ssh-keys # Key path for the SSH host keys
+  # # Build Agent specific configuration: The build agent needs some sort of authentication method in order to perform clone operations.
+  # # This can either be: SSH, spearate credentails, or the artemis admin user
+  #   build_agent_use_ssh: # Setting whether SSH should be used.
+  #   ssh_url: # URL template for SSH clone operations. (e.g. ssh://git@hostname.artemis.cit.tum.de:7921/)
+  #   build_agent_git_credentials: # Config for separate build agent git credentails
   #     user:
   #     password:
+  #   user: # An artemis admin user for the local version control system
+  #   password: # The password of the artemis admin user for the local version control system
   #
   #continuous_integration:
   #  bamboo:
