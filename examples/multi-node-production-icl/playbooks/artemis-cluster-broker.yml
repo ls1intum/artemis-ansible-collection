@@ -8,7 +8,6 @@
 
     - role: ls1intum.artemis.proxy
       vars:
-        proxy_site_template: reverse_proxy
         proxy_generate_dh_param: "{{ broker.proxy.generate_dh_param }}"
         proxy_ssl_certificate_path: "{{ broker.proxy.ssl_certificate_path }}"
         proxy_ssl_certificate_key_path: "{{ broker.proxy.ssl_certificate_key_path }}"

@@ -35,5 +35,4 @@ registry_bootstrap_prod_file: "{{ registry_working_directory }}/bootstrap-prod.y
 registry_application_file: "{{ registry_working_directory }}/config-server/application.yml"
 registry_instance_id: registry:1
 
-proxy_site_template: reverse_proxy # Name of the site loaded within nginx
 proxy_target_port: 8761
