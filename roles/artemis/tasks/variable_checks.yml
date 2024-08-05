@@ -128,6 +128,17 @@
     - continuous_integration.bamboo.bitbucket_link_name is undefined or continuous_integration.bamboo.bitbucket_link_name is none
 
 ##############################################################################
+# Check GitLab CI Variables
+##############################################################################
+
+- name: Check if gitlabci.result_token is set
+  fail:
+    msg: "GitLab CI configuration is incomplete - Make sure to add gitlabci.result_token"
+  when:
+    - continuous_integration.gitlabci is defined
+    - continuous_integration.gitlabci.result_token is undefined or continuous_integration.gitlabci.result_token is none
+
+##############################################################################
 # Check localci Variables
 ##############################################################################
 
@@ -143,3 +154,21 @@
   when:
     - continuous_integration.localci is defined
     - node_id is defined and node_id == 1 and not continuous_integration.localci.is_core_node | default(false)
+
+##############################################################################
+# Check PostHog Variables
+##############################################################################
+
+- name: Check if posthog host is set
+  fail:
+    msg: "PostHog configuration is incomplete - Make sure to add PostHog host"
+  when:
+    - post_hog is defined
+    - post_hog.host is undefined or post_hog.host is none
+
+- name: Check if posthog token is set
+  fail:
+    msg: "PostHog configuration is incomplete - Make sure to add PostHog token"
+  when:
+    - post_hog is defined
+    - post_hog.token is undefined or post_hog.token is none

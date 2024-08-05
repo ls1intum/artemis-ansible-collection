@@ -8,4 +8,4 @@
 - name: Fail if docker is not installed
   ansible.builtin.fail:
     msg: "Docker is not installed - please install docker before running this role."
-  when: docker_installed.stat.exists
+  when: not docker_installed.stat.exists

@@ -66,7 +66,7 @@
     path: "{{ artemis_ssh_key_path }}"
     state: directory
     mode: '0775'
-  when: artemis_ssh_key_path is not none and artemis_ssh_key_path != ""
+  when: artemis_ssh_priv_key_value is not none and artemis_ssh_key_path is not none and artemis_ssh_key_path != ""
 
 - name: Copy ssh key
   become: true
@@ -75,7 +75,7 @@
     dest: "{{ artemis_ssh_key_path }}/{{ artemis_ssh_key_name }}"
   register: ssh_key
   notify: restart artemis
-  when: artemis_ssh_key_path is not none and artemis_ssh_key_path != ""
+  when: artemis_ssh_priv_key_value is not none and artemis_ssh_key_path is not none and artemis_ssh_key_path != ""
 
 - name: Set permissions for artemis ssh key directory
   become: true
@@ -85,7 +85,7 @@
     recurse: yes
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
-  when: artemis_ssh_key_path is not none and artemis_ssh_key_path != ""
+  when: artemis_ssh_priv_key_value is not none and artemis_ssh_key_path is not none and artemis_ssh_key_path != ""
 
 - name: Create artemis data-export directory
   become: true
@@ -114,6 +114,9 @@
     name: "{{ artemis_user_name }}"
     groups: docker
     append: yes
+  when: 
+    - continuous_integration.localci is defined
+    - is_build_agent is defined and (is_build_agent | bool)
 
 - name: Copy artemis.service systemd configuration
   become: true

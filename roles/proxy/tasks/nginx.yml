@@ -97,6 +97,32 @@
     state: present
   notify: restart nginx
 
+- name: Include SSH git stream configuration in nginx.conf
+  become: true
+  
+  blockinfile:
+    dest: /etc/nginx/nginx.conf
+    append_newline: true
+    prepend_newline: true
+    block: |
+      stream {
+        upstream artemis_ssh {
+          include artemis-ssh-upstream.conf;
+        }
+        server {
+          listen 7921;
+          proxy_pass artemis_ssh;
+        }
+      }
+
+- name: Copy artemis-ssh-upstream.conf
+  become: true
+  template:
+    src: artemis-ssh-upstream.conf.j2
+    dest: /etc/nginx/artemis-ssh-upstream.conf
+    mode: 0644
+  notify: restart nginx
+
 - name: Copy timeouts.conf
   become: true
   template:

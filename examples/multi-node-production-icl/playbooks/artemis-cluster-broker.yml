@@ -1,0 +1,25 @@
+---
+
+- name: Setup Artemis Broker
+  hosts: artemis_cluster_broker
+
+  roles:
+    - role: ls1intum.artemis.broker
+
+    - role: ls1intum.artemis.proxy
+      vars:
+        proxy_generate_dh_param: "{{ broker.proxy.generate_dh_param }}"
+        proxy_ssl_certificate_path: "{{ broker.proxy.ssl_certificate_path }}"
+        proxy_ssl_certificate_key_path: "{{ broker.proxy.ssl_certificate_key_path }}"
+        proxy_target_port: 8761
+
+    - role: ls1intum.artemis.firewall
+      tags: firewall
+      vars:
+        firewall_hostgroup: broker
+        # Management Networks - used to allow SSH / HTTP access to Hosts and services
+        management_network_ipv4: "{{ firewall_management_network_ipv4 }}"
+        management_network_ipv6: "{{ firewall_management_network_ipv6 }}"
+        # Monitoring Service
+        monitoring_host_ipv4: "{{ firewall_monitoring_host_ipv4 }}"
+        monitoring_host_ipv6: "{{ firewall_monitoring_host_ipv6 }}"

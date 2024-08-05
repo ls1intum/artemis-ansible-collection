@@ -1,0 +1,3 @@
+{% for node in proxy_available_nodes %}
+server {{ node.hostname }}:7921{% if node.weight is defined %} weight={{ node.weight }}{% endif %};
+{% endfor %}

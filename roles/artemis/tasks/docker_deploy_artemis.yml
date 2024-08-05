@@ -12,6 +12,20 @@
     state: directory
     mode: '0770'
 
+- name: Create artemis database directory
+  become: true
+  file:
+    path: "{{ artemis_working_directory }}/data/database"
+    state: directory
+    mode: '0770'
+
+- name: Create artemis data/artemis directory
+  become: true
+  file:
+    path: "{{ artemis_working_directory }}/data/artemis"
+    state: directory
+    mode: '0770'
+
 - name: Set permissions for artemis directory
   become: true
   file:
@@ -83,6 +97,12 @@
     mode: 0660
   register: config
   notify: restart docker artemis
+
+- include_tasks: generate_ssh_keys.yml
+  when:
+    - version_control.localvc is defined and version_control.localvc is not none
+    - version_control.localvc.ssh_key_path is defined and version_control.localvc.ssh_key_path|length > 0
+    - not (only_update_artemis_config | bool)
 
 - name: Create artemis ssh key directory
   become: true
