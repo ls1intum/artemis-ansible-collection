@@ -164,7 +164,7 @@ artemis:
     ssh-template-clone-url: {{ version_control.gitlab.ssh_url }}
     ssh-keys-url-path: /-/profile/keys
 {% if artemis_ssh_key_path is defined and artemis_ssh_key_path is not none and artemis_ssh_key_path != "" %}
-    ssh-private-key-folder-path:  {{ artemis_ssh_key_path }}
+    ssh-private-key-folder-path: {{ artemis_ssh_key_path }}
 {% endif %}
 {% if artemis_ssh_key_password is defined and artemis_ssh_key_password is not none %}
     ssh-private-key-password: {{ artemis_ssh_key_password }}
@@ -189,7 +189,7 @@ artemis:
 {% if version_control.localvc.build_agent_use_ssh is defined %}
     build-agent-use-ssh: {{ version_control.localvc.build_agent_use_ssh | string | lower }}
 {% if continuous_integration.localci.is_build_agent is defined and continuous_integration.localci.is_build_agent is not none and continuous_integration.localci.is_build_agent and artemis_ssh_key_path is defined and artemis_ssh_key_path is not none and artemis_ssh_key_path != "" %}
-    ssh-private-key-folder-path:  {{ artemis_ssh_key_path }}
+    ssh-private-key-folder-path: {{ artemis_ssh_key_path }}
 {% endif %}
 {% endif %}
 {% if version_control.localvc.ssh_key_path is defined and version_control.localvc.ssh_key_path|length > 0 %}
