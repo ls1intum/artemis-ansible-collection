@@ -178,7 +178,7 @@ artemis:
     url: {{ version_control.localvc.url }}
     local-vcs-repo-path: {{ version_control.localvc.repo_storage_base_path }}
     default-branch: {{ artemis_version_control_default_branch_name }}
-{% if artemis_computed_is_core_node or version_control.localvc.build_agent_git_credentials is not defined %}
+{% if artemis_computed_is_core_node or (version_control.localvc.build_agent_git_credentials is not defined and version_control.localvc.build_agent_use_ssh is not defined) %}
     user: {{ artemis_internal_admin_user }}
     password: {{ artemis_internal_admin_password }}
 {% endif %}
