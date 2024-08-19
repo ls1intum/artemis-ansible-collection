@@ -62,8 +62,8 @@ server {
         add_header alt-svc 'h3=":443"; ma=2592000,h3-29=":443"; ma=2592000';
     }
 
-    error_page 502 /502.html;
-    location /502.html {
+    error_page 502 =503 /503.html;
+    location /503.html {
         root /usr/share/nginx/html;
         internal;
     }

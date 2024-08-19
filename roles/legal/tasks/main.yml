@@ -6,6 +6,7 @@
     group: "{{ artemis_group }}"
     mode: '0755'
   become: true
+  become_user: "{{ artemis_user }}"
 
 - name: Copy privacy_statements into legal directory
   copy:
@@ -15,6 +16,7 @@
     group: "{{ artemis_user }}"
     mode: '0644'
   become: true
+  become_user: "{{ artemis_user }}"
 
 - name: Copy imprints into legal directory
   copy:
@@ -24,3 +26,4 @@
     group: "{{ artemis_user }}"
     mode: '0644'
   become: true
+  become_user: "{{ artemis_user }}"

@@ -15,7 +15,7 @@ artemis_database_password: #FIXME
 
 artemis_internal_admin_password: #FIXME
 
-proxy_ssl_certificate_path:  #FIXME
+proxy_ssl_certificate_path: #FIXME
 proxy_ssl_certificate_key_path: #FIXME
 
 artemis_jhipster_jwt: #FIXME
@@ -109,13 +109,30 @@ Jenkins configuration:
 ```
 ---
 
+LocalCI configuration:
+```
+  localci:
+    is_core_node: true
+    is_build_agent: true
+    concurrent_build_size: 2
+    thread_pool_size: 2
+    proxy:
+      http_proxy: "http://proxy:8080"
+      https_proxy: "http://proxy:8080"
+      no_proxy: "localhost"
+    image_cleanup:
+      expiry_days: 3
+      schedule_time: "0 0 4 * * *"
+```
+---
+
 
 Athena configuration:
 ```
 athena:
   url:
   secret:
-  restricted-modules: # optional parameter to restrict access to specific modules, e.g. module_text_llm,module_programming_llm
+  restricted_modules: # optional parameter to restrict access to specific modules, e.g. module_text_llm,module_programming_llm
 ```
 ---
 

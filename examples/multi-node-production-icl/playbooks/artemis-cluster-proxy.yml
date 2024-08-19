@@ -1,0 +1,26 @@
+---
+
+- name: Setup Artemis Load Balancer / Reverse Proxy
+  hosts: artemis_cluster_proxy
+
+  roles:
+    - role: ls1intum.artemis.proxy
+      vars:
+        proxy_available_nodes:
+          - hostname: "[fcfe::a:1]"
+            weight: 1
+          - hostname: "[fcfe::a:2]"
+            weight: 1
+          - hostname: "[fcfe::a:3]"
+            weight: 1
+
+    - role: ls1intum.artemis.firewall
+      tags: firewall
+      vars:
+        firewall_hostgroup: proxy
+        # Management Networks - used to allow SSH / HTTP access to Hosts and services
+        management_network_ipv4: "{{ firewall_management_network_ipv4 }}"
+        management_network_ipv6: "{{ firewall_management_network_ipv6 }}"
+        # Monitoring Service
+        monitoring_host_ipv4: "{{ firewall_monitoring_host_ipv4 }}"
+        monitoring_host_ipv6: "{{ firewall_monitoring_host_ipv6 }}"

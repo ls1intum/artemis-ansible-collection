@@ -1,0 +1,10 @@
+---
+
+- name: Setup Cluster Network
+  hosts: artemis_cluster
+
+  roles:
+    - role: ls1intum.artemis.wireguard
+      become: true
+      vars:
+        wireguard_hostgroup: "{{ groups.artemis_cluster }}"
