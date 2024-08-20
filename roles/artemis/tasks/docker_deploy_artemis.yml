@@ -12,10 +12,10 @@
     state: directory
     mode: '0770'
   loop:
-    - "/data"
-    - "/data/database"
-    - "/data/artemis"
-    - "/data/redis"
+    - "data"
+    - "data/database"
+    - "data/artemis"
+    - "data/redis"
 
 - name: Set permissions for artemis directory
   become: true
