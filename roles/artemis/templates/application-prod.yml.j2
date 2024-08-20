@@ -32,6 +32,16 @@ spring:
       addresses: "{{ broker.url }}:61613"
 {% endif %}
 {% endif %}
+
+{% if redis is defined and redis is not none %}
+  data:
+    redis:
+      host: {{ redis.host }}
+      port: {{ redis.port}}
+      username: {{ redis.username}}
+      password: {{ redis.password }}
+{% endif %}
+
 {% if is_multinode_install and hazelcast_address is defined %}
   hazelcast:
     interface: "{{ hazelcast_address }}"

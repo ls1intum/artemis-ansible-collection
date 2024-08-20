@@ -226,6 +226,12 @@ hazelcast_address: "{% if is_multinode_install is defined and is_multinode_insta
 artemis_eureka_urls: "{% if registry.url is defined and registry.url is not none %}http://admin:${jhipster.registry.password}@{{ registry.url }}:8761/eureka/{% endif %}"
 artemis_eureka_instance_id: "{{ node_id }}"
 
+#redis:
+#  host:
+#  port:
+#  username:
+#  password:
+
 ##############################################################################
 # Iris Configuration
 ##############################################################################

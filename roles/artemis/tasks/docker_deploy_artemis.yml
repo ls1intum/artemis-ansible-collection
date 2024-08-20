@@ -8,23 +8,14 @@
 - name: Create artemis data directory
   become: true
   file:
-    path: "{{ artemis_working_directory }}/data"
+    path: "{{ artemis_working_directory }}/{{ item }}"
     state: directory
     mode: '0770'
-
-- name: Create artemis database directory
-  become: true
-  file:
-    path: "{{ artemis_working_directory }}/data/database"
-    state: directory
-    mode: '0770'
-
-- name: Create artemis data/artemis directory
-  become: true
-  file:
-    path: "{{ artemis_working_directory }}/data/artemis"
-    state: directory
-    mode: '0770'
+  loop:
+    - "/data"
+    - "/data/database"
+    - "/data/artemis"
+    - "/data/redis"
 
 - name: Set permissions for artemis directory
   become: true
