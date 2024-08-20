@@ -37,7 +37,7 @@ server {
     ssl_session_tickets off;
     ssl_stapling on;
     ssl_stapling_verify on;
-    ssl_early_data on;
+#   ssl_early_data on;
     quic_gso on;
     resolver {{ proxy_resolver }};
     resolver_timeout 5s;
