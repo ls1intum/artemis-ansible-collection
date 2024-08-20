@@ -1,5 +1,11 @@
 {{ ansible_managed | comment }}
 
+log_format quic '$remote_addr - $remote_user [$time_local] '
+                    '"$request" $status $body_bytes_sent '
+                    '"$http_referer" "$http_user_agent" "$http3"';
+
+access_log quic;
+
 server {
     listen 80 default_server;
     listen [::]:80 default_server;
@@ -9,8 +15,15 @@ server {
 }
 
 server {
-    listen 443 ssl http2;
-    listen [::]:443 ssl http2;
+    listen 443 ssl;
+    listen 443 quic reuseport;
+    listen [::]:443 ssl;
+    listen [::]:443 quic reuseport;
+    http2 on;
+    http3 on;
+    http3_hq on;
+    quic_retry on;
+    
     server_name _;
     ssl_certificate     {{ proxy_ssl_certificate_path }};
     ssl_certificate_key {{ proxy_ssl_certificate_key_path }};
@@ -25,6 +38,7 @@ server {
     ssl_stapling on;
     ssl_stapling_verify on;
 #   ssl_early_data on;
+    quic_gso on;
     resolver {{ proxy_resolver }};
     resolver_timeout 5s;
     add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload";
@@ -44,6 +58,8 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_cache_bypass $http_upgrade;
+        # used to advertise the availability of HTTP/3
+        add_header alt-svc 'h3=":443"; ma=2592000,h3-29=":443"; ma=2592000';
     }
 
     error_page 502 =503 /503.html;
