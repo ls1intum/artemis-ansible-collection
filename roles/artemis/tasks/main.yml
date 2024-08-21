@@ -1,4 +1,10 @@
 ---
+# Check for compatible Ansible version.
+- name: Check for compatible Ansible version.
+  assert:
+    that: ansible_version.full is version_compare('2.16', '>=')
+    msg: You need Ansible version 2.16 or higher.
+
 # Check if variables are set correctly
 - include_tasks: variable_checks.yml
   when: 
