@@ -51,8 +51,8 @@ artemis_jhipster_jwt: #FIXME
 artemis_jhipster_registry_password: #FIXME Multinode
 
 artemis_email: artemis.in@tum.de
-artemis_operator_name: "Technical University of Munich"
-artemis_operator_admin_name: "Stephan Krusche"
+artemis_operator_name: "Anonymous University"
+artemis_operator_admin_name: "Anonymous University Admin"
 artemis_notification_from: "Artemis Notification"
 
 artemis_telemetry_enabled: true
