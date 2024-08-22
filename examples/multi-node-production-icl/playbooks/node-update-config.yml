@@ -4,5 +4,8 @@
   hosts: artemis_cluster_nodes
 
   roles:
-    - role: ls1intum.artemis.storage_client
+
     - role: ls1intum.artemis.artemis
+      vars:
+        artemis_force_no_restart: true
+        only_update_artemis_config: true

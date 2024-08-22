@@ -1,8 +1,0 @@
----
-
-- name: Setup Artemis DB
-  hosts: artemis_cluster_db
-
-  roles:
-    - role: geerlingguy.mysql
-      become: true
