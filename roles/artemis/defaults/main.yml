@@ -51,7 +51,13 @@ artemis_jhipster_jwt: #FIXME
 artemis_jhipster_registry_password: #FIXME Multinode
 
 artemis_email: artemis.in@tum.de
+artemis_operator_name: "Technical University of Munich"
+artemis_operator_admin_name: "Stephan Krusche"
 artemis_notification_from: "Artemis Notification"
+
+artemis_telemetry_enabled: true
+artemis_send_admin_details: true
+artemis_telemetry_destination: "telemetry.artemis.cit.tum.de"
 
 artemis_working_directory: "/opt/artemis"
 artemis_repo_basepath: "."

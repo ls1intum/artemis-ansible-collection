@@ -150,6 +150,10 @@ artemis:
 {% if artemis_ssh_key_password is defined and artemis_ssh_key_password is not none and artemis_ssh_key_password != "" %}
     ssh-private-key-password: {{ artemis_ssh_key_password }}
 {% endif %}
+  telemetry:
+    enabled: {{ artemis_telemetry_enabled }}
+    sendAdminDetails: {{ artemis_send_admin_details }}
+    destination: {{ artemis_telemetry_destination }}
 {% endif %}
 
 
@@ -362,6 +366,8 @@ info:
       - modeling_tour: 'UML Class Diagram'
       - programming_exercise_fail_tour: 'tutorial'
       - programming_exercise_success_tour: 'tutorial'
+  operatorName: {{ artemis_operator_name }}
+  operatorAdminName: {{ artemis_operator_admin_name }}
   contact: {{ artemis_email }}
   imprint: https://ase.in.tum.de/lehrstuhl_1/component/content/article/179-imprint
 {% if is_testserver is defined and is_testserver is sameas true %}
