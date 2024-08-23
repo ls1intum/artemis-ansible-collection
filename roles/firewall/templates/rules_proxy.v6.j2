@@ -5,6 +5,7 @@
 :INPUT DROP [0:0]
 :FORWARD DROP [0:0]
 :OUTPUT ACCEPT [0:0]
+-A INPUT -p udp -m udp --dport 443 -j ACCEPT
 -A INPUT -i lo -m comment --comment "Allow lo interface" -j ACCEPT
 -A INPUT -i wg0 -m comment --comment "Allow wg0 interface" -j ACCEPT
 -A INPUT -p ipv6-icmp -m comment --comment "Allow icmpv6" -j ACCEPT
