@@ -8,4 +8,5 @@
         become: true
         vars:
           proxy_target_port: 8082
+          proxy_forward_ssh: false
       - role: ../../jenkins
