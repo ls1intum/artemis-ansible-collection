@@ -113,7 +113,7 @@
           proxy_pass artemis_ssh;
         }
       }
-  when: proxy_site_template == "artemis"
+  when: proxy_forward_ssh
   notify: restart nginx
 
 - name: Copy artemis-ssh-upstream.conf
