@@ -99,7 +99,6 @@
 
 - name: Include SSH git stream configuration in nginx.conf
   become: true
-  
   blockinfile:
     dest: /etc/nginx/nginx.conf
     append_newline: true
@@ -114,6 +113,8 @@
           proxy_pass artemis_ssh;
         }
       }
+  when: proxy_site_template == "artemis"
+  notify: restart nginx
 
 - name: Copy artemis-ssh-upstream.conf
   become: true
