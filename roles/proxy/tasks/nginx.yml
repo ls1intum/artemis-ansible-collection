@@ -122,6 +122,7 @@
     src: artemis-ssh-upstream.conf.j2
     dest: /etc/nginx/artemis-ssh-upstream.conf
     mode: 0644
+  when: proxy_forward_ssh
   notify: restart nginx
 
 - name: Copy timeouts.conf

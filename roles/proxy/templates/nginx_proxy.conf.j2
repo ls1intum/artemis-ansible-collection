@@ -1,7 +1,7 @@
 {{ ansible_managed | comment }}
 
 # Load balancing
-upstream artemis {
+upstream app {
 {% if proxy_load_balancing_method is defined %}
     {{ proxy_load_balancing_method }};
 {% endif %}
@@ -62,7 +62,7 @@ server {
     client_body_buffer_size 1m;
 
     location / {
-        proxy_pass {{ proxy_node_protocol }}://artemis;
+        proxy_pass {{ proxy_node_protocol }}://app;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -93,7 +93,7 @@ server {
 {% endif %}
 
     location /api/authenticate {
-        proxy_pass http://artemis/api/authenticate;
+        proxy_pass http://app/api/authenticate;
 		# For a given violation of the rate limit defined in the zone
 		# * the first 2 (delay) requests will be allowed without delay
 		# * the next (burst - delay) request waits until it fits in the rate limit
