@@ -1,7 +1,7 @@
 - name: Add repo for the latest stable ngnix version 
   become: true
   block:
-    - name: ngnix |no apt key
+    - name: ngnix | no apt key
       ansible.builtin.get_url:
         url: http://nginx.org/keys/nginx_signing.key
         dest: /etc/apt/trusted.gpg.d/nginx.asc
