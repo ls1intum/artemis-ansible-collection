@@ -59,7 +59,6 @@
     recurse: yes
     owner: "{{ pyris_user_name }}"
     group: "{{ pyris_user_group }}"
-  register: permissions
   notify: restart docker pyris
 
 - name: Create weaviate directory
@@ -77,7 +76,6 @@
     recurse: yes
     owner: "{{ pyris_user_name }}"
     group: "{{ pyris_user_group }}"
-  register: permissions
   notify: restart docker pyris
 
 - name: Copy docker.env to pyris directory
