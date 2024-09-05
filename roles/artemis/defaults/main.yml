@@ -57,7 +57,7 @@ artemis_notification_from: "Artemis Notification"
 
 artemis_telemetry_enabled: true
 artemis_send_admin_details: true
-artemis_telemetry_destination: "telemetry.artemis.cit.tum.de"
+artemis_telemetry_destination: "https://telemetry.artemis.cit.tum.de"
 
 artemis_working_directory: "/opt/artemis"
 artemis_repo_basepath: "."
