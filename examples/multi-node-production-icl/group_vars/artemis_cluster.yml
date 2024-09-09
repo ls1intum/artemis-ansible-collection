@@ -18,6 +18,12 @@ artemis_repo_basepath: "/mnt/storage"
 artemis_legal_path: "/mnt/storage/legal"
 artemis_data_export_path: "/mnt/storage/data-exports"
 
+# Telemetry configuration
+artemis_operator_name: "Example University Name" # FIXME: Set the name of your university
+artemis_operator_admin_name: "Max Mustermann" # FIXME: Set the name of the main admin
+artemis_telemetry_enabled: true
+artemis_send_admin_details: true
+
 ##############################################################################
 # External Systems Configuration
 ##############################################################################
