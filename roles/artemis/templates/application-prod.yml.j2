@@ -340,9 +340,11 @@ jhipster:
         token-validity-in-seconds-for-remember-me: 2592000  # Token is valid 30 days
 {% endif %}
 
-{% if artemis_CORS_allowed_origins is defined and artemis_CORS_allowed_origins is not none %}
-  cors:
-    allowed-origins: {{ artemis_CORS_allowed_origins }}
+{% if artemis_cors is defined and artemis_cors is not none %}
+  artemis_cors:
+    {% for key, value in cors.items() %}
+    {{ key }}: {{ value | to_nice_yaml(indent=2) | trim }}
+    {% endfor %}
 {% endif %}
 
 {% if is_multinode_install|bool == true and artemis_jhipster_registry_password is not none %}
