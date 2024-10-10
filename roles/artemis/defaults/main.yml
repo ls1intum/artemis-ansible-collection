@@ -113,6 +113,19 @@ enable_science_event_logging: false
 
 #theia:
 #  portal_url: https://theia-yannik.k8s.ase.cit.tum.de
+#  images:
+#    java:
+#      Java-17: "java-17-latest"
+#    c:
+#      C: "c-latest"
+#    javascript:
+#      Javascript: "javascript-latest"
+#    ocaml:
+#      Ocaml: "ocaml-latest"
+#    python:
+#      Python: "python-latest"
+#    rust:
+#      Rust: "rust-latest"
 
 # If the password of some users is stored externally, you need to provide a name and the reset links. They will be displayed as a hint in the reset form of Artemis.
 # You need to at least provide the provider and the English reset link.
