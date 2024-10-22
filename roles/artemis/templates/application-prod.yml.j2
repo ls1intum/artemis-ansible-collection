@@ -258,6 +258,9 @@ artemis:
       expiry-days: {{ continuous_integration.localci.image_cleanup.expiry_days }}
       cleanup-schedule-time: {{ continuous_integration.localci.image_cleanup.schedule_time }}
 {% endif %}
+    build-agent:
+        short-name: {{ node_short_name }}
+        display-name: {{ node_display_name }}
 {% endif %}
 
   git:
