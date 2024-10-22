@@ -1,7 +1,7 @@
 - name: Add repo for the latest stable ngnix version 
   become: true
   block:
-    - name: ngnix |no apt key
+    - name: ngnix | no apt key
       ansible.builtin.get_url:
         url: http://nginx.org/keys/nginx_signing.key
         dest: /etc/apt/trusted.gpg.d/nginx.asc
@@ -17,7 +17,6 @@
     name: nginx
     state: latest
     update_cache: yes
-
   notify: restart nginx
 
 - name: Enable nginx service
@@ -114,7 +113,7 @@
           proxy_pass artemis_ssh;
         }
       }
-  when: proxy_site_template == "artemis"
+  when: proxy_forward_ssh
   notify: restart nginx
 
 - name: Copy artemis-ssh-upstream.conf
@@ -123,6 +122,7 @@
     src: artemis-ssh-upstream.conf.j2
     dest: /etc/nginx/artemis-ssh-upstream.conf
     mode: 0644
+  when: proxy_forward_ssh
   notify: restart nginx
 
 - name: Copy timeouts.conf
@@ -133,30 +133,34 @@
     mode: 0644
   notify: restart nginx
 
-- name: Copy {{ proxy_site_template }}.conf
+- name: Copy proxy.conf
   become: true
   template:
-    src: nginx_{{ proxy_site_template }}.conf.j2
-    dest: /etc/nginx/sites-available/{{ proxy_site_template }}.conf
+    src: nginx_proxy.conf.j2
+    dest: /etc/nginx/sites-available/proxy.conf
     mode: 0644
   notify: reload nginx
 
-- name: Enable {{ proxy_site_template }} site config
+- name: Enable proxy site config
   become: true
   file:
-    src: /etc/nginx/sites-available/{{ proxy_site_template }}.conf
-    dest: /etc/nginx/sites-enabled/{{ proxy_site_template }}.conf
+    src: /etc/nginx/sites-available/proxy.conf
+    dest: /etc/nginx/sites-enabled/proxy.conf
     owner: root
     group: root
     state: link
   notify: reload nginx
 
-- name: Disable default site config
+- name: Disable default and legacy site config
   become: true
   file:
-    dest: /etc/nginx/sites-enabled/default
+    dest: "/etc/nginx/sites-enabled/{{ item }}"
     state: absent
   notify: reload nginx
+  with_items:
+    - "default"
+    - "artemis.conf"
+    - "reverse_proxy.conf"
 
 - name: Ensure old 502.html error page is removed
   become: true
