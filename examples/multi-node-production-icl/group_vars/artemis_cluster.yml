@@ -53,10 +53,14 @@ continuous_integration:
 ##############################################################################
 proxy_generate_dh_param: false
 
-proxy_ssl_certificate_path: # FIXME fullchain.pem
-proxy_ssl_certificate_key_path: # FIXME privkey.pem
+servers:
+  - name: "_"
+    ssl_certificate_path: # FIXME fullchain.pem
+    ssl_certificate_key_path:  # FIXME privkey.pem
+    default_server: true
 
 firewall_hostgroup: default
+proxy_forward_ssh: true
 
 ##############################################################################
 # Broker and Registry Configuration

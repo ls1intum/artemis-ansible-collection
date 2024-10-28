@@ -10,8 +10,11 @@
       vars:
         proxy_forward_ssh: false
         proxy_generate_dh_param: "{{ broker.proxy.generate_dh_param }}"
-        proxy_ssl_certificate_path: "{{ broker.proxy.ssl_certificate_path }}"
-        proxy_ssl_certificate_key_path: "{{ broker.proxy.ssl_certificate_key_path }}"
+        servers:
+          - name: "_"
+            ssl_certificate_path: "{{ broker.proxy.ssl_certificate_path }}"
+            ssl_certificate_key_path:  "{{ broker.proxy.ssl_certificate_key_path }}"
+            default_server: true
         proxy_target_port: 8761
 
     - role: ls1intum.artemis.firewall

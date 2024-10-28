@@ -36,3 +36,4 @@ registry_application_file: "{{ registry_working_directory }}/config-server/appli
 registry_instance_id: registry:1
 
 proxy_target_port: 8761
+proxy_forward_ssh: false

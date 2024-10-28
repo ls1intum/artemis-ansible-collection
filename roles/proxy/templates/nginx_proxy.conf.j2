@@ -30,19 +30,20 @@ server {
     return 301 https://$host$request_uri;
 }
 
+{% for server in servers %}
 server {
-    listen 443 ssl;
+    listen 443 ssl{% if server.default_server %} default_server{% endif %};
     listen 443 quic reuseport;
-    listen [::]:443 ssl;
+    listen [::]:443 ssl{% if server.default_server %} default_server{% endif %};
     listen [::]:443 quic reuseport;
     http2 on;
     http3 on;
     http3_hq on;
     quic_retry on;
     
-    server_name _;
-    ssl_certificate     {{ proxy_ssl_certificate_path }};
-    ssl_certificate_key {{ proxy_ssl_certificate_key_path }};
+    server_name {{ server.name }};
+    ssl_certificate     {{ server.ssl_certificate_path }};
+    ssl_certificate_key {{ server.ssl_certificate_key_path }};
     ssl_protocols       TLSv1.2 TLSv1.3;
     {% if proxy_generate_dh_param|bool == true %}ssl_dhparam /etc/nginx/dhparam.pem;{% endif %}
     ssl_prefer_server_ciphers   on;
@@ -113,3 +114,5 @@ server {
         internal;
     }
 }
+
+{% endfor %}
