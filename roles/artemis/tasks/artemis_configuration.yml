@@ -96,7 +96,7 @@
     mode: '0775'
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
-  when: artemis_data_export_path is not none and artemis_data_export_path != ""
+  when: artemis_data_export_path is not none and artemis_data_export_path != "" and artemis_computed_is_core_node
 
 - name: Set permissions for artemis data-export directory
   become: true
@@ -106,7 +106,7 @@
     recurse: true
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
-  when: artemis_data_export_path is not none and artemis_data_export_path != ""
+  when: artemis_data_export_path is not none and artemis_data_export_path != "" and artemis_computed_is_core_node
 
 - name: Add artemis user to docker group
   become: true
