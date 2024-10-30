@@ -8,5 +8,5 @@
         become: true
         vars:
           proxy_target_port: 8081
-          proxy_site_template: reverse_proxy
+          proxy_forward_ssh: false
       - role: ../../gitlab

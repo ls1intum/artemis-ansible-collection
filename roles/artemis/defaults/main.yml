@@ -57,7 +57,7 @@ artemis_notification_from: "Artemis Notification"
 
 artemis_telemetry_enabled: true
 artemis_send_admin_details: true
-artemis_telemetry_destination: "telemetry.artemis.cit.tum.de"
+artemis_telemetry_destination: "https://telemetry.artemis.cit.tum.de"
 
 artemis_working_directory: "/opt/artemis"
 artemis_repo_basepath: "."
@@ -113,6 +113,19 @@ enable_science_event_logging: false
 
 #theia:
 #  portal_url: https://theia-yannik.k8s.ase.cit.tum.de
+#  images:
+#    java:
+#      Java-17: "java-17-latest"
+#    c:
+#      C: "c-latest"
+#    javascript:
+#      Javascript: "javascript-latest"
+#    ocaml:
+#      Ocaml: "ocaml-latest"
+#    python:
+#      Python: "python-latest"
+#    rust:
+#      Rust: "rust-latest"
 
 # If the password of some users is stored externally, you need to provide a name and the reset links. They will be displayed as a hint in the reset form of Artemis.
 # You need to at least provide the provider and the English reset link.
@@ -231,6 +244,9 @@ hazelcast_address: "{% if is_multinode_install is defined and is_multinode_insta
 
 artemis_eureka_urls: "{% if registry.url is defined and registry.url is not none %}http://admin:${jhipster.registry.password}@{{ registry.url }}:8761/eureka/{% endif %}"
 artemis_eureka_instance_id: "{{ node_id }}"
+
+node_short_name: unnamed-artemis-node
+node_display_name: Unnamed Artemis Node
 
 ##############################################################################
 # Iris Configuration

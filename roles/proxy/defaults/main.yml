@@ -1,38 +1,41 @@
 
-proxy_ssl_certificate_path:
-proxy_ssl_certificate_key_path:
+servers:
+  - name:
+    ssl_certificate_path:
+    ssl_certificate_key_path:
+    default_server: true
 
-proxy_resolver: "127.0.0.53 valid=300s"
 
 # Nodes for load balancing; Either define a host-group or manually list all nodes
 #proxy_available_nodes: "{{ groups.artemisnodes }}" # will not work anymore
 proxy_available_nodes:
   - hostname: 127.0.0.1
 
-
 # Service Port on nodes for load balancing; If differing for each node fall back to
 # manual list of proxy_available_nodes and comment out proxy_target_port variable declaration
 proxy_target_port: 8080
 
+# Port forwarding configuration of Artemis nodes for SSH Git communication with Artemis ICL LocalVC
+proxy_forward_ssh: true
+
 # Protocol used to communicate with nodes (either http or https)
 proxy_node_protocol: http
+
+# Used for the /mailto enpoint - Has to be a valid mail address.
+proxy_mailto:
 
 # /etc/nginx/sites-available/artemis.conf
 # Uncomment to change load balancing method from default (which is round robin)
 # Can be "least_conn" or "ip_hash"
 #proxy_load_balancing_method: ip_hash
 
+proxy_resolver: "127.0.0.53 valid=300s"
+
 proxy_worker_rlmmiit_nofile: 30000
 proxy_worker_connections: 20000
 proxy_server_names_hash_bucket_size: 256
 
-proxy_site_template: artemis
-
 proxy_generate_dh_param: true
-
-# Used for the /mailto enpoint - Has to be a valid mail address.
-proxy_mailto:
-
 
 proxy_send_timeout: "900s"
 proxy_read_timeout: "900s"

@@ -258,6 +258,9 @@ artemis:
       expiry-days: {{ continuous_integration.localci.image_cleanup.expiry_days }}
       cleanup-schedule-time: {{ continuous_integration.localci.image_cleanup.schedule_time }}
 {% endif %}
+    build-agent:
+        short-name: {{ node_short_name }}
+        display-name: {{ node_display_name }}
 {% endif %}
 
   git:
@@ -309,8 +312,8 @@ artemis:
 {% endif %}
 
   telemetry:
-    enabled: {{ artemis_telemetry_enabled }}
-    sendAdminDetails: {{ artemis_send_admin_details }}
+    enabled: {{ artemis_telemetry_enabled | lower }}
+    sendAdminDetails: {{ artemis_send_admin_details | lower }}
     destination: {{ artemis_telemetry_destination }}
 {% endif %}
 
@@ -318,6 +321,15 @@ artemis:
 theia:
 {% if theia.portal_url is defined and theia.portal_url is not none %}
   portal-url: {{ theia.portal_url }}
+{% endif %}
+{% if theia.images is defined and theia.images is not none %}
+  images:
+{% for programming_language_key, programming_language_value in theia.images.items() %}
+    {{ programming_language_key }}:
+{% for image_key, image_value in programming_language_value.items() %}
+      {{ image_key }}: {{ image_value }}
+{% endfor %}
+{% endfor %}
 {% endif %}
 {% endif %}
 
