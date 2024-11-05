@@ -32,9 +32,9 @@ server {
 
 {% for server in servers %}
 server {
-    listen 443 ssl{% if server.default_server %} default_server{% endif %};
+    listen 443 ssl{% if server.default_server is defined and server.default_server is not none and server.default_server %} default_server{% endif %};
     listen 443 quic{% if loop.index == 1 %} reuseport{% endif %};
-    listen [::]:443 ssl{% if server.default_server %} default_server{% endif %};
+    listen [::]:443 ssl{% if server.default_server is defined and server.default_server is not none and server.default_server %} default_server{% endif %};
     listen [::]:443 quic{% if loop.index == 1 %} reuseport{% endif %};
     http2 on;
     http3 on;
