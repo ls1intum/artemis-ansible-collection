@@ -76,7 +76,6 @@ artemis_plagiarism_checks_plagiarism_results_limit: 100
 
 artemis_ssh_key_path: /opt/keys
 artemis_ssh_key_name: "artemis_ssh_key"
-artemis_ssh_priv_key_value: #FIXME
 artemis_ssh_key_password:
 
 artemis_force_restart: false        # Will restart the artemis service on all nodes (unless artemis_force_no_restart) is set

@@ -109,27 +109,6 @@
   file:
     path: "{{ artemis_ssh_key_path }}"
     state: directory
-    mode: '0775'
-  when: artemis_ssh_key_path is not none and artemis_ssh_key_path != ""
-
-- name: Copy ssh key
-  become: true
-  copy:
-    content: "{{ artemis_ssh_priv_key_value }}"
-    dest: "{{ artemis_ssh_key_path }}/{{ artemis_ssh_key_name }}"
-  register: ssh_key
-  notify: restart docker artemis
-  when: artemis_ssh_key_path is not none and artemis_ssh_key_path != ""
-
-- name: Set permissions for artemis ssh key directory
-  become: true
-  file:
-    path: "{{ artemis_ssh_key_path }}"
-    state: directory
-    recurse: yes
-    owner: "{{ artemis_user_name }}"
-    group: "{{ artemis_user_group }}"
-    mode: '0770'
   when: artemis_ssh_key_path is not none and artemis_ssh_key_path != ""
 
 - name: Create artemis data-export directory
