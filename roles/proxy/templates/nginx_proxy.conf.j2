@@ -10,12 +10,6 @@ upstream app {
 {% endfor %}
 }
 
-log_format quic '$remote_addr - $remote_user [$time_local] '
-                    '"$request" $status $body_bytes_sent '
-                    '"$http_referer" "$http_user_agent" "$http3"';
-
-access_log quic;
-
 # Remove nginx version from HTTP response
 server_tokens off;
 
