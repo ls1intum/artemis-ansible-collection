@@ -108,7 +108,7 @@
     state: present
   with_items:
     - regexp: '^(\s*)gzip(\s+)(\w*);'
-      line: "\tgzip  on;"
+      line: "\tgzip on;"
     - regexp: '^(\s*)gzip_types(\s+)[/\-\w\s]*;'
       line: "\tgzip_types text/plain application/javascript application/x-javascript text/javascript text/xml text/css;"
   notify: restart nginx
