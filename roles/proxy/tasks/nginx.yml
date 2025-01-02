@@ -97,6 +97,22 @@
     state: present
   notify: restart nginx
 
+- name: Adjust gzip settings in nginx.conf
+  become: true
+  lineinfile:
+    path: /etc/nginx/nginx.conf
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    insertafter: "http {"
+    firstmatch: yes
+    state: present
+  with_items:
+    - regexp: '^(\s*)gzip(\s+)(\w*);'
+      line: "\tgzip  on;"
+    - regexp: '^(\s*)gzip_types(\s+)[/\-\w\s]*;'
+      line: "\tgzip_types text/plain application/javascript application/x-javascript text/javascript text/xml text/css;"
+  notify: restart nginx
+
 - name: Include SSH git stream configuration in nginx.conf
   become: true
   blockinfile:
