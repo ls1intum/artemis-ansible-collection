@@ -45,7 +45,7 @@
     dest: "{{ artemis_working_directory }}/application-prod.yml"
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
-    mode: 0640
+    mode: 0600
   register: config
   notify: restart artemis
 
