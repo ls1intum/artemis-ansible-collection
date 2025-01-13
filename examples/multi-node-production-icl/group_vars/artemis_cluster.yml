@@ -67,6 +67,7 @@ proxy_forward_ssh: true
 # Broker and Registry Configuration
 ##############################################################################
 is_multinode_install: true
+is_multinode_api_gateway_install: true
 
 activemq_version: 2.31.2
 

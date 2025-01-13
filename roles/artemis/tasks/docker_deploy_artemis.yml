@@ -99,7 +99,7 @@
   notify: restart docker artemis
 
 - name: Copy api-gateway env files
-  when: is_multinode_install
+  when: is_multinode_api_gateway_install
   become: true
   template:
     src: "templates/api-gateway.env.j2"
