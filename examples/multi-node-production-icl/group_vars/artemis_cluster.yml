@@ -4,6 +4,7 @@ artemis_server_url: "https://artemis-cluster.example.com"
 artemis_email: # FIXME: Set a valid email address
 
 artemis_build_version: 7.0.0 # FIXME: Adjust to newest version
+artemis_api_gateway_build_version: latest # FIXME: Adjust to newest version
 
 artemis_database_dbname: "Artemis"
 artemis_database_username: "Artemis"
