@@ -98,6 +98,18 @@
   register: config
   notify: restart docker artemis
 
+- name: Copy api-gateway env files
+  when: is_multinode_install
+  become: true
+  template:
+    src: "templates/api-gateway.env.j2"
+    dest: "{{ artemis_working_directory }}/api-gateway.env"
+    owner: "{{ artemis_user_name }}"
+    group: "{{ artemis_user_group }}"
+    mode: 0660
+  register: config
+  notify: restart docker artemis
+
 - include_tasks: generate_ssh_keys.yml
   when:
     - version_control.localvc is defined and version_control.localvc is not none
