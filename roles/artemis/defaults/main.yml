@@ -226,6 +226,9 @@ artemis_external_password_reset_link_de: "https://campus.tum.de/tumonline/ee/ui/
   #  host:
   #  token:
   #
+  #licenses:
+  #  matlab: "28000@mlm1.rbg.tum.de"
+  #
   ###############################################################################
   ## Message Broker
   ###############################################################################
