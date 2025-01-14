@@ -317,6 +317,14 @@ artemis:
     destination: {{ artemis_telemetry_destination }}
 {% endif %}
 
+{% if licenses is defined and licenses is not none %}
+  licenses:
+{% if licenses.matlab is defined and licenses.matlab is not none %}
+    matlab:
+      license-server: {{ licenses.matlab }}
+{% endif %}
+{% endif %}
+
 {% if theia is defined and theia is not none %}
 theia:
 {% if theia.portal_url is defined and theia.portal_url is not none %}
