@@ -1,0 +1,9 @@
+- name: Display deprecation notice
+  debug:
+    msg: "DEPRECATION NOTICE: Please use 'firewall_hostgroup: registry' instead of 'firewall_hostgroup: broker'."
+  when: firewall_hostgroup == 'broker'
+
+- name: Set default values for deprecated variables
+  set_fact:
+    firewall_hostgroup: "registry"
+  when: firewall_hostgroup == 'broker'
