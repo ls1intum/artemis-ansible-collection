@@ -1,6 +1,6 @@
 wireguard_port: 51820
 
-firewall_hostgroup:  # Can be 'broker', 'nodes', 'proxy' or left blank for default rules
+firewall_hostgroup:  # Can be 'registry', 'nodes', 'proxy' or left blank for default rules
 
 # Management Networks - used to allow SSH / HTTP access to Hosts and services
 management_network_ipv4: "172.24.152.0/24"
