@@ -18,6 +18,12 @@ artemis_repo_basepath: "/mnt/storage"
 artemis_legal_path: "/mnt/storage/legal"
 artemis_data_export_path: "/mnt/storage/data-exports"
 
+# Telemetry configuration
+artemis_operator_name: "Example University Name" # FIXME: Set the name of your university
+artemis_operator_admin_name: "Max Mustermann" # FIXME: Set the name of the main admin
+artemis_telemetry_enabled: true
+artemis_send_admin_details: true
+
 ##############################################################################
 # External Systems Configuration
 ##############################################################################
@@ -47,11 +53,14 @@ continuous_integration:
 ##############################################################################
 proxy_generate_dh_param: false
 
-proxy_ssl_certificate_path: # FIXME fullchain.pem
-proxy_ssl_certificate_key_path: # FIXME privkey.pem
+servers:
+  - name: "_"
+    ssl_certificate_path: # FIXME fullchain.pem
+    ssl_certificate_key_path:  # FIXME privkey.pem
+    default_server: true
 
 firewall_hostgroup: default
-proxy_site_template: artemis # Name of the site loaded within nginx
+proxy_forward_ssh: true
 
 ##############################################################################
 # Broker and Registry Configuration

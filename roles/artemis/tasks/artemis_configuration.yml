@@ -45,7 +45,7 @@
     dest: "{{ artemis_working_directory }}/application-prod.yml"
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
-    mode: 0640
+    mode: 0600
   register: config
   notify: restart artemis
 
@@ -65,26 +65,6 @@
   file:
     path: "{{ artemis_ssh_key_path }}"
     state: directory
-    mode: '0775'
-  when: artemis_ssh_priv_key_value is not none and artemis_ssh_key_path is not none and artemis_ssh_key_path != ""
-
-- name: Copy ssh key
-  become: true
-  copy:
-    content: "{{ artemis_ssh_priv_key_value }}"
-    dest: "{{ artemis_ssh_key_path }}/{{ artemis_ssh_key_name }}"
-  register: ssh_key
-  notify: restart artemis
-  when: artemis_ssh_priv_key_value is not none and artemis_ssh_key_path is not none and artemis_ssh_key_path != ""
-
-- name: Set permissions for artemis ssh key directory
-  become: true
-  file:
-    path: "{{ artemis_ssh_key_path }}"
-    state: directory
-    recurse: yes
-    owner: "{{ artemis_user_name }}"
-    group: "{{ artemis_user_group }}"
   when: artemis_ssh_priv_key_value is not none and artemis_ssh_key_path is not none and artemis_ssh_key_path != ""
 
 - name: Create artemis data-export directory
@@ -96,7 +76,7 @@
     mode: '0775'
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
-  when: artemis_data_export_path is not none and artemis_data_export_path != ""
+  when: artemis_data_export_path is not none and artemis_data_export_path != "" and artemis_computed_is_core_node
 
 - name: Set permissions for artemis data-export directory
   become: true
@@ -106,7 +86,7 @@
     recurse: true
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
-  when: artemis_data_export_path is not none and artemis_data_export_path != ""
+  when: artemis_data_export_path is not none and artemis_data_export_path != "" and artemis_computed_is_core_node
 
 - name: Add artemis user to docker group
   become: true

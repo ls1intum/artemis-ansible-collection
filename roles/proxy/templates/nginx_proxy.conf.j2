@@ -1,7 +1,7 @@
 {{ ansible_managed | comment }}
 
 # Load balancing
-upstream artemis {
+upstream app {
 {% if proxy_load_balancing_method is defined %}
     {{ proxy_load_balancing_method }};
 {% endif %}
@@ -9,12 +9,6 @@ upstream artemis {
     server {{ node.hostname }}{% if proxy_target_port is defined %}:{{ proxy_target_port }}{% endif %}{% if node.weight is defined %} weight={{ node.weight }}{% endif %};
 {% endfor %}
 }
-
-log_format quic '$remote_addr - $remote_user [$time_local] '
-                    '"$request" $status $body_bytes_sent '
-                    '"$http_referer" "$http_user_agent" "$http3"';
-
-access_log quic;
 
 # Remove nginx version from HTTP response
 server_tokens off;
@@ -30,19 +24,20 @@ server {
     return 301 https://$host$request_uri;
 }
 
+{% for server in servers %}
 server {
-    listen 443 ssl;
-    listen 443 quic reuseport;
-    listen [::]:443 ssl;
-    listen [::]:443 quic reuseport;
+    listen 443 ssl{% if server.default_server is defined and server.default_server is not none and server.default_server %} default_server{% endif %};
+    listen 443 quic{% if loop.index == 1 %} reuseport{% endif %};
+    listen [::]:443 ssl{% if server.default_server is defined and server.default_server is not none and server.default_server %} default_server{% endif %};
+    listen [::]:443 quic{% if loop.index == 1 %} reuseport{% endif %};
     http2 on;
     http3 on;
     http3_hq on;
     quic_retry on;
     
-    server_name _;
-    ssl_certificate     {{ proxy_ssl_certificate_path }};
-    ssl_certificate_key {{ proxy_ssl_certificate_key_path }};
+    server_name {{ server.name }};
+    ssl_certificate     {{ server.ssl_certificate_path }};
+    ssl_certificate_key {{ server.ssl_certificate_key_path }};
     ssl_protocols       TLSv1.2 TLSv1.3;
     {% if proxy_generate_dh_param|bool == true %}ssl_dhparam /etc/nginx/dhparam.pem;{% endif %}
     ssl_prefer_server_ciphers   on;
@@ -62,7 +57,7 @@ server {
     client_body_buffer_size 1m;
 
     location / {
-        proxy_pass {{ proxy_node_protocol }}://artemis;
+        proxy_pass {{ proxy_node_protocol }}://app;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -93,7 +88,7 @@ server {
 {% endif %}
 
     location /api/authenticate {
-        proxy_pass http://artemis/api/authenticate;
+        proxy_pass http://app/api/authenticate;
 		# For a given violation of the rate limit defined in the zone
 		# * the first 2 (delay) requests will be allowed without delay
 		# * the next (burst - delay) request waits until it fits in the rate limit
@@ -113,3 +108,5 @@ server {
         internal;
     }
 }
+
+{% endfor %}

@@ -1,0 +1,23 @@
+- name: Display deprecation notice
+  debug:
+    msg: "DEPRECATION NOTICE: The variable 'proxy_site_template' is being deprecated. Please use 'proxy_forward_ssh' instead. See https://github.com/ls1intum/artemis-ansible-collection/pull/70 for additional information."
+  when: proxy_site_template is defined
+
+- name: Set default values for deprecated variables
+  set_fact:
+    proxy_forward_ssh: "{{ proxy_site_template == 'artemis' }}"
+  when: proxy_site_template is defined
+
+- name: Display deprecation notice
+  debug:
+    msg: "DEPRECATION NOTICE: The variable 'proxy_ssl_certificate_path' and 'proxy_ssl_certificate_key_path' is being deprecated. Please use the 'server' list instead. See https://github.com/ls1intum/artemis-ansible-collection/pull/70 for additional information."
+  when: proxy_ssl_certificate_path is defined or proxy_ssl_certificate_key_path is defined
+
+- name: Set default values for deprecated variables
+  set_fact:
+    servers:
+      - name: "_"
+        ssl_certificate_path: "{{ proxy_ssl_certificate_path }}"
+        ssl_certificate_key_path: "{{ proxy_ssl_certificate_key_path }}"
+        default_server: true
+  when: proxy_ssl_certificate_path is defined or proxy_ssl_certificate_key_path is defined

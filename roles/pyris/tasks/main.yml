@@ -59,7 +59,23 @@
     recurse: yes
     owner: "{{ pyris_user_name }}"
     group: "{{ pyris_user_group }}"
-  register: permissions
+  notify: restart docker pyris
+
+- name: Create weaviate directory
+  become: true
+  file:
+    path: "{{ pyris_weaviate_directory }}"
+    state: directory
+    mode: '0777'
+
+- name: Set permissions for weaviate directory
+  become: true
+  file:
+    path: "{{ pyris_weaviate_directory }}"
+    state: directory
+    recurse: yes
+    owner: "{{ pyris_user_name }}"
+    group: "{{ pyris_user_group }}"
   notify: restart docker pyris
 
 - name: Copy docker.env to pyris directory
@@ -78,6 +94,17 @@
   template:
     src: "templates/application.yml.j2"
     dest: "{{ pyris_working_directory }}/application.yml"
+    owner: "{{ pyris_user_name }}"
+    group: "{{ pyris_user_group }}"
+    mode: 0660
+  register: config
+  notify: restart docker pyris
+
+- name: Copy llm_config.yml to pyris directory
+  become: true
+  template:
+    src: "templates/llm_config.yml.j2"
+    dest: "{{ pyris_working_directory }}/llm_config.yml"
     owner: "{{ pyris_user_name }}"
     group: "{{ pyris_user_group }}"
     mode: 0660
