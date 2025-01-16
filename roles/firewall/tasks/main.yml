@@ -1,3 +1,5 @@
+- include_tasks: deprecations.yml
+
 - name: Install iptables-persistent
   become: true
   apt:
