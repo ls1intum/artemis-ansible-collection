@@ -15,4 +15,5 @@
     - version_control.localvc is defined and version_control.localvc is not none
     - version_control.localvc.ssh_key_path is defined and version_control.localvc.ssh_key_path|length > 0
     - not (only_update_artemis_config | bool)
+    - contionous_integration.localci is defined and contionous_integration.localci is not none and contionous_integration.localci.is_core_node is defined and contionous_integration.localci.is_core_node
 
