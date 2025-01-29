@@ -226,6 +226,9 @@ artemis_external_password_reset_link_de: "https://campus.tum.de/tumonline/ee/ui/
   #  host:
   #  token:
   #
+  #licenses:
+  #  matlab: "28000@mlm1.rbg.tum.de"
+  #
   ###############################################################################
   ## Message Broker
   ###############################################################################
@@ -262,6 +265,12 @@ node_display_name: Unnamed Artemis Node
 #  token:
 
 ##############################################################################
+# Atlas Configuration
+##############################################################################
+#atlas:
+# More configuration options will be added in the future.
+
+##############################################################################
 # CORS Configuration
 # This is the default config to work with scorpio and theia
 ##############################################################################
@@ -295,9 +304,10 @@ artemis_spring_profile_docker: "{% if use_docker %},docker{% endif %}"
 artemis_spring_profile_iris: "{% if iris is defined and iris is not none %},iris{% endif %}"
 artemis_spring_profile_theia: "{% if theia is defined and theia is not none %},theia{% endif %}"
 artemis_spring_profile_aeolus: "{% if aeolus is defined and aeolus is not none %},aeolus{% endif %}"
+artemis_spring_profile_atlas: "{% if atlas is defined %},atlas{% endif %}" # TODO: Add and atlas is not none check as soon as the additional configuration options are added
 artemis_spring_profile_lti: "{% if lti.oauth_secret is defined and lti.oauth_secret is not none %},lti{% endif %}"
 
-artemis_spring_profile_core: "{% if artemis_computed_is_core_node %},core{{ artemis_spring_profile_user_management }}{{ artemis_spring_profile_ldap }}{{ artemis_spring_profile_version_control }}{{ artemis_spring_profile_continuous_integration }}{{ artemis_spring_profile_athena }}{{ artemis_spring_profile_scheduling }}{{ artemis_spring_profile_docker }}{{ artemis_spring_profile_iris }}{{ artemis_spring_profile_theia }}{{ artemis_spring_profile_aeolus }}{{ artemis_spring_profile_lti }}{% endif %}"
+artemis_spring_profile_core: "{% if artemis_computed_is_core_node %},core{{ artemis_spring_profile_user_management }}{{ artemis_spring_profile_ldap }}{{ artemis_spring_profile_version_control }}{{ artemis_spring_profile_continuous_integration }}{{ artemis_spring_profile_athena }}{{ artemis_spring_profile_scheduling }}{{ artemis_spring_profile_docker }}{{ artemis_spring_profile_iris }}{{ artemis_spring_profile_theia }}{{ artemis_spring_profile_aeolus }}{{ artemis_spring_profile_atlas }}{{ artemis_spring_profile_lti }}{% endif %}"
 artemis_spring_profile_buildagent: "{% if continuous_integration.localci is defined and continuous_integration.localci is not none %}{% if continuous_integration.localci.is_build_agent is defined and continuous_integration.localci.is_build_agent is not none and continuous_integration.localci.is_build_agent %},buildagent{% endif %}{% endif %}"
 
 artemis_spring_profiles: "{{ artemis_spring_profile_env }}{{ artemis_spring_profile_buildagent }}{{ artemis_spring_profile_core }}"

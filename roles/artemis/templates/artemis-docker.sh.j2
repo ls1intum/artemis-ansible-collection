@@ -33,7 +33,10 @@ function start {
     rm -rf Artemis
     git clone https://github.com/ls1intum/Artemis.git -b "$pr_branch" Artemis
     sed -i "s/ARTEMIS_DOCKER_TAG=.*/ARTEMIS_DOCKER_TAG='$pr_tag'/g" $ENV_FILE
-    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --pull always --no-build
+    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --pull always --no-build --remove-orphans
+    
+    # Reload Nginx configuration as Nginx may still be running from a previous start. This is necessary to apply the new configuration.
+    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" exec nginx nginx -s reload
 }
 
 function stop {
@@ -41,9 +44,9 @@ function stop {
 
     echo "Stopping Artemis"
 
-    # Get all docker-compose services matching artemis-app* to be multi-node and single-node compatible.
+    # Get all docker-compose services that are not called nginx.
     services=$(docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" ps --services)
-    artemis_services=$(echo "$services" | grep "^artemis-app")
+    artemis_services=$(echo "$services" | grep -v "^nginx")
 
     docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" stop $artemis_services
 }
