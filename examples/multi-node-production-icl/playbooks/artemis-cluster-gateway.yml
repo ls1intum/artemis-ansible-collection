@@ -1,0 +1,15 @@
+---
+
+- name: Setup API-Gateway
+  hosts: artemis_api_gateway
+
+  roles:
+    - role: ls1intum.artemis.gateway
+      tags: gateway
+      vars:
+        # Management Networks - used to allow SSH / HTTP access to Hosts and services
+        management_network_ipv4: "{{ firewall_management_network_ipv4 }}"
+        management_network_ipv6: "{{ firewall_management_network_ipv6 }}"
+        # Monitoring Service
+        monitoring_host_ipv4: "{{ firewall_monitoring_host_ipv4 }}"
+        monitoring_host_ipv6: "{{ firewall_monitoring_host_ipv6 }}"

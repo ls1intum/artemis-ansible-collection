@@ -64,15 +64,21 @@ firewall_hostgroup: default
 proxy_forward_ssh: true
 
 ##############################################################################
+# (API) Gateway
+##############################################################################
+is_multinode_gateway_install: true
+gateway:
+  url:  "[fcfe:0:0:0:0:0:b:1]" # Your gateway VM hostname (e.g., Wireguard IP)
+
+##############################################################################
 # Broker and Registry Configuration
 ##############################################################################
 is_multinode_install: true
-is_multinode_gateway_install: true
 
 activemq_version: 2.31.2
 
 broker:
-  url: "[fcfe:0:0:0:0:0:b:1]" # Your broker VM hostname (e.g., Wireguard IP)
+  url: "[fcfe:0:0:0:0:0:b:2]" # Your broker VM hostname (e.g., Wireguard IP)
   username: brokeruser
   password: # FIXME: Set a secure password
   proxy:
@@ -81,7 +87,7 @@ broker:
     ssl_certificate_key_path: #FIXME privkey.pem
 
 registry:
-  url: "[fcfe:0:0:0:0:0:b:2]" # Your registry VM hostname (e.g., Wireguard IP)
+  url: "[fcfe:0:0:0:0:0:b:3]" # Your registry VM hostname (e.g., Wireguard IP)
   proxy:
     generate_dh_param: false
     ssl_certificate_path: # FIXME fullchain.pem

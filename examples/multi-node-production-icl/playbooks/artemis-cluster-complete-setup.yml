@@ -19,3 +19,6 @@
 
 # Cluster Artemis Nodes
 - import_playbook: artemis-cluster-nodes.yml
+
+# Cluster (API) Gateway
+- import_playbook: artemis-cluster-gateway.yml
