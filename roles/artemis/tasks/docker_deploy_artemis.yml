@@ -98,12 +98,12 @@
   register: config
   notify: restart docker artemis
 
-- name: Copy api-gateway env files
-  when: is_multinode_api_gateway_install
+- name: Copy gateway env files
+  when: is_multinode_gateway_install
   become: true
   template:
-    src: "templates/api-gateway.env.j2"
-    dest: "{{ artemis_working_directory }}/api-gateway.env"
+    src: "templates/gateway.env.j2"
+    dest: "{{ artemis_working_directory }}/gateway.env"
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
     mode: 0660

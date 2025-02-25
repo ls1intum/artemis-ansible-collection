@@ -2,7 +2,7 @@
 artemis_version: 6.9.0
 is_testserver: false
 is_multinode_install: false
-is_multinode_api_gateway_install: false
+is_multinode_gateway_install: false
 
 artemis_server_url: https://artemis.ase.in.tum.de
 artemis_server_port: 8080
@@ -66,7 +66,7 @@ artemis_repo_basepath: "."
 artemis_legal_path: /opt/artemis/legal
 artemis_data_export_path: /opt/artemis/data-exports
 
-artemis_api_gateway_version: latest
+gateway_version: latest
 
 # the following two values must be cron expressions
 artemis_scheduling_data_export_creation_time: 0 0 4 * * * # every day at 4 am
@@ -85,7 +85,7 @@ artemis_force_restart: false        # Will restart the artemis service on all no
 artemis_force_no_restart: false     # Will prevent the restart of the artemis service on all nodes
 
 artemis_build_version: "{{ artemis_version }}"
-artemis_api_gateway_build_version: "{{ artemis_api_gateway_version }}"
+gateway_build_version: "{{ gateway_version }}"
 artemis_war_version: "{{ artemis_build_version }}"
 artemis_war_url: "https://github.com/ls1intum/Artemis/releases/download/{{ artemis_war_version }}/Artemis.war"
 

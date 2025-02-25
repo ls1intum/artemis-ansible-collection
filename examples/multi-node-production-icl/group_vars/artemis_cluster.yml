@@ -4,7 +4,7 @@ artemis_server_url: "https://artemis-cluster.example.com"
 artemis_email: # FIXME: Set a valid email address
 
 artemis_build_version: 7.0.0 # FIXME: Adjust to newest version
-artemis_api_gateway_build_version: latest # FIXME: Adjust to newest version
+gateway_build_version: latest # FIXME: Adjust to newest version
 
 artemis_database_dbname: "Artemis"
 artemis_database_username: "Artemis"
@@ -67,7 +67,7 @@ proxy_forward_ssh: true
 # Broker and Registry Configuration
 ##############################################################################
 is_multinode_install: true
-is_multinode_api_gateway_install: true
+is_multinode_gateway_install: true
 
 activemq_version: 2.31.2
 
