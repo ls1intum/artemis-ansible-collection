@@ -1,0 +1,9 @@
+eureka:
+    client:
+      enabled: true
+      serviceUrl:
+        defaultZone: "{{ gateway_eureka_urls }}"
+    instance:
+      appname: API-Gateway
+      preferIpAddress: true
+      ip-address: "{{ gateway_address }}"

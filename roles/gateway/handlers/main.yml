@@ -1,0 +1,7 @@
+---
+- name: Restart API Gateway
+  become: true
+  service:
+    name: "gateway"
+    state: "restarted"
+    enabled: true

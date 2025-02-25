@@ -1,0 +1,11 @@
+---
+artemis_user_name: artemis
+artemis_user_group: artemis
+
+gateway_eureka_urls: "{% if registry.url is defined and registry.url is not none %}http://admin:${jhipster.registry.password}@{{ registry.url }}:8761/eureka/{% endif %}"
+
+gateway_address: # FIXME
+
+gateway_working_directory: /opt/gateway
+gateway_war_version: "{{ gateway_build_version }}"
+gateway_war_url: "https://github.com/ls1intum/API-Gateway/releases/download/{{ gateway_war_version }}/API-Gateway.war"

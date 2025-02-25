@@ -1,0 +1,29 @@
+---
+- name: Download API-Gateway.war to {{ artemis_working_directory }}
+  become: true
+  get_url:
+    url: "{{ gateway_war_url }}"
+    dest: "{{ gateway_working_directory }}/gateway.war"
+    owner: "{{ artemis_user_name }}"
+    group: "{{ artemis_user_group }}"
+    mode: '0644'
+  notify: Restart API Gateway
+
+- name: Copy gateway.service systemd configuration
+  become: true
+  template:
+    src: gateway.service.j2
+    dest: "/etc/systemd/system/gateway.service"
+    mode: 0644
+  register: service
+  notify: Restart API Gateway
+
+- name: Enable gateway service
+  become: true
+  systemd:
+    daemon_reload: yes
+    name: gateway
+    enabled: yes
+    masked: no
+  notify: Restart API Gateway
+

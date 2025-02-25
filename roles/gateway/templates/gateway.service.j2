@@ -1,0 +1,35 @@
+{{ ansible_managed | comment }}
+
+[Unit]
+Description=Gateway
+After=syslog.target
+
+[Service]
+User={{ artemis_user_name }}
+WorkingDirectory={{ gateway_working_directory }}
+ExecStart=/usr/bin/java \
+    -Djdk.tls.ephemeralDHKeySize=2048 \
+    -DLC_CTYPE=UTF-8 \
+    -Dfile.encoding=UTF-8 \
+    -Dsun.jnu.encoding=UTF-8 \
+    -Djava.security.egd=file:/dev/./urandom \
+    -Dhazelcast.slow.operation.detector.stacktrace.logging.enabled=true \
+    {# -Xmx{{ (artemis_system_ram_proportion * ansible_memory_mb.real.total) | int }}m \ - let's discuss if we want to define this for the gateway #}
+    -XX:+ShowCodeDetailsInExceptionMessages \
+    -XX:+HeapDumpOnOutOfMemoryError \
+    --add-modules java.se \
+    --add-exports java.base/jdk.internal.ref=ALL-UNNAMED \
+    --add-exports java.naming/com.sun.jndi.ldap=ALL-UNNAMED \
+    --add-opens java.base/java.lang=ALL-UNNAMED \
+    --add-opens java.base/java.nio=ALL-UNNAMED \
+    --add-opens java.base/sun.nio.ch=ALL-UNNAMED \
+    --add-opens java.management/sun.management=ALL-UNNAMED \
+    --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED \
+    -jar gateway.war
+SuccessExitStatus=143
+#StandardOutput=file:{{ gateway_working_directory }}/gateway.log
+StandardError=inherit
+
+[Install]
+WantedBy=multi-user.target
+
