@@ -1,6 +1,6 @@
 ---
-artemis_user_name: artemis
-artemis_user_group: artemis
+artemis_jhipster_jwt: # FIXME
+artemis_jhipster_registry_password: #FIXME Multinode
 
 gateway_eureka_urls: "{% if registry.url is defined and registry.url is not none %}http://admin:${jhipster.registry.password}@{{ registry.url }}:8761/eureka/{% endif %}"
 
