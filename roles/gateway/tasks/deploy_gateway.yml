@@ -1,0 +1,8 @@
+---
+- name: Download API-Gateway.war to {{ gateway_working_directory }}
+  become: true
+  get_url:
+    url: "{{ gateway_war_url }}"
+    dest: "{{ gateway_working_directory }}/gateway.war"
+    mode: '0644'
+  notify: Restart API Gateway

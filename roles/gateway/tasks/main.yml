@@ -3,15 +3,7 @@
 
 - include_tasks: jdk.yml
 
-- name: Download API-Gateway.war to {{ artemis_working_directory }}
-  become: true
-  get_url:
-    url: "{{ gateway_war_url }}"
-    dest: "{{ gateway_working_directory }}/gateway.war"
-    owner: "{{ artemis_user_name }}"
-    group: "{{ artemis_user_group }}"
-    mode: '0644'
-  notify: Restart API Gateway
+- include_tasks: deploy_artemis.yml
 
 - name: Copy gateway.service systemd configuration
   become: true
