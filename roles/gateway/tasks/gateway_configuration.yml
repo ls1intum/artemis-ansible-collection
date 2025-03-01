@@ -15,7 +15,7 @@
     dest: "/etc/systemd/system/gateway.service"
     mode: 0644
   register: service
-  notify: Restart API Gateway
+  notify: Restart Gateway
 
 - name: Enable gateway service
   become: true
@@ -24,7 +24,7 @@
     name: gateway
     enabled: yes
     masked: no
-  notify: Restart API Gateway
+  notify: Restart Gateway
 
 - name: Copy application.yml
   become: true
@@ -32,4 +32,4 @@
     src: application.yml.j2
     dest: "{{ gateway_working_directory }}/application.yml"
     mode: 0644
-  notify: Restart API Gateway
+  notify: Restart Gateway
