@@ -2,7 +2,7 @@
 artemis_version: 6.9.0
 is_testserver: false
 is_multinode_install: false
-is_multinode_gateway_install: false
+is_multinode_docker_gateway_install: false
 
 artemis_server_url: https://artemis.ase.in.tum.de
 artemis_server_port: 8080
