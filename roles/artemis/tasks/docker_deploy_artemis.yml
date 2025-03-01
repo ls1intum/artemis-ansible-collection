@@ -108,7 +108,6 @@
     group: "{{ artemis_user_group }}"
     mode: 0660
   register: config
-  notify: restart docker artemis
 
 - include_tasks: generate_ssh_keys.yml
   when:
