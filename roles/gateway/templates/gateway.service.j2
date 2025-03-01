@@ -5,7 +5,6 @@ Description=Gateway
 After=syslog.target
 
 [Service]
-User={{ artemis_user_name }}
 WorkingDirectory={{ gateway_working_directory }}
 ExecStart=/usr/bin/java \
     -Djdk.tls.ephemeralDHKeySize=2048 \
@@ -27,7 +26,6 @@ ExecStart=/usr/bin/java \
     --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED \
     -jar gateway.war
 SuccessExitStatus=143
-#StandardOutput=file:{{ gateway_working_directory }}/gateway.log
 StandardError=inherit
 
 [Install]
