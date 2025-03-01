@@ -6,7 +6,8 @@ eureka:
     instance:
       appname: API-Gateway
       preferIpAddress: true
-      ip-address: "{{ gateway.url }}"
+      instanceId: Gateway:1
+      ip-address: "{{ gateway_url }}"
 
 jhipster:
   security:
