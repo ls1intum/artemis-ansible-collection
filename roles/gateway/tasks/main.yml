@@ -5,21 +5,4 @@
 
 - include_tasks: deploy_artemis.yml
 
-- name: Copy gateway.service systemd configuration
-  become: true
-  template:
-    src: gateway.service.j2
-    dest: "/etc/systemd/system/gateway.service"
-    mode: 0644
-  register: service
-  notify: Restart API Gateway
-
-- name: Enable gateway service
-  become: true
-  systemd:
-    daemon_reload: yes
-    name: gateway
-    enabled: yes
-    masked: no
-  notify: Restart API Gateway
-
+- include_tasks: gateway_configuration.yml

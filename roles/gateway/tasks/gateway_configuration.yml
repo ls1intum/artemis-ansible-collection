@@ -1,0 +1,35 @@
+---
+- name: Create Gateway working directory
+  become: true
+  file:
+    state: directory
+    path: "{{ gateway_working_directory }}"
+    user: "{{ gateway_user_name }}"
+    group: "{{ gateway_user_group }}"
+    mode: '0775'
+
+- name: Copy gateway.service systemd configuration
+  become: true
+  template:
+    src: gateway.service.j2
+    dest: "/etc/systemd/system/gateway.service"
+    mode: 0644
+  register: service
+  notify: Restart API Gateway
+
+- name: Enable gateway service
+  become: true
+  systemd:
+    daemon_reload: yes
+    name: gateway
+    enabled: yes
+    masked: no
+  notify: Restart API Gateway
+
+- name: Copy application.yml
+  become: true
+  template:
+    src: application.yml.j2
+    dest: "{{ gateway_working_directory }}/application.yml"
+    mode: 0644
+  notify: Restart API Gateway
