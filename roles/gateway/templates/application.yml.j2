@@ -17,4 +17,9 @@ jhipster:
            token-validity-in-seconds: 259200                   # Token is valid 3 days
            token-validity-in-seconds-for-remember-me: 2592000  # Token is valid 30 days
   registry:
-     password: {{ artemis_jhipster_registry_password }}
+    password: {{ artemis_jhipster_registry_password }}
+
+management:
+  endpoint:
+     gateway:
+        access: unrestricted # change to ADMIN (requires username and password)
