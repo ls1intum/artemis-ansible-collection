@@ -21,3 +21,9 @@ gateway_deployment_user_comment: "User to deploy the gateway to this host"
 gateway_working_directory: /opt/gateway
 gateway_war_version: "{{ gateway.build_version }}"
 gateway_war_url: "https://github.com/ls1intum/API-Gateway/releases/download/{{ gateway_war_version }}/Gateway.war"
+
+##############################################################################
+# Java Setup
+##############################################################################
+
+openjdk_version: 21
