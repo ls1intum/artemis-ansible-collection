@@ -8,6 +8,16 @@ gateway:
   url:  # FIXME
   build_version: latest # FIXME: Adjust to newest version
 
+gateway_user_name: gateway
+gateway_user_gid: 1337
+gateway_user_group: gateway
+
+gateway_create_deployment_user: false
+gateway_deployment_user_name: deployment
+gateway_deployment_user_uid: 1338
+gateway_deployment_user_public_key: "" # FIXME
+gateway_deployment_user_comment: "User to deploy the gateway to this host"
+
 gateway_working_directory: /opt/gateway
 gateway_war_version: "{{ gateway.build_version }}"
 gateway_war_url: "https://github.com/ls1intum/API-Gateway/releases/download/{{ gateway_war_version }}/Gateway.war"

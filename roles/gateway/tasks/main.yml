@@ -1,4 +1,6 @@
 ---
+- include_tasks: users.yml
+
 - name: Download API-Gateway.war to {{ artemis_working_directory }}
   become: true
   get_url:

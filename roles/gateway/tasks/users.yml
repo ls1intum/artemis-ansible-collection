@@ -1,0 +1,42 @@
+---
+- name: Ensure gateway group {{ gateway_user_group }} exists
+  become: yes
+  group:
+    name: "{{ gateway_user_group }}"
+    gid: "{{ gateway_user_gid }}"
+    state: present
+
+- name: Ensure gateway user {{ gateway_user_name }} exists
+  become: yes
+  user:
+    name: "{{ gateway_user_name }}"
+    state: present
+    group: "{{ gateway_user_group }}"
+    uid: "{{ gateway_user_gid }}"
+
+- name: Ensure deployment user {{ gateway_deployment_user_name }} exists
+  become: yes
+  user:
+    name: "{{ gateway_deployment_user_name }}"
+    comment: "{{ gateway_deployment_user_comment }}"
+    state: present
+    uid: "{{ gateway_deployment_user_uid }}"
+    group: "{{ gateway_user_group }}"
+  when: (gateway_create_deployment_user | bool)
+
+- name: Ensure (limited) sudo privileges for user {{ gateway_deployment_user_name }}
+  become: yes
+  template:
+    src: gateway_deployment_sudoers.j2
+    dest: /etc/sudoers.d/gateway_deployment
+    validate: 'visudo -cf %s'
+    mode: 0440
+  when: (gateway_create_deployment_user | bool)
+
+- name: Authorize ssh-key for deployment user
+  become: yes
+  authorized_key:
+    user: "{{ gateway_deployment_user_name }}"
+    state: present
+    key: "{{ gateway_deployment_user_public_key }}"
+  when: (gateway_create_deployment_user | bool)
