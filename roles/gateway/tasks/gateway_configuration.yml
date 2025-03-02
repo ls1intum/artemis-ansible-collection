@@ -4,7 +4,7 @@
   file:
     state: directory
     path: "{{ gateway_working_directory }}"
-    user: "{{ gateway_user_name }}"
+    owner: "{{ gateway_user_name }}"
     group: "{{ gateway_user_group }}"
     mode: '0775'
 

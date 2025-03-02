@@ -65,11 +65,8 @@ proxy_forward_ssh: true
 ##############################################################################
 # (API) Gateway
 ##############################################################################
-is_multinode_gateway_install: true
-gateway_build_version:
-gateway:
-  build_version: latest # FIXME: Adjust to newest version
-  url:  "[fcfe:0:0:0:0:0:b:1]" # Your gateway VM hostname (e.g., Wireguard IP)
+gateway_build_version: # FIXME
+gateway_url: "[fcfe:0:0:0:0:0:b:1]" # Your gateway VM hostname (e.g., Wireguard IP)
 
 ##############################################################################
 # Broker and Registry Configuration
