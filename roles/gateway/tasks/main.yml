@@ -3,6 +3,6 @@
 
 - include_tasks: jdk.yml
 
-- include_tasks: deploy_artemis.yml
+- include_tasks: deploy_gateway.yml
 
 - include_tasks: gateway_configuration.yml
