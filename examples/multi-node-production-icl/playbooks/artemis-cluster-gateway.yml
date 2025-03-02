@@ -1,0 +1,8 @@
+---
+
+- name: Setup API-Gateway
+  hosts: artemis_api_gateway
+
+  roles:
+    - role: ls1intum.artemis.gateway
+      tags: gateway

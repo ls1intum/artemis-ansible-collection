@@ -3,6 +3,9 @@ artemis-cluster-node1.example.com
 artemis-cluster-node2.example.com
 artemis-cluster-node3.example.com
 
+[artemis_api_gateway]
+artemis-api-gateway.example.com
+
 [artemis_cluster_broker]
 artemis-cluster-broker.example.com
 

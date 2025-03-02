@@ -23,7 +23,7 @@ monitoring_host_ipv6: "2a09:80c0:89:1::32"
 You have to configure a special varaible to select the firewall rule set which is applied:
 
 ```
-firewall_hostgroup:  # Can be 'broker', 'nodes', 'proxy' or left blank for default rules
+firewall_hostgroup:  # Can be 'broker', 'nodes', 'proxy', 'proxy_gateway' or left blank for default rules
 ```
 
 ## Example usage:
