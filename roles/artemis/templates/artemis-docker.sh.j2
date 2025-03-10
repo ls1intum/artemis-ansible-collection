@@ -36,7 +36,7 @@ function start {
     docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --pull always --no-build --remove-orphans
     
     # Reload Nginx configuration as Nginx may still be running from a previous start. This is necessary to apply the new configuration.
-    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" exec nginx nginx -s reload
+    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" exec nginx nginx -s reload || true
 }
 
 function stop {

@@ -94,6 +94,9 @@ artemis:
   build-logs-path: {{ artemis_repo_basepath }}/build-logs
   data-export-path: {{ artemis_data_export_path }}
   bcrypt-salt-rounds: {{ artemis_bcrypt_salt_rounds }}
+{% if push_notification_relay is defined and push_notification_relay is not none %}
+  push-notification-relay: {{ push_notification_relay }}
+{% endif %}
   user-management:
 {% if user_management.jira is defined and user_management.jira is not none %}
     use-external: true
@@ -315,6 +318,14 @@ artemis:
     enabled: {{ artemis_telemetry_enabled | lower }}
     sendAdminDetails: {{ artemis_send_admin_details | lower }}
     destination: {{ artemis_telemetry_destination }}
+{% endif %}
+
+{% if licenses is defined and licenses is not none %}
+  licenses:
+{% if licenses.matlab is defined and licenses.matlab is not none %}
+    matlab:
+      license-server: {{ licenses.matlab }}
+{% endif %}
 {% endif %}
 
 {% if theia is defined and theia is not none %}
