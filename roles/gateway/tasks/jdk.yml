@@ -1,0 +1,7 @@
+
+- name: Install openjdk-{{ openjdk_version }}-jdk
+  become: true
+  apt:
+    name: "openjdk-{{ openjdk_version }}-jdk"
+    state: latest
+    update_cache: yes
