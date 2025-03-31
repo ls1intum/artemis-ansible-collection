@@ -18,6 +18,6 @@
   unarchive:
     src: https://dlcdn.apache.org/activemq/activemq-artemis/{{ activemq_version }}/apache-artemis-{{ activemq_version }}-bin.tar.gz
     dest: /opt/activemq-distribution
-    remote_src: yes
+    remote_src: true
   notify: restart broker
   when: not activemq_install_result.stat.exists

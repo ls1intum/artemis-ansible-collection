@@ -31,7 +31,7 @@
   file:
     path: "{{ artemis_working_directory }}"
     state: directory
-    recurse: yes
+    recurse: true
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
   register: permissions
@@ -42,7 +42,7 @@
   file:
     path: "{{ artemis_working_directory }}/data/database"
     state: directory
-    recurse: yes
+    recurse: true
     # Must match UID and GID used for the postgres user
     # See e.g. https://hub.docker.com/layers/library/postgres/16.1-alpine/images/sha256-b788d196db04847b17df664f4ae18062e712328d225b9ff75d4d7cd91a16c374?context=explore
     owner: "70"

@@ -3,4 +3,4 @@
   apt:
     name: "openjdk-{{ jdk_openjdk_version }}-jdk"
     state: latest
-    update_cache: yes
+    update_cache: true

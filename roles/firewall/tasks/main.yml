@@ -5,7 +5,7 @@
   apt:
     name: iptables-persistent
     state: latest
-    update_cache: yes
+    update_cache: true
 
 - name: Check if docker service exists
   stat:

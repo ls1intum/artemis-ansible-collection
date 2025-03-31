@@ -27,7 +27,7 @@
   file:
     path: "{{ registry_working_directory }}"
     state: directory
-    recurse: yes
+    recurse: true
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
   notify: restart registry
@@ -43,9 +43,9 @@
 - name: Enable registry service
   become: true
   systemd:
-    daemon_reload: yes
+    daemon_reload: true
     name: registry
-    enabled: yes
+    enabled: true
     masked: no
   notify: restart registry
 

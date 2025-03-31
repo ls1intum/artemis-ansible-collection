@@ -19,8 +19,8 @@
 
 - name: Enable wg0 service
   systemd:
-    daemon_reload: yes
+    daemon_reload: true
     name: wg-quick@wg0.service
-    enabled: yes
-    masked: no
+    enabled: true
+    masked: false
   notify: restart wireguard

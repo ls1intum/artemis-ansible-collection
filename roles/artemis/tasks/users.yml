@@ -1,12 +1,12 @@
 - name: Ensure artemis group {{ artemis_user_group }} exists
-  become: yes
+  become: true
   group:
     name: "{{ artemis_user_group }}"
     gid: "{{ artemis_user_gid }}"
     state: present
 
 - name: Ensure artemis user {{ artemis_user_name }} exists
-  become: yes
+  become: true
   user:
     name: "{{ artemis_user_name }}"
     state: present
@@ -15,7 +15,7 @@
     groups: "{% if use_docker or (continuous_integration is defined and continuous_integration.localci is defined and continuous_integration.localci) %}docker{% endif %}"
 
 - name: Ensure deployment user {{ artemis_deployment_user_name }} exists
-  become: yes
+  become: true
   user:
     name: "{{ artemis_deployment_user_name }}"
     comment: "{{ artemis_deployment_user_comment }}"
@@ -26,7 +26,7 @@
   when: (artemis_create_deployment_user | bool)
 
 - name: Ensure (limited) sudo privileges for user {{ artemis_deployment_user_name }}
-  become: yes
+  become: true
   template:
     src: artemis_deployment_sudoers.j2
     dest: /etc/sudoers.d/artemis_deployment
@@ -37,7 +37,7 @@
     - use_docker | bool
 
 - name: Authorize ssh-key for deployment user
-  become: yes
+  become: true
   authorized_key:
     user: "{{ artemis_deployment_user_name }}"
     state: present

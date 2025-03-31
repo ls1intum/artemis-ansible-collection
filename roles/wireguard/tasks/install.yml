@@ -7,7 +7,7 @@
   apt:
     name: wireguard
     state: latest
-    update_cache: yes
+    update_cache: true
   register: wireinstall
 
 - name: Reboot after first install

@@ -16,15 +16,15 @@
   apt:
     name: nginx
     state: latest
-    update_cache: yes
+    update_cache: true
   notify: restart nginx
 
 - name: Enable nginx service
   become: true
   systemd:
-    daemon_reload: yes
+    daemon_reload: true
     name: nginx
-    enabled: yes
+    enabled: true
     masked: no
   notify: restart nginx
 
@@ -82,7 +82,7 @@
     regexp: '^\t(# )?server_names_hash_bucket_size'
     line: "\tserver_names_hash_bucket_size {{ proxy_server_names_hash_bucket_size }};"
     insertafter: "http {"
-    firstmatch: yes
+    firstmatch: true
     state: present
   notify: restart nginx
 
@@ -93,7 +93,7 @@
     regexp: '^(\s*)include /etc/nginx/sites-enabled/\*;'
     line: "\tinclude /etc/nginx/sites-enabled/*;"
     insertafter: "http {"
-    firstmatch: yes
+    firstmatch: true
     state: present
   notify: restart nginx
 
@@ -104,7 +104,7 @@
     regexp: "{{ item.regexp }}"
     line: "{{ item.line }}"
     insertafter: "http {"
-    firstmatch: yes
+    firstmatch: true
     state: present
   with_items:
     - regexp: '^(\s*)gzip(\s+)(\w*);'

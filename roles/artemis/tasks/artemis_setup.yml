@@ -28,7 +28,7 @@
       - mysql-client
       - graphviz
     state: present
-    update_cache: yes
+    update_cache: true
     cache_valid_time: 3600
 
 - name: Create artemis directory
@@ -43,7 +43,7 @@
   file:
     path: "{{ artemis_working_directory }}"
     state: directory
-    recurse: no
+    recurse: false
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
 
@@ -80,7 +80,7 @@
   user:
     name: "{{ artemis_user_name }}"
     groups: docker
-    append: yes
+    append: true
   when: 
     - continuous_integration.localci is defined
     - is_build_agent is defined and (is_build_agent | bool)
@@ -100,7 +100,7 @@
 - name: Enable artemis service
   become: true
   systemd:
-    daemon_reload: yes
+    daemon_reload: true
     name: artemis
-    enabled: yes
-    masked: no
+    enabled: true
+    masked: false
