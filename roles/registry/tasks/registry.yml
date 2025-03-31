@@ -46,7 +46,7 @@
     daemon_reload: true
     name: registry
     enabled: true
-    masked: no
+    masked: false
   notify: restart registry
 
 - name: Copy application-prod.yml

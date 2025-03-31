@@ -52,5 +52,5 @@
     daemon_reload: true
     name: broker
     enabled: true
-    masked: no
+    masked: false
   notify: restart broker
