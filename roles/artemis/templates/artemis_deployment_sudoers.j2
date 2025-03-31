@@ -1,7 +1,3 @@
-{{ artemis_deployment_user_name }}  ALL=(ALL) NOPASSWD: /bin/systemctl start artemis
-{{ artemis_deployment_user_name }}  ALL=(ALL) NOPASSWD: /bin/systemctl stop artemis
-{{ artemis_deployment_user_name }}  ALL=(ALL) NOPASSWD: {{ artemis_working_directory }}/artemis-backup.sh
-
 # Whitelist commands for `artemis-server-cli deploy`
 {{ artemis_deployment_user_name }}  ALL=(ALL) NOPASSWD: /usr/bin/mv /home/{{ artemis_deployment_user_name }}/artemis.war.new {{ artemis_working_directory }}/artemis.war.new
 {{ artemis_deployment_user_name }}  ALL=(ALL) NOPASSWD: /usr/bin/rm {{ artemis_working_directory }}/artemis.war.old
