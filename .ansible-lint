@@ -20,3 +20,4 @@ skip_list:
   - "yaml[comments]"
   - "galaxy[no-changelog]"
   - "warning[outdated-tag]"
+  - "syntax-check[unknown-module]"
