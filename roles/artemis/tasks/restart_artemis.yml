@@ -1,5 +1,4 @@
 ---
-
 - name: Stop Artemis
   become: true
   service:
@@ -25,7 +24,7 @@
     dest: "{{ artemis_working_directory }}/artemis.war"
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
-    mode: '644'
+    mode: "644"
   when: download_artemis_application | bool
 
 - name: Start artemis on other nodes

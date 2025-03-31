@@ -1,12 +1,13 @@
-- name: Add repo for the latest stable ngnix version 
+---
+- name: Add repo for the latest stable ngnix version
   become: true
   block:
-    - name: ngnix | no apt key
+    - name: Ngnix | No apt key
       ansible.builtin.get_url:
         url: http://nginx.org/keys/nginx_signing.key
         dest: /etc/apt/trusted.gpg.d/nginx.asc
 
-    - name: nginx | apt source
+    - name: Nginx | Apt source
       ansible.builtin.apt_repository:
         repo: "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/nginx.asc] http://nginx.org/packages/mainline/ubuntu/ {{ ansible_distribution_release }} nginx"
         state: present
@@ -39,18 +40,18 @@
   file:
     path: /etc/nginx/sites-enabled
     state: directory
-    mode: '755'
+    mode: "755"
 
 - name: Ensure nginx sites-available exists
   become: true
   file:
     path: /etc/nginx/sites-available
     state: directory
-    mode: '755'
+    mode: "755"
 
 - name: Generate DH Parameters (This will take a while....)
   become: true
-  openssl_dhparam:
+  community.crypto.openssl_dhparam:
     path: /etc/nginx/dhparam.pem
     size: 4096
   when:
@@ -60,7 +61,7 @@
   become: true
   lineinfile:
     path: /etc/nginx/nginx.conf
-    regexp: '^worker_rlimit_nofile'
+    regexp: "^worker_rlimit_nofile"
     line: "worker_rlimit_nofile {{ proxy_worker_rlmmiit_nofile }};"
     insertbefore: BOF
     state: present
@@ -70,7 +71,7 @@
   become: true
   lineinfile:
     path: /etc/nginx/nginx.conf
-    regexp: '^\s*worker_connections\s+\d+'
+    regexp: "^\\s*worker_connections\\s+\\d+"
     line: "\tworker_connections {{ proxy_worker_connections }};"
     backrefs: true
   notify: restart nginx
@@ -79,18 +80,18 @@
   become: true
   lineinfile:
     path: /etc/nginx/nginx.conf
-    regexp: '^\t(# )?server_names_hash_bucket_size'
+    regexp: "^\\t(# )?server_names_hash_bucket_size"
     line: "\tserver_names_hash_bucket_size {{ proxy_server_names_hash_bucket_size }};"
     insertafter: "http {"
     firstmatch: true
     state: present
   notify: restart nginx
 
-- name: Include sites-enabled in nginx.conf 
+- name: Include sites-enabled in nginx.conf
   become: true
   lineinfile:
     path: /etc/nginx/nginx.conf
-    regexp: '^(\s*)include /etc/nginx/sites-enabled/\*;'
+    regexp: "^(\\s*)include /etc/nginx/sites-enabled/\\*;"
     line: "\tinclude /etc/nginx/sites-enabled/*;"
     insertafter: "http {"
     firstmatch: true
@@ -107,9 +108,9 @@
     firstmatch: true
     state: present
   with_items:
-    - regexp: '^(\s*)gzip(\s+)(\w*);'
+    - regexp: "^(\\s*)gzip(\\s+)(\\w*);"
       line: "\tgzip on;"
-    - regexp: '^(\s*)gzip_types(\s+)[/\-\w\s]*;'
+    - regexp: "^(\\s*)gzip_types(\\s+)[/\\-\\w\\s]*;"
       line: "\tgzip_types text/plain application/javascript application/x-javascript text/javascript text/xml text/css;"
   notify: restart nginx
 
@@ -201,7 +202,7 @@
   become: true
   lineinfile:
     path: /etc/sysctl.conf
-    regexp: '^fs.file-max='
+    regexp: "^fs.file-max="
     line: fs.file-max=2000000
     state: present
   notify: apply sysctl
@@ -222,7 +223,7 @@
   file:
     path: /etc/systemd/system.conf.d/
     state: directory
-    mode: '755'
+    mode: "755"
 
 - name: Copy systemd-limits nginx.conf
   become: true

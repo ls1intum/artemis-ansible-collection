@@ -1,6 +1,5 @@
+---
 #TODO check if war is allredy present - If so fail and prompt user to use the uprade instead
-
-
 - name: Check Artemis version is set
   fail:
     msg: "No Artemis version is set!"
@@ -22,7 +21,7 @@
     dest: "{{ artemis_working_directory }}/artemis.war.new"
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
-    mode: '644'
+    mode: "644"
   when: not (is_release | bool)
 
 - name: Download Artemis.war to {{ artemis_working_directory }}
@@ -32,6 +31,6 @@
     dest: "{{ artemis_working_directory }}/artemis.war.new"
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
-    mode: '644'
+    mode: "644"
     force: true
   when: is_release | bool

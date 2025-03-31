@@ -1,6 +1,7 @@
 ---
 - name: Need address from ansible facts?
-  debug: var=hostvars[inventory_hostname]['ansible_default_ipv6']['address']
+  debug:
+    var: hostvars[inventory_hostname]['ansible_default_ipv6']['address']
   when:
     - wireguard_host_ipv6_address is undefined or wireguard_host_ipv6_address is none
 
@@ -14,7 +15,7 @@
   template:
     src: wireguard_wg0.conf.j2
     dest: /etc/wireguard/wg0.conf
-    mode: 0644
+    mode: "0644"
   notify: restart wireguard
 
 - name: Enable wg0 service

@@ -1,3 +1,4 @@
+---
 # user.yml task
 artemis_user_name: artemis
 artemis_user_comment: Artemis
@@ -27,8 +28,8 @@ registry_ip_address: "{{ wireguard_interface_address }}"
 registry_external_host: "" # External host under which the registry UI should be reachable (excluding https://)
 
 registry_application_prod_jwt: "{{ registry_jwt }}"
-registry_application_jwt:  "{{ registry_jwt }}"
-registry_bootstrap_prod_jwt:  "{{ registry_jwt }}"
+registry_application_jwt: "{{ registry_jwt }}"
+registry_bootstrap_prod_jwt: "{{ registry_jwt }}"
 
 registry_application_prod_file: "{{ registry_working_directory }}/application-prod.yml"
 registry_bootstrap_prod_file: "{{ registry_working_directory }}/bootstrap-prod.yml"

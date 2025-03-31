@@ -1,9 +1,10 @@
+---
 - name: Create registry directory
   become: true
   file:
     path: "{{ registry_working_directory }}"
     state: directory
-    mode: '775'
+    mode: "775"
   notify: restart registry
 
 - name: Create registry config directory
@@ -11,7 +12,7 @@
   file:
     path: "{{ registry_working_directory }}/config-server"
     state: directory
-    mode: '755'
+    mode: "755"
   notify: restart registry
 
 - name: Download jhipster v{{ registry_version }}
@@ -19,7 +20,7 @@
   get_url:
     url: "https://github.com/jhipster/jhipster-registry/releases/download/v{{ registry_version }}/jhipster-registry-{{ registry_version }}.jar"
     dest: "{{ registry_working_directory }}/registry.jar"
-    mode: '644'
+    mode: "644"
   notify: restart registry
 
 - name: Set permissions for registry directory

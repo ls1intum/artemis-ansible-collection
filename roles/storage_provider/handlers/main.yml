@@ -1,7 +1,7 @@
 ---
 # handlers file for storage-provider
 
-- name: restart nfs-server
+- name: Restart nfs-server
   service:
     name: "nfs-server"
     state: "restarted"

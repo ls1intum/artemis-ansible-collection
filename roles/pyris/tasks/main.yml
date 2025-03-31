@@ -32,13 +32,13 @@
   template:
     src: pyris_deployment_sudoers.j2
     dest: /etc/sudoers.d/pyris_deployment
-    validate: 'visudo -cf %s'
+    validate: "visudo -cf %s"
     mode: "440"
   when: (pyris_create_deployment_user | bool)
 
 - name: Authorize ssh-key for deployment user
   become: true
-  authorized_key:
+  ansible.posix.authorized_key:
     user: "{{ pyris_deployment_user_name }}"
     state: present
     key: "{{ pyris_deployment_user_public_key }}"
@@ -49,7 +49,7 @@
   file:
     path: "{{ pyris_working_directory }}"
     state: directory
-    mode: '775'
+    mode: "775"
 
 - name: Set permissions for pyris directory
   become: true
@@ -66,7 +66,7 @@
   file:
     path: "{{ pyris_weaviate_directory }}"
     state: directory
-    mode: '777'
+    mode: "777"
 
 - name: Set permissions for weaviate directory
   become: true
@@ -121,5 +121,3 @@
     mode: "770"
   register: config
   notify: restart docker pyris
-
-

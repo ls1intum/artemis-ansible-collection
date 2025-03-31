@@ -1,10 +1,11 @@
+---
 - name: Ensure SSH key directory is present
   become: true
   become_user: "{{ artemis_user_name }}"
   file:
     path: "{{ version_control.localvc.ssh_key_path }}"
     state: directory
-    mode: '770'
+    mode: "770"
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
   throttle: 1
@@ -16,7 +17,7 @@
   community.crypto.openssh_keypair:
     comment: "Artemis"
     force: false
-    mode: '770'
+    mode: "770"
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
     path: "{{ version_control.localvc.ssh_key_path }}/{{ item.type }}"

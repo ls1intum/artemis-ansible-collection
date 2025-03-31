@@ -1,4 +1,4 @@
-
+---
 - name: Check if wireguard is installed
   package_facts:
     manager: "apt"

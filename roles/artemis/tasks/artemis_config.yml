@@ -1,5 +1,4 @@
 ---
-
 - name: Copy application-prod.yml to artemis directory
   become: true
   template:

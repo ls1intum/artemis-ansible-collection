@@ -1,7 +1,7 @@
 ---
 # handlers file for artemis
 
-- name: restart docker compose artemis
+- name: Restart docker compose artemis
   become: true
   shell: |
     ./artemis-docker.sh restart {{ artemis_build_version }} {{ artemis_branch }}
@@ -9,7 +9,7 @@
     chdir: "{{ artemis_working_directory }}"
   listen: "restart docker artemis"
 
-- name: start docker compose artemis
+- name: Start docker compose artemis
   become: true
   command: ./artemis-docker.sh start {{ artemis_build_version }} {{ artemis_branch }}
   args:

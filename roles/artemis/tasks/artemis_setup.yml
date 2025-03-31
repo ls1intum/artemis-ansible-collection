@@ -1,6 +1,7 @@
+---
 - name: Ensure locale en_US.UTF-8 exists
   become: true
-  locale_gen:
+  community.general.locale_gen:
     name: en_US.UTF-8
     state: present
 
@@ -8,7 +9,7 @@
   become: true
   lineinfile:
     path: /etc/environment
-    regexp: '^LC_ALL='
+    regexp: "^LC_ALL="
     line: LC_ALL=en_US.UTF-8
     state: present
 
@@ -16,7 +17,7 @@
   become: true
   lineinfile:
     path: /etc/environment
-    regexp: '^LANG='
+    regexp: "^LANG="
     line: LANG=en_US.UTF-8
     state: present
 
@@ -36,7 +37,7 @@
   file:
     path: "{{ artemis_working_directory }}"
     state: directory
-    mode: '775'
+    mode: "775"
 
 - name: Set permissions for artemis directory
   become: true
@@ -60,7 +61,7 @@
   file:
     path: "{{ artemis_data_export_path }}"
     state: directory
-    mode: '775'
+    mode: "775"
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
   when: artemis_data_export_path is not none and artemis_data_export_path != "" and artemis_computed_is_core_node
@@ -81,7 +82,7 @@
     name: "{{ artemis_user_name }}"
     groups: docker
     append: true
-  when: 
+  when:
     - continuous_integration.localci is defined
     - is_build_agent is defined and (is_build_agent | bool)
 

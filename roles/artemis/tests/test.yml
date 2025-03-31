@@ -1,6 +1,6 @@
 ---
-
-- hosts: localhost
+- name: Test Artemis Installation
+  hosts: localhost
   connection: local
   roles:
     - role: artemis
@@ -13,5 +13,5 @@
             password: "asdf"
         version_control:
         continuous_integration:
-          #bitbucket:
-          #hostname: "test"
+          # bitbucket:
+          # hostname: "test"

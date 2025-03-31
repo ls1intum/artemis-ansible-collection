@@ -1,3 +1,4 @@
+---
 # user.yml task
 artemis_user_name: artemis
 artemis_user_comment: Artemis
@@ -19,7 +20,6 @@ activemq_force_reinstall: false # The broker will not be reinstalled if it alrea
 activemq_working_directory: /opt/broker
 activemq_username: "{{ broker.username }}"
 activemq_password: "{{ broker.password }}"
-
 
 # Configure the borker ip address - by default it uses the wireguard network
 activemq_ip_address: "{{ wireguard_interface_address }}"

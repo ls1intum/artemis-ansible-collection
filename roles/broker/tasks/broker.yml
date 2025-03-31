@@ -1,3 +1,4 @@
+---
 - name: Check if activemq has been installed in the current version
   become: true
   stat:
@@ -9,7 +10,7 @@
   file:
     path: "{{ activemq_install_directory }}"
     state: directory
-    mode: '775'
+    mode: "775"
   notify: restart broker
   when: not activemq_install_result.stat.exists
 

@@ -1,4 +1,5 @@
-- name: restart registry
+---
+- name: Restart registry
   become: true
   service:
     name: registry

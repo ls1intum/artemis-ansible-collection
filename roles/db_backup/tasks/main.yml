@@ -1,11 +1,12 @@
+---
 - name: Ensure backup location is present
   become: true
-  file: 
+  file:
     path: "{{ artemis_database_backup_dir }}"
     state: directory
     mode: "755"
 
-- name: Deploy database backup script 
+- name: Deploy database backup script
   become: true
   template:
     src: "templates/backup.sh.j2"

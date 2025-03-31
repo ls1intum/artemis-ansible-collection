@@ -98,14 +98,7 @@ artemis:
   push-notification-relay: {{ push_notification_relay }}
 {% endif %}
   user-management:
-{% if user_management.jira is defined and user_management.jira is not none %}
-    use-external: true
-    external:
-      url: {{ user_management.jira.url }}
-      user: {{ user_management.jira.user }}
-      password: {{ user_management.jira.password }}
-      admin-group-name: {{ user_management.jira.admin_group}}
-{% elif ldap.url is defined and ldap.url is not none%}
+{% if ldap.url is defined and ldap.url is not none%}
     use-external: true
 {% else %}
     use-external: false
@@ -139,42 +132,6 @@ artemis:
     login:
       account-name: {{ artemis_account_login_info }}
 {% endif %}
-{% if version_control.bitbucket is defined %}
-  version-control:
-    url: {{ version_control.bitbucket.url }}
-    user: {{ user_management.jira.user }}
-    password: {{ user_management.jira.password }}
-    token: {{ version_control.bitbucket.token }}
-    ssh-template-clone-url: {{ version_control.bitbucket.ssh_url }}
-    ssh-keys-url-path: /plugins/servlet/ssh/account/keys
-{% if artemis_ssh_key_path is defined and artemis_ssh_key_path is not none and artemis_ssh_key_path != "" %}
-    ssh-private-key-folder-path: {{ artemis_ssh_key_path }}
-{% endif %}
-{% if artemis_ssh_key_password is defined and artemis_ssh_key_password is not none and artemis_ssh_key_password != "" %}
-    ssh-private-key-password: {{ artemis_ssh_key_password }}
-{% endif %}
-{% endif %}
-
-
-{% if version_control.gitlab is defined %}
-  version-control:
-    url: {{ version_control.gitlab.url }}
-    user: {{ version_control.gitlab.user }}
-    password: {{ version_control.gitlab.password }}
-    token: {{ version_control.gitlab.token }}
-    ci-token: {{ version_control.gitlab.ci_token }}
-    health-api-token: {{ version_control.gitlab.health_api_token }}
-    ssh-template-clone-url: {{ version_control.gitlab.ssh_url }}
-    ssh-keys-url-path: /-/profile/keys
-{% if artemis_ssh_key_path is defined and artemis_ssh_key_path is not none and artemis_ssh_key_path != "" %}
-    ssh-private-key-folder-path: {{ artemis_ssh_key_path }}
-{% endif %}
-{% if artemis_ssh_key_password is defined and artemis_ssh_key_password is not none %}
-    ssh-private-key-password: {{ artemis_ssh_key_password }}
-{% endif %}
-    default-branch: main
-    versionControlAccessToken: true
-{% endif %}
 
 {% if version_control.localvc is defined %}
   version-control:
@@ -206,17 +163,6 @@ artemis:
 {% endif %}
 {% endif %}
 
-{% if continuous_integration.bamboo is defined %}
-  continuous-integration:
-    url: {{ continuous_integration.bamboo.url }}
-    user: {{ user_management.jira.user }}
-    password: {{ user_management.jira.password }}
-    token: {{ continuous_integration.bamboo.token }}
-    vcs-application-link-name: {{ continuous_integration.bamboo.bitbucket_link_name }}
-    empty-commit-necessary: true
-    artemis-authentication-token-value: {{ continuous_integration.bamboo.result_plugin_token }}
-{% endif %}
-
 {% if continuous_integration.jenkins is defined %}
   continuous-integration:
     url: {{ continuous_integration.jenkins.url }}
@@ -227,13 +173,6 @@ artemis:
     vcs-credentials: {{ continuous_integration.jenkins.vcs_credentials }}
     artemis-authentication-token-key: {{ continuous_integration.jenkins.artemis_auth_token_key }}
     artemis-authentication-token-value: {{ continuous_integration.jenkins.artemis_auth_token_value }}
-{% endif %}
-
-{% if continuous_integration.gitlabci is defined %}
-  continuous-integration:
-    build-timeout: 30
-    artemis-authentication-token-value: {{ continuous_integration.gitlabci.result_token }}
-    notification-plugin: "ls1tum/artemis-notification-plugin:1.0.0"
 {% endif %}
 
 {% if continuous_integration.localci is defined %}

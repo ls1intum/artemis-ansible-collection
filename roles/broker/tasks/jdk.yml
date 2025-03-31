@@ -1,3 +1,4 @@
+---
 - name: Install openjdk-{{ jdk_openjdk_version }}-jdk
   become: true
   apt:
