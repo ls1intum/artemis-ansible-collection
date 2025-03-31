@@ -12,6 +12,6 @@ jobs:
     # Important: This sets up your GITHUB_WORKSPACE environment variable
       - uses: actions/checkout@v4
       - name: Run ansible-lint
-        uses: ansible/ansible-lint@main
+        uses: ansible/ansible-lint@39ea20ef8957633d89c45485028b68e232a8c1c2
         with:
           requirements_file: "requirements.yml"
