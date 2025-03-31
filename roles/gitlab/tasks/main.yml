@@ -1,2 +1,0 @@
-# Install docker & gitlab
-- include_tasks: install.yml

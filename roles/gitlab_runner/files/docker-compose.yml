@@ -1,7 +1,0 @@
-services:
-    gitlab-runner:
-        image: docker.io/gitlab/gitlab-runner:latest
-        volumes:
-            - /var/run/docker.sock:/var/run/docker.sock
-            - /usr/local/bin/docker:/usr/bin/docker
-            - ./config.toml:/etc/gitlab-runner/config.toml:ro
