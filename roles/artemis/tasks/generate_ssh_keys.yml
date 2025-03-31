@@ -4,10 +4,11 @@
   file:
     path: "{{ version_control.localvc.ssh_key_path }}"
     state: directory
-    mode: '0770'
+    mode: '770'
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
   throttle: 1
+  when: artemis_computed_is_core_node
 
 - name: Generate SSH host key
   become: true
@@ -15,7 +16,7 @@
   community.crypto.openssh_keypair:
     comment: "Artemis"
     force: false
-    mode: '0770'
+    mode: '770'
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
     path: "{{ version_control.localvc.ssh_key_path }}/{{ item.type }}"
@@ -34,3 +35,4 @@
   # https://github.com/ansible-collections/community.crypto/issues/416
   # https://github.com/ansible/ansible/issues/77217
   ignore_errors: true
+  when: artemis_computed_is_core_node

@@ -3,14 +3,14 @@
   file: 
     path: "{{ artemis_database_backup_dir }}"
     state: directory
-    mode: 0755
+    mode: "755"
 
 - name: Deploy database backup script 
   become: true
   template:
     src: "templates/backup.sh.j2"
     dest: "{{ artemis_database_backup_script_path }}"
-    mode: 0700
+    mode: "700"
 
 - name: Add backup cronjob
   become: true

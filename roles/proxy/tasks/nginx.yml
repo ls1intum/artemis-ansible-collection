@@ -39,14 +39,14 @@
   file:
     path: /etc/nginx/sites-enabled
     state: directory
-    mode: '0755'
+    mode: '755'
 
 - name: Ensure nginx sites-available exists
   become: true
   file:
     path: /etc/nginx/sites-available
     state: directory
-    mode: '0755'
+    mode: '755'
 
 - name: Generate DH Parameters (This will take a while....)
   become: true
@@ -137,7 +137,7 @@
   template:
     src: artemis-ssh-upstream.conf.j2
     dest: /etc/nginx/artemis-ssh-upstream.conf
-    mode: 0644
+    mode: "644"
   when: proxy_forward_ssh
   notify: restart nginx
 
@@ -146,7 +146,7 @@
   template:
     src: nginx_timeouts.conf.j2
     dest: /etc/nginx/conf.d/timeouts.conf
-    mode: 0644
+    mode: "644"
   notify: restart nginx
 
 - name: Copy proxy.conf
@@ -154,7 +154,7 @@
   template:
     src: nginx_proxy.conf.j2
     dest: /etc/nginx/sites-available/proxy.conf
-    mode: 0644
+    mode: "644"
   notify: reload nginx
 
 - name: Enable proxy site config
@@ -189,7 +189,7 @@
   copy:
     src: files/nginx_503.html
     dest: /usr/share/nginx/html/503.html
-    mode: 0644
+    mode: "644"
   notify: reload nginx
 
 - name: Validate nginx config
@@ -214,7 +214,7 @@
   copy:
     src: files/nginx_security_limits.conf
     dest: /etc/security/limits.d/nginx.conf
-    mode: 0644
+    mode: "644"
   notify: reboot system
 
 - name: Ensure systemd.conf.d folder exists
@@ -222,12 +222,12 @@
   file:
     path: /etc/systemd/system.conf.d/
     state: directory
-    mode: '0755'
+    mode: '755'
 
 - name: Copy systemd-limits nginx.conf
   become: true
   copy:
     src: files/nginx_systemd_limits.conf
     dest: /etc/systemd/system.conf.d/limits.conf
-    mode: 0644
+    mode: "644"
   notify: reboot system

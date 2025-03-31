@@ -4,7 +4,7 @@
     path: "{{ artemis_legal_path }}"
     owner: "{{ artemis_user }}"
     group: "{{ artemis_group }}"
-    mode: '0755'
+    mode: '755'
   become: true
   become_user: "{{ artemis_user }}"
 
@@ -14,7 +14,7 @@
     dest: "{{ artemis_legal_path }}"
     owner: "{{ artemis_user }}"
     group: "{{ artemis_user }}"
-    mode: '0644'
+    mode: '644'
   become: true
   become_user: "{{ artemis_user }}"
 
@@ -24,6 +24,6 @@
     dest: "{{ artemis_legal_path }}"
     owner: "{{ artemis_user }}"
     group: "{{ artemis_user }}"
-    mode: '0644'
+    mode: '644'
   become: true
   become_user: "{{ artemis_user }}"

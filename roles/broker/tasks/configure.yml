@@ -17,7 +17,7 @@
   template:
     src: activemq_primary_broker.xml.j2
     dest: "{{ activemq_working_directory }}/etc/broker.xml"
-    mode: 0644
+    mode: "644"
   notify: restart broker
 
 - name: Set permissions for broker working directory
@@ -35,7 +35,7 @@
   template:
     src: activemq_broker.service.j2
     dest: "/etc/systemd/system/broker.service"
-    mode: 0644
+    mode: "644"
   notify: restart broker
 
 - name: Ensure correct broker version is installed

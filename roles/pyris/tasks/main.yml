@@ -33,7 +33,7 @@
     src: pyris_deployment_sudoers.j2
     dest: /etc/sudoers.d/pyris_deployment
     validate: 'visudo -cf %s'
-    mode: 0440
+    mode: "440"
   when: (pyris_create_deployment_user | bool)
 
 - name: Authorize ssh-key for deployment user
@@ -49,7 +49,7 @@
   file:
     path: "{{ pyris_working_directory }}"
     state: directory
-    mode: '0775'
+    mode: '775'
 
 - name: Set permissions for pyris directory
   become: true
@@ -66,7 +66,7 @@
   file:
     path: "{{ pyris_weaviate_directory }}"
     state: directory
-    mode: '0777'
+    mode: '777'
 
 - name: Set permissions for weaviate directory
   become: true
@@ -85,7 +85,7 @@
     dest: "{{ pyris_working_directory }}/docker.env"
     owner: "{{ pyris_user_name }}"
     group: "{{ pyris_user_group }}"
-    mode: 0660
+    mode: "660"
   register: config
   notify: restart docker pyris
 
@@ -96,7 +96,7 @@
     dest: "{{ pyris_working_directory }}/application.yml"
     owner: "{{ pyris_user_name }}"
     group: "{{ pyris_user_group }}"
-    mode: 0660
+    mode: "660"
   register: config
   notify: restart docker pyris
 
@@ -107,7 +107,7 @@
     dest: "{{ pyris_working_directory }}/llm_config.yml"
     owner: "{{ pyris_user_name }}"
     group: "{{ pyris_user_group }}"
-    mode: 0660
+    mode: "660"
   register: config
   notify: restart docker pyris
 
@@ -118,7 +118,7 @@
     dest: "{{ pyris_working_directory }}/pyris-docker.sh"
     owner: "{{ pyris_user_name }}"
     group: "{{ pyris_user_group }}"
-    mode: 0770
+    mode: "770"
   register: config
   notify: restart docker pyris
 

@@ -1,19 +1,18 @@
 ---
-artemis_version: 6.9.0
+artemis_version: # Set to version or local path to war file for non-docker installation and docker tag for docker version
 is_testserver: false
 is_multinode_install: false
 
 artemis_server_url: https://artemis.ase.in.tum.de
 artemis_server_port: 8080
 
-install_artemis: true
-upgrade_artemis: false
 use_docker: false
 artemis_node_count: 1
 
-check_variables: true
-
-only_update_artemis_config: false
+download_artemis_application: false # Set to true to update the artemis app version
+setup_system: false                 # Set to true to perform the overall system setup (users, systemd, ...)
+restart_artemis: false              # Set to true to restart artemis. Needed if download_artemis_application is set.
+update_artemis_config: false        # Set to true to update the artemis configuration in application-prod.yml.
 
 ##############################################################################
 # Artemis Linux Users
@@ -78,12 +77,8 @@ artemis_ssh_key_path: /opt/keys
 artemis_ssh_key_name: "artemis_ssh_key"
 artemis_ssh_key_password:
 
-artemis_force_restart: false        # Will restart the artemis service on all nodes (unless artemis_force_no_restart) is set
-artemis_force_no_restart: false     # Will prevent the restart of the artemis service on all nodes
-
 artemis_build_version: "{{ artemis_version }}"
-artemis_war_version: "{{ artemis_build_version }}"
-artemis_war_url: "https://github.com/ls1intum/Artemis/releases/download/{{ artemis_war_version }}/Artemis.war"
+artemis_war_url: "https://github.com/ls1intum/Artemis/releases/download/{{ artemis_version }}/Artemis.war"
 
 artemis_git_repository_url: https://github.com/ls1intum/Artemis.git
 artemis_branch: develop

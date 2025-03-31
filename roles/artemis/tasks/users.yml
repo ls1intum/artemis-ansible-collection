@@ -31,7 +31,7 @@
     src: artemis_deployment_sudoers.j2
     dest: /etc/sudoers.d/artemis_deployment
     validate: 'visudo -cf %s'
-    mode: 0440
+    mode: "440"
   when: (artemis_create_deployment_user | bool)
 
 - name: Authorize ssh-key for deployment user

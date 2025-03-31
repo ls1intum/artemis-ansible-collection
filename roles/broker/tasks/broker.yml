@@ -9,7 +9,7 @@
   file:
     path: "{{ activemq_install_directory }}"
     state: directory
-    mode: '0775'
+    mode: '775'
   notify: restart broker
   when: not activemq_install_result.stat.exists
 
