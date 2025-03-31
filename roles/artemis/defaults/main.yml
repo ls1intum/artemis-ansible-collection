@@ -71,12 +71,9 @@ artemis_data_export_days_between_data_exports: 14
 artemis_plagiarism_checks_plagiarism_results_limit: 100
 
 artemis_ssh_key_path: /opt/keys
-artemis_ssh_key_name: "artemis_ssh_key"
-artemis_ssh_key_password:
 artemis_build_version: "{{ artemis_version }}"
 artemis_war_url: "https://github.com/ls1intum/Artemis/releases/download/{{ artemis_version }}/Artemis.war"
 
-artemis_git_repository_url: https://github.com/ls1intum/Artemis.git
 artemis_branch: develop
 
 artemis_system_ram_proportion: 0.8 # How much % of the system RAM to allocate to the Artemis service (Default here: 80%)
