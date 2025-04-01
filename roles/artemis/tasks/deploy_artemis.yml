@@ -9,7 +9,7 @@
     msg: "restart_artemis has to be set when a new artemis version should be released"
   when: not (restart_artemis | bool)
 
-- name: Check if versioin matches release pattern
+- name: Check if version matches release pattern
   set_fact:
     is_release: "{{ artemis_version is match('^\\d+\\.\\d+\\.\\d+$') }}"
 
