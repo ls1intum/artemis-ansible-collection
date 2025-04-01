@@ -11,7 +11,7 @@
     path: "{{ activemq_install_directory }}"
     state: directory
     mode: "775"
-  notify: restart broker
+  notify: Restart broker
   when: not activemq_install_result.stat.exists
 
 - name: Download and extract activemq {{ activemq_version }}
@@ -20,5 +20,5 @@
     src: https://dlcdn.apache.org/activemq/activemq-artemis/{{ activemq_version }}/apache-artemis-{{ activemq_version }}-bin.tar.gz
     dest: /opt/activemq-distribution
     remote_src: true
-  notify: restart broker
+  notify: Restart broker
   when: not activemq_install_result.stat.exists
