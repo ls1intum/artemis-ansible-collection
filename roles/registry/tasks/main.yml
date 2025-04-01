@@ -1,3 +1,4 @@
+---
 # Check secrets for registry
 - include_tasks: variable_checks_registry.yml
 

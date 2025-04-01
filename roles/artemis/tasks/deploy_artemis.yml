@@ -1,18 +1,35 @@
-#TODO check if war is allredy present - If so fail and prompt user to use the uprade instead
+---
+- name: Check Artemis version is set
+  fail:
+    msg: "No Artemis version is set!"
+  when: artemis_version is undefined or artemis_version is none or artemis_version == ""
+
+- name: Check restart_artemis is set.
+  fail:
+    msg: "restart_artemis has to be set when a new artemis version should be released"
+  when: not (restart_artemis | bool)
+
+- name: Check if version matches release pattern
+  set_fact:
+    is_release: "{{ artemis_version is match('^\\d+\\.\\d+\\.\\d+$') }}"
+
+- name: Copy local Artemis.war to {{ artemis_working_directory }}
+  become: true
+  copy:
+    src: "{{ artemis_version }}"
+    dest: "{{ artemis_working_directory }}/artemis.war.new"
+    owner: "{{ artemis_user_name }}"
+    group: "{{ artemis_user_group }}"
+    mode: "644"
+  when: not (is_release | bool)
 
 - name: Download Artemis.war to {{ artemis_working_directory }}
   become: true
   get_url:
     url: "{{ artemis_war_url }}"
-    dest: "{{ artemis_working_directory }}/artemis.war"
+    dest: "{{ artemis_working_directory }}/artemis.war.new"
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
-    mode: '0644'
-  notify: restart artemis
-
-- include_tasks: generate_ssh_keys.yml
-  when:
-    - version_control.localvc is defined and version_control.localvc is not none
-    - version_control.localvc.ssh_key_path is defined and version_control.localvc.ssh_key_path|length > 0
-    - not (only_update_artemis_config | bool)
-
+    mode: "644"
+    force: true
+  when: is_release | bool

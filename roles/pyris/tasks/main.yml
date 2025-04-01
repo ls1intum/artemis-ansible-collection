@@ -1,13 +1,13 @@
 ---
 - name: Ensure pyris group {{ pyris_user_group }} exists
-  become: yes
+  become: true
   group:
     name: "{{ pyris_user_group }}"
     gid: "{{ pyris_user_gid }}"
     state: present
 
 - name: Ensure pyris user {{ pyris_user_name }} exists
-  become: yes
+  become: true
   user:
     name: "{{ pyris_user_name }}"
     state: present
@@ -16,7 +16,7 @@
     groups: "docker"
 
 - name: Ensure deployment user {{ pyris_deployment_user_name }} exists
-  become: yes
+  become: true
   user:
     name: "{{ pyris_deployment_user_name }}"
     comment: "{{ pyris_deployment_user_comment }}"
@@ -24,21 +24,21 @@
     uid: "{{ pyris_deployment_user_uid }}"
     group: "{{ pyris_user_group }}"
     groups: "sudo,docker"
-    append: yes
+    append: true
   when: (pyris_create_deployment_user | bool)
 
 - name: Ensure (limited) sudo privileges for user {{ pyris_deployment_user_name }}
-  become: yes
+  become: true
   template:
     src: pyris_deployment_sudoers.j2
     dest: /etc/sudoers.d/pyris_deployment
-    validate: 'visudo -cf %s'
-    mode: 0440
+    validate: "visudo -cf %s"
+    mode: "440"
   when: (pyris_create_deployment_user | bool)
 
 - name: Authorize ssh-key for deployment user
-  become: yes
-  authorized_key:
+  become: true
+  ansible.posix.authorized_key:
     user: "{{ pyris_deployment_user_name }}"
     state: present
     key: "{{ pyris_deployment_user_public_key }}"
@@ -49,14 +49,14 @@
   file:
     path: "{{ pyris_working_directory }}"
     state: directory
-    mode: '0775'
+    mode: "775"
 
 - name: Set permissions for pyris directory
   become: true
   file:
     path: "{{ pyris_working_directory }}"
     state: directory
-    recurse: yes
+    recurse: true
     owner: "{{ pyris_user_name }}"
     group: "{{ pyris_user_group }}"
   notify: restart docker pyris
@@ -66,14 +66,14 @@
   file:
     path: "{{ pyris_weaviate_directory }}"
     state: directory
-    mode: '0777'
+    mode: "777"
 
 - name: Set permissions for weaviate directory
   become: true
   file:
     path: "{{ pyris_weaviate_directory }}"
     state: directory
-    recurse: yes
+    recurse: true
     owner: "{{ pyris_user_name }}"
     group: "{{ pyris_user_group }}"
   notify: restart docker pyris
@@ -85,7 +85,7 @@
     dest: "{{ pyris_working_directory }}/docker.env"
     owner: "{{ pyris_user_name }}"
     group: "{{ pyris_user_group }}"
-    mode: 0660
+    mode: "660"
   register: config
   notify: restart docker pyris
 
@@ -96,7 +96,7 @@
     dest: "{{ pyris_working_directory }}/application.yml"
     owner: "{{ pyris_user_name }}"
     group: "{{ pyris_user_group }}"
-    mode: 0660
+    mode: "660"
   register: config
   notify: restart docker pyris
 
@@ -107,7 +107,7 @@
     dest: "{{ pyris_working_directory }}/llm_config.yml"
     owner: "{{ pyris_user_name }}"
     group: "{{ pyris_user_group }}"
-    mode: 0660
+    mode: "660"
   register: config
   notify: restart docker pyris
 
@@ -118,8 +118,6 @@
     dest: "{{ pyris_working_directory }}/pyris-docker.sh"
     owner: "{{ pyris_user_name }}"
     group: "{{ pyris_user_group }}"
-    mode: 0770
+    mode: "770"
   register: config
   notify: restart docker pyris
-
-

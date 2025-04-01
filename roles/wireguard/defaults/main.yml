@@ -1,5 +1,4 @@
+---
 wireguard_hostgroup: "{{ groups.yourgroup }}"
 
-
 wireguard_port: 51820
-

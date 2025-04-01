@@ -1,3 +1,4 @@
+---
 - name: Ensure group {{ artemis_group }} exists
   become: true
   group:
@@ -49,4 +50,3 @@
     state: started
     enabled: true
   become: true
-

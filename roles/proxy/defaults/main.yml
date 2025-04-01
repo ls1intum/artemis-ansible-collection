@@ -1,13 +1,19 @@
+---
+# servers:
+#   - name:
+#     ssl_certificate_path:
+#     ssl_certificate_key_path:
+#     default_server: false
 
-servers:
-  - name:
-    ssl_certificate_path:
-    ssl_certificate_key_path:
-    default_server: true
-
+# redirects:
+#   - name:
+#     ssl_certificate_path:
+#     ssl_certificate_key_path:
+#     default_server: true
+#     to: "{{ artemis_url }}"
 
 # Nodes for load balancing; Either define a host-group or manually list all nodes
-#proxy_available_nodes: "{{ groups.artemisnodes }}" # will not work anymore
+# proxy_available_nodes: "{{ groups.artemisnodes }}" # will not work anymore
 proxy_available_nodes:
   - hostname: 127.0.0.1
 
@@ -23,11 +29,10 @@ proxy_node_protocol: http
 
 # Used for the /mailto enpoint - Has to be a valid mail address.
 proxy_mailto:
-
 # /etc/nginx/sites-available/artemis.conf
 # Uncomment to change load balancing method from default (which is round robin)
 # Can be "least_conn" or "ip_hash"
-#proxy_load_balancing_method: ip_hash
+# proxy_load_balancing_method: ip_hash
 
 proxy_resolver: "127.0.0.53 valid=300s"
 

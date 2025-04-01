@@ -1,5 +1,4 @@
 ---
-
 - name: Check if database password is set
   assert:
     that:
@@ -7,10 +6,10 @@
     fail_msg: "You must set the mysql_exporter_password variable"
 
 - name: Create database user with password and PROCESS, REPLICATION CLIENT privileges
-  mysql_user:
+  community.mysql.mysql_user:
     name: "{{ mysql_exporter_user }}"
     password: "{{ mysql_exporter_password }}"
-    priv: '*.*:PROCESS,REPLICATION CLIENT'
+    priv: "*.*:PROCESS,REPLICATION CLIENT"
     state: present
 
 - name: Install mysqld exporter

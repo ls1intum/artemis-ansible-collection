@@ -18,18 +18,16 @@ pyris_deployment_user_uid: 1338
 pyris_deployment_user_public_key: ""
 pyris_deployment_user_comment: "User to deploy pyris to this host"
 
-
 ##############################################################################
 # OpenAI Setup
 ##############################################################################
 
-pyris_general_config: #FIXME
-pyris_llm_config: #FIXME
-
+pyris_general_config: # FIXME
+pyris_llm_config: # FIXME
 
 ##############################################################################
 # Nginx Setup
 ##############################################################################
 
-proxy_ssl_certificate_path: #FIXME
-proxy_ssl_certificate_key_path: #FIXME
+proxy_ssl_certificate_path: # FIXME
+proxy_ssl_certificate_key_path: # FIXME

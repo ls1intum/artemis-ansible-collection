@@ -1,7 +1,8 @@
+---
 - name: Check if python3-pip is installed
   command: dpkg-query -l python3-pip
   register: pip_check
-  ignore_errors: true 
+  ignore_errors: true
 
 - name: Install python3-pip
   become: true
@@ -13,7 +14,6 @@
   become: true
   pip:
     name: docker
-
 
 - name: Create data directory
   become: true
@@ -27,7 +27,6 @@
     name: jenkins
     state: present
     image: "jenkins/jenkins:{{ jenkins_docker_tag }}"
-
 
 - name: Start jenkins container
   become: true

@@ -1,37 +1,38 @@
+---
 - name: Create artemis directory
   become: true
   file:
     path: "{{ artemis_working_directory }}"
     state: directory
-    mode: '0775'
+    mode: "0775"
 
 - name: Create artemis data directory
   become: true
   file:
     path: "{{ artemis_working_directory }}/data"
     state: directory
-    mode: '0770'
+    mode: "0770"
 
 - name: Create artemis database directory
   become: true
   file:
     path: "{{ artemis_working_directory }}/data/database"
     state: directory
-    mode: '0770'
+    mode: "0770"
 
 - name: Create artemis data/artemis directory
   become: true
   file:
     path: "{{ artemis_working_directory }}/data/artemis"
     state: directory
-    mode: '0770'
+    mode: "0770"
 
 - name: Set permissions for artemis directory
   become: true
   file:
     path: "{{ artemis_working_directory }}"
     state: directory
-    recurse: yes
+    recurse: true
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
   register: permissions
@@ -42,7 +43,7 @@
   file:
     path: "{{ artemis_working_directory }}/data/database"
     state: directory
-    recurse: yes
+    recurse: true
     # Must match UID and GID used for the postgres user
     # See e.g. https://hub.docker.com/layers/library/postgres/16.1-alpine/images/sha256-b788d196db04847b17df664f4ae18062e712328d225b9ff75d4d7cd91a16c374?context=explore
     owner: "70"
@@ -57,7 +58,7 @@
     dest: "{{ artemis_working_directory }}/docker.env"
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
-    mode: 0660
+    mode: "660"
   register: config
   notify: restart docker artemis
 
@@ -68,7 +69,7 @@
     dest: "{{ artemis_working_directory }}/artemis.env"
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
-    mode: 0660
+    mode: "660"
   register: config
   notify: restart docker artemis
 
@@ -79,7 +80,7 @@
     dest: "{{ artemis_working_directory }}/database.env"
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
-    mode: 0660
+    mode: "660"
   register: config
   notify: restart docker artemis
 
@@ -94,7 +95,7 @@
     dest: "{{ artemis_working_directory }}/node{{ docker_node_id }}.env"
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
-    mode: 0660
+    mode: "660"
   register: config
   notify: restart docker artemis
 
@@ -116,7 +117,7 @@
   file:
     path: "{{ artemis_data_export_path }}"
     state: directory
-    mode: '0775'
+    mode: "775"
   when: artemis_data_export_path is not none and artemis_data_export_path != ""
 
 - name: Set permissions for artemis data-export directory
@@ -136,8 +137,6 @@
     dest: "{{ artemis_working_directory }}/artemis-docker.sh"
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
-    mode: 0770
+    mode: "770"
   register: config
   notify: restart docker artemis
-
-

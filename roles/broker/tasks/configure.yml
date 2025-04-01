@@ -1,3 +1,4 @@
+---
 - name: Check if broker is installed
   become: true
   stat:
@@ -6,10 +7,12 @@
 
 - name: Create broker in {{ activemq_working_directory }} (NOT IDEMPOTENT)
   become: true
-  command: ./artemis create --user {{ activemq_username }} --password {{ activemq_password }} --require-login --force {{ activemq_working_directory }} --java-options "-Xms{{ (activemq_system_ram_proportion * ansible_memory_mb.real.total) | int }}m -Xmx{{ (activemq_system_ram_proportion * ansible_memory_mb.real.total) | int }}m"
+  command: ./artemis create --user {{ activemq_username }} --password {{ activemq_password }} --require-login --force {{ activemq_working_directory }} --java-options
+    "-Xms{{ (activemq_system_ram_proportion * ansible_memory_mb.real.total) | int }}m -Xmx{{ (activemq_system_ram_proportion * ansible_memory_mb.real.total) | int
+    }}m"
   args:
     chdir: "{{ activemq_install_directory }}/apache-artemis-{{ activemq_version }}/bin"
-  notify: restart broker
+  notify: Restart broker
   when: not broker_install_result.stat.exists or activemq_force_reinstall
 
 - name: Copy primary broker.xml file
@@ -17,40 +20,40 @@
   template:
     src: activemq_primary_broker.xml.j2
     dest: "{{ activemq_working_directory }}/etc/broker.xml"
-    mode: 0644
-  notify: restart broker
+    mode: "644"
+  notify: Restart broker
 
 - name: Set permissions for broker working directory
   become: true
   file:
     path: "{{ activemq_working_directory }}"
     state: directory
-    recurse: yes
+    recurse: true
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
-  notify: restart broker
+  notify: Restart broker
 
 - name: Copy broker.service systemd configuration
   become: true
   template:
     src: activemq_broker.service.j2
     dest: "/etc/systemd/system/broker.service"
-    mode: 0644
-  notify: restart broker
+    mode: "644"
+  notify: Restart broker
 
 - name: Ensure correct broker version is installed
   become: true
   lineinfile:
     path: "{{ activemq_working_directory }}/etc/artemis.profile"
-    regexp: '^ARTEMIS_HOME='
+    regexp: "^ARTEMIS_HOME="
     line: "ARTEMIS_HOME='/opt/activemq-distribution/apache-artemis-{{ activemq_version }}'"
-  notify: restart broker
+  notify: Restart broker
 
 - name: Enable broker service
   become: true
   systemd:
-    daemon_reload: yes
+    daemon_reload: true
     name: broker
-    enabled: yes
-    masked: no
-  notify: restart broker
+    enabled: true
+    masked: false
+  notify: Restart broker

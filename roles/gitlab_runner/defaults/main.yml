@@ -1,6 +1,0 @@
-gitlab_runner:
-  dir: /opt/gitlab-runner
-  url: # TODO
-  gitlab_api_token: # TODO
-  concurrent: 1
-  default_image: ubuntu:24.04

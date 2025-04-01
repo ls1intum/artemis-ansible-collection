@@ -1,3 +1,4 @@
+---
 artemis_database_dbname: artemis
 artemis_database_backup_dir: /opt/backup
 artemis_database_backup_script_path: /opt/backup.sh

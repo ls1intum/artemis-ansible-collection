@@ -1,0 +1,59 @@
+---
+- name: Stop Artemis
+  become: true
+  service:
+    name: artemis
+    state: stopped
+  when: node_id is undefined or not (node_id == 1)
+
+- name: Stop Artemis on node 1
+  become: true
+  service:
+    name: artemis
+    state: stopped
+  when:
+    - node_id is defined
+    - node_id == 1
+
+- name: Copy Artemis.war.new to Artemis.war
+  become: true
+  copy:
+    src: "{{ artemis_working_directory }}/artemis.war.new"
+    remote_src: true
+    dest: "{{ artemis_working_directory }}/artemis.war"
+    owner: "{{ artemis_user_name }}"
+    group: "{{ artemis_user_group }}"
+    mode: "644"
+  when:
+    - download_artemis_application | bool
+    - not ansible_check_mode
+
+- name: Start artemis on node 1
+  become: true
+  service:
+    name: artemis
+    state: restarted
+  when:
+    - node_id is defined
+    - node_id == 1
+
+- name: Wait for Artemis to come up
+  uri:
+    url: "{{ artemis_server_url ~ ('/' if not artemis_server_url.endswith('/') else '') ~ 'management/info' }}"
+    status_code: 200
+  register: result
+  until: result.status == 200
+  retries: 120
+  delay: 5
+  when:
+    - node_id is defined
+    - node_id == 1
+  throttle: 1
+
+- name: Start artemis on other nodes
+  become: true
+  service:
+    name: artemis
+    state: restarted
+  when:
+    - node_id is undefined or not (node_id == 1)

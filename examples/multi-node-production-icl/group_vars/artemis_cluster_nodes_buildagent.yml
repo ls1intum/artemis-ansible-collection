@@ -1,5 +1,0 @@
----
-
-continuous_integration:
-  localci:
-    is_build_agent: true

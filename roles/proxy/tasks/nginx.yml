@@ -1,12 +1,13 @@
-- name: Add repo for the latest stable ngnix version 
+---
+- name: Add repo for the latest stable ngnix version
   become: true
   block:
-    - name: ngnix | no apt key
+    - name: Ngnix | No apt key
       ansible.builtin.get_url:
         url: http://nginx.org/keys/nginx_signing.key
         dest: /etc/apt/trusted.gpg.d/nginx.asc
 
-    - name: nginx | apt source
+    - name: Nginx | Apt source
       ansible.builtin.apt_repository:
         repo: "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/nginx.asc] http://nginx.org/packages/mainline/ubuntu/ {{ ansible_distribution_release }} nginx"
         state: present
@@ -16,17 +17,17 @@
   apt:
     name: nginx
     state: latest
-    update_cache: yes
-  notify: restart nginx
+    update_cache: true
+  notify: Restart nginx
 
 - name: Enable nginx service
   become: true
   systemd:
-    daemon_reload: yes
+    daemon_reload: true
     name: nginx
-    enabled: yes
-    masked: no
-  notify: restart nginx
+    enabled: true
+    masked: false
+  notify: Restart nginx
 
 - name: Start nginx
   become: true
@@ -39,18 +40,18 @@
   file:
     path: /etc/nginx/sites-enabled
     state: directory
-    mode: '0755'
+    mode: "755"
 
 - name: Ensure nginx sites-available exists
   become: true
   file:
     path: /etc/nginx/sites-available
     state: directory
-    mode: '0755'
+    mode: "755"
 
 - name: Generate DH Parameters (This will take a while....)
   become: true
-  openssl_dhparam:
+  community.crypto.openssl_dhparam:
     path: /etc/nginx/dhparam.pem
     size: 4096
   when:
@@ -60,42 +61,42 @@
   become: true
   lineinfile:
     path: /etc/nginx/nginx.conf
-    regexp: '^worker_rlimit_nofile'
+    regexp: "^worker_rlimit_nofile"
     line: "worker_rlimit_nofile {{ proxy_worker_rlmmiit_nofile }};"
     insertbefore: BOF
     state: present
-  notify: restart nginx
+  notify: Restart nginx
 
 - name: Adjust worker_connections in nginx.conf
   become: true
   lineinfile:
     path: /etc/nginx/nginx.conf
-    regexp: '^\s*worker_connections\s+\d+'
+    regexp: "^\\s*worker_connections\\s+\\d+"
     line: "\tworker_connections {{ proxy_worker_connections }};"
     backrefs: true
-  notify: restart nginx
+  notify: Restart nginx
 
 - name: Adjust worker_connections in nginx.conf
   become: true
   lineinfile:
     path: /etc/nginx/nginx.conf
-    regexp: '^\t(# )?server_names_hash_bucket_size'
+    regexp: "^\\t(# )?server_names_hash_bucket_size"
     line: "\tserver_names_hash_bucket_size {{ proxy_server_names_hash_bucket_size }};"
     insertafter: "http {"
-    firstmatch: yes
+    firstmatch: true
     state: present
-  notify: restart nginx
+  notify: Restart nginx
 
-- name: Include sites-enabled in nginx.conf 
+- name: Include sites-enabled in nginx.conf
   become: true
   lineinfile:
     path: /etc/nginx/nginx.conf
-    regexp: '^(\s*)include /etc/nginx/sites-enabled/\*;'
+    regexp: "^(\\s*)include /etc/nginx/sites-enabled/\\*;"
     line: "\tinclude /etc/nginx/sites-enabled/*;"
     insertafter: "http {"
-    firstmatch: yes
+    firstmatch: true
     state: present
-  notify: restart nginx
+  notify: Restart nginx
 
 - name: Adjust gzip settings in nginx.conf
   become: true
@@ -104,14 +105,14 @@
     regexp: "{{ item.regexp }}"
     line: "{{ item.line }}"
     insertafter: "http {"
-    firstmatch: yes
+    firstmatch: true
     state: present
   with_items:
-    - regexp: '^(\s*)gzip(\s+)(\w*);'
+    - regexp: "^(\\s*)gzip(\\s+)(\\w*);"
       line: "\tgzip on;"
-    - regexp: '^(\s*)gzip_types(\s+)[/\-\w\s]*;'
+    - regexp: "^(\\s*)gzip_types(\\s+)[/\\-\\w\\s]*;"
       line: "\tgzip_types text/plain application/javascript application/x-javascript text/javascript text/xml text/css;"
-  notify: restart nginx
+  notify: Restart nginx
 
 - name: Include SSH git stream configuration in nginx.conf
   become: true
@@ -130,32 +131,32 @@
         }
       }
   when: proxy_forward_ssh
-  notify: restart nginx
+  notify: Restart nginx
 
 - name: Copy artemis-ssh-upstream.conf
   become: true
   template:
     src: artemis-ssh-upstream.conf.j2
     dest: /etc/nginx/artemis-ssh-upstream.conf
-    mode: 0644
+    mode: "644"
   when: proxy_forward_ssh
-  notify: restart nginx
+  notify: Restart nginx
 
 - name: Copy timeouts.conf
   become: true
   template:
     src: nginx_timeouts.conf.j2
     dest: /etc/nginx/conf.d/timeouts.conf
-    mode: 0644
-  notify: restart nginx
+    mode: "644"
+  notify: Restart nginx
 
 - name: Copy proxy.conf
   become: true
   template:
     src: nginx_proxy.conf.j2
     dest: /etc/nginx/sites-available/proxy.conf
-    mode: 0644
-  notify: reload nginx
+    mode: "644"
+  notify: Reload nginx
 
 - name: Enable proxy site config
   become: true
@@ -165,14 +166,14 @@
     owner: root
     group: root
     state: link
-  notify: reload nginx
+  notify: Reload nginx
 
 - name: Disable default and legacy site config
   become: true
   file:
     dest: "/etc/nginx/sites-enabled/{{ item }}"
     state: absent
-  notify: reload nginx
+  notify: Reload nginx
   with_items:
     - "default"
     - "artemis.conf"
@@ -189,8 +190,8 @@
   copy:
     src: files/nginx_503.html
     dest: /usr/share/nginx/html/503.html
-    mode: 0644
-  notify: reload nginx
+    mode: "644"
+  notify: Reload nginx
 
 - name: Validate nginx config
   become: true
@@ -201,10 +202,10 @@
   become: true
   lineinfile:
     path: /etc/sysctl.conf
-    regexp: '^fs.file-max='
+    regexp: "^fs.file-max="
     line: fs.file-max=2000000
     state: present
-  notify: apply sysctl
+  notify: Apply sysctl
 
 - name: Flush handlers
   meta: flush_handlers
@@ -214,20 +215,20 @@
   copy:
     src: files/nginx_security_limits.conf
     dest: /etc/security/limits.d/nginx.conf
-    mode: 0644
-  notify: reboot system
+    mode: "644"
+  notify: Reboot system
 
 - name: Ensure systemd.conf.d folder exists
   become: true
   file:
     path: /etc/systemd/system.conf.d/
     state: directory
-    mode: '0755'
+    mode: "755"
 
 - name: Copy systemd-limits nginx.conf
   become: true
   copy:
     src: files/nginx_systemd_limits.conf
     dest: /etc/systemd/system.conf.d/limits.conf
-    mode: 0644
-  notify: reboot system
+    mode: "644"
+  notify: Reboot system
