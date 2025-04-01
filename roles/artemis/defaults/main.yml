@@ -3,7 +3,7 @@ artemis_version: # Set to version or local path to war file for non-docker insta
 is_testserver: false
 is_multinode_install: false
 
-artemis_server_url: https://artemis.ase.in.tum.de
+artemis_server_url: https://artemis.tum.de
 artemis_server_port: 8080
 
 use_docker: false

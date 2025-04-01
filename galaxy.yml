@@ -8,8 +8,8 @@ readme: README.md
 
 authors:
   - Matthias Linhuber <matthias@linhuber.org> (https://mtze.me)
-  - Timor Morrien <timor.morrien@tum.de> (https://ase.cit.tum.de/people/morrien/)
-  - Benjamin Schmitz <benjamin.schmitz@tum.de> (https://ase.cit.tum.de/people/schmitz/)
+  - Timor Morrien <timor.morrien@tum.de> (https://aet.cit.tum.de/people/morrien/)
+  - Benjamin Schmitz <benjamin.schmitz@tum.de> (https://aet.cit.tum.de/people/schmitz/)
   - Magnus Kühne
   - Colin Wilk
   - Simon Leiss <hello@sleiss.me> (https://sleiss.me)
@@ -27,13 +27,13 @@ dependencies: {}
 # Ansible collections cannot depend on roles... So the user has to install the dependencies by hand *sadface*. Details -> https://github.com/ansible/ansible/issues/76030
 
 # The URL of the originating SCM repository
-repository: https://github.com/ls1intum/ls1intum.artemis
+repository: https://github.com/ls1intum/artemis-ansible-collection
 
 # The URL to any online docs
 documentation: https://docs.artemis.cit.tum.de
 
 # The URL to the homepage of the collection/project
-homepage: https://artemis.cit.tum.de
+homepage: https://artemis.tum.de
 
 # The URL to the collection issue tracker
 issues: https://github.com/ls1intum/artemis-ansible-collection/issues
