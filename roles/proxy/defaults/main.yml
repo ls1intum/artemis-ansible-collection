@@ -1,9 +1,16 @@
 ---
-servers:
-  - name:
-    ssl_certificate_path:
-    ssl_certificate_key_path:
-    default_server: true
+# servers:
+#   - name:
+#     ssl_certificate_path:
+#     ssl_certificate_key_path:
+#     default_server: false
+
+# redirects:
+#   - name:
+#     ssl_certificate_path:
+#     ssl_certificate_key_path:
+#     default_server: true
+#     to: "{{ artemis_url }}"
 
 # Nodes for load balancing; Either define a host-group or manually list all nodes
 # proxy_available_nodes: "{{ groups.artemisnodes }}" # will not work anymore
