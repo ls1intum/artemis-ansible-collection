@@ -1,5 +1,4 @@
 ---
-#TODO check if war is allredy present - If so fail and prompt user to use the uprade instead
 - name: Check Artemis version is set
   fail:
     msg: "No Artemis version is set!"
