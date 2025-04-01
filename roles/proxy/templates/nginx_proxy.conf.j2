@@ -21,7 +21,7 @@ server {
     listen [::]:80 default_server;
     server_name _;
 
-    return 301 https://$host$request_uri;
+    return 308 https://$host$request_uri;
 }
 
 {% for server in servers %}
@@ -179,7 +179,7 @@ server {
     }
 
     location / {
-        return 301 {{ redirect.to }};
+        return 308 {{ redirect.to }};
     }
 
     error_page 502 =503 /503.html;
