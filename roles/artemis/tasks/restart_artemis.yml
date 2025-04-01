@@ -5,7 +5,6 @@
     name: artemis
     state: stopped
   when: node_id is undefined or not (node_id == 1)
-  throttle: 1
 
 - name: Stop Artemis on node 1
   become: true
@@ -58,4 +57,3 @@
     state: restarted
   when:
     - node_id is undefined or not (node_id == 1)
-  throttle: 1
