@@ -18,7 +18,7 @@
     name: nginx
     state: latest
     update_cache: true
-  notify: restart nginx
+  notify: Restart nginx
 
 - name: Enable nginx service
   become: true
@@ -27,7 +27,7 @@
     name: nginx
     enabled: true
     masked: false
-  notify: restart nginx
+  notify: Restart nginx
 
 - name: Start nginx
   become: true
@@ -65,7 +65,7 @@
     line: "worker_rlimit_nofile {{ proxy_worker_rlmmiit_nofile }};"
     insertbefore: BOF
     state: present
-  notify: restart nginx
+  notify: Restart nginx
 
 - name: Adjust worker_connections in nginx.conf
   become: true
@@ -74,7 +74,7 @@
     regexp: "^\\s*worker_connections\\s+\\d+"
     line: "\tworker_connections {{ proxy_worker_connections }};"
     backrefs: true
-  notify: restart nginx
+  notify: Restart nginx
 
 - name: Adjust worker_connections in nginx.conf
   become: true
@@ -85,7 +85,7 @@
     insertafter: "http {"
     firstmatch: true
     state: present
-  notify: restart nginx
+  notify: Restart nginx
 
 - name: Include sites-enabled in nginx.conf
   become: true
@@ -96,7 +96,7 @@
     insertafter: "http {"
     firstmatch: true
     state: present
-  notify: restart nginx
+  notify: Restart nginx
 
 - name: Adjust gzip settings in nginx.conf
   become: true
@@ -112,7 +112,7 @@
       line: "\tgzip on;"
     - regexp: "^(\\s*)gzip_types(\\s+)[/\\-\\w\\s]*;"
       line: "\tgzip_types text/plain application/javascript application/x-javascript text/javascript text/xml text/css;"
-  notify: restart nginx
+  notify: Restart nginx
 
 - name: Include SSH git stream configuration in nginx.conf
   become: true
@@ -131,7 +131,7 @@
         }
       }
   when: proxy_forward_ssh
-  notify: restart nginx
+  notify: Restart nginx
 
 - name: Copy artemis-ssh-upstream.conf
   become: true
@@ -140,7 +140,7 @@
     dest: /etc/nginx/artemis-ssh-upstream.conf
     mode: "644"
   when: proxy_forward_ssh
-  notify: restart nginx
+  notify: Restart nginx
 
 - name: Copy timeouts.conf
   become: true
@@ -148,7 +148,7 @@
     src: nginx_timeouts.conf.j2
     dest: /etc/nginx/conf.d/timeouts.conf
     mode: "644"
-  notify: restart nginx
+  notify: Restart nginx
 
 - name: Copy proxy.conf
   become: true
@@ -156,7 +156,7 @@
     src: nginx_proxy.conf.j2
     dest: /etc/nginx/sites-available/proxy.conf
     mode: "644"
-  notify: reload nginx
+  notify: Reload nginx
 
 - name: Enable proxy site config
   become: true
@@ -166,14 +166,14 @@
     owner: root
     group: root
     state: link
-  notify: reload nginx
+  notify: Reload nginx
 
 - name: Disable default and legacy site config
   become: true
   file:
     dest: "/etc/nginx/sites-enabled/{{ item }}"
     state: absent
-  notify: reload nginx
+  notify: Reload nginx
   with_items:
     - "default"
     - "artemis.conf"
@@ -191,7 +191,7 @@
     src: files/nginx_503.html
     dest: /usr/share/nginx/html/503.html
     mode: "644"
-  notify: reload nginx
+  notify: Reload nginx
 
 - name: Validate nginx config
   become: true
@@ -205,7 +205,7 @@
     regexp: "^fs.file-max="
     line: fs.file-max=2000000
     state: present
-  notify: apply sysctl
+  notify: Apply sysctl
 
 - name: Flush handlers
   meta: flush_handlers
@@ -216,7 +216,7 @@
     src: files/nginx_security_limits.conf
     dest: /etc/security/limits.d/nginx.conf
     mode: "644"
-  notify: reboot system
+  notify: Reboot system
 
 - name: Ensure systemd.conf.d folder exists
   become: true
@@ -231,4 +231,4 @@
     src: files/nginx_systemd_limits.conf
     dest: /etc/systemd/system.conf.d/limits.conf
     mode: "644"
-  notify: reboot system
+  notify: Reboot system

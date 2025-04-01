@@ -24,7 +24,7 @@
     state: present
     uid: "{{ artemis_deployment_user_uid }}"
     group: "{{ artemis_user_group }}"
-    groups: "{% if use_docker %}docker{% if else %}sudo{% endif %}"
+    groups: "{% if use_docker %}docker{% else %}sudo{% endif %}"
   when: (artemis_create_deployment_user | bool)
 
 - name: Ensure (limited) sudo privileges for user {{ artemis_deployment_user_name }}

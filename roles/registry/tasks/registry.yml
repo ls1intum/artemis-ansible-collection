@@ -5,7 +5,7 @@
     path: "{{ registry_working_directory }}"
     state: directory
     mode: "775"
-  notify: restart registry
+  notify: Restart registry
 
 - name: Create registry config directory
   become: true
@@ -13,7 +13,7 @@
     path: "{{ registry_working_directory }}/config-server"
     state: directory
     mode: "755"
-  notify: restart registry
+  notify: Restart registry
 
 - name: Download jhipster v{{ registry_version }}
   become: true
@@ -21,7 +21,7 @@
     url: "https://github.com/jhipster/jhipster-registry/releases/download/v{{ registry_version }}/jhipster-registry-{{ registry_version }}.jar"
     dest: "{{ registry_working_directory }}/registry.jar"
     mode: "644"
-  notify: restart registry
+  notify: Restart registry
 
 - name: Set permissions for registry directory
   become: true
@@ -31,7 +31,7 @@
     recurse: true
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
-  notify: restart registry
+  notify: Restart registry
 
 - name: Copy registry.service systemd configuration
   become: true
@@ -39,7 +39,7 @@
     src: registry_registry.service.j2
     dest: "/etc/systemd/system/registry.service"
     mode: "644"
-  notify: restart registry
+  notify: Restart registry
 
 - name: Enable registry service
   become: true
@@ -48,7 +48,7 @@
     name: registry
     enabled: true
     masked: false
-  notify: restart registry
+  notify: Restart registry
 
 - name: Copy application-prod.yml
   become: true
@@ -58,7 +58,7 @@
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
     mode: "644"
-  notify: restart registry
+  notify: Restart registry
 
 - name: Copy bootstrap-prod.yml
   become: true
@@ -68,7 +68,7 @@
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
     mode: "644"
-  notify: restart registry
+  notify: Restart registry
 
 - name: Copy application.yml
   become: true
@@ -78,4 +78,4 @@
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
     mode: "644"
-  notify: restart registry
+  notify: Restart registry

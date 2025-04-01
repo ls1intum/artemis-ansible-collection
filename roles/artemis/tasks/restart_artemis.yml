@@ -27,7 +27,7 @@
     mode: "644"
   when: download_artemis_application | bool
 
-- name: Start artemis on other nodes
+- name: Start artemis on node 1
   become: true
   service:
     name: artemis

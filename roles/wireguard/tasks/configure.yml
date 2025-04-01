@@ -16,7 +16,7 @@
     src: wireguard_wg0.conf.j2
     dest: /etc/wireguard/wg0.conf
     mode: "0644"
-  notify: restart wireguard
+  notify: Restart wireguard
 
 - name: Enable wg0 service
   systemd:
@@ -24,4 +24,4 @@
     name: wg-quick@wg0.service
     enabled: true
     masked: false
-  notify: restart wireguard
+  notify: Restart wireguard
