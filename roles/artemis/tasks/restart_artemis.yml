@@ -25,7 +25,9 @@
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
     mode: "644"
-  when: download_artemis_application | bool
+  when:
+    - download_artemis_application | bool
+    - not ansible_check_mode
 
 - name: Start artemis on node 1
   become: true
