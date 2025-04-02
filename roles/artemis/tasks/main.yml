@@ -1,11 +1,13 @@
 ---
 # Check if variables are set correctly
 - include_tasks: variable_checks.yml
+  when: (setup_system | bool) or (update_artemis_config | bool)
 
 - include_tasks: node_checks.yml
   when:
     - continuous_integration.localci is defined
     - is_build_agent is defined and (is_build_agent | bool)
+    - (setup_system | bool) or (update_artemis_config | bool)
 
 # Create Artemis and (if desired) deployment users.
 - include_tasks: users.yml
