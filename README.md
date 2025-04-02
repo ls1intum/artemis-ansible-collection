@@ -46,13 +46,12 @@ ansible-galaxy install -r ~/.ansible/collections/ansible_collections/ls1intum/ar
 You can find the documentation for Artemis [here](https://docs.artemis.cit.tum.de).
 Each role includes a readme and default configuration. Consult these for more information.
 
- **Use the examples in the examples folder as starting point for your deployment (Warning: the examples are currently outdated and are being reworked)**
+Our Ansible configuration for the TUM Artemis Production, Staging and Test environments are public at [github.com/ls1intum/artemis-ansible](https://github.com/ls1intum/artemis-ansible).
+Use them as examples for how to use this collection and as a reference for deploying Artemis.
 
 # Deployment Strategies
 
 Artemis can be deployed in different ways. Depending on the use case the ansible configuration differs.
-
-You can find examples for each configuration in the `examples` folder. **Warning: the examples are currently outdated and are being reworked**
 
 ## Single Node installation
 All Artemis components are deployed to a single host. This is the prefered deployment strategy for small installations or testing/evaluation purposes.
@@ -71,25 +70,8 @@ This setup allows to scale Artemis to support many concurrent users.
 
 ## Version Control & Continuous Integration
 
-Artemis relies on (external) services to handle version control and continuous integration. Currently three configurations are supported by Artemis:
-- Integrated Code Lifecycle
-- Gitlab, Jenkins
-- GitlabCI
-
-The ansible configuration has to be adapted accordingly. Again, you can find examples for both in the `examples` folder. **Warning: the examples are currently outdated and are being reworked**
-
-## Test Servers
-
-This collection also allows to provision test servers/clusters. To provision a test server or test cluster, set the
-
-```
-is_testserver: true
-```
-variable in your `group_vars`.
-
-## Tests
-
-All roles have been tested on ubuntu 20.04 LTS
+Artemis has a built-in version control and continuous integration system, the so-called Integrated Code Lifecycle.
+Alternatively, you can use the built-in version control and Jenkins as an external continuous integration system.
 
 # Ansible Development Setup 
 
