@@ -7,7 +7,7 @@ artemis_user_uid: 1337
 artemis_user_gid: 1337
 
 # jdk.yml task
-jdk_openjdk_version: 16
+jdk_openjdk_version: 17
 
 ##############################################################################
 # Registry
@@ -16,7 +16,7 @@ jdk_openjdk_version: 16
 registry_password: "{{ artemis_jhipster_registry_password }}"
 registry_jwt: "{{ artemis_jhipster_jwt }}"
 
-registry_version: 7.3.0
+registry_version: 7.4.0
 registry_working_directory: /opt/registry
 
 registry_application_prod_registry_password: "{{ registry_password }}"
