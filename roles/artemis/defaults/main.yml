@@ -30,6 +30,7 @@ artemis_deployment_user_name: deploymentuser
 artemis_deployment_user_uid: 1338
 artemis_deployment_user_public_key: ""
 artemis_deployment_user_comment: "User to deploy artemis to this host"
+artemis_deployment_full_sudo: false
 
 ##############################################################################
 # Java Setup
