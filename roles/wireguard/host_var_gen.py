@@ -1,10 +1,10 @@
 import subprocess
 import argparse
 
-HOST_TYPES = ["node", "db", "broker", "proxy", "storage"]
+HOST_TYPES = ["node", "agent", "db", "broker", "proxy", "storage"]
 
 # Used for the ipv6 address generation. (e.g. broker -> ::b:1)
-HOST_TYPE_NETWORKS = ["a", "d", "b", "f", "9"]
+HOST_TYPE_NETWORKS = ["a", "affe", "d", "b", "f", "9"]
 
 MAPPPING = dict(zip(HOST_TYPES, HOST_TYPE_NETWORKS))
 
@@ -23,6 +23,7 @@ def store_host_var_file(pub, priv, h_type, host_id, filename):
     content = f"""
 # IPv6 address (with CIDR!) which can be used to access the node - If left blank, ansible will use host facts to fill the address.
 wireguard_host_ipv6_address:
+host_ipv4_address:
 
 # Address of the node inside the network.
 wireguard_interface_address: "fcfe:0:0:0:0:0:{MAPPPING[h_type]}:{host_id}"
@@ -30,11 +31,15 @@ wireguard_interface_address: "fcfe:0:0:0:0:0:{MAPPPING[h_type]}:{host_id}"
 # Wireguard Keys - Autmatically generated!
 wireguard_pubkey: {pub}
 wireguard_privkey: {priv}
-
 """
 
     if h_type == "node":
-        content += f"node_id: {host_id}"
+        content += f"\nnode_id: {host_id}\n"
+
+    if h_type == "agent":
+        content += f"\nnode_id: 1{host_id:03d}\n"
+        content += f"node_short_name: artemis-build-agent-{host_id}\n"
+        content += f"node_display_name: Artemis Build Agent {host_id}\n"
 
     with open(f"{filename}.yml", 'w') as f:
         f.writelines(content)
