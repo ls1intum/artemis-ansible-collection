@@ -36,7 +36,6 @@
     mode: "440"
   when:
     - artemis_create_deployment_user | bool
-    - use_docker | bool
 
 - name: Authorize ssh-key for deployment user
   become: true
