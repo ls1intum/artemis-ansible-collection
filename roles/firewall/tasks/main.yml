@@ -16,7 +16,7 @@
 - name: Copy rules.v4
   become: true
   template:
-    src: rules_{{ firewall_hostgroup | default('default') }}.v4.j2
+    src: rules_{{ firewall_hostgroup }}.v4.j2
     dest: /etc/iptables/rules.v4
     mode: "644"
   register: copy4
@@ -25,7 +25,7 @@
 - name: Copy rules.v6
   become: true
   template:
-    src: rules_{{ firewall_hostgroup | default('default') }}.v6.j2
+    src: rules_{{ firewall_hostgroup }}.v6.j2
     dest: /etc/iptables/rules.v6
     mode: "644"
   register: copy6
