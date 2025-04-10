@@ -103,6 +103,10 @@ artemis:
 {% else %}
     use-external: false
 {% endif %}
+    passkey:
+      enabled: {{ artemis_passkey_enabled | lower }}
+      allowed-origins: '{{ artemis_passkey_allowed_origins }}'
+      rp-id: '{{ artemis_passkey_rp_id }}'
 
 {% if artemis_external_password_provider is defined and artemis_external_password_provider is not none %}
     password-reset:
