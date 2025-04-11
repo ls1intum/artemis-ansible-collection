@@ -121,6 +121,9 @@ push_notification_relay: "https://hermes.artemis.cit.tum.de"
 artemis_external_password_provider: TUMonline
 artemis_external_password_reset_link_en: "https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/pl/ui/$ctx/co_loc_password_reset.main?$ctx=design=ca2;header=max;lang=en"
 artemis_external_password_reset_link_de: "https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/pl/ui/$ctx/co_loc_password_reset.main?$ctx=design=ca2;header=max;lang=de"
+
+artemis_passkey_enabled: false
+
 #ldap:
 #  url: "ldaps://iauth.tum.de:636"
 #  user_dn: "cn=TUINI01-Artemis,ou=bindDNs,ou=iauth,dc=tum,dc=de"
