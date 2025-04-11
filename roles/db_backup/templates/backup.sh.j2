@@ -9,7 +9,7 @@ $(basename $0) [options]
 
 Options:
 -d                          Perform Database Backup.
--p                          Prune backups older than 7 days
+-p                          Prune backups older than {{ artemis_database_backup_retention }} days
 HELP
 }
 
@@ -23,7 +23,7 @@ if [ $OPTIND -eq 1 ]; then printf "Invalid Option: $(basename $0) requires optio
 shift $((OPTIND -1))
 
 if [ $prune = true ]; then # Prune old backups
-    find /srv/artemis-db/ -mtime +7 -type f -delete
+    find {{ artemis_database_backup_dir }} -mtime +{{ artemis_database_backup_retention }} -type f -delete
 fi
 
 if [ $database = true ]; then # Database Backup
