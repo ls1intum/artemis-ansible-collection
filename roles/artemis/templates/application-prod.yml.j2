@@ -103,7 +103,7 @@ artemis:
 {% else %}
     use-external: false
 {% endif %}
-{% if passkey is defined and passkey is not none %}
+{% if artemis_passkey_enabled %}
     passkey:
       enabled: true
 {% endif %}
