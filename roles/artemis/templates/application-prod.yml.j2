@@ -17,8 +17,6 @@ spring:
         prepStmtCacheSqlLimit: 2048
         useServerPrepStmts: true
   jpa:
-    database-platform: {{ artemis_database_platform }}
-    database: {{ artemis_database_type|upper }}
     hibernate:
       connection:
         charSet: {{ artemis_database_encoding }}
@@ -333,34 +331,19 @@ jhipster:
 {% if artemis_computed_is_core_node %}
 # Properties to be exposed on the /info management endpoint
 info:
-  guided-tour:
-    courseShortName: 'artemistutorial'
-    tours:
-      - cancel_tour: ''
-      - code_editor_tour: 'tutorial'
-      - course_overview_tour: ''
-      - course_exercise_overview_tour: 'tutorial'
-      - modeling_tour: 'UML Class Diagram'
-      - programming_exercise_fail_tour: 'tutorial'
-      - programming_exercise_success_tour: 'tutorial'
   operatorName: {{ artemis_operator_name }}
   operatorAdminName: {{ artemis_operator_admin_name }}
   contact: {{ artemis_email }}
   imprint: https://ase.in.tum.de/lehrstuhl_1/component/content/article/179-imprint
 {% if is_testserver is defined and is_testserver is sameas true %}
-  test-server: true
+  testServer: true
 {% endif %}
 {% if is_testserver is defined and is_testserver is sameas false %}
-  test-server: false
+  testServer: false
 {% endif %}
-  text-assessment-analytics-enabled: true
+  textAssessmentAnalyticsEnabled: true
   sentry:
     dsn: https://e52d0b9b6b61769f50b088634b4bc781@sentry.ase.in.tum.de/2
-{% if post_hog is defined %}
-  post-hog:
-    host: {{ post_hog.host }}
-    token: {{ post_hog.token }}
-{% endif %}
 {% endif %}
 
 {% if is_multinode_install and artemis_eureka_urls is defined and hazelcast_address is defined %}
