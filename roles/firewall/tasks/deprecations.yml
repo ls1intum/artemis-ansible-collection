@@ -1,3 +1,4 @@
+---
 - name: Display deprecation notice
   debug:
     msg: "DEPRECATION NOTICE: Please use 'firewall_hostgroup: registry' instead of 'firewall_hostgroup: broker'."

@@ -1,3 +1,4 @@
+---
 roles:
   - src: geerlingguy.docker
 
@@ -5,3 +6,9 @@ roles:
 
   - name: cloudalchemy.mysqld_exporter
     src: https://github.com/ls1admin/ansible-mysqld_exporter.git
+
+collections:
+  - name: community.mysql
+    source: https://galaxy.ansible.com
+  - name: ansible.posix
+    source: https://galaxy.ansible.com

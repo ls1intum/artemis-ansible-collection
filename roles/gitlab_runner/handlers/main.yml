@@ -1,6 +1,0 @@
-- name: Restart GitLab Runner
-  become: true
-  community.docker.docker_compose:
-    project_src: "{{ gitlab_runner.dir }}"
-    restarted: true
-    pull: true

@@ -1,6 +1,6 @@
+---
 mysql_exporter_user: "exporter"
 mysql_exporter_password: ""
 
 mysql_exporter_version: "0.14.0"
 mysql_exporter_dsn: "{{ mysql_exporter_user }}:{{ mysql_exporter_password }}@(localhost:3306)/"
-

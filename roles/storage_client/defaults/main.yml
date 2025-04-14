@@ -1,3 +1,4 @@
+---
 artemis_uid: 1337
 artemis_gid: 1337
 artemis_user: artemis
@@ -5,4 +6,4 @@ artemis_group: artemis
 
 # Storage server definition
 storage_server_address: "fcfe:0:0:0:0:0:9:1" # This is the default address for the storage server in the wireguard network
-storage_export:  /srv/artemis
+storage_export: /srv/artemis

@@ -1,4 +1,5 @@
-- name: restart broker
+---
+- name: Restart broker
   become: true
   service:
     name: broker

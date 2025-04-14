@@ -1,53 +1,54 @@
+---
 - name: Create registry directory
   become: true
   file:
     path: "{{ registry_working_directory }}"
     state: directory
-    mode: '0775'
-  notify: restart registry
+    mode: "775"
+  notify: Restart registry
 
 - name: Create registry config directory
   become: true
   file:
     path: "{{ registry_working_directory }}/config-server"
     state: directory
-    mode: '0755'
-  notify: restart registry
+    mode: "755"
+  notify: Restart registry
 
 - name: Download jhipster v{{ registry_version }}
   become: true
   get_url:
     url: "https://github.com/jhipster/jhipster-registry/releases/download/v{{ registry_version }}/jhipster-registry-{{ registry_version }}.jar"
     dest: "{{ registry_working_directory }}/registry.jar"
-    mode: '0644'
-  notify: restart registry
+    mode: "644"
+  notify: Restart registry
 
 - name: Set permissions for registry directory
   become: true
   file:
     path: "{{ registry_working_directory }}"
     state: directory
-    recurse: yes
+    recurse: true
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
-  notify: restart registry
+  notify: Restart registry
 
 - name: Copy registry.service systemd configuration
   become: true
   template:
     src: registry_registry.service.j2
     dest: "/etc/systemd/system/registry.service"
-    mode: 0644
-  notify: restart registry
+    mode: "644"
+  notify: Restart registry
 
 - name: Enable registry service
   become: true
   systemd:
-    daemon_reload: yes
+    daemon_reload: true
     name: registry
-    enabled: yes
-    masked: no
-  notify: restart registry
+    enabled: true
+    masked: false
+  notify: Restart registry
 
 - name: Copy application-prod.yml
   become: true
@@ -56,8 +57,8 @@
     dest: "{{ registry_working_directory }}/application-prod.yml"
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
-    mode: 0644
-  notify: restart registry
+    mode: "644"
+  notify: Restart registry
 
 - name: Copy bootstrap-prod.yml
   become: true
@@ -66,8 +67,8 @@
     dest: "{{ registry_working_directory }}/bootstrap-prod.yml"
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
-    mode: 0644
-  notify: restart registry
+    mode: "644"
+  notify: Restart registry
 
 - name: Copy application.yml
   become: true
@@ -76,5 +77,5 @@
     dest: "{{ registry_working_directory }}/config-server/application.yml"
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
-    mode: 0644
-  notify: restart registry
+    mode: "644"
+  notify: Restart registry

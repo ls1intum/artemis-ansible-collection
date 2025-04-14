@@ -1,56 +1,50 @@
 ---
-# Check for compatible Ansible version.
-- name: Check for compatible Ansible version.
-  assert:
-    that: ansible_version.full is version_compare('2.16', '>=')
-    msg: You need Ansible version 2.16 or higher.
-
 # Check if variables are set correctly
 - include_tasks: variable_checks.yml
-  when: 
-    - (check_variables | bool)
-    - not (only_update_artemis_config | bool)
+  when: (setup_system | bool) or (update_artemis_config | bool)
 
 - include_tasks: node_checks.yml
-  when: 
+  when:
     - continuous_integration.localci is defined
     - is_build_agent is defined and (is_build_agent | bool)
+    - (setup_system | bool) or (update_artemis_config | bool)
 
 # Create Artemis and (if desired) deployment users.
 - include_tasks: users.yml
-  when: 
-    - not (only_update_artemis_config | bool)
+  when:
+    - setup_system | bool
 
 # Install JDK
 - include_tasks: jdk.yml
   when:
     - not (use_docker | bool)
-    - not (only_update_artemis_config | bool)
+    - setup_system | bool
 
 # Configure the Artemis systemd service
-- include_tasks: artemis_configuration.yml
+- include_tasks: artemis_setup.yml
   when:
     - not (use_docker | bool)
+    - setup_system | bool
+
+# Configure Artemis application
+- include_tasks: artemis_config.yml
+  when:
+    - not (use_docker | bool)
+    - update_artemis_config | bool
 
 # Install Artemis to the host
 - include_tasks: deploy_artemis.yml
-  when: 
-    - (install_artemis | bool)
+  when:
+    - download_artemis_application
     - not (use_docker | bool)
-    - not (upgrade_artemis | bool)
-    - not (only_update_artemis_config | bool)
 
 # Install Artemis to the host using Docker
 - include_tasks: docker_deploy_artemis.yml
   when:
-    - (install_artemis | bool)
     - (use_docker | bool)
-    - not (upgrade_artemis | bool)
-    - not (only_update_artemis_config | bool)
 
-# Upgrade Artemis to specified version
-- include_tasks: upgrade_artemis.yml
-  when: 
-    - not (install_artemis | bool) 
-    - (upgrade_artemis | bool)
-    - not (only_update_artemis_config | bool)
+# Restart Artemis
+- include_tasks: restart_artemis.yml
+  when:
+    - not (use_docker | bool)
+    - restart_artemis | bool

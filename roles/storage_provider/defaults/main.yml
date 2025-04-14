@@ -6,7 +6,7 @@ artemis_user: artemis
 artemis_group: artemis
 
 # Storage server definition
-storage_export:  /srv/artemis
+storage_export: /srv/artemis
 
 # Storage Network
 storage_network: "fcfe:0:0:0:0:0:0:0/96"

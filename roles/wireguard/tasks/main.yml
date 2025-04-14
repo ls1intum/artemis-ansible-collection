@@ -1,3 +1,4 @@
+---
 # Install wireguard
 - include_tasks: install.yml
 

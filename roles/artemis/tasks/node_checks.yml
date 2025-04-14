@@ -1,5 +1,4 @@
-
-
+---
 - name: Check if docker is installed
   ansible.builtin.stat:
     path: /usr/bin/docker

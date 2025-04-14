@@ -1,14 +1,22 @@
+---
 exclude_paths:
-- .cache/  
-- .github/
-- ../../../.cache/ #Strange github action behaviour 
-
+  - .cache/
+  - .github/
+  - ../../../.cache/ # Strange github action behaviour
 
 skip_list:
-  - '403'  # Package installs should not use latest
-  - '208'  # File permissions unset or incorrect
-  - '602'  # Allow empty string comparison
+  - "403" # Package installs should not use latest
+  - "208" # File permissions unset or incorrect
+  - "602" # Allow empty string comparison
   - no-tabs
-  - 'ignore-errors'
-  - 'no-changed-when'
-  - 'risky-shell-pipe'
+  - "ignore-errors"
+  - "no-changed-when"
+  - "risky-shell-pipe"
+  - "fqcn[action-core]"
+  - "name[missing]"
+  - "var-naming[no-role-prefix]"
+  - "name[template]"
+  - "yaml[line-length]"
+  - "yaml[comments]"
+  - "galaxy[no-changelog]"
+  - "warning[outdated-tag]"
