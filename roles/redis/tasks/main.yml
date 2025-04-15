@@ -1,4 +1,4 @@
-
+---
 - name: Check if redis.password is set
   fail:
     msg: "No redis password is configured!"
