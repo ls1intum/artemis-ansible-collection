@@ -53,6 +53,8 @@ server {
     resolver {{ proxy_resolver }};
     resolver_timeout 5s;
     add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload";
+    # used to advertise the availability of HTTP/3
+    add_header alt-svc 'h3=":443"; ma=2592000,h3-29=":443"; ma=2592000';
     client_max_body_size 10m;
     client_body_buffer_size 1m;
 
@@ -76,8 +78,6 @@ server {
         fastcgi_send_timeout 900s;
         fastcgi_read_timeout 900s;
         client_max_body_size 128M;
-        # used to advertise the availability of HTTP/3
-        add_header alt-svc 'h3=":443"; ma=2592000,h3-29=":443"; ma=2592000';
     }
 
 {% if proxy_mailto is not none %}
@@ -140,6 +140,8 @@ server {
     resolver {{ proxy_resolver }};
     resolver_timeout 5s;
     add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload";
+    # used to advertise the availability of HTTP/3
+    add_header alt-svc 'h3=":443"; ma=2592000,h3-29=":443"; ma=2592000';
     client_max_body_size 10m;
     client_body_buffer_size 1m;
 
@@ -163,8 +165,6 @@ server {
         fastcgi_send_timeout 900s;
         fastcgi_read_timeout 900s;
         client_max_body_size 128M;
-        # used to advertise the availability of HTTP/3
-        add_header alt-svc 'h3=":443"; ma=2592000,h3-29=":443"; ma=2592000';
     }
 
     location /api/authenticate {
