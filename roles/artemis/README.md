@@ -9,7 +9,7 @@ Default variables can be found in the `defaults/main.yml` file.
 ### Variables that have to be configured for a single node installation:
 
 ```
-artemis_server_url: "https://artemis.example.de"
+artemis_server_url: "https://artemis.example.com"
 artemis_database_password: "your_database_password"
 
 artemis_internal_admin_password: "your_admin_password"
@@ -45,12 +45,12 @@ user_management:
 LocalVC configuration:
 ```
 localvc:
-  url: "https://localvc.example.com"
+  url: "https://artemis.example.com"
   repo_storage_base_path: "/path/to/repo_storage"
   use_version_control_access_token: false
   ssh_key_path: "/opt/artemis/ssh-keys" # Key path for the SSH host keys
   build_agent_use_ssh: true # Setting whether SSH should be used.
-  ssh_url: "ssh://git@hostname.artemis.cit.tum.de:7921/" # URL template for SSH clone operations.
+  ssh_url: "ssh://git@artemis.example.com:7921/" # URL template for SSH clone operations.
   build_agent_git_credentials:
     user: "build_agent_user"
     password: "build_agent_password"
@@ -124,7 +124,7 @@ lti:
 
 Registry Configuration:
 ```
-artemis_jhipster_registry_password: "your_registry_password" #FIXME Multinode
+artemis_jhipster_registry_password: "your_registry_password" # Set this to the password for the JHipster registry in a multi-node setup
 ```
 The Token can be generated with: `openssl rand -base64 64`
 
