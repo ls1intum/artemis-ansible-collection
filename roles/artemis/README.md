@@ -1,116 +1,66 @@
-Artemis
-=========
+# Artemis
 
-This role installs artemis on a host. The role supports single node installations as well as multi node installations.
+This role installs Artemis on a host. The role supports single node installations as well as multi node installations.
 
-Role Variables
---------------
+## Role Variables and Configuration
+
 Default variables can be found in the `defaults/main.yml` file.
 
 ### Variables that have to be configured for a single node installation:
 
 ```
-artemis_server_url: "https://artemis.example.de"
-artemis_database_password: #FIXME
+artemis_server_url: "https://artemis.example.com"
+artemis_database_password: "your_database_password"
 
-artemis_internal_admin_password: #FIXME
+artemis_internal_admin_password: "your_admin_password"
 
-proxy_ssl_certificate_path: #FIXME
-proxy_ssl_certificate_key_path: #FIXME
+proxy_ssl_certificate_path: "/path/to/ssl_certificate"
+proxy_ssl_certificate_key_path: "/path/to/ssl_certificate_key"
 
-artemis_jhipster_jwt: #FIXME
-
+artemis_jhipster_jwt: "your_jwt_secret"
 ```
 
 The JWT secret can be generated with: `openssl rand -base64 64 | tr -d '\n'`.
 
-
 ### Additional Variables for external systems
-To configure LDAP access for artemis, add the following variables:
+
+To configure LDAP access for Artemis, add the following variables:
 ```
 ldap:
   url: "ldaps://iauth.tum.de:636"
   user_dn: "cn=TUINI01-Artemis,ou=bindDNs,ou=iauth,dc=tum,dc=de"
   base: "ou=users,ou=data,ou=prod,ou=iauth,dc=tum,dc=de"
-  password:
+  password: "your_ldap_password"
 ```
----
 
-To configure Jira as user management server add:
-
+To allow internal user registration:
 ```
 user_management:
-  jira:
-    url:
-    user:
-    password:
-    admin_group: # Jira group that will have admin access in the artemis web ui
-```
-
-To allow internal user registration: 
-```
-user_management: 
-  registration: 
+  registration:
     allowed_email_pattern:  ([a-zA-Z0-9_\-\.\+]+)@((tum\.de)|(in\.tum\.de)|(mytum\.de))
     allowed_email_pattern_readable: '@tum.de, @in.tum.de, @mytum.de'
     cleanup_time_minutes: 2
 ```
----
 
-Bitbucket configuration:
+LocalVC configuration:
 ```
-
-bitbucket_hostname: bitbucket.example.com
-version_control:
-  bitbucket:
-    url: "https://{{ bitbucket_hostname }}"
-    ssh_url: "ssh://git@{{ bitbucket_hostname }}:7999"
-    token:
+localvc:
+  url: "https://artemis.example.com"
+  repo_storage_base_path: "/path/to/repo_storage"
+  use_version_control_access_token: false
+  ssh_key_path: "/opt/artemis/ssh-keys" # Key path for the SSH host keys
+  build_agent_use_ssh: true # Setting whether SSH should be used.
+  ssh_url: "ssh://git@artemis.example.com:7921/" # URL template for SSH clone operations.
+  build_agent_git_credentials:
+    user: "build_agent_user"
+    password: "build_agent_password"
+  user: "localvc_user"
+  password: "localvc_password"
 ```
----
-
-Bamboo configuration:
-```
-continuous_integration:
-  bamboo:
-    url:
-    token:
-    bitbucket_link_name:
-    result_plugin_token:
-```
----
-
-Gitlab configuration:
-```
-version_control:
-
-  gitlab:
-    url: 
-    user: 
-    password: 
-    token: # Access token for $user
-    ci_token: # Jenkins secret push token
-    health_api_token: # Access token for health API
-    ssh_url: # Full SSH clone URL 
-```
----
-
-
-Jenkins configuration:
-```
-  jenkins:
-    url: 
-    user: 
-    password:
-    secret_push_token:
-    vcs_credentials:
-    artemis_auth_token_key:
-    artemis_auth_token_value:
-```
----
 
 LocalCI configuration:
 ```
+continuous_integration:
   localci:
     is_core_node: true
     is_build_agent: true
@@ -124,62 +74,68 @@ LocalCI configuration:
       expiry_days: 3
       schedule_time: "0 0 4 * * *"
 ```
----
 
+Jenkins configuration:
+```
+continuous_integration:
+  jenkins:
+    url: "https://jenkins.example.com"
+    user: "jenkins_user"
+    password: "jenkins_password"
+    secret_push_token: "jenkins_secret_push_token"
+    vcs_credentials: "jenkins_vcs_credentials"
+    artemis_auth_token_key: "jenkins_artemis_auth_token_key"
+    artemis_auth_token_value: "jenkins_artemis_auth_token_value"
+```
 
 Athena configuration:
 ```
 athena:
-  url:
-  secret:
-  restricted_modules: # optional parameter to restrict access to specific modules, e.g. module_text_llm,module_programming_llm
+  url: "https://athena.example.com"
+  secret: "athena_secret"
+  restricted_modules: "module_text_llm,module_programming_llm" # optional parameter to restrict access to specific modules
 ```
----
 
-Apollon configuration:
+Iris configuration:
 ```
-apollon_url: #https://apollon.ase.in.tum.de/api/converter
+iris:
+  url: "https://iris.example.com"
+  secret: "iris_secret"
 ```
----
 
 Mail configuration:
 ```
 mail:
-  host:
-  port:
-  user:
-  password:
-  protocol:
-  ssl_trust:
+  host: "smtp.example.com"
+  port: 587
+  user: "smtp_user"
+  password: "smtp_password"
+  protocol: "smtp"
+  ssl_trust: "smtp.example.com"
 ```
-
----
 
 LTI configuration:
 ```
 lti:
-  oauth_secret:
+  oauth_secret: "lti_oauth_secret"
 ```
 
-### Additional Variables for multi node installtions
+### Additional Variables for multi node installations
 
 Registry Configuration:
 ```
-artemis_jhipster_registry_password: #FIXME Multinode
-
+artemis_jhipster_registry_password: "your_registry_password" # Set this to the password for the JHipster registry in a multi-node setup
 ```
 The Token can be generated with: `openssl rand -base64 64`
 
----
-
-
-Active MQ configuration
+Active MQ configuration:
 ```
 broker:
   url: "fcfe:0:0:0:0:0:b:1" # Default address in the wireguard network
-  username: brokeruser
-  password: #FIXME
-
+  username: "brokeruser"
+  password: "your_broker_password"
 ```
 
+## Example Usage
 
+Please refer to https://github.com/ls1intum/artemis-ansible for concrete examples.
