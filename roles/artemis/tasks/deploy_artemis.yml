@@ -15,9 +15,19 @@
 
 - name: Copy local Artemis.war to {{ artemis_working_directory }}
   become: true
-  copy:
+  synchronize:
     src: "{{ artemis_version }}"
     dest: "{{ artemis_working_directory }}/artemis.war.new"
+    mode: push
+    archive: true
+    owner: false
+    group: false
+  when: not (is_release | bool)
+
+- name: Set correct ownership and permissions on artemis.war.new
+  become: true
+  file:
+    path: "{{ artemis_working_directory }}/artemis.war.new"
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
     mode: "644"
