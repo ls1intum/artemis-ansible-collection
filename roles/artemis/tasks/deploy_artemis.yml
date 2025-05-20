@@ -15,7 +15,7 @@
 
 - name: Copy local Artemis.war to {{ artemis_working_directory }}
   become: true
-  synchronize:
+  ansible.posix.synchronize:
     src: "{{ artemis_version }}"
     dest: "{{ artemis_working_directory }}/artemis.war.new"
     mode: push
