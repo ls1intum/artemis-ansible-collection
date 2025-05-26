@@ -87,7 +87,7 @@ artemis_database_username: artemis
 artemis_database_password: #FIXME
 artemis_database_encoding: utf8mb4 # MySQL specific default encoding
 artemis_database_collation: utf8mb4_unicode_ci # MySQL specific default collation
-apollon_url: https://apollon.ase.in.tum.de/api/converter
+# apollon_url: https://apollon.ase.in.tum.de/api/converter
 artemis_bcrypt_salt_rounds: 11
 
 artemis_account_login_info: "TUM"
@@ -267,7 +267,7 @@ artemis_spring_profile_atlas: "{% if atlas is defined %},atlas{% endif %}" # TOD
 artemis_spring_profile_lti: "{% if lti.oauth_secret is defined and lti.oauth_secret is not none %},lti{% endif %}"
 
 artemis_spring_profile_core: "{% if artemis_computed_is_core_node %},core{{ artemis_spring_profile_ldap }}{{ artemis_spring_profile_version_control
-  }}{{ artemis_spring_profile_continuous_integration }}{{ artemis_spring_profile_athena }}{{ artemis_spring_profile_scheduling }}{{ artemis_spring_profile_docker
+  }}{{ artemis_spring_profile_continuous_integration }}{{ artemis_spring_profile_athena }}{{ artemis_spring_profile_apollon }}{{ artemis_spring_profile_scheduling }}{{ artemis_spring_profile_docker
   }}{{ artemis_spring_profile_iris }}{{ artemis_spring_profile_theia }}{{ artemis_spring_profile_aeolus }}{{ artemis_spring_profile_atlas }}{{ artemis_spring_profile_lti
   }}{% endif %}"
 artemis_spring_profile_buildagent: "{% if continuous_integration.localci is defined and continuous_integration.localci is not none %}{% if continuous_integration.localci.is_build_agent
