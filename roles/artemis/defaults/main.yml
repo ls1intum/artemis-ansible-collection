@@ -87,7 +87,7 @@ artemis_database_username: artemis
 artemis_database_password: #FIXME
 artemis_database_encoding: utf8mb4 # MySQL specific default encoding
 artemis_database_collation: utf8mb4_unicode_ci # MySQL specific default collation
-# apollon_url: https://apollon.ase.in.tum.de/api/converter
+# apollon_url: https://apollon.ase.in.tum.de
 artemis_bcrypt_salt_rounds: 11
 
 artemis_account_login_info: "TUM"
