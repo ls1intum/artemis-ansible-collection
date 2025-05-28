@@ -15,6 +15,19 @@
     - node_id is defined
     - node_id == 1
 
+- name: Copy Artemis.war to Artemis.war.old
+  become: true
+  copy:
+    src: "{{ artemis_working_directory }}/artemis.war"
+    remote_src: true
+    dest: "{{ artemis_working_directory }}/artemis.war.old"
+    owner: "{{ artemis_deployment_user_name }}"
+    group: "{{ artemis_user_group }}"
+    mode: "644"
+  when:
+    - download_artemis_application | bool
+    - not ansible_check_mode
+
 - name: Copy Artemis.war.new to Artemis.war
   become: true
   copy:
