@@ -28,7 +28,7 @@
   become: true
   file:
     path: "{{ artemis_working_directory }}/artemis.war.new"
-    owner: "{{ artemis_user_name }}"
+    owner: "{{ artemis_deployment_user_name }}"
     group: "{{ artemis_user_group }}"
     mode: "644"
   when: not (is_release | bool)
@@ -38,7 +38,7 @@
   get_url:
     url: "{{ artemis_war_url }}"
     dest: "{{ artemis_working_directory }}/artemis.war.new"
-    owner: "{{ artemis_user_name }}"
+    owner: "{{ artemis_deployment_user_name }}"
     group: "{{ artemis_user_group }}"
     mode: "644"
     force: true
