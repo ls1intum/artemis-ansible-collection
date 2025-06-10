@@ -13,6 +13,10 @@
   set_fact:
     is_release: "{{ artemis_version is match('^\\d+\\.\\d+\\.\\d+$') }}"
 
+- name: "Copying Artemis.war to {{ artemis_working_directory }}/artemis.war.new ..."
+  debug:
+    msg: "Copying Artemis.war to {{ artemis_working_directory }}/artemis.war.new ..."
+
 - name: Copy local Artemis.war to {{ artemis_working_directory }}
   become: true
   ansible.posix.synchronize:
