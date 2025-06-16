@@ -323,6 +323,7 @@ info:
   operatorName: {{ artemis_operator_name }}
   operatorAdminName: {{ artemis_operator_admin_name }}
   contact: {{ artemis_email }}
+  enableSeasonalFeatures: {{ artemis_enable_seasonal_features | lower }}
 {% if is_testserver is defined and is_testserver is sameas true %}
   testServer: true
 {% endif %}

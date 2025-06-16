@@ -92,6 +92,8 @@ artemis_bcrypt_salt_rounds: 11
 
 artemis_account_login_info: "TUM"
 
+artemis_enable_seasonal_features: true
+
 shared_monitoring_host_v4:
 artemis_version_control_default_branch_name: main
 
