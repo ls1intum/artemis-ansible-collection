@@ -276,6 +276,6 @@ artemis_spring_profile_buildagent: "{% if continuous_integration.localci is defi
 artemis_spring_profiles: "{{ artemis_spring_profile_env }}{{ artemis_spring_profile_buildagent }}{{ artemis_spring_profile_core }}"
 
 # ───────── Helios (empty defaults, must be overridden) ─────────
-HELIOS_ENVIRONMENT_NAME: ""
-HELIOS_PROD_SECRET_KEY: ""
-HELIOS_STAGING_SECRET_KEY: ""
+helios_environment_name: ""
+helios_prod_secret_key: ""
+helios_staging_secret_key: ""
