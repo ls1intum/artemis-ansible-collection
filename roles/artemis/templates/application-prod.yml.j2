@@ -357,3 +357,36 @@ management:
     metrics:
       export:
         enabled: true
+
+###############################################################################
+# Helios
+###############################################################################
+{% set is_build_agent = (IS_BUILD_AGENT is defined) %}
+
+helios:
+  status:
+    # Disable entirely on build agents
+    enabled: {{ 'false' if is_build_agent else 'true' }}
+    environment-name: ${HELIOS_ENVIRONMENT_NAME:}
+
+    # Build the list of endpoints dynamically
+    {% set endpoints = [] %}
+    {% if helios_prod_secret_key is defined and helios_prod_secret_key != "" %}
+    {%   set _ = endpoints.append(
+          {'url':'https://helios.aet.cit.tum.de/api/environments/status',
+           'secretKey':'${HELIOS_PROD_SECRET_KEY:}'} ) %}
+    {% endif %}
+    {% if helios_staging_secret_key is defined and helios_staging_secret_key != "" %}
+    {%   set _ = endpoints.append(
+          {'url':'https://helios-staging.aet.cit.tum.de/api/environments/status',
+           'secretKey':'${HELIOS_STAGING_SECRET_KEY:}'} ) %}
+    {% endif %}
+
+    # Render only if at least one endpoint exists
+    {% if endpoints %}
+    endpoints:
+    {%   for ep in endpoints %}
+      - url: {{ ep.url }}
+        secretKey: {{ ep.secretKey }}
+    {%   endfor %}
+    {% endif %}
