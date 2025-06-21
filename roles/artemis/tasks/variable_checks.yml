@@ -50,7 +50,7 @@
     msg: >-
       Helios environment '{{ helios_environment_name }}' is configured on this
       core node, but neither 'helios_prod_secret_key' nor
-      'helios_staging_secret_key' is defined (or both are empty).  
+      'helios_staging_secret_key' is defined (or both are empty).
       Please add at least one of them in the inventory/group-vars.
   when:
     # skip build agents
