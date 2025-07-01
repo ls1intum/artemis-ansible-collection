@@ -277,5 +277,7 @@ artemis_spring_profiles: "{{ artemis_spring_profile_env }}{{ artemis_spring_prof
 
 # ───────── Helios (empty defaults, must be overridden) ─────────
 helios_environment_name: ""
+helios_prod_status_url: "https://helios.aet.cit.tum.de/api/environments/status"
 helios_prod_secret_key: ""
+helios_staging_status_url: "https://helios-staging.aet.cit.tum.de/api/environments/status"
 helios_staging_secret_key: ""
