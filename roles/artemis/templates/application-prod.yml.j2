@@ -332,6 +332,18 @@ info:
   textAssessmentAnalyticsEnabled: true
   sentry:
     dsn: https://e52d0b9b6b61769f50b088634b4bc781@sentry.ase.in.tum.de/2
+
+{% if helios is defined %}
+helios:
+  status:
+    enabled: true
+    environment-name: {{ helios.environment_name }}
+    endpoints:
+{% for endpoint in helios.endpoints %}
+      - url: {{ endpoint.url }}
+        secret-key: {{ endpoint.secret_key }}
+{% endfor %}
+{% endif %}
 {% endif %}
 
 {% if is_multinode_install and artemis_eureka_urls is defined and hazelcast_address is defined %}

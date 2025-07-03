@@ -242,6 +242,17 @@ node_display_name: Unnamed Artemis Node
 #artemis_CORS_allowed_origins: "*"
 
 ##############################################################################
+# Helios Configuration
+##############################################################################
+#helios:
+#  environment_name: artemis.tum.de
+#  endpoints:
+#    - url: "https://helios.aet.cit.tum.de/api/environments/status"
+#      secret_key: ""
+#    - url: "https://helios-staging.aet.cit.tum.de/api/environments/status"
+#      secret_key: ""
+
+##############################################################################
 # Auto-generated Variables - No not alter!
 ##############################################################################
 
