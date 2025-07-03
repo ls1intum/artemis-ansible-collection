@@ -96,7 +96,7 @@
     name: vm.mmap_rnd_bits
     value: "{{ entropy_bits_override }}"
     state: present
-    reload: yes
+    reload: true
   become: true
   when:
     - continuous_integration.localci.is_build_agent is defined
