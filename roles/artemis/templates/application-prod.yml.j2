@@ -332,6 +332,18 @@ info:
   textAssessmentAnalyticsEnabled: true
   sentry:
     dsn: https://e52d0b9b6b61769f50b088634b4bc781@sentry.ase.in.tum.de/2
+
+{% if helios is defined %}
+helios:
+  status:
+    enabled: true
+    environment-name: {{ helios.environment_name }}
+    endpoints:
+{% for endpoint in helios.endpoints %}
+      - url: {{ endpoint.url }}
+        secret-key: {{ endpoint.secret_key }}
+{% endfor %}
+{% endif %}
 {% endif %}
 
 {% if is_multinode_install and artemis_eureka_urls is defined and hazelcast_address is defined %}
@@ -357,29 +369,3 @@ management:
     metrics:
       export:
         enabled: true
-
-###############################################################################
-# Helios
-###############################################################################
-
-{% if helios_environment_name is defined and helios_environment_name != '' %}
-helios:
-  status:
-    # Disable entirely on build agents
-    enabled: {{ not is_build_agent }}
-    environment-name: {{ helios_environment_name }}
-    {#-- Render endpoints only if at least one secret-key & url is present --#}
-    {% if (helios_prod_status_url is defined and helios_prod_status_url != '' and helios_prod_secret_key is defined and helios_prod_secret_key != '') or (helios_staging_status_url is defined and helios_staging_status_url != '' and helios_staging_secret_key is defined and helios_staging_secret_key != '') %}
-    endpoints:
-      {% if helios_prod_status_url is defined and helios_prod_status_url != '' and helios_prod_secret_key is defined and helios_prod_secret_key != '' %}
-      - url: {{ helios_prod_status_url }}
-        secretKey: {{ helios_prod_secret_key }}
-      {% endif %}
-
-      {% if helios_staging_status_url is defined and helios_staging_status_url != '' and helios_staging_secret_key is defined and helios_staging_secret_key != '' %}
-      - url: {{ helios_staging_status_url }}
-        secretKey: {{ helios_staging_secret_key }}
-      {% endif %}
-    {% endif %}
-
-{% endif %}

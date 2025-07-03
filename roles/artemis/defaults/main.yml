@@ -242,6 +242,17 @@ node_display_name: Unnamed Artemis Node
 #artemis_CORS_allowed_origins: "*"
 
 ##############################################################################
+# Helios Configuration
+##############################################################################
+#helios:
+#  environment_name: artemis.tum.de
+#  endpoints:
+#    - url: "https://helios.aet.cit.tum.de/api/environments/status"
+#      secret_key: ""
+#    - url: "https://helios-staging.aet.cit.tum.de/api/environments/status"
+#      secret_key: ""
+
+##############################################################################
 # Auto-generated Variables - No not alter!
 ##############################################################################
 
@@ -274,10 +285,3 @@ artemis_spring_profile_buildagent: "{% if continuous_integration.localci is defi
   is defined and continuous_integration.localci.is_build_agent is not none and continuous_integration.localci.is_build_agent %},buildagent{% endif %}{% endif %}"
 
 artemis_spring_profiles: "{{ artemis_spring_profile_env }}{{ artemis_spring_profile_buildagent }}{{ artemis_spring_profile_core }}"
-
-# ───────── Helios (empty defaults, must be overridden) ─────────
-helios_environment_name: ""
-helios_prod_status_url: "https://helios.aet.cit.tum.de/api/environments/status"
-helios_prod_secret_key: ""
-helios_staging_status_url: "https://helios-staging.aet.cit.tum.de/api/environments/status"
-helios_staging_secret_key: ""
