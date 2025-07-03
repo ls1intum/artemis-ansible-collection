@@ -91,6 +91,18 @@
     - version_control.localvc is defined and version_control.localvc is not none
     - version_control.localvc.ssh_key_path is defined and version_control.localvc.ssh_key_path|length > 0
 
+- name: Set entropy bits override for mmap randomization
+  ansible.posix.sysctl:
+    name: vm.mmap_rnd_bits
+    value: "{{ entropy_bits_override }}"
+    state: present
+    reload: yes
+  become: true
+  when:
+    - continuous_integration.localci.is_build_agent is defined
+    - continuous_integration.localci.is_build_agent
+    - entropy_bits_override is defined and entropy_bits_override is defined and entropy_bits_override | int > 0
+
 - name: Copy artemis.service systemd configuration
   become: true
   template:
