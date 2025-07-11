@@ -289,7 +289,7 @@ artemis_spring_profile_sharing: "{% if sharing is defined and sharing is not non
 artemis_spring_profile_core: "{% if artemis_computed_is_core_node %},core{{ artemis_spring_profile_ldap }}{{ artemis_spring_profile_version_control
   }}{{ artemis_spring_profile_continuous_integration }}{{ artemis_spring_profile_athena }}{{ artemis_spring_profile_apollon }}{{ artemis_spring_profile_scheduling }}{{ artemis_spring_profile_docker
   }}{{ artemis_spring_profile_iris }}{{ artemis_spring_profile_theia }}{{ artemis_spring_profile_aeolus }}{{ artemis_spring_profile_atlas }}{{ artemis_spring_profile_lti
-  }}{{ artemis_spring_profile_sharing}}{% endif %}"
+  }}{{ artemis_spring_profile_sharing }}{% endif %}"
 artemis_spring_profile_buildagent: "{% if continuous_integration.localci is defined and continuous_integration.localci is not none %}{% if continuous_integration.localci.is_build_agent
   is defined and continuous_integration.localci.is_build_agent is not none and continuous_integration.localci.is_build_agent %},buildagent{% endif %}{% endif %}"
 
