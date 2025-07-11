@@ -132,6 +132,12 @@ artemis:
 {% endif %}
     login:
       account-name: {{ artemis_account_login_info }}
+{% if sharing is defined %}
+  sharing:
+    serverurl: {{ sharing.url }}
+    apikey: {{ sharing.apikey }}
+    actionname: {{ sharing.actionname }}
+{% endif %}
 {% endif %}
 
 {% if version_control.localvc is defined %}
