@@ -1,0 +1,27 @@
+---
+- name: Check if redis.password is set
+  fail:
+    msg: "No redis password is configured!"
+  when:
+    - redis.password is undefined or redis.password is none
+
+- name: Create working directory
+  become: true
+  file:
+    path: "{{ redis.working_directory }}"
+    state: directory
+    mode: '0775'
+  notify: Restart redis
+
+- name: Copy configuration file
+  become: true
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ redis.working_directory }}/{{ item.dest }}"
+    mode: '0600'
+  notify: Restart redis
+  with_items:
+    - src: redis.conf.j2
+      dest: "redis.conf"
+    - src: docker-compose.yml.j2
+      dest: "docker-compose.yml"
