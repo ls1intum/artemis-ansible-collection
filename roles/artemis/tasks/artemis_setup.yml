@@ -88,7 +88,7 @@
 
 - name: Turn the tmp directory into a tmpfs
   become: true
-  mount:
+  ansible.posix.mount:
     path: "{{ artemis_tmp_directory }}"
     src: tmpfs
     fstype: tmpfs
