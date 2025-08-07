@@ -91,7 +91,9 @@ artemis:
   legal-path: {{ artemis_legal_path }}
   build-logs-path: {{ artemis_repo_basepath }}/build-logs
   data-export-path: {{ artemis_data_export_path }}
-  temp-path: {{ artemis_repo_basepath }}/tmp
+{% if artemis_tmp_directory is defined and artemis_tmp_directory is not none and artemis_tmp_directory != "" %}
+  temp-path: {{ artemis_tmp_directory }}
+{% endif %}
   bcrypt-salt-rounds: {{ artemis_bcrypt_salt_rounds }}
 {% if push_notification_relay is defined and push_notification_relay is not none %}
   push-notification-relay: {{ push_notification_relay }}
