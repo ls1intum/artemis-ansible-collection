@@ -15,6 +15,8 @@ server_tokens off;
 
 # Rate limit for the login REST call, at most one requests per two seconds
 limit_req_zone $binary_remote_addr zone=loginlimit:10m rate=30r/m;
+# Rate limit for git operations, at most 15 requests per second
+limit_req_zone $binary_remote_addr zone=gitlimit:10m rate=15r/s;
 
 server {
     listen 80 default_server;
@@ -109,6 +111,35 @@ server {
         limit_req zone=loginlimit burst=3 delay=2;
     }
 
+    location /git/ {
+        proxy_pass http://app/git/;
+		# For a given violation of the rate limit defined in the zone
+		# * the first 2 (delay) requests will be allowed without delay
+		# * the next (burst - delay) request waits until it fits in the rate limit
+		# * the rest will be denied
+		# If an attacker spams this endpoint, only the first three requests will come through.
+		# This only resets if the violation of the rate limit stops.
+        limit_req zone=gitlimit burst=30 nodelay;
+
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        proxy_send_timeout 900s;
+        proxy_read_timeout 900s;
+        proxy_max_temp_file_size 0;
+        proxy_buffering on;
+        proxy_buffer_size 16k;
+        proxy_buffers 8 16k;
+        proxy_busy_buffers_size 32k;
+        fastcgi_send_timeout 900s;
+        fastcgi_read_timeout 900s;
+        client_max_body_size 128M;
+    }
+
     location /favicon.ico {
         return 404;
     }
@@ -155,28 +186,6 @@ server {
     add_header alt-svc 'h3=":443"; ma=2592000,h3-29=":443"; ma=2592000';
     client_max_body_size 10m;
     client_body_buffer_size 1m;
-
-    location ~ ^/(api|git)/ {
-        proxy_pass {{ proxy_node_protocol }}://app;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-#       proxy_set_header Early-Data $ssl_early_data;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
-        proxy_send_timeout 900s;
-        proxy_read_timeout 900s;
-        proxy_max_temp_file_size 0;
-        proxy_buffering on;
-        proxy_buffer_size 16k;
-        proxy_buffers 8 16k;
-        proxy_busy_buffers_size 32k;
-        fastcgi_send_timeout 900s;
-        fastcgi_read_timeout 900s;
-        client_max_body_size 128M;
-    }
 
     location / {
         return 308 {{ redirect.to }};
