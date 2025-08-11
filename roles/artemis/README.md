@@ -105,7 +105,8 @@ iris:
 
 Nebula configuration:
 ```
-iris:
+nebula:
+  enabled: true # Set to false if you do not want to use Nebula
   base-url: "https://nebula.example.com"
   secret-token: "nebula-secret"
 ```

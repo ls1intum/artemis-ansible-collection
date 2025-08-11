@@ -256,6 +256,7 @@ artemis:
 
 {% if nebula is defined and nebula is not none %}
   nebula:
+    enabled: true
     url: {{ nebula.url }}
     secret-token: {{ nebula.secret }}
 {% endif %}
