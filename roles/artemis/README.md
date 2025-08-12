@@ -103,6 +103,14 @@ iris:
   secret: "iris_secret"
 ```
 
+Nebula configuration:
+```
+nebula:
+  enabled: true # Set to false if you do not want to use Nebula
+  base-url: "https://nebula.example.com"
+  secret-token: "nebula-secret"
+```
+
 Mail configuration:
 ```
 mail:
