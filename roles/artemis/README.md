@@ -106,7 +106,7 @@ iris:
 Nebula configuration:
 ```
 nebula:
-  base-url: "https://nebula.example.com"
+  url: "https://nebula.example.com"
   secret-token: "nebula-secret"
 ```
 
