@@ -34,9 +34,15 @@
   when:
     - spring_ai is defined
     - spring_ai.azure_openai is defined
-    - (spring_ai.azure_openai.api_key is not defined or spring_ai.azure_openai.api_key | length == 0)
-      or (spring_ai.azure_openai.endpoint is not defined or spring_ai.azure_openai.endpoint | length == 0)
-      or (spring_ai.azure_openai.deployment_name is not defined or spring_ai.azure_openai.deployment_name | length == 0)
+    - spring_ai.azure_openai.api_key is not defined 
+        or spring_ai.azure_openai.api_key is none 
+        or spring_ai.azure_openai.api_key | length == 0
+        or spring_ai.azure_openai.endpoint is not defined 
+        or spring_ai.azure_openai.endpoint is none 
+        or spring_ai.azure_openai.endpoint | length == 0
+        or spring_ai.azure_openai.deployment_name is not defined 
+        or spring_ai.azure_openai.deployment_name is none
+        or spring_ai.azure_openai.deployment_name | length == 0
 
 ##############################################################################
 # Check localci Variables
