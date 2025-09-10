@@ -35,7 +35,6 @@ spring:
     interface: "{{ hazelcast_address }}"
 {% endif %}
 
-{# Spring AI configuration (only spring_ai.* supported) #}
 {% if spring_ai is defined and spring_ai.azure_openai is defined %}
   ai:
     azure:
