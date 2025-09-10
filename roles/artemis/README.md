@@ -96,6 +96,31 @@ athena:
   restricted_modules: "module_text_llm,module_programming_llm" # optional parameter to restrict access to specific modules
 ```
 
+Hyperion (Azure OpenAI / Spring AI) configuration (adds profile `hyperion` when present):
+
+Define two parts:
+1. Activate profile by declaring an empty or minimal `hyperion:` key.
+2. Configure Spring AI globally under `spring_ai:`.
+
+```yaml
+hyperion: {}
+
+spring_ai:
+  azure_openai:
+    api_key: "{{ vault_azure_openai_api_key }}"
+    endpoint: "https://my-azure-openai-resource.openai.azure.com/"
+    deployment_name: "gpt-5-mini"
+    temperature: 1.0
+```
+Rendered into application-prod.yml under (if spring_ai.azure_openai is present):
+
+```text
+spring.ai.azure.openai.api-key
+spring.ai.azure.openai.endpoint
+spring.ai.azure.openai.chat.options.deployment-name
+spring.ai.azure.openai.chat.options.temperature
+```
+
 Iris configuration:
 ```
 iris:
