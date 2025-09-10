@@ -107,7 +107,7 @@ Nebula configuration:
 ```
 nebula:
   url: "https://nebula.example.com"
-  secret-token: "nebula-secret"
+  secret: "nebula-secret"
 ```
 
 Mail configuration:
