@@ -28,6 +28,16 @@
     - artemis_jhipster_registry_password is undefined or artemis_jhipster_registry_password is none
     - is_multinode_install|bool
 
+- name: Check Spring AI Azure OpenAI configuration completeness (optional)
+  fail:
+    msg: "spring_ai.azure_openai defined but missing one of: api_key, endpoint, deployment_name"
+  when:
+    - spring_ai is defined
+    - spring_ai.azure_openai is defined
+    - (spring_ai.azure_openai.api_key is not defined or spring_ai.azure_openai.api_key | length == 0)
+      or (spring_ai.azure_openai.endpoint is not defined or spring_ai.azure_openai.endpoint | length == 0)
+      or (spring_ai.azure_openai.deployment_name is not defined or spring_ai.azure_openai.deployment_name | length == 0)
+
 ##############################################################################
 # Check localci Variables
 ##############################################################################

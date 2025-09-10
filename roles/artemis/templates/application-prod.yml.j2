@@ -35,6 +35,19 @@ spring:
     interface: "{{ hazelcast_address }}"
 {% endif %}
 
+{# Spring AI configuration (only spring_ai.* supported) #}
+{% if spring_ai is defined and spring_ai.azure_openai is defined %}
+  ai:
+    azure:
+      openai:
+        api-key: {{ spring_ai.azure_openai.api_key | quote }}
+        endpoint: {{ spring_ai.azure_openai.endpoint | quote }}
+        chat:
+          options:
+            deployment-name: {{ spring_ai.azure_openai.deployment_name | quote }}
+            temperature: {{ spring_ai.azure_openai.temperature | default(1.0) }}
+{% endif %}
+
 {% if artemis_computed_is_core_node %}
 {% if shared_monitoring_host_v4 is not none %}
   prometheus:
