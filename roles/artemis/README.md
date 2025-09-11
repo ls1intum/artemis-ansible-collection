@@ -112,7 +112,7 @@ spring_ai:
 
 artemis_hyperion_enabled: true
 ```
-Rendered into application-prod.yml under (if spring_ai.azure_openai is present) and general Artemis section:
+Rendered into application-prod.yml under `spring_ai` (if spring_ai.azure_openai is present) and general Artemis section:
 
 ```text
 spring.ai.azure.openai.api-key
