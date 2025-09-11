@@ -34,6 +34,7 @@ spring:
   hazelcast:
     interface: "{{ hazelcast_address }}"
 {% endif %}
+{% if artemis_computed_is_core_node %}
 
 {% if spring_ai is defined and spring_ai.azure_openai is defined %}
   ai:
@@ -47,7 +48,6 @@ spring:
             temperature: {{ spring_ai.azure_openai.temperature | default(1.0) }}
 {% endif %}
 
-{% if artemis_computed_is_core_node %}
 {% if shared_monitoring_host_v4 is not none %}
   prometheus:
     monitoringIp: "{{ shared_monitoring_host_v4 }}"
@@ -274,6 +274,9 @@ artemis:
     event-logging:
       enable: {{ enable_science_event_logging | lower }}
 {% endif %}
+
+  hyperion:
+    enabled: {{ artemis_hyperion_enabled | lower }}
 
   telemetry:
     enabled: {{ artemis_telemetry_enabled | lower }}
