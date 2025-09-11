@@ -44,6 +44,13 @@
         or spring_ai.azure_openai.deployment_name is none
         or spring_ai.azure_openai.deployment_name | length == 0
 
+- name: Warn if Hyperion enabled but Spring AI Azure OpenAI not configured
+  debug:
+    msg: "Hyperion is enabled (artemis_hyperion_enabled=true) but spring_ai.azure_openai is not configured. Hyperion features may not work."
+  when:
+    - artemis_hyperion_enabled | default(false)
+    - spring_ai is not defined or spring_ai.azure_openai is not defined
+
 ##############################################################################
 # Check localci Variables
 ##############################################################################

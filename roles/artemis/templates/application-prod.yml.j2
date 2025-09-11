@@ -272,6 +272,9 @@ artemis:
       enable: {{ enable_science_event_logging | lower }}
 {% endif %}
 
+  hyperion:
+    enabled: {{ artemis_hyperion_enabled | lower }}
+
   telemetry:
     enabled: {{ artemis_telemetry_enabled | lower }}
     sendAdminDetails: {{ artemis_send_admin_details | lower }}

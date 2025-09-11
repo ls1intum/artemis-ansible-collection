@@ -239,9 +239,10 @@ node_display_name: Unnamed Artemis Node
 ##############################################################################
 # Hyperion / Spring AI (Azure OpenAI) Configuration
 ##############################################################################
-# Define Spring AI configuration once.
-# To enable Hyperion features, define an (even empty) 'hyperion:' block to trigger the profile
-# and configure Azure OpenAI under spring_ai.azure_openai. Example:
+# Define Spring AI configuration once under spring_ai.azure_openai.
+# Hyperion is enabled via the application property artemis.hyperion.enabled,
+# controlled here with the variable 'artemis_hyperion_enabled'.
+# Example Spring AI configuration:
 #
 #spring_ai:
 #  azure_openai:
@@ -249,8 +250,9 @@ node_display_name: Unnamed Artemis Node
 #    endpoint: "https://your-resource-name.openai.azure.com/"
 #    deployment_name: "gpt-5-mini"
 #    temperature: 1.0
-#
-#hyperion: {}
+
+# Toggle for artemis.hyperion.enabled in application-prod.yml
+artemis_hyperion_enabled: false
 
 ##############################################################################
 # CORS Configuration
@@ -301,12 +303,11 @@ artemis_spring_profile_aeolus: "{% if aeolus is defined and aeolus is not none %
 artemis_spring_profile_atlas: "{% if atlas is defined %},atlas{% endif %}" # TODO: Add and atlas is not none check as soon as the additional configuration options are added
 artemis_spring_profile_lti: "{% if lti.oauth_secret is defined and lti.oauth_secret is not none %},lti{% endif %}"
 artemis_spring_profile_sharing: "{% if sharing is defined and sharing is not none %},sharing{% endif %}"
-artemis_spring_profile_hyperion: "{% if hyperion is defined %},hyperion{% endif %}"
 
 artemis_spring_profile_core: "{% if artemis_computed_is_core_node %},core{{ artemis_spring_profile_ldap }}{{ artemis_spring_profile_version_control
   }}{{ artemis_spring_profile_continuous_integration }}{{ artemis_spring_profile_athena }}{{ artemis_spring_profile_apollon }}{{ artemis_spring_profile_scheduling }}{{ artemis_spring_profile_docker
   }}{{ artemis_spring_profile_iris }}{{ artemis_spring_profile_theia }}{{ artemis_spring_profile_aeolus }}{{ artemis_spring_profile_atlas }}{{ artemis_spring_profile_lti
-  }}{{ artemis_spring_profile_sharing }}{{ artemis_spring_profile_hyperion }}{% endif %}"
+  }}{{ artemis_spring_profile_sharing }}{% endif %}"
 artemis_spring_profile_buildagent: "{% if continuous_integration.localci is defined and continuous_integration.localci is not none %}{% if continuous_integration.localci.is_build_agent
   is defined and continuous_integration.localci.is_build_agent is not none and continuous_integration.localci.is_build_agent %},buildagent{% endif %}{% endif %}"
 
