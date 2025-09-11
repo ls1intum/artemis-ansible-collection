@@ -251,7 +251,6 @@ node_display_name: Unnamed Artemis Node
 #    deployment_name: "gpt-5-mini"
 #    temperature: 1.0
 
-# Toggle for artemis.hyperion.enabled in application-prod.yml
 artemis_hyperion_enabled: false
 
 ##############################################################################
