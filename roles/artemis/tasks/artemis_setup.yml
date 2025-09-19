@@ -84,7 +84,7 @@
     mode: "775"
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
-  when: artemis_tmp_directory is defined and artemis_tmp_directory is not none and artemis_tmp_directory != ""
+  when: artemis_tmp_directory is defined and artemis_tmp_directory is not none and artemis_tmp_directory != "" and artemis_tmp_directory != "/tmp"
 
 - name: Turn the tmp directory into a tmpfs
   become: true
@@ -94,7 +94,7 @@
     fstype: tmpfs
     opts: defaults,noatime,nosuid,nodev,noexec,mode=1777,size=10G
     state: mounted
-  when: artemis_tmp_directory is defined and artemis_tmp_directory is not none and artemis_tmp_directory != ""
+  when: artemis_tmp_directory is defined and artemis_tmp_directory is not none and artemis_tmp_directory != "" and artemis_tmp_directory != "/tmp"
 
 - name: Add artemis user to docker group
   become: true
