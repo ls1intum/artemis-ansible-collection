@@ -260,6 +260,12 @@ artemis_hyperion_enabled: false
 #artemis_CORS_allowed_origins: "*"
 
 ##############################################################################
+# Internal Configuration
+##############################################################################
+# List of CIDR ranges that are allowed to access internal endpoints (e.g. /api/*/internal/**)
+artemis_internal_ip_allowlist: []
+
+##############################################################################
 # Helios Configuration
 ##############################################################################
 #helios:
