@@ -100,6 +100,10 @@ enable_science_event_logging: false
 
 push_notification_relay: "https://hermes.artemis.cit.tum.de"
 
+sentry:
+  dsn:
+  enable_db_tracing: false
+
 #theia:
 #  portal_url: https://theia-yannik.k8s.ase.cit.tum.de
 #  images:
