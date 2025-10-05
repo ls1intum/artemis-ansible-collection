@@ -3,7 +3,7 @@
 spring:
 {% if artemis_computed_is_core_node %}
   datasource:
-{% if sentry.dsn is defined and sentry.dn|length and sentry.enable_db_tracing is defined and sentry.enable_db_tracing sameas true %}
+{% if sentry.dsn is defined and sentry.dsn|length and sentry.enable_db_tracing is defined and sentry.enable_db_tracing sameas true %}
     driver-class: com.p6spy.engine.spy.P6SpyDriver
 {% endif %}
     type: com.zaxxer.hikari.HikariDataSource
@@ -379,7 +379,7 @@ info:
 {% endif %}
   textAssessmentAnalyticsEnabled: true
   sentry:
-{% if sentry_dsn is defined and sentry_dsn != '' %}
+{% if sentry.dsn is defined and sentry.dsn != '' %}
     dsn: ${sentry.dsn}
 {% else %}
     dsn:
