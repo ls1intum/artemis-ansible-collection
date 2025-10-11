@@ -1,4 +1,20 @@
 ---
+- name: Ensure AppArmor utilities are present
+  become: true
+  ansible.builtin.package:
+    name:
+      - apparmor
+      - apparmor-utils
+    state: present
+- name: Install AppArmor profile for bwrap-enabled build containers
+  ansible.builtin.copy:
+    src: files/apparmor_profile_bubblewrap
+    dest: /etc/apparmor.d/apparmor_profile_bubblewrap
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload apparmor profile
+
 - name: Create artemis directory
   become: true
   file:
