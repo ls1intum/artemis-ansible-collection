@@ -6,7 +6,6 @@
   command: apparmor_parser -r /etc/apparmor.d/apparmor_profile_bubblewrap
   listen: Reload apparmor profile
 
-
 - name: Restart docker compose artemis
   become: true
   shell: |

@@ -1,14 +1,17 @@
 ---
 - name: Ensure AppArmor utilities are present
   become: true
-  ansible.builtin.package:
+  apt:
     name:
       - apparmor
       - apparmor-utils
     state: present
+    update_cache: true
+    cache_valid_time: 3600
+
 - name: Install AppArmor profile for bwrap-enabled build containers
-  ansible.builtin.copy:
-    src: files/apparmor_profile_bubblewrap
+  copy:
+    src: apparmor_profile_bubblewrap
     dest: /etc/apparmor.d/apparmor_profile_bubblewrap
     owner: root
     group: root
