@@ -4,28 +4,28 @@
   file:
     path: "{{ artemis_working_directory }}"
     state: directory
-    mode: "0775"
+    mode: "775"
 
 - name: Create artemis data directory
   become: true
   file:
     path: "{{ artemis_working_directory }}/data"
     state: directory
-    mode: "0770"
+    mode: "770"
 
 - name: Create artemis database directory
   become: true
   file:
     path: "{{ artemis_working_directory }}/data/database"
     state: directory
-    mode: "0770"
+    mode: "770"
 
 - name: Create artemis data/artemis directory
   become: true
   file:
     path: "{{ artemis_working_directory }}/data/artemis"
     state: directory
-    mode: "0770"
+    mode: "770"
 
 - name: Set permissions for artemis directory
   become: true
@@ -35,7 +35,6 @@
     recurse: true
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
-  register: permissions
   notify: restart docker artemis
 
 - name: Set permissions for postgres directory
@@ -59,7 +58,6 @@
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
     mode: "660"
-  register: config
   notify: restart docker artemis
 
 - name: Copy artemis.env to artemis directory
@@ -70,7 +68,6 @@
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
     mode: "660"
-  register: config
   notify: restart docker artemis
 
 - name: Copy database.env to artemis directory
@@ -81,7 +78,6 @@
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
     mode: "660"
-  register: config
   notify: restart docker artemis
 
 - name: Copy node env files
@@ -96,7 +92,6 @@
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
     mode: "660"
-  register: config
   notify: restart docker artemis
 
 - include_tasks: generate_ssh_keys.yml
@@ -137,5 +132,4 @@
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
     mode: "770"
-  register: config
   notify: restart docker artemis
