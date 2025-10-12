@@ -11,7 +11,7 @@
 
 - name: Copy privacy_statements into legal directory
   copy:
-    src: files/privacy/ # KEEP THE /
+    src: privacy/ # KEEP THE /
     dest: "{{ artemis_legal_path }}"
     owner: "{{ artemis_user }}"
     group: "{{ artemis_user }}"
@@ -21,7 +21,7 @@
 
 - name: Copy imprints into legal directory
   copy:
-    src: files/imprints/ # KEEP THE /
+    src: imprints/ # KEEP THE /
     dest: "{{ artemis_legal_path }}"
     owner: "{{ artemis_user }}"
     group: "{{ artemis_user }}"

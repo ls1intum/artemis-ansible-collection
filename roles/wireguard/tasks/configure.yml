@@ -15,7 +15,7 @@
   template:
     src: wireguard_wg0.conf.j2
     dest: /etc/wireguard/wg0.conf
-    mode: "0644"
+    mode: "644"
   notify: Restart wireguard
 
 - name: Enable wg0 service
