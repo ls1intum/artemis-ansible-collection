@@ -10,6 +10,7 @@
     cache_valid_time: 3600
 
 - name: Install AppArmor profile for bwrap-enabled build containers
+  become: true
   copy:
     src: apparmor_profile_bubblewrap
     dest: /etc/apparmor.d/apparmor_profile_bubblewrap
