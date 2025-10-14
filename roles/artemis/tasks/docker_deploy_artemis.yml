@@ -16,7 +16,7 @@
     dest: /etc/apparmor.d/apparmor_profile_bubblewrap
     owner: root
     group: root
-    mode: "0644"
+    mode: "644"
   notify: Reload apparmor profile
 
 - name: Create artemis directory
