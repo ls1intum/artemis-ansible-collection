@@ -130,6 +130,13 @@ iris:
   secret: "iris_secret"
 ```
 
+Nebula configuration:
+```
+nebula:
+  url: "https://nebula.example.com"
+  secret: "nebula-secret"
+```
+
 Mail configuration:
 ```
 mail:
