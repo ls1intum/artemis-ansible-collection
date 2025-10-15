@@ -61,6 +61,7 @@ artemis_repo_basepath: "."
 
 artemis_legal_path: /opt/artemis/legal
 artemis_data_export_path: /opt/artemis/data-exports
+artemis_tmp_directory: # Defaults to system tmp dir
 
 # the following two values must be cron expressions
 artemis_scheduling_data_export_creation_time: 0 0 4 * * * # every day at 4 am
@@ -242,6 +243,23 @@ node_display_name: Unnamed Artemis Node
 ##############################################################################
 #atlas:
 # More configuration options will be added in the future.
+
+##############################################################################
+# Hyperion / Spring AI (Azure OpenAI) Configuration
+##############################################################################
+# Define Spring AI configuration once under spring_ai.azure_openai.
+# Hyperion is enabled via the application property artemis.hyperion.enabled,
+# controlled here with the variable 'artemis_hyperion_enabled'.
+# Example Spring AI configuration:
+#
+#spring_ai:
+#  azure_openai:
+#    api_key: ""
+#    endpoint: "https://your-resource-name.openai.azure.com/"
+#    deployment_name: "gpt-5-mini"
+#    temperature: 1.0
+
+artemis_hyperion_enabled: false
 
 ##############################################################################
 # CORS Configuration
