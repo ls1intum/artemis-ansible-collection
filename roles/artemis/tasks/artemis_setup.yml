@@ -76,6 +76,26 @@
     group: "{{ artemis_user_group }}"
   when: artemis_data_export_path is not none and artemis_data_export_path != "" and artemis_computed_is_core_node
 
+- name: Create tmp directory
+  become: true
+  file:
+    path: "{{ artemis_tmp_directory }}"
+    state: directory
+    mode: "775"
+    owner: "{{ artemis_user_name }}"
+    group: "{{ artemis_user_group }}"
+  when: artemis_tmp_directory is defined and artemis_tmp_directory is not none and artemis_tmp_directory != "" and artemis_tmp_directory != "/tmp"
+
+- name: Turn the tmp directory into a tmpfs
+  become: true
+  ansible.posix.mount:
+    path: "{{ artemis_tmp_directory }}"
+    src: tmpfs
+    fstype: tmpfs
+    opts: defaults,noatime,nosuid,nodev,noexec,mode=1777,size=10G
+    state: mounted
+  when: artemis_tmp_directory is defined and artemis_tmp_directory is not none and artemis_tmp_directory != "" and artemis_tmp_directory != "/tmp"
+
 - name: Add artemis user to docker group
   become: true
   user:
@@ -90,6 +110,18 @@
   when:
     - version_control.localvc is defined and version_control.localvc is not none
     - version_control.localvc.ssh_key_path is defined and version_control.localvc.ssh_key_path|length > 0
+
+- name: Set entropy bits override for mmap randomization
+  ansible.posix.sysctl:
+    name: vm.mmap_rnd_bits
+    value: "{{ entropy_bits_override }}"
+    state: present
+    reload: true
+  become: true
+  when:
+    - continuous_integration.localci.is_build_agent is defined
+    - continuous_integration.localci.is_build_agent
+    - entropy_bits_override is defined and entropy_bits_override is defined and entropy_bits_override | int > 0
 
 - name: Copy artemis.service systemd configuration
   become: true

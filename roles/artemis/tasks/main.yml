@@ -32,12 +32,6 @@
     - not (use_docker | bool)
     - update_artemis_config | bool
 
-# Install Artemis to the host
-- include_tasks: deploy_artemis.yml
-  when:
-    - download_artemis_application
-    - not (use_docker | bool)
-
 # Install Artemis to the host using Docker
 - include_tasks: docker_deploy_artemis.yml
   when:

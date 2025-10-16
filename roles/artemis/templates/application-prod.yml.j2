@@ -45,8 +45,20 @@ spring:
   hazelcast:
     interface: "{{ hazelcast_address }}"
 {% endif %}
-
 {% if artemis_computed_is_core_node %}
+
+{% if spring_ai is defined and spring_ai.azure_openai is defined %}
+  ai:
+    azure:
+      openai:
+        api-key: {{ spring_ai.azure_openai.api_key | quote }}
+        endpoint: {{ spring_ai.azure_openai.endpoint | quote }}
+        chat:
+          options:
+            deployment-name: {{ spring_ai.azure_openai.deployment_name | quote }}
+            temperature: {{ spring_ai.azure_openai.temperature | default(1.0) }}
+{% endif %}
+
 {% if shared_monitoring_host_v4 is not none %}
   prometheus:
     monitoringIp: "{{ shared_monitoring_host_v4 }}"
@@ -93,6 +105,9 @@ server:
       internal-proxies: 10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|169\.254\.\d{1,3}\.\d{1,3}|127\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.1[6-9]{1}\.\d{1,3}\.\d{1,3}|172\.2[0-9]{1}\.\d{1,3}\.\d{1,3}|172\.3[0-1]{1}\.\d{1,3}\.\d{1,3}|0:0:0:0:0:0:0:1|::1|fcfe::f:1|fcfe:0:0:0:0:0:f:1
 
 artemis:
+{% if artemis_tmp_directory is defined and artemis_tmp_directory is not none and artemis_tmp_directory != "" %}
+  temp-path: {{ artemis_tmp_directory }}
+{% endif %}
 {% if artemis_computed_is_core_node %}
   course-archives-path: {{ artemis_repo_basepath }}/course-archives
   repo-clone-path: {{ artemis_repo_basepath }}/repos
@@ -143,6 +158,12 @@ artemis:
 {% endif %}
     login:
       account-name: {{ artemis_account_login_info }}
+{% if sharing is defined %}
+  sharing:
+    serverurl: {{ sharing.url }}
+    apikey: {{ sharing.apikey }}
+    actionname: {{ sharing.actionname }}
+{% endif %}
 {% endif %}
 
 {% if version_control.localvc is defined %}
@@ -265,6 +286,9 @@ artemis:
       enable: {{ enable_science_event_logging | lower }}
 {% endif %}
 
+  hyperion:
+    enabled: {{ artemis_hyperion_enabled | lower }}
+
   telemetry:
     enabled: {{ artemis_telemetry_enabled | lower }}
     sendAdminDetails: {{ artemis_send_admin_details | lower }}
@@ -334,7 +358,6 @@ info:
   operatorName: {{ artemis_operator_name }}
   operatorAdminName: {{ artemis_operator_admin_name }}
   contact: {{ artemis_email }}
-  imprint: https://ase.in.tum.de/lehrstuhl_1/component/content/article/179-imprint
 {% if is_testserver is defined and is_testserver is sameas true %}
   testServer: true
 {% endif %}
@@ -344,6 +367,18 @@ info:
   textAssessmentAnalyticsEnabled: true
   sentry:
     dsn: https://e52d0b9b6b61769f50b088634b4bc781@sentry.ase.in.tum.de/2
+
+{% if helios is defined %}
+helios:
+  status:
+    enabled: true
+    environment-name: {{ helios.environment_name }}
+    endpoints:
+{% for endpoint in helios.endpoints %}
+      - url: {{ endpoint.url }}
+        secret-key: {{ endpoint.secret_key }}
+{% endfor %}
+{% endif %}
 {% endif %}
 
 {% if is_multinode_install and artemis_eureka_urls is defined and hazelcast_address is defined %}

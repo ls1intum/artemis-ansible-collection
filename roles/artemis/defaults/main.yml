@@ -61,6 +61,7 @@ artemis_repo_basepath: "."
 
 artemis_legal_path: /opt/artemis/legal
 artemis_data_export_path: /opt/artemis/data-exports
+artemis_tmp_directory: # Defaults to system tmp dir
 
 # the following two values must be cron expressions
 artemis_scheduling_data_export_creation_time: 0 0 4 * * * # every day at 4 am
@@ -87,7 +88,7 @@ artemis_database_username: artemis
 artemis_database_password: #FIXME
 artemis_database_encoding: utf8mb4 # MySQL specific default encoding
 artemis_database_collation: utf8mb4_unicode_ci # MySQL specific default collation
-apollon_url: https://apollon.ase.in.tum.de/api/converter
+# apollon_url: https://apollon.ase.in.tum.de
 artemis_bcrypt_salt_rounds: 11
 
 artemis_account_login_info: "TUM"
@@ -118,8 +119,8 @@ push_notification_relay: "https://hermes.artemis.cit.tum.de"
 # If the password of some users is stored externally, you need to provide a name and the reset links. They will be displayed as a hint in the reset form of Artemis.
 # You need to at least provide the provider and the English reset link.
 artemis_external_password_provider: TUMonline
-artemis_external_password_reset_link_en: "https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/pl/ui/$ctx/co_loc_password_reset.main?$ctx=design=ca2;header=max;lang=en"
-artemis_external_password_reset_link_de: "https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/pl/ui/$ctx/co_loc_password_reset.main?$ctx=design=ca2;header=max;lang=de"
+artemis_external_password_reset_link_en: "https://campus.tum.de/tumonline/co_loc_password_reset.main#lang=en"
+artemis_external_password_reset_link_de: "https://campus.tum.de/tumonline/co_loc_password_reset.main#lang=de"
 
 artemis_passkey_enabled: false
 
@@ -245,9 +246,45 @@ node_display_name: Unnamed Artemis Node
 # More configuration options will be added in the future.
 
 ##############################################################################
+# Hyperion / Spring AI (Azure OpenAI) Configuration
+##############################################################################
+# Define Spring AI configuration once under spring_ai.azure_openai.
+# Hyperion is enabled via the application property artemis.hyperion.enabled,
+# controlled here with the variable 'artemis_hyperion_enabled'.
+# Example Spring AI configuration:
+#
+#spring_ai:
+#  azure_openai:
+#    api_key: ""
+#    endpoint: "https://your-resource-name.openai.azure.com/"
+#    deployment_name: "gpt-5-mini"
+#    temperature: 1.0
+
+artemis_hyperion_enabled: false
+
+##############################################################################
 # CORS Configuration
 ##############################################################################
 #artemis_CORS_allowed_origins: "*"
+
+##############################################################################
+# Helios Configuration
+##############################################################################
+#helios:
+#  environment_name: artemis.tum.de
+#  endpoints:
+#    - url: "https://helios.aet.cit.tum.de/api/environments/status"
+#      secret_key: ""
+#    - url: "https://helios-staging.aet.cit.tum.de/api/environments/status"
+#      secret_key: ""
+
+##############################################################################
+# Sharing Configuration
+##############################################################################
+#sharing:
+#  url: "https://dev-exchange.codeability-austria.uibk.ac.at/"
+#  apikey: ""
+#  actionname: "Export to Artemis@testInstance"
 
 ##############################################################################
 # Auto-generated Variables - No not alter!
@@ -258,7 +295,7 @@ artemis_computed_is_core_node: "{{ not (continuous_integration.localci is define
 
 # Compute Spring Profiles from set variables
 artemis_spring_profile_env: "prod"
-artemis_spring_profile_ldap: "{% if ldap.password is defined and ldap.password is not none %},ldap-only{% endif %}"
+artemis_spring_profile_ldap: "{% if ldap.password is defined and ldap.password is not none %},ldap{% endif %}"
 artemis_spring_profile_version_control: "{% if version_control.localvc is defined and version_control.localvc is not none %},localvc{% endif
   %}"
 artemis_spring_profile_continuous_integration: "{% if continuous_integration.jenkins
@@ -273,11 +310,12 @@ artemis_spring_profile_theia: "{% if theia is defined and theia is not none %},t
 artemis_spring_profile_aeolus: "{% if aeolus is defined and aeolus is not none %},aeolus{% endif %}"
 artemis_spring_profile_atlas: "{% if atlas is defined %},atlas{% endif %}" # TODO: Add and atlas is not none check as soon as the additional configuration options are added
 artemis_spring_profile_lti: "{% if lti.oauth_secret is defined and lti.oauth_secret is not none %},lti{% endif %}"
+artemis_spring_profile_sharing: "{% if sharing is defined and sharing is not none %},sharing{% endif %}"
 
 artemis_spring_profile_core: "{% if artemis_computed_is_core_node %},core{{ artemis_spring_profile_ldap }}{{ artemis_spring_profile_version_control
-  }}{{ artemis_spring_profile_continuous_integration }}{{ artemis_spring_profile_athena }}{{ artemis_spring_profile_scheduling }}{{ artemis_spring_profile_docker
+  }}{{ artemis_spring_profile_continuous_integration }}{{ artemis_spring_profile_athena }}{{ artemis_spring_profile_apollon }}{{ artemis_spring_profile_scheduling }}{{ artemis_spring_profile_docker
   }}{{ artemis_spring_profile_iris }}{{ artemis_spring_profile_theia }}{{ artemis_spring_profile_aeolus }}{{ artemis_spring_profile_atlas }}{{ artemis_spring_profile_lti
-  }}{% endif %}"
+  }}{{ artemis_spring_profile_sharing }}{% endif %}"
 artemis_spring_profile_buildagent: "{% if continuous_integration.localci is defined and continuous_integration.localci is not none %}{% if continuous_integration.localci.is_build_agent
   is defined and continuous_integration.localci.is_build_agent is not none and continuous_integration.localci.is_build_agent %},buildagent{% endif %}{% endif %}"
 
