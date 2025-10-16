@@ -1,0 +1,24 @@
+{{ ansible_managed | comment }}
+
+services:
+  redis:
+    image: redis/redis-stack-server:latest
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+      - ./redis-data:/data
+    command: [
+      "redis-server",
+      "/usr/local/etc/redis/redis.conf",
+      "--requirepass {{ redis.password }}",
+      "--user {{ redis.user }} on >{{ redis.password }} +@all &* ~*",
+      "--user default off nopass nocommands",
+      "--protected-mode no"
+    ]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "{{ redis.password }}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
