@@ -3,11 +3,11 @@
 spring:
 {% if artemis_computed_is_core_node %}
   datasource:
-{% if sentry.dsn is defined and sentry.dsn|length and sentry.enable_db_tracing is defined and sentry.enable_db_tracing sameas true %}
+{% if sentry.dsn is defined and sentry.dsn|length and sentry.enable_db_tracing is defined and sentry.enable_db_tracing is sameas true %}
     driver-class: com.p6spy.engine.spy.P6SpyDriver
 {% endif %}
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:{{ 'p6spy:' if sentry.enable_db_tracing else ''}}{{ artemis_database_type }}://{{ artemis_database_host }}:{{ artemis_database_port }}/{{ artemis_database_dbname }}?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
+    url: jdbc:{{ 'p6spy:' (sentry.dsn is defined and sentry.dsn|length and sentry.enable_db_tracing is defined and sentry.enable_db_tracing is sameas true) else ''}}{{ artemis_database_type }}://{{ artemis_database_host }}:{{ artemis_database_port }}/{{ artemis_database_dbname }}?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
     username: {{ artemis_database_username }}
     password: {{ artemis_database_password }}
     hikari:
@@ -348,8 +348,8 @@ jhipster:
 sentry:
   dsn: {{ sentry.dsn }}
   release: {{ artemis_version }}
-  send-default-pii: {{ sentry.send_default_pii or false}}
-  traces-sample-rate: {{ sentry.traces_sample_rate or 0.0 }}
+  send-default-pii: {{ sentry.send_default_pii | default(false)}}
+  traces-sample-rate: {{ sentry.traces_sample_rate | default(0.0) }}
   logging:
     enabled: true
     minimum-breadcrumb-level: error
@@ -371,7 +371,7 @@ info:
 {% endif %}
   textAssessmentAnalyticsEnabled: true
   sentry:
-{% if sentry.dsn is defined and sentry.dsn != '' %}
+{% if sentry.dsn is defined and sentry.dsn|length %}
     dsn: {{ sentry.dsn }}
 {% else %}
     dsn:
