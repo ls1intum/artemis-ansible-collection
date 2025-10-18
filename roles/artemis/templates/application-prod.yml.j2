@@ -354,15 +354,7 @@ sentry:
     enabled: true
     minimum-breadcrumb-level: error
     minimum-event-level: error
-{% if sentry.environment is defined and sentry.environment|length %}
   environment: {{ sentry.environment }}
-{% elif is_testserver is defined and is_testserver is sameas true %}
-  environment: test
-{% elif is_testserver is defined and is_testserver is sameas false %}
-  environment: prod
-{% else %}
-  environment: local
-{% endif %}
 {% endif %}
 
 {% if artemis_computed_is_core_node %}
@@ -380,7 +372,7 @@ info:
   textAssessmentAnalyticsEnabled: true
   sentry:
 {% if sentry.dsn is defined and sentry.dsn != '' %}
-    dsn: ${sentry.dsn}
+    dsn: {{ sentry.dsn }}
 {% else %}
     dsn:
 {% endif %}

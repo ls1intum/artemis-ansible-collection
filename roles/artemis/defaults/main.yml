@@ -103,6 +103,18 @@ push_notification_relay: "https://hermes.artemis.cit.tum.de"
 sentry:
   dsn:
   enable_db_tracing: false
+# send_default_pii: false
+# traces_sample_rate: 0.0
+# sentry.environment: 'env' # optional since we do set default values with the below logic
+{% if sentry.environment is defined and sentry.environment|length %}
+  environment: {{ sentry.environment }}
+{% elif is_testserver is defined and is_testserver is sameas true %}
+  environment: test
+{% elif is_testserver is defined and is_testserver is sameas false %}
+  environment: prod
+{% else %}
+  environment: local
+{% endif %}
 
 #theia:
 #  portal_url: https://theia-yannik.k8s.ase.cit.tum.de
