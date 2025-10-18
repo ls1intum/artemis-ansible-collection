@@ -7,7 +7,7 @@ spring:
     driver-class: com.p6spy.engine.spy.P6SpyDriver
 {% endif %}
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:{{ 'p6spy:' (sentry.dsn is defined and sentry.dsn|length and sentry.enable_db_tracing is defined and sentry.enable_db_tracing is sameas true) else ''}}{{ artemis_database_type }}://{{ artemis_database_host }}:{{ artemis_database_port }}/{{ artemis_database_dbname }}?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
+    url: jdbc:{{ 'p6spy:' if (sentry.dsn is defined and sentry.dsn|length and sentry.enable_db_tracing is defined and sentry.enable_db_tracing is sameas true) else ''}}{{ artemis_database_type }}://{{ artemis_database_host }}:{{ artemis_database_port }}/{{ artemis_database_dbname }}?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
     username: {{ artemis_database_username }}
     password: {{ artemis_database_password }}
     hikari:
@@ -354,7 +354,15 @@ sentry:
     enabled: true
     minimum-breadcrumb-level: error
     minimum-event-level: error
+{% if sentry.environment is defined and sentry.environment|length %}
   environment: {{ sentry.environment }}
+{% elif is_testserver is defined and is_testserver is sameas true %}
+  environment: test
+{% elif is_testserver is defined and is_testserver is sameas false %}
+  environment: prod
+{% else %}
+  environment: local
+{% endif %}
 {% endif %}
 
 {% if artemis_computed_is_core_node %}
