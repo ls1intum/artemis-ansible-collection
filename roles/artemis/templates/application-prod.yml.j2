@@ -272,6 +272,13 @@ artemis:
     secret-token: {{ iris.secret }}
 {% endif %}
 
+{% if nebula is defined and nebula is not none %}
+  nebula:
+    enabled: true
+    url: {{ nebula.url }}
+    secret-token: {{ nebula.secret }}
+{% endif %}
+
 {% if enable_science_event_logging is defined %}
   science:
     event-logging:
