@@ -107,6 +107,10 @@ artemis:
   build-logs-path: {{ artemis_repo_basepath }}/build-logs
   data-export-path: {{ artemis_data_export_path }}
   bcrypt-salt-rounds: {{ artemis_bcrypt_salt_rounds }}
+{% if tum_live_base_url is defined and tum_live_base_url is not none %}
+  tum-live:
+    api-base-url: {{ tum_live_base_url }}
+{% endif %}
 {% if push_notification_relay is defined and push_notification_relay is not none %}
   push-notification-relay: {{ push_notification_relay }}
 {% endif %}

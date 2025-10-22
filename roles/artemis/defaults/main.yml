@@ -230,6 +230,7 @@ node_display_name: Unnamed Artemis Node
 #nebula:
 #  url:
 #  secret:
+#tum_live_base_url: "https://tum.live/api/v2"
 
 ##############################################################################
 # Aeolus Configuration
