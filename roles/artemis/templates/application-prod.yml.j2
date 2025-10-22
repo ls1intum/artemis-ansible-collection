@@ -354,7 +354,6 @@ jhipster:
 {% if sentry.dsn is defined and sentry.dsn|length %}
 sentry:
   dsn: {{ sentry.dsn }}
-  release: {{ artemis_version }}
   send-default-pii: {{ sentry.send_default_pii | default(false)}}
   traces-sample-rate: {{ sentry.traces_sample_rate | default(0.0) }}
   logging:
