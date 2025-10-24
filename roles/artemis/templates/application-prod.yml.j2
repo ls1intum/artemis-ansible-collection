@@ -110,6 +110,14 @@ artemis:
 {% if push_notification_relay is defined and push_notification_relay is not none %}
   push-notification-relay: {{ push_notification_relay }}
 {% endif %}
+{% if artemis_internal_ip_allowlist is defined and artemis_internal_ip_allowlist is not none %}
+  security:
+    internal:
+      allowed-cidrs:
+{% for cidr in artemis_internal_ip_allowlist %}
+        - {{ cidr }}
+{%- endfor %}
+{% endif %}
   user-management:
 {% if ldap.url is defined and ldap.url is not none%}
     use-external: true
@@ -267,6 +275,13 @@ artemis:
   iris:
     url: {{ iris.url }}
     secret-token: {{ iris.secret }}
+{% endif %}
+
+{% if nebula is defined and nebula is not none %}
+  nebula:
+    enabled: true
+    url: {{ nebula.url }}
+    secret-token: {{ nebula.secret }}
 {% endif %}
 
 {% if enable_science_event_logging is defined %}
