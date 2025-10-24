@@ -1,0 +1,74 @@
+#include <tunables/global>
+
+profile docker-bwrap flags=(attach_disconnected,mediate_deleted) {
+
+  # Capabilities (docker-default + sys_admin for mount mediation)
+  capability chown,
+  capability dac_override,
+  capability fowner,
+  capability fsetid,
+  capability kill,
+  capability setgid,
+  capability setuid,
+  capability setpcap,
+  capability net_bind_service,
+  capability net_raw,
+  capability sys_chroot,
+  capability mknod,
+  capability audit_write,
+  capability sys_admin,
+
+  # Networking / signals / ptrace
+  network inet,
+  network inet6,
+  network unix,
+  signal (send,receive) set=(hup int term),
+  ptrace (trace,read) peer=@{profile_name},
+
+  file,
+
+  # Namespaces & mount mediation
+  userns,
+  mount,
+  umount,
+  pivot_root,
+
+  # Filesystems/targets used during bwrap setup (staging + final)
+  # bwrap mounts proc under /newroot first, then moves it to /proc
+  mount fstype=proc      -> /newroot/**,
+  mount fstype=proc      -> /proc,
+
+  # /dev is a tmpfs in the new mount ns; devpts for PTYs
+  mount fstype=tmpfs     -> /dev,
+  mount fstype=devpts    -> /dev/pts,
+
+  # tmpfs for scratch
+  mount fstype=tmpfs     -> /tmp/**,
+
+  # IPC ns mounts mqueue here
+  mount fstype=mqueue    -> /dev/mqueue,
+
+  # if sys needs to be potentially exposed
+  mount fstype=sysfs     -> /sys,
+
+  mount options=(bind)   -> /,
+  mount options=(bind)   -> /home,
+  mount options=(rbind)  -> /,
+  mount options=(rbind)  -> /home,
+
+  # Propagation/adjustments bwrap performs
+  mount options=(rprivate),
+  mount options=(rslave),
+
+  # Allow bwrap to move/remount mounts during finalization
+  mount options=(move)     -> /**,
+  mount options=(remount)  -> /**,
+
+  # Docker-default denies
+  deny /sys/[^f]*/** wklx,
+  deny /sys/f[^s]*/** wklx,
+  deny /sys/fs/** wklx,
+  deny /sys/kernel/security/** wklx,
+  deny /proc/sysrq-trigger rwklx,
+  deny /proc/kcore rwklx,
+}
