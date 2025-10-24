@@ -4,7 +4,7 @@ spring:
 {% if artemis_computed_is_core_node %}
   datasource:
 {% if sentry.dsn is defined and sentry.dsn|length and sentry.enable_db_tracing is defined and sentry.enable_db_tracing is sameas true %}
-    driver-class: com.p6spy.engine.spy.P6SpyDriver
+    driver-class-name: com.p6spy.engine.spy.P6SpyDriver
 {% endif %}
     type: com.zaxxer.hikari.HikariDataSource
     url: jdbc:{{ 'p6spy:' if (sentry.dsn is defined and sentry.dsn|length and sentry.enable_db_tracing is defined and sentry.enable_db_tracing is sameas true) else ''}}{{ artemis_database_type }}://{{ artemis_database_host }}:{{ artemis_database_port }}/{{ artemis_database_dbname }}?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
