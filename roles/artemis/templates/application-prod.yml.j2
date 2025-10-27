@@ -116,7 +116,7 @@ artemis:
       allowed-cidrs:
 {% for cidr in artemis_internal_ip_allowlist %}
         - {{ cidr }}
-{%- endfor %}
+{% endfor %}
 {% endif %}
   user-management:
 {% if ldap.url is defined and ldap.url is not none%}
@@ -245,10 +245,6 @@ artemis:
     id: artemis_lti
     oauth-key: artemis_lti_key
     oauth-secret: {{ lti.oauth_secret }}
-    user-prefix-edx: edx_
-    user-prefix-u4i: u4i_
-    user-group-name-edx: edx
-    user-group-name-u4i: u4i
 {% endif %}
 
 {% if athena is defined %}

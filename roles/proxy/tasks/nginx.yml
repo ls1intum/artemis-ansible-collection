@@ -188,7 +188,7 @@
 - name: Copy nginx 503.html
   become: true
   copy:
-    src: files/nginx_503.html
+    src: nginx_503.html
     dest: /usr/share/nginx/html/503.html
     mode: "644"
   notify: Reload nginx
@@ -213,7 +213,7 @@
 - name: Copy security-limits nginx.conf
   become: true
   copy:
-    src: files/nginx_security_limits.conf
+    src: nginx_security_limits.conf
     dest: /etc/security/limits.d/nginx.conf
     mode: "644"
   notify: Reboot system
@@ -228,7 +228,7 @@
 - name: Copy systemd-limits nginx.conf
   become: true
   copy:
-    src: files/nginx_systemd_limits.conf
+    src: nginx_systemd_limits.conf
     dest: /etc/systemd/system.conf.d/limits.conf
     mode: "644"
   notify: Reboot system
