@@ -101,11 +101,11 @@ enable_science_event_logging: false
 push_notification_relay: "https://hermes.artemis.cit.tum.de"
 
 sentry:
-  dsn:
+  dsn: ""
   enable_db_tracing: false
 # send_default_pii: false
 # traces_sample_rate: 0.0
-# sentry.environment: 'local'
+# environment: 'local'
 
 #theia:
 #  portal_url: https://theia-yannik.k8s.ase.cit.tum.de
