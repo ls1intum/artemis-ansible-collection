@@ -254,6 +254,18 @@ artemis:
     restricted-modules: {{ athena.restricted_modules }}
 {% endif %}
 
+{% if atlas is defined %}
+  atlas:
+    enabled: {{ atlas.enabled }}
+
+{% if atlas.atlasml is defined %}
+    atlasml:
+      enabled: {{ enabled: atlas.atlasml.enabled }}
+      base-url: {{ enabled: atlas.atlasml.base-url }}
+      auth-token: {{ enabled: atlas.atlasml.auth-token }}
+{% endif %}
+{% endif %}
+
 {% if apollon_url is defined %}
   apollon:
     conversion-service-url: {{ apollon_url }}
