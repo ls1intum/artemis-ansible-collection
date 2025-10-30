@@ -275,9 +275,9 @@ artemis_internal_ip_allowlist: []
 ##############################################################################
 # Rate Limit Configuration
 ##############################################################################
-artemis_rate_limit:
-  account_management_rpm: 5
-  authentication_rpm: 30
+#artemis_rate_limit:
+#  account_management_rpm: 5
+#  authentication_rpm: 30
 
 ##############################################################################
 # Helios Configuration
