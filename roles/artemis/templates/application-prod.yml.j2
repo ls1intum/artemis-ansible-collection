@@ -3,11 +3,8 @@
 spring:
 {% if artemis_computed_is_core_node %}
   datasource:
-{% if (sentry.dsn | default('') | length) and (sentry.enable_db_tracing | default(false) | bool) %}
-    driver-class-name: com.p6spy.engine.spy.P6SpyDriver
-{% endif %}
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:{{ 'p6spy:' if ((sentry.dsn | default('') | length) and (sentry.enable_db_tracing | default(false) | bool)) else ''}}{{ artemis_database_type }}://{{ artemis_database_host }}:{{ artemis_database_port }}/{{ artemis_database_dbname }}?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
+    url: jdbc:{{ artemis_database_type }}://{{ artemis_database_host }}:{{ artemis_database_port }}/{{ artemis_database_dbname }}?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
     username: {{ artemis_database_username }}
     password: {{ artemis_database_password }}
     hikari:
