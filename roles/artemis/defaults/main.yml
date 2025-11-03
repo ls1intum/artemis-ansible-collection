@@ -230,6 +230,7 @@ node_display_name: Unnamed Artemis Node
 #nebula:
 #  url:
 #  secret:
+#tum_live_base_url: "https://tum.live/api/v2"
 
 ##############################################################################
 # Aeolus Configuration
@@ -275,6 +276,13 @@ artemis_hyperion_enabled: false
 ##############################################################################
 # List of CIDR ranges that are allowed to access internal endpoints (e.g. /api/*/internal/**)
 artemis_internal_ip_allowlist: []
+
+##############################################################################
+# Rate Limit Configuration
+##############################################################################
+#artemis_rate_limit:
+#  account_management_rpm: 5
+#  authentication_rpm: 30
 
 ##############################################################################
 # Helios Configuration

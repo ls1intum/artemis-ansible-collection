@@ -118,6 +118,12 @@ artemis:
         - {{ cidr }}
 {% endfor %}
 {% endif %}
+{% if artemis_rate_limit is defined and artemis_rate_limit is not none %}
+  rate-limiting:
+    enabled: true
+    account-management-rpm: {{ artemis_rate_limit.account_management_rpm }}
+    authentication-rpm: {{ artemis_rate_limit.authentication_rpm }}
+{% endif %}
   user-management:
 {% if ldap.url is defined and ldap.url is not none%}
     use-external: true
@@ -290,6 +296,11 @@ artemis:
     enabled: true
     url: {{ nebula.url }}
     secret-token: {{ nebula.secret }}
+{% endif %}
+
+{% if tum_live_base_url is defined and tum_live_base_url is not none %}
+  tum-live:
+    api-base-url: {{ tum_live_base_url }}
 {% endif %}
 
 {% if enable_science_event_logging is defined %}
