@@ -280,6 +280,11 @@ artemis:
     secret-token: {{ nebula.secret }}
 {% endif %}
 
+{% if tum_live_base_url is defined and tum_live_base_url is not none %}
+  tum-live:
+    api-base-url: {{ tum_live_base_url }}
+{% endif %}
+
 {% if enable_science_event_logging is defined %}
   science:
     event-logging:
