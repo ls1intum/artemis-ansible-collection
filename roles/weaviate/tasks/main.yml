@@ -1,0 +1,235 @@
+---
+# Validate required variables
+- name: Validate required variables are set
+  assert:
+    that:
+      - weaviate_domain is defined and weaviate_domain != ""
+      - weaviate_api_key is defined and weaviate_api_key != ""
+      - letsencrypt_email is defined and letsencrypt_email != ""
+    fail_msg: |
+      Required variables are missing!
+      Please ensure the following are set:
+        - weaviate_domain (e.g., weaviate.example.com)
+        - weaviate_api_key (generate with: openssl rand -base64 32)
+        - letsencrypt_email (e.g., your-email@example.com)
+
+- name: Ensure weaviate group {{ weaviate_user_group }} exists
+  become: true
+  group:
+    name: "{{ weaviate_user_group }}"
+    gid: "{{ weaviate_user_gid }}"
+    state: present
+
+- name: Ensure weaviate user {{ weaviate_user_name }} exists
+  become: true
+  user:
+    name: "{{ weaviate_user_name }}"
+    state: present
+    uid: "{{ weaviate_user_uid }}"
+    group: "{{ weaviate_user_group }}"
+    groups: "docker"
+
+- name: Ensure deployment user {{ weaviate_deployment_user_name }} exists
+  become: true
+  user:
+    name: "{{ weaviate_deployment_user_name }}"
+    comment: "{{ weaviate_deployment_user_comment }}"
+    state: present
+    uid: "{{ weaviate_deployment_user_uid }}"
+    group: "{{ weaviate_user_group }}"
+    groups: "sudo,docker"
+    append: true
+  when: (weaviate_create_deployment_user | bool)
+
+- name: Ensure (limited) sudo privileges for user {{ weaviate_deployment_user_name }}
+  become: true
+  template:
+    src: weaviate_deployment_sudoers.j2
+    dest: /etc/sudoers.d/weaviate_deployment
+    validate: "visudo -cf %s"
+    mode: "440"
+  when: (weaviate_create_deployment_user | bool)
+
+- name: Authorize ssh-key for deployment user
+  become: true
+  ansible.posix.authorized_key:
+    user: "{{ weaviate_deployment_user_name }}"
+    state: present
+    key: "{{ weaviate_deployment_user_public_key }}"
+  when: (weaviate_create_deployment_user | bool)
+
+- name: Create weaviate working directory
+  become: true
+  file:
+    path: "{{ weaviate_working_directory }}"
+    state: directory
+    mode: "775"
+
+- name: Create weaviate traefik directory
+  become: true
+  file:
+    path: "{{ weaviate_traefik_directory }}"
+    state: directory
+    mode: "775"
+
+- name: Create weaviate backup directory
+  become: true
+  file:
+    path: "{{ weaviate_backup_directory }}"
+    state: directory
+    mode: "775"
+
+- name: Set permissions for weaviate directories
+  become: true
+  file:
+    path: "{{ item }}"
+    state: directory
+    recurse: true
+    owner: "{{ weaviate_user_name }}"
+    group: "{{ weaviate_user_group }}"
+  loop:
+    - "{{ weaviate_working_directory }}"
+    - "{{ weaviate_traefik_directory }}"
+    - "{{ weaviate_backup_directory }}"
+  notify: restart docker weaviate
+
+- name: Copy docker-compose.yml to weaviate directory
+  become: true
+  template:
+    src: "templates/docker-compose.yml.j2"
+    dest: "{{ weaviate_working_directory }}/docker-compose.yml"
+    owner: "{{ weaviate_user_name }}"
+    group: "{{ weaviate_user_group }}"
+    mode: "660"
+  notify: restart docker weaviate
+
+- name: Copy .env to weaviate directory
+  become: true
+  template:
+    src: "templates/docker.env.j2"
+    dest: "{{ weaviate_working_directory }}/.env"
+    owner: "{{ weaviate_user_name }}"
+    group: "{{ weaviate_user_group }}"
+    mode: "660"
+  notify: restart docker weaviate
+
+- name: Copy traefik.yml to weaviate directory
+  become: true
+  template:
+    src: "templates/traefik.yml.j2"
+    dest: "{{ weaviate_traefik_directory }}/traefik.yml"
+    owner: "{{ weaviate_user_name }}"
+    group: "{{ weaviate_user_group }}"
+    mode: "660"
+  notify: restart docker weaviate
+
+- name: Copy config.yml.template to weaviate directory
+  become: true
+  template:
+    src: "templates/config.yml.template.j2"
+    dest: "{{ weaviate_traefik_directory }}/config.yml.template"
+    owner: "{{ weaviate_user_name }}"
+    group: "{{ weaviate_user_group }}"
+    mode: "660"
+  notify: regenerate traefik config
+
+- name: Create acme.json for Let's Encrypt certificates
+  become: true
+  file:
+    path: "{{ weaviate_traefik_directory }}/acme.json"
+    state: touch
+    owner: "{{ weaviate_user_name }}"
+    group: "{{ weaviate_user_group }}"
+    mode: "600"
+    modification_time: preserve
+    access_time: preserve
+
+- name: Copy setup.sh script
+  become: true
+  copy:
+    src: "files/setup.sh"
+    dest: "{{ weaviate_working_directory }}/setup.sh"
+    owner: "{{ weaviate_user_name }}"
+    group: "{{ weaviate_user_group }}"
+    mode: "770"
+
+- name: Copy generate-traefik-config.sh script
+  become: true
+  copy:
+    src: "files/generate-traefik-config.sh"
+    dest: "{{ weaviate_working_directory }}/generate-traefik-config.sh"
+    owner: "{{ weaviate_user_name }}"
+    group: "{{ weaviate_user_group }}"
+    mode: "770"
+  notify: regenerate traefik config
+
+- name: Copy backup.sh script
+  become: true
+  copy:
+    src: "files/backup.sh"
+    dest: "{{ weaviate_working_directory }}/backup.sh"
+    owner: "{{ weaviate_user_name }}"
+    group: "{{ weaviate_user_group }}"
+    mode: "770"
+
+- name: Copy restore.sh script
+  become: true
+  copy:
+    src: "files/restore.sh"
+    dest: "{{ weaviate_working_directory }}/restore.sh"
+    owner: "{{ weaviate_user_name }}"
+    group: "{{ weaviate_user_group }}"
+    mode: "770"
+
+- name: Copy weaviate-docker.sh helper script
+  become: true
+  template:
+    src: "templates/weaviate-docker.sh.j2"
+    dest: "{{ weaviate_working_directory }}/weaviate-docker.sh"
+    owner: "{{ weaviate_user_name }}"
+    group: "{{ weaviate_user_group }}"
+    mode: "770"
+
+- name: Generate initial traefik config
+  become: true
+  become_user: "{{ weaviate_user_name }}"
+  shell: ./generate-traefik-config.sh
+  args:
+    chdir: "{{ weaviate_working_directory }}"
+    creates: "{{ weaviate_traefik_directory }}/config.yml"
+
+- name: Setup automated backups cron job
+  become: true
+  cron:
+    name: "Weaviate automated backup"
+    minute: "{{ weaviate_backup_schedule.split()[0] }}"
+    hour: "{{ weaviate_backup_schedule.split()[1] }}"
+    day: "{{ weaviate_backup_schedule.split()[2] }}"
+    month: "{{ weaviate_backup_schedule.split()[3] }}"
+    weekday: "{{ weaviate_backup_schedule.split()[4] }}"
+    job: "cd {{ weaviate_working_directory }} && ./backup.sh >> {{ weaviate_working_directory }}/backup.log 2>&1"
+    user: "{{ weaviate_user_name }}"
+    state: present
+  when: weaviate_enable_automated_backups | bool
+
+- name: Setup automated backup cleanup cron job
+  become: true
+  cron:
+    name: "Weaviate backup cleanup"
+    minute: "30"
+    hour: "3"
+    job: "find {{ weaviate_backup_directory }} -name 'backup-*.tar.gz' -mtime +{{ weaviate_backup_retention_days }} -delete"
+    user: "{{ weaviate_user_name }}"
+    state: present
+  when: weaviate_enable_automated_backups | bool
+
+- name: Ensure handlers are flushed before starting
+  meta: flush_handlers
+
+- name: Start Weaviate services
+  become: true
+  shell: ./weaviate-docker.sh start
+  args:
+    chdir: "{{ weaviate_working_directory }}"
+  register: weaviate_start_result
+  changed_when: "'Starting' in weaviate_start_result.stdout"

@@ -1,0 +1,103 @@
+#!/bin/bash
+set -e
+
+echo "Starting Weaviate backup..."
+
+# Load environment variables
+if [ ! -f .env ]; then
+    echo "Error: .env file not found!"
+    exit 1
+fi
+
+export $(grep -v '^#' .env | grep -v '^$' | xargs)
+
+# Check required variables
+if [ -z "$WEAVIATE_API_KEY" ] || [ -z "$WEAVIATE_DOMAIN" ]; then
+    echo "Error: WEAVIATE_API_KEY and WEAVIATE_DOMAIN must be set in .env"
+    exit 1
+fi
+
+# Create backups directory if it doesn't exist
+mkdir -p backups
+
+# Generate backup ID with timestamp
+BACKUP_ID="backup-$(date +%Y%m%d-%H%M%S)"
+echo "Backup ID: $BACKUP_ID"
+
+# Initiate backup via Weaviate API
+echo "Initiating backup..."
+RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+    "https://${WEAVIATE_DOMAIN}/v1/backups/filesystem" \
+    -H "Authorization: Bearer ${WEAVIATE_API_KEY}" \
+    -H "Content-Type: application/json" \
+    -d "{\"id\": \"${BACKUP_ID}\"}")
+
+HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+BODY=$(echo "$RESPONSE" | sed '$d')
+
+if [ "$HTTP_CODE" != "200" ]; then
+    echo "Error: Failed to initiate backup (HTTP $HTTP_CODE)"
+    echo "$BODY"
+    exit 1
+fi
+
+echo "Backup initiated successfully!"
+
+# Poll backup status
+echo "Waiting for backup to complete..."
+MAX_RETRIES=60
+RETRY_COUNT=0
+STATUS=""
+
+while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+    sleep 5
+
+    STATUS_RESPONSE=$(curl -s -w "\n%{http_code}" \
+        "https://${WEAVIATE_DOMAIN}/v1/backups/filesystem/${BACKUP_ID}" \
+        -H "Authorization: Bearer ${WEAVIATE_API_KEY}")
+
+    HTTP_CODE=$(echo "$STATUS_RESPONSE" | tail -n1)
+    BODY=$(echo "$STATUS_RESPONSE" | sed '$d')
+
+    if [ "$HTTP_CODE" == "200" ]; then
+        STATUS=$(echo "$BODY" | grep -o '"status":"[^"]*' | cut -d'"' -f4)
+
+        if [ "$STATUS" == "SUCCESS" ]; then
+            echo "Backup completed successfully!"
+            break
+        elif [ "$STATUS" == "FAILED" ]; then
+            echo "Error: Backup failed!"
+            echo "$BODY"
+            exit 1
+        fi
+    fi
+
+    RETRY_COUNT=$((RETRY_COUNT + 1))
+    echo "Backup in progress... (${RETRY_COUNT}/${MAX_RETRIES})"
+done
+
+if [ "$STATUS" != "SUCCESS" ]; then
+    echo "Error: Backup timed out"
+    exit 1
+fi
+
+# Copy backup from container
+echo "Copying backup from container..."
+docker cp weaviate:/var/lib/weaviate/backups/${BACKUP_ID} backups/
+
+# Compress backup
+echo "Compressing backup..."
+cd backups
+tar -czf ${BACKUP_ID}.tar.gz ${BACKUP_ID}
+rm -rf ${BACKUP_ID}
+cd ..
+
+BACKUP_SIZE=$(du -h backups/${BACKUP_ID}.tar.gz | cut -f1)
+
+echo ""
+echo "Backup completed successfully!"
+echo "  Backup ID: ${BACKUP_ID}"
+echo "  Location: backups/${BACKUP_ID}.tar.gz"
+echo "  Size: ${BACKUP_SIZE}"
+echo ""
+echo "To restore this backup, run: ./restore.sh ${BACKUP_ID}"
