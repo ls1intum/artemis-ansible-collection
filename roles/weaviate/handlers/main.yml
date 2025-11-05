@@ -2,14 +2,14 @@
 # handlers file for weaviate
 - name: Restart docker compose weaviate
   become: true
-  shell: ./weaviate-docker.sh restart
+  command: ./weaviate-docker.sh restart
   args:
     chdir: "{{ weaviate_working_directory }}"
   listen: "restart docker weaviate"
 
 - name: Start docker compose weaviate
   become: true
-  shell: ./weaviate-docker.sh start
+  command: ./weaviate-docker.sh start
   args:
     chdir: "{{ weaviate_working_directory }}"
   listen: "start docker weaviate"
@@ -17,7 +17,7 @@
 - name: Regenerate Traefik configuration
   become: true
   become_user: "{{ weaviate_user_name }}"
-  shell: ./generate-traefik-config.sh
+  command: ./generate-traefik-config.sh
   args:
     chdir: "{{ weaviate_working_directory }}"
   listen: "regenerate traefik config"
