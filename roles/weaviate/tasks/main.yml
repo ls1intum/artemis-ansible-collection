@@ -193,7 +193,7 @@
 - name: Generate initial traefik config
   become: true
   become_user: "{{ weaviate_user_name }}"
-  shell: ./generate-traefik-config.sh
+  command: ./generate-traefik-config.sh
   args:
     chdir: "{{ weaviate_working_directory }}"
     creates: "{{ weaviate_traefik_directory }}/config.yml"
@@ -228,7 +228,7 @@
 
 - name: Start Weaviate services
   become: true
-  shell: ./weaviate-docker.sh start
+  command: ./weaviate-docker.sh start
   args:
     chdir: "{{ weaviate_working_directory }}"
   register: weaviate_start_result
