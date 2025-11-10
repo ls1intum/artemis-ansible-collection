@@ -2,21 +2,11 @@
 galaxy_info:
   author: ls1intum
   description: Deploy Weaviate vector database with Traefik reverse proxy
-  company: TUM - Chair of Applied Software Engineering
+  company: TUM Applied Education Technologies
 
   license: MIT
 
   min_ansible_version: "2.9"
-
-  platforms:
-    - name: Ubuntu
-      versions:
-        - focal
-        - jammy
-    - name: Debian
-      versions:
-        - bullseye
-        - bookworm
 
   galaxy_tags:
     - weaviate

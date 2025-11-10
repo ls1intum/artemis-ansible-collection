@@ -13,12 +13,3 @@
   args:
     chdir: "{{ weaviate_working_directory }}"
   listen: "start docker weaviate"
-
-- name: Regenerate Traefik configuration
-  become: true
-  become_user: "{{ weaviate_user_name }}"
-  command: ./generate-traefik-config.sh
-  args:
-    chdir: "{{ weaviate_working_directory }}"
-  listen: "regenerate traefik config"
-  notify: restart docker weaviate

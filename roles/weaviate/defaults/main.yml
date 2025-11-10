@@ -39,7 +39,7 @@ weaviate_log_level: "info"
 # Let's Encrypt Configuration (REQUIRED)
 letsencrypt_email: # FIXME - e.g., your-email@example.com
 
-# IP Whitelisting (Optional)
+# IP Safelisting (Optional)
 # Default: accessible from everywhere with API key authentication
 # Examples:
 #   Single IP: "203.0.113.1/32"

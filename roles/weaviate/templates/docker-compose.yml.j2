@@ -51,7 +51,8 @@ services:
       - --scheme
       - http
     volumes:
-      - weaviate_data:/var/lib/weaviate
+      - {{ weaviate_data_directory }}:/var/lib/weaviate
+      - {{ weaviate_backup_directory }}:/var/lib/weaviate/backups
     environment:
       QUERY_DEFAULTS_LIMIT: 25
       AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'false'
@@ -126,6 +127,3 @@ services:
 networks:
   weaviate_network:
     driver: bridge
-
-volumes:
-  weaviate_data:

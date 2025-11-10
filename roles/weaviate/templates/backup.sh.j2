@@ -17,8 +17,11 @@ if [ -z "$WEAVIATE_API_KEY" ] || [ -z "$WEAVIATE_DOMAIN" ]; then
     exit 1
 fi
 
+# Use configured backup directory
+BACKUP_DIR="{{ weaviate_backup_directory }}"
+
 # Create backups directory if it doesn't exist
-mkdir -p backups
+mkdir -p "$BACKUP_DIR"
 
 # Generate backup ID with timestamp
 BACKUP_ID="backup-$(date +%Y%m%d-%H%M%S)"
@@ -81,23 +84,19 @@ if [ "$STATUS" != "SUCCESS" ]; then
     exit 1
 fi
 
-# Copy backup from container
-echo "Copying backup from container..."
-docker cp weaviate:/var/lib/weaviate/backups/${BACKUP_ID} backups/
-
-# Compress backup
+# Compress backup (backup is already on host filesystem via mounted volume)
 echo "Compressing backup..."
-cd backups
+cd "$BACKUP_DIR"
 tar -czf ${BACKUP_ID}.tar.gz ${BACKUP_ID}
 rm -rf ${BACKUP_ID}
-cd ..
+cd - > /dev/null
 
-BACKUP_SIZE=$(du -h backups/${BACKUP_ID}.tar.gz | cut -f1)
+BACKUP_SIZE=$(du -h ${BACKUP_DIR}/${BACKUP_ID}.tar.gz | cut -f1)
 
 echo ""
 echo "Backup completed successfully!"
 echo "  Backup ID: ${BACKUP_ID}"
-echo "  Location: backups/${BACKUP_ID}.tar.gz"
+echo "  Location: ${BACKUP_DIR}/${BACKUP_ID}.tar.gz"
 echo "  Size: ${BACKUP_SIZE}"
 echo ""
 echo "To restore this backup, run: ./restore.sh ${BACKUP_ID}"

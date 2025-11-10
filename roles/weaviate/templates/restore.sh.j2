@@ -1,24 +1,27 @@
 #!/bin/bash
 set -e
 
+# Use configured backup directory
+BACKUP_DIR="{{ weaviate_backup_directory }}"
+
 # Check if backup ID is provided
 if [ -z "$1" ]; then
     echo "Usage: ./restore.sh <backup-id>"
     echo ""
     echo "Available backups:"
-    ls -1 backups/*.tar.gz 2>/dev/null | sed 's/backups\//  /' | sed 's/.tar.gz//' || echo "  No backups found"
+    ls -1 ${BACKUP_DIR}/*.tar.gz 2>/dev/null | sed "s|${BACKUP_DIR}/||" | sed 's/.tar.gz//' | sed 's/^/  /' || echo "  No backups found"
     exit 1
 fi
 
 BACKUP_ID=$1
-BACKUP_FILE="backups/${BACKUP_ID}.tar.gz"
+BACKUP_FILE="${BACKUP_DIR}/${BACKUP_ID}.tar.gz"
 
 # Check if backup file exists
 if [ ! -f "$BACKUP_FILE" ]; then
     echo "Error: Backup file not found: $BACKUP_FILE"
     echo ""
     echo "Available backups:"
-    ls -1 backups/*.tar.gz 2>/dev/null | sed 's/backups\//  /' | sed 's/.tar.gz//' || echo "  No backups found"
+    ls -1 ${BACKUP_DIR}/*.tar.gz 2>/dev/null | sed "s|${BACKUP_DIR}/||" | sed 's/.tar.gz//' | sed 's/^/  /' || echo "  No backups found"
     exit 1
 fi
 
@@ -50,17 +53,14 @@ if [ "$CONFIRM" != "yes" ]; then
     exit 0
 fi
 
-# Extract backup
+# Extract backup (backup directory is mounted into container, so just extract in place)
 echo "Extracting backup..."
-cd backups
+cd "$BACKUP_DIR"
 tar -xzf ${BACKUP_ID}.tar.gz
-cd ..
-
-# Copy backup to container
-echo "Copying backup to container..."
-docker cp backups/${BACKUP_ID} weaviate:/var/lib/weaviate/backups/
+cd - > /dev/null
 
 # Initiate restore via Weaviate API
+# No need to copy - backup directory is already mounted in container
 echo "Initiating restore..."
 RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
     "https://${WEAVIATE_DOMAIN}/v1/backups/filesystem/${BACKUP_ID}/restore" \
@@ -73,7 +73,7 @@ BODY=$(echo "$RESPONSE" | sed '$d')
 if [ "$HTTP_CODE" != "200" ]; then
     echo "Error: Failed to initiate restore (HTTP $HTTP_CODE)"
     echo "$BODY"
-    rm -rf backups/${BACKUP_ID}
+    rm -rf ${BACKUP_DIR}/${BACKUP_ID}
     exit 1
 fi
 
@@ -104,7 +104,7 @@ while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
         elif [ "$STATUS" == "FAILED" ]; then
             echo "Error: Restore failed!"
             echo "$BODY"
-            rm -rf backups/${BACKUP_ID}
+            rm -rf ${BACKUP_DIR}/${BACKUP_ID}
             exit 1
         fi
     fi
@@ -115,15 +115,14 @@ done
 
 if [ "$STATUS" != "SUCCESS" ]; then
     echo "Error: Restore timed out"
-    rm -rf backups/${BACKUP_ID}
+    rm -rf ${BACKUP_DIR}/${BACKUP_ID}
     exit 1
 fi
-
-# Cleanup
-echo "Cleaning up..."
-rm -rf backups/${BACKUP_ID}
 
 echo ""
 echo "Restore completed successfully!"
 echo "  Backup ID: ${BACKUP_ID}"
+echo ""
+echo "Note: Extracted backup directory remains at ${BACKUP_DIR}/${BACKUP_ID}"
+echo "You can safely delete it after verification: rm -rf ${BACKUP_DIR}/${BACKUP_ID}"
 echo ""
