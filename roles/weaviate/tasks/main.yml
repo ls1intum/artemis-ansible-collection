@@ -58,26 +58,17 @@
     key: "{{ weaviate_deployment_user_public_key }}"
   when: (weaviate_create_deployment_user | bool)
 
-- name: Create weaviate working directory
+- name: Create weaviate directories
   become: true
   file:
-    path: "{{ weaviate_working_directory }}"
+    path: "{{ item }}"
     state: directory
     mode: "775"
-
-- name: Create weaviate traefik directory
-  become: true
-  file:
-    path: "{{ weaviate_traefik_directory }}"
-    state: directory
-    mode: "775"
-
-- name: Create weaviate backup directory
-  become: true
-  file:
-    path: "{{ weaviate_backup_directory }}"
-    state: directory
-    mode: "775"
+  loop:
+    - "{{ weaviate_working_directory }}"
+    - "{{ weaviate_traefik_directory }}"
+    - "{{ weaviate_backup_directory }}"
+    - "{{ weaviate_data_directory }}"
 
 - name: Set permissions for weaviate directories
   become: true
@@ -91,47 +82,35 @@
     - "{{ weaviate_working_directory }}"
     - "{{ weaviate_traefik_directory }}"
     - "{{ weaviate_backup_directory }}"
+    - "{{ weaviate_data_directory }}"
   notify: restart docker weaviate
 
-- name: Copy docker-compose.yml to weaviate directory
+- name: Copy configuration templates that trigger restart
   become: true
   template:
-    src: "templates/docker-compose.yml.j2"
-    dest: "{{ weaviate_working_directory }}/docker-compose.yml"
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ weaviate_user_name }}"
+    group: "{{ weaviate_user_group }}"
+    mode: "660"
+  loop:
+    - src: docker-compose.yml.j2
+      dest: "{{ weaviate_working_directory }}/docker-compose.yml"
+    - src: docker.env.j2
+      dest: "{{ weaviate_working_directory }}/.env"
+    - src: traefik.yml.j2
+      dest: "{{ weaviate_traefik_directory }}/traefik.yml"
+  notify: restart docker weaviate
+
+- name: Generate Traefik config.yml from template
+  become: true
+  template:
+    src: "config.yml.j2"
+    dest: "{{ weaviate_traefik_directory }}/config.yml"
     owner: "{{ weaviate_user_name }}"
     group: "{{ weaviate_user_group }}"
     mode: "660"
   notify: restart docker weaviate
-
-- name: Copy .env to weaviate directory
-  become: true
-  template:
-    src: "templates/docker.env.j2"
-    dest: "{{ weaviate_working_directory }}/.env"
-    owner: "{{ weaviate_user_name }}"
-    group: "{{ weaviate_user_group }}"
-    mode: "660"
-  notify: restart docker weaviate
-
-- name: Copy traefik.yml to weaviate directory
-  become: true
-  template:
-    src: "templates/traefik.yml.j2"
-    dest: "{{ weaviate_traefik_directory }}/traefik.yml"
-    owner: "{{ weaviate_user_name }}"
-    group: "{{ weaviate_user_group }}"
-    mode: "660"
-  notify: restart docker weaviate
-
-- name: Copy config.yml.template to weaviate directory
-  become: true
-  template:
-    src: "templates/config.yml.template.j2"
-    dest: "{{ weaviate_traefik_directory }}/config.yml.template"
-    owner: "{{ weaviate_user_name }}"
-    group: "{{ weaviate_user_group }}"
-    mode: "660"
-  notify: regenerate traefik config
 
 - name: Create acme.json for Let's Encrypt certificates
   become: true
@@ -144,59 +123,18 @@
     modification_time: preserve
     access_time: preserve
 
-- name: Copy setup.sh script
-  become: true
-  copy:
-    src: "files/setup.sh"
-    dest: "{{ weaviate_working_directory }}/setup.sh"
-    owner: "{{ weaviate_user_name }}"
-    group: "{{ weaviate_user_group }}"
-    mode: "770"
-
-- name: Copy generate-traefik-config.sh script
-  become: true
-  copy:
-    src: "files/generate-traefik-config.sh"
-    dest: "{{ weaviate_working_directory }}/generate-traefik-config.sh"
-    owner: "{{ weaviate_user_name }}"
-    group: "{{ weaviate_user_group }}"
-    mode: "770"
-  notify: regenerate traefik config
-
-- name: Copy backup.sh script
-  become: true
-  copy:
-    src: "files/backup.sh"
-    dest: "{{ weaviate_working_directory }}/backup.sh"
-    owner: "{{ weaviate_user_name }}"
-    group: "{{ weaviate_user_group }}"
-    mode: "770"
-
-- name: Copy restore.sh script
-  become: true
-  copy:
-    src: "files/restore.sh"
-    dest: "{{ weaviate_working_directory }}/restore.sh"
-    owner: "{{ weaviate_user_name }}"
-    group: "{{ weaviate_user_group }}"
-    mode: "770"
-
-- name: Copy weaviate-docker.sh helper script
+- name: Copy templated shell scripts
   become: true
   template:
-    src: "templates/weaviate-docker.sh.j2"
-    dest: "{{ weaviate_working_directory }}/weaviate-docker.sh"
+    src: "{{ item }}.j2"
+    dest: "{{ weaviate_working_directory }}/{{ item }}"
     owner: "{{ weaviate_user_name }}"
     group: "{{ weaviate_user_group }}"
     mode: "770"
-
-- name: Generate initial traefik config
-  become: true
-  become_user: "{{ weaviate_user_name }}"
-  command: ./generate-traefik-config.sh
-  args:
-    chdir: "{{ weaviate_working_directory }}"
-    creates: "{{ weaviate_traefik_directory }}/config.yml"
+  loop:
+    - backup.sh
+    - restore.sh
+    - weaviate-docker.sh
 
 - name: Setup automated backups cron job
   become: true

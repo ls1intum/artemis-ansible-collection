@@ -27,7 +27,13 @@ http:
     default-whitelist:
       ipAllowList:
         sourceRange:
-{{ALLOWED_IPS_YAML}}
+{% if weaviate_allowed_ips == "" %}
+          - "0.0.0.0/0"
+{% else %}
+{% for ip in weaviate_allowed_ips.split(',') %}
+          - "{{ ip.strip() }}"
+{% endfor %}
+{% endif %}
 
     secured:
       chain:

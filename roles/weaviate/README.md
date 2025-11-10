@@ -390,6 +390,6 @@ MIT
 
 ## Author Information
 
-This role was created by the [Chair of Applied Software Engineering at TUM](https://www.cit.tum.de/cit/startseite/).
+This role was created by the [Chair of Applied Software Engineering at TUM](https://aet.cit.tum.de/).
 
 For issues and contributions, please visit the [artemis-ansible-collection repository](https://github.com/ls1intum/artemis-ansible-collection).
