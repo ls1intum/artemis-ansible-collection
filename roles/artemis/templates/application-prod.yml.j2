@@ -262,11 +262,11 @@ artemis:
 
 {% if atlas is defined %}
   atlas:
-    enabled: {{ atlas.enabled }}
+    enabled: {{ atlas.enabled | lower }}
 
-{% if atlas.atlasml is defined %}
+{% if atlas.atlasml is defined and atlas.atlasml.enabled %}
     atlasml:
-      enabled: {{ atlas.atlasml.enabled }}
+      enabled: {{ atlas.atlasml.enabled | lower }}
       base-url: {{ atlas.atlasml.base-url }}
       auth-token: {{ atlas.atlasml.auth-token }}
 {% endif %}
