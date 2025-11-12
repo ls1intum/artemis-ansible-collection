@@ -1,0 +1,28 @@
+---
+galaxy_info:
+  author: ls1intum
+  description: Deploy Weaviate vector database with Traefik reverse proxy
+  company: TUM Applied Education Technologies
+
+  license: MIT
+
+  min_ansible_version: "2.9"
+
+  galaxy_tags:
+    - weaviate
+    - vector
+    - database
+    - traefik
+    - docker
+    - ai
+    - ml
+
+dependencies: []
+
+# Note: This role requires Docker and Docker Compose to be installed on the target system.
+# These are not managed by this role to allow flexibility in Docker installation methods.
+#
+# To install Docker, you can:
+# 1. Use a pre-existing Docker role from Ansible Galaxy
+# 2. Install manually before running this role
+# 3. Use your organization's preferred Docker installation method

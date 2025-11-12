@@ -1,0 +1,43 @@
+http:
+  middlewares:
+    https-redirectscheme:
+      redirectScheme:
+        scheme: https
+        permanent: true
+
+    default-headers:
+      headers:
+        frameDeny: true
+        browserXssFilter: true
+        contentTypeNosniff: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 15552000
+        customFrameOptionsValue: SAMEORIGIN
+        customRequestHeaders:
+          X-Forwarded-Proto: https
+
+    rate-limit:
+      rateLimit:
+        average: 100
+        period: 1s
+        burst: 200
+
+    default-whitelist:
+      ipAllowList:
+        sourceRange:
+{% if weaviate_allowed_ips == "" %}
+          - "0.0.0.0/0"
+{% else %}
+{% for ip in weaviate_allowed_ips.split(',') %}
+          - "{{ ip.strip() }}"
+{% endfor %}
+{% endif %}
+
+    secured:
+      chain:
+        middlewares:
+          - default-whitelist
+          - default-headers
+          - rate-limit
