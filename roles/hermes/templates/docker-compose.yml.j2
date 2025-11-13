@@ -1,0 +1,15 @@
+services:
+  hermes:
+    image: ghcr.io/ls1intum/hermes:"{{ hermes_version }}"
+    container_name: hermes
+    ports:
+      - "{{ hermes_port }}:8080"
+    environment:
+      - APNS_CERTIFICATE_PWD="{{ hermes_apns_certificate_password }}"
+      - APNS_PROD_ENVIRONMENT="{{ hermes_apns_prod_environment }}"
+      - APNS_CERTIFICATE_PATH="{{ hermes_working_directory }}/{{ hermes_apns_certificate_path }}"
+      - GOOGLE_APPLICATION_CREDENTIALS="{{ hermes_working_directory }}/{{ hermes_google_application_credentials_json_path }}"
+    volumes:
+      - ${APNS_CERT_PATH}:/key/artemis-apns.p12
+      - ${GOOGLE_APPLICATION_CREDENTIALS_JSON}:/firebase.json
+    restart: on-failure
