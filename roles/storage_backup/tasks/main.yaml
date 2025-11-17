@@ -30,7 +30,7 @@
 - name: Write keys to file
   copy:
     dest: ./decryption_Keys.txt
-    content: "{{ borg_keys }}"
+    content: "{{ borg_keys.stdout }}"
   delegate_to: localhost
 
 - name: Deploy storage backup script

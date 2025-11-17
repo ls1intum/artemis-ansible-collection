@@ -23,13 +23,13 @@ esac; done
 if [ $OPTIND -eq 1 ]; then printf "Invalid Option: %s requires options.\nRun %s -h for help.\n" "$(basename "$0")" "$(basename "$0")" 1>&2; exit 1; fi
 shift $((OPTIND -1))
 
-export BORG_PASSPHRASE={{ storage_backup_password }}
+export BORG_PASSPHRASE="{{ storage_backup_password }}"
 
-if [ $prune = true ]; then # Prune old backups
+if [ "$prune" = true ]; then # Prune old backups
     borg prune --keep-within {{ storage_backup_retention }}d "{{ storage_backup_dir }}"
 fi
 
-if [ $storage = true ]; then # Storage Backup
+if [ "$storage" = true ]; then # Storage Backup
     borg create -C {{ storage_backup_compression }} "{{ storage_backup_dir }}::{hostname}-{now:%Y-%m-%dT%H:%M:%S}" "{{ storage_export }}"
 fi
 
