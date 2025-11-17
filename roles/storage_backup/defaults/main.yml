@@ -1,6 +1,6 @@
 ---
 storage_export: /srv/artemis
-storage_backup_password: #FIXME
+storage_backup_password: "" #FIXME
 storage_backup_dir: /opt/backup
 
 storage_backup_script_path: /opt/backup.sh

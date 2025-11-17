@@ -1,7 +1,7 @@
 ---
 - name: Install dependencies
   become: true
-  ansible.builtin.apt:
+  apt:
     name:
       - borgbackup
     state: present
@@ -9,7 +9,7 @@
 
 - name: Initialise Borg repository
   become: true
-  ansible.builtin.command: borg init --encryption=repokey {{ storage_backup_dir }}
+  command: borg init --encryption=repokey {{ storage_backup_dir }}
   environment:
     BORG_PASSPHRASE: '{{ storage_backup_password }}'
   register: init_borg_output
@@ -20,18 +20,18 @@
 
 - name: Get encryption keys
   become: true
-  ansible.builtin.command: borg key export --paper {{ storage_backup_dir }}
+  command: borg key export --paper {{ storage_backup_dir }}
   register: borg_keys
-  changed_when: borg_keys.rc != 0
 
 - name: Print encryption keys
-  ansible.builtin.debug:
+  debug:
     msg: "{{ borg_keys }}"
 
-- name: Save the keys!
-  ansible.builtin.pause:
-    prompt: "Save the keys! (Enter to continue)"
-    echo: true
+- name: Write keys to file
+  copy:
+    dest: ./decryption_Keys.txt
+    content: "{{ borg_keys }}"
+  delegate_to: localhost
 
 - name: Deploy storage backup script
   become: true
@@ -42,7 +42,7 @@
 
 - name: Add backup cronjob
   become: true
-  ansible.builtin.cron:
+  cron:
     name: "Backup artemis storage"
     minute: "{{ storage_backup_minute }}"
     hour: "{{ storage_backup_hour }}"
