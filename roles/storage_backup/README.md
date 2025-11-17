@@ -1,12 +1,12 @@
 # Storage Backup
 
-This role adds a cron job to the Storage host which creates regular Storage backups.
+This role adds a cron job to the Storage host which creates regular Storage backups. The encryption keys will be saved to `./decryption_Keys.txt` on the localhost.
 
 ## Configuration
 
 The default configuration will create a Storage backup every day at 4:30:
 
-```yml
+```yaml
 storage_export: /srv/artemis
 storage_backup_dir: /opt/backup
 
@@ -19,7 +19,7 @@ storage_backup_hour: 4
 
 ### Variables that have to be configured:
 
-```
+```yaml
 storage_backup_password: "your_storage_backup_password"
 ```
 Note that the password can be set to the empty string to store the backup without a password.
