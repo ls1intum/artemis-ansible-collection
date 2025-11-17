@@ -31,7 +31,7 @@
 - name: Save the keys!
   ansible.builtin.pause:
     prompt: "Save the keys! (Enter to continue)"
-    echo: yes
+    echo: true
 
 - name: Deploy storage backup script
   become: true
