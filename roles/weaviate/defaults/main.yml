@@ -1,7 +1,6 @@
 ---
 weaviate_build_version: "1.30.0"
 weaviate_working_directory: "/opt/weaviate"
-weaviate_data_directory: "{{ weaviate_working_directory }}/data"
 weaviate_traefik_directory: "{{ weaviate_working_directory }}/traefik"
 weaviate_backup_directory: "{{ weaviate_working_directory }}/backups"
 

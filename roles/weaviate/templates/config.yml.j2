@@ -18,26 +18,9 @@ http:
         customRequestHeaders:
           X-Forwarded-Proto: https
 
+    # Rate limiting: 100 requests/sec average, 200 burst
     rate-limit:
       rateLimit:
         average: 100
         period: 1s
         burst: 200
-
-    default-whitelist:
-      ipAllowList:
-        sourceRange:
-{% if weaviate_allowed_ips == "" %}
-          - "0.0.0.0/0"
-{% else %}
-{% for ip in weaviate_allowed_ips.split(',') %}
-          - "{{ ip.strip() }}"
-{% endfor %}
-{% endif %}
-
-    secured:
-      chain:
-        middlewares:
-          - default-whitelist
-          - default-headers
-          - rate-limit

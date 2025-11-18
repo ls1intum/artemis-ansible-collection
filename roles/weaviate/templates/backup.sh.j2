@@ -1,102 +1,102 @@
 #!/bin/bash
 set -e
 
-echo "Starting Weaviate backup..."
-
-# Load environment variables
-if [ ! -f .env ]; then
-    echo "Error: .env file not found!"
-    exit 1
+# Load environment variables from .env file
+if [ -f .env ]; then
+    export $(grep -v '^#' .env | xargs)
 fi
 
-export $(grep -v '^#' .env | grep -v '^$' | xargs)
-
-# Check required variables
-if [ -z "$WEAVIATE_API_KEY" ] || [ -z "$WEAVIATE_DOMAIN" ]; then
-    echo "Error: WEAVIATE_API_KEY and WEAVIATE_DOMAIN must be set in .env"
-    exit 1
-fi
-
-# Use configured backup directory
+# Configuration
+BACKUP_ID="backup-$(date +%Y%m%d-%H%M%S)"
 BACKUP_DIR="{{ weaviate_backup_directory }}"
+BACKUP_BACKEND="filesystem"
+WEAVIATE_URL="https://${WEAVIATE_DOMAIN}"
 
-# Create backups directory if it doesn't exist
+# Check required environment variables
+if [ -z "$WEAVIATE_API_KEY" ]; then
+    echo "Error: WEAVIATE_API_KEY not set in .env file"
+    exit 1
+fi
+
+if [ -z "$WEAVIATE_DOMAIN" ]; then
+    echo "Error: WEAVIATE_DOMAIN not set in .env file"
+    exit 1
+fi
+
+# Create backup directory if it doesn't exist
 mkdir -p "$BACKUP_DIR"
 
-# Generate backup ID with timestamp
-BACKUP_ID="backup-$(date +%Y%m%d-%H%M%S)"
-echo "Backup ID: $BACKUP_ID"
+echo "Starting Weaviate backup: $BACKUP_ID"
+echo "Backup URL: $WEAVIATE_URL"
+echo ""
 
 # Initiate backup via Weaviate API
 echo "Initiating backup..."
-RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
-    "https://${WEAVIATE_DOMAIN}/v1/backups/filesystem" \
-    -H "Authorization: Bearer ${WEAVIATE_API_KEY}" \
+BACKUP_RESPONSE=$(curl -s -w "\n%{http_code}" \
+    -X POST \
+    -H "Authorization: Bearer $WEAVIATE_API_KEY" \
     -H "Content-Type: application/json" \
-    -d "{\"id\": \"${BACKUP_ID}\"}")
+    "$WEAVIATE_URL/v1/backups/$BACKUP_BACKEND" \
+    -d "{\"id\": \"$BACKUP_ID\"}")
 
-HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
-BODY=$(echo "$RESPONSE" | sed '$d')
+HTTP_CODE=$(echo "$BACKUP_RESPONSE" | tail -n1)
+RESPONSE_BODY=$(echo "$BACKUP_RESPONSE" | sed '$d')
 
 if [ "$HTTP_CODE" != "200" ]; then
     echo "Error: Failed to initiate backup (HTTP $HTTP_CODE)"
-    echo "$BODY"
+    echo "Response: $RESPONSE_BODY"
     exit 1
 fi
 
-echo "Backup initiated successfully!"
+echo "Backup initiated successfully"
+echo ""
 
-# Poll backup status
+# Wait for backup to complete
 echo "Waiting for backup to complete..."
 MAX_RETRIES=60
 RETRY_COUNT=0
-STATUS=""
+SLEEP_INTERVAL=5
 
 while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-    sleep 5
+    STATUS_RESPONSE=$(curl -s \
+        -H "Authorization: Bearer $WEAVIATE_API_KEY" \
+        "$WEAVIATE_URL/v1/backups/$BACKUP_BACKEND/$BACKUP_ID")
 
-    STATUS_RESPONSE=$(curl -s -w "\n%{http_code}" \
-        "https://${WEAVIATE_DOMAIN}/v1/backups/filesystem/${BACKUP_ID}" \
-        -H "Authorization: Bearer ${WEAVIATE_API_KEY}")
+    STATUS=$(echo "$STATUS_RESPONSE" | grep -o '"status":"[^"]*"' | cut -d'"' -f4)
 
-    HTTP_CODE=$(echo "$STATUS_RESPONSE" | tail -n1)
-    BODY=$(echo "$STATUS_RESPONSE" | sed '$d')
-
-    if [ "$HTTP_CODE" == "200" ]; then
-        STATUS=$(echo "$BODY" | grep -o '"status":"[^"]*' | cut -d'"' -f4)
-
-        if [ "$STATUS" == "SUCCESS" ]; then
-            echo "Backup completed successfully!"
-            break
-        elif [ "$STATUS" == "FAILED" ]; then
-            echo "Error: Backup failed!"
-            echo "$BODY"
-            exit 1
-        fi
+    if [ "$STATUS" = "SUCCESS" ]; then
+        echo "Backup completed successfully!"
+        break
+    elif [ "$STATUS" = "FAILED" ]; then
+        echo "Error: Backup failed"
+        echo "Response: $STATUS_RESPONSE"
+        exit 1
     fi
 
-    RETRY_COUNT=$((RETRY_COUNT + 1))
-    echo "Backup in progress... (${RETRY_COUNT}/${MAX_RETRIES})"
+    echo "Backup status: $STATUS (attempt $((RETRY_COUNT+1))/$MAX_RETRIES)"
+    sleep $SLEEP_INTERVAL
+    RETRY_COUNT=$((RETRY_COUNT+1))
 done
 
-if [ "$STATUS" != "SUCCESS" ]; then
-    echo "Error: Backup timed out"
+if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
+    echo "Error: Backup timed out after $((MAX_RETRIES*SLEEP_INTERVAL)) seconds"
     exit 1
 fi
 
-# Compress backup (backup is already on host filesystem via mounted volume)
-echo "Compressing backup..."
-cd "$BACKUP_DIR"
-tar -czf ${BACKUP_ID}.tar.gz ${BACKUP_ID}
-rm -rf ${BACKUP_ID}
-cd - > /dev/null
+echo ""
+echo "Creating compressed archive..."
+tar -czf "$BACKUP_DIR/$BACKUP_ID.tar.gz" -C "$BACKUP_DIR" "$BACKUP_ID"
 
-BACKUP_SIZE=$(du -h ${BACKUP_DIR}/${BACKUP_ID}.tar.gz | cut -f1)
+# Remove uncompressed backup directory
+rm -rf "$BACKUP_DIR/$BACKUP_ID"
 
 echo ""
+echo "======================================"
 echo "Backup completed successfully!"
-echo "  Backup ID: ${BACKUP_ID}"
-echo "  Location: ${BACKUP_DIR}/${BACKUP_ID}.tar.gz"
-echo "  Size: ${BACKUP_SIZE}"
+echo "Backup ID: $BACKUP_ID"
+echo "Location: $BACKUP_DIR/$BACKUP_ID.tar.gz"
+echo "Size: $(du -h "$BACKUP_DIR/$BACKUP_ID.tar.gz" | cut -f1)"
+echo "======================================"
 echo ""
-echo "To restore this backup, run: ./restore.sh ${BACKUP_ID}"
+echo "To restore this backup, run:"
+echo "  ./restore.sh $BACKUP_ID"

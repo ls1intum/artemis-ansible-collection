@@ -292,7 +292,7 @@ To update Weaviate to a new version:
 
 ### IP Whitelisting
 
-By default, Weaviate is accessible from anywhere with valid API key authentication. For additional security:
+By default, Weaviate is accessible from anywhere with valid API key authentication. For additional security, you can restrict access by IP address:
 
 ```yaml
 # Restrict to specific networks
@@ -301,6 +301,8 @@ weaviate_allowed_ips: "10.0.0.0/8,192.168.0.0/16"
 # Restrict to single office IP
 weaviate_allowed_ips: "203.0.113.42/32"
 ```
+
+**How it works**: The role uses Docker labels to configure Traefik's IP whitelist middleware dynamically. When `weaviate_allowed_ips` is set, the middleware is automatically enabled; when empty, public access (with API key) is allowed. This eliminates the need for manual Traefik configuration file editing.
 
 ### SSL/TLS
 

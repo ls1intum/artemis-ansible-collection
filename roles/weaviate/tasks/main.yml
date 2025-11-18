@@ -68,7 +68,6 @@
     - "{{ weaviate_working_directory }}"
     - "{{ weaviate_traefik_directory }}"
     - "{{ weaviate_backup_directory }}"
-    - "{{ weaviate_data_directory }}"
 
 - name: Set permissions for weaviate directories
   become: true
@@ -82,7 +81,6 @@
     - "{{ weaviate_working_directory }}"
     - "{{ weaviate_traefik_directory }}"
     - "{{ weaviate_backup_directory }}"
-    - "{{ weaviate_data_directory }}"
   notify: restart docker weaviate
 
 - name: Copy configuration templates that trigger restart
