@@ -38,6 +38,8 @@ spring:
 
 {% if spring_ai is defined and spring_ai.azure_openai is defined %}
   ai:
+    model:
+      chat: azure-openai
     azure:
       openai:
         api-key: {{ spring_ai.azure_openai.api_key | quote }}
@@ -262,11 +264,11 @@ artemis:
 
 {% if atlas is defined %}
   atlas:
-    enabled: {{ atlas.enabled }}
+    enabled: {{ atlas.enabled | lower }}
 
-{% if atlas.atlasml is defined %}
+{% if atlas.atlasml is defined and atlas.atlasml.enabled %}
     atlasml:
-      enabled: {{ atlas.atlasml.enabled }}
+      enabled: {{ atlas.atlasml.enabled | lower }}
       base-url: {{ atlas.atlasml.base-url }}
       auth-token: {{ atlas.atlasml.auth-token }}
 {% endif %}
