@@ -24,7 +24,10 @@ Before using this role, ensure the following requirements are met:
 - **Docker Engine**: 20.10 or later
 - **Docker Compose**: v2.0 or later
 - **Ports**: 80, 443, and 50051 must be accessible from the internet
-- **Resources**: Minimum 24GB RAM, 8 CPU cores recommended (based on default resource allocations)
+- **Resources**:
+  - **Development/Testing**: Minimum 8GB RAM, 4 CPU cores (uses default resource limits)
+  - **Production**: 16GB+ RAM recommended, 6+ CPU cores (requires customizing resource limits)
+  - See [Resource Planning](#resource-planning) section for detailed guidance
 
 ### DNS Configuration
 
@@ -42,22 +45,83 @@ This role **does not** install Docker. You must install Docker and Docker Compos
 
 ## Configuration
 
-To configure the role, you need to set the required variables in your Ansible playbook or inventory.
-
 ### Required Variables
 
-The following variables **must** be set:
+The following variables **must** be set in your playbook, inventory, or group_vars. The role will fail with a clear error message if any of these are missing or invalid.
+
+#### `weaviate_domain` (required)
+
+The fully qualified domain name for your Weaviate instance.
 
 ```yaml
-# Domain name for Weaviate instance
 weaviate_domain: "weaviate.example.com"
-
-# API key for authentication (generate with: openssl rand -base64 32)
-weaviate_api_key: "your-secure-44-character-api-key-here"
-
-# Email for Let's Encrypt certificate notifications
-letsencrypt_email: "your-email@example.com"
 ```
+
+**Requirements:**
+- Must be a valid domain name
+- Must have a DNS A record pointing to your server's IP address
+- Must be publicly accessible for Let's Encrypt certificate validation
+- Cannot be `localhost` or an IP address (HTTPS requires a real domain)
+
+**Examples:**
+- ✓ `weaviate.example.com`
+- ✓ `db.weaviate.example.org`
+- ✗ `localhost` (won't work with Let's Encrypt)
+- ✗ `192.168.1.100` (use a domain, not an IP)
+
+#### `weaviate_api_key` (required)
+
+A strong random API key for authenticating requests to Weaviate.
+
+```yaml
+# For production, use Ansible Vault:
+weaviate_api_key: "{{ vault_weaviate_api_key }}"
+
+# For testing only (generate a secure key):
+weaviate_api_key: "dGhpcyBpcyBhIHNlY3VyZSBhcGkga2V5IGZvciBkZW1vIHB1cnBvc2VzIG9ubHk="
+```
+
+**Generate a secure API key:**
+```bash
+openssl rand -base64 32
+```
+
+**Security best practices:**
+- Use a cryptographically secure random key (minimum 32 characters)
+- **Always** store in Ansible Vault for production deployments
+- Never commit plain-text API keys to version control
+- Rotate keys periodically
+- Use different keys for different environments (dev, staging, prod)
+
+**Example Vault setup:**
+```bash
+# Create encrypted vault file
+ansible-vault create group_vars/weaviate/vault.yml
+
+# Add to vault.yml:
+vault_weaviate_api_key: "your-generated-key-here"
+
+# Reference in playbook:
+weaviate_api_key: "{{ vault_weaviate_api_key }}"
+```
+
+#### `letsencrypt_email` (required)
+
+Email address for Let's Encrypt certificate notifications.
+
+```yaml
+letsencrypt_email: "admin@example.com"
+```
+
+**Requirements:**
+- Must be a valid email address (contains `@`)
+- Should be actively monitored
+- Used for certificate expiry notifications and renewal reminders
+
+**Purpose:**
+- Let's Encrypt sends important notifications about certificate expiry
+- Required for automated certificate renewal
+- Helps troubleshoot certificate issues
 
 ### Optional Variables
 
@@ -110,21 +174,29 @@ weaviate_backup_retention_days: 7
 
 #### Resource Limits
 
+**Default values** are optimized for development/testing on modest hardware (8GB RAM total):
+
 ```yaml
-# Weaviate container resources
-weaviate_cpu_limit: "8"
-weaviate_memory_limit: "16G"
-weaviate_cpu_reservation: "4"
-weaviate_memory_reservation: "8G"
-
-# Traefik resources
+# Traefik (reverse proxy - minimal requirements)
 weaviate_traefik_cpu_limit: "1"
-weaviate_traefik_memory_limit: "1G"
+weaviate_traefik_memory_limit: "512M"
+weaviate_traefik_cpu_reservation: "1"
+weaviate_traefik_memory_reservation: "256M"
 
-# Multi2vec-CLIP resources
-weaviate_multi2vec_cpu_limit: "4"
-weaviate_multi2vec_memory_limit: "8G"
+# Weaviate (vector database - scales with dataset size)
+weaviate_cpu_limit: "2"
+weaviate_memory_limit: "4G"
+weaviate_cpu_reservation: "1"
+weaviate_memory_reservation: "2G"
+
+# Multi2vec-CLIP (ML model for embeddings)
+weaviate_multi2vec_cpu_limit: "1"
+weaviate_multi2vec_memory_limit: "2G"
+weaviate_multi2vec_cpu_reservation: "1"
+weaviate_multi2vec_memory_reservation: "1G"
 ```
+
+**For production deployments**, increase these limits based on your workload. See [Resource Planning](#resource-planning) for recommendations.
 
 ## Example Usage
 
@@ -280,6 +352,198 @@ To update Weaviate to a new version:
 - Weaviate handles schema migrations automatically on startup
 - Always check [Weaviate release notes](https://github.com/weaviate/weaviate/releases) for breaking changes
 - Consider creating a manual backup before major version upgrades (1.x → 2.x)
+
+## Resource Planning
+
+### Understanding Resource Requirements
+
+The role's default resource limits are designed for **development and testing** environments on modest hardware. Production deployments require significantly more resources depending on your workload.
+
+#### Default Resource Allocations (Development)
+
+The default configuration totals:
+- **CPU Limits**: 4 cores total
+  - Traefik: 1 core
+  - Weaviate: 2 cores
+  - Multi2vec-CLIP: 1 core
+- **CPU Reservations**: 2 cores guaranteed
+  - Traefik: 1 core
+  - Weaviate: 1 core
+  - Multi2vec-CLIP: 1 core
+- **Memory Limits**: 6.5GB total
+  - Traefik: 512MB
+  - Weaviate: 4GB
+  - Multi2vec-CLIP: 2GB
+- **Memory Reservations**: 3.25GB guaranteed
+  - Traefik: 256MB
+  - Weaviate: 2GB
+  - Multi2vec-CLIP: 1GB
+
+**Total System Requirements (Development)**: Minimum 8GB RAM, 4 CPU cores
+
+**Note**: All CPU limits use integer values (whole cores) for clarity and predictable resource allocation.
+
+### Production Resource Recommendations
+
+For production deployments, adjust resource limits based on your expected workload:
+
+#### Small Production (16GB RAM, 6 CPU cores)
+
+Suitable for small teams, light usage, datasets < 100k vectors:
+
+```yaml
+# Weaviate
+weaviate_cpu_limit: "4"
+weaviate_memory_limit: "8G"
+weaviate_cpu_reservation: "2"
+weaviate_memory_reservation: "4G"
+
+# Multi2vec-CLIP
+weaviate_multi2vec_cpu_limit: "2"
+weaviate_multi2vec_memory_limit: "4G"
+weaviate_multi2vec_cpu_reservation: "1"
+weaviate_multi2vec_memory_reservation: "2G"
+
+# Traefik (can keep defaults)
+weaviate_traefik_cpu_limit: "1"
+weaviate_traefik_memory_limit: "512M"
+```
+
+**Total**: 7 CPU cores, ~12.5GB RAM
+
+#### Medium Production (32GB RAM, 10 CPU cores)
+
+Suitable for medium teams, moderate usage, datasets 100k-1M vectors:
+
+```yaml
+# Weaviate
+weaviate_cpu_limit: "6"
+weaviate_memory_limit: "12G"
+weaviate_cpu_reservation: "3"
+weaviate_memory_reservation: "6G"
+
+# Multi2vec-CLIP
+weaviate_multi2vec_cpu_limit: "3"
+weaviate_multi2vec_memory_limit: "6G"
+weaviate_multi2vec_cpu_reservation: "2"
+weaviate_multi2vec_memory_reservation: "3G"
+
+# Traefik
+weaviate_traefik_cpu_limit: "1"
+weaviate_traefik_memory_limit: "1G"
+weaviate_traefik_cpu_reservation: "1"
+weaviate_traefik_memory_reservation: "512M"
+```
+
+**Total**: 10 CPU cores, ~19GB RAM
+
+#### Large Production (64GB+ RAM, 12+ CPU cores)
+
+Suitable for large teams, heavy usage, datasets > 1M vectors:
+
+```yaml
+# Weaviate
+weaviate_cpu_limit: "8"
+weaviate_memory_limit: "16G"
+weaviate_cpu_reservation: "4"
+weaviate_memory_reservation: "8G"
+
+# Multi2vec-CLIP
+weaviate_multi2vec_cpu_limit: "4"
+weaviate_multi2vec_memory_limit: "8G"
+weaviate_multi2vec_cpu_reservation: "2"
+weaviate_multi2vec_memory_reservation: "4G"
+
+# Traefik
+weaviate_traefik_cpu_limit: "1"
+weaviate_traefik_memory_limit: "1G"
+```
+
+**Total**: ~13 CPU cores, ~25GB RAM
+
+### Factors Affecting Resource Needs
+
+#### Weaviate Memory Requirements
+
+Weaviate's memory usage depends on:
+- **Vector count**: ~50-100 bytes per vector (varies by dimensions)
+- **Object properties**: Additional metadata increases memory
+- **Index type**: HNSW indices use more memory than flat indices
+- **Shard count**: Multiple shards increase overhead
+
+**Rule of thumb**: Allocate 4GB + (vector_count × 100 bytes)
+
+#### Multi2vec-CLIP Memory Requirements
+
+The CLIP model requires:
+- **Base model size**: ~600MB for ViT-B-32
+- **Batch processing**: Additional memory for concurrent requests
+- **Recommended**: 2GB minimum, 4-8GB for production
+
+#### CPU Considerations
+
+- **Weaviate**: CPU-intensive for:
+  - Query processing and vector similarity calculations
+  - Indexing new vectors
+  - Background compaction
+- **Multi2vec-CLIP**: CPU-only inference (no GPU support in default image)
+  - Embedding generation is CPU-bound
+  - More CPUs = faster embedding throughput
+
+### Monitoring and Tuning
+
+After deployment, monitor resource usage:
+
+```bash
+# Check container resource usage
+docker stats
+
+# Check Weaviate memory usage
+./weaviate-docker.sh logs weaviate | grep -i memory
+
+# View current limits
+docker inspect weaviate | grep -A 10 "Memory"
+```
+
+**Signs you need more resources**:
+- OOM (Out of Memory) kills in logs
+- Query latency > 1 second for simple searches
+- High CPU usage (> 80%) sustained
+- Container restarts due to health check failures
+
+### Example Production Playbook
+
+```yaml
+- hosts: weaviate_production
+  roles:
+    - role: ls1intum.artemis.weaviate
+      vars:
+        # Required
+        weaviate_domain: "weaviate.production.example.com"
+        weaviate_api_key: "{{ vault_weaviate_api_key }}"
+        letsencrypt_email: "ops@example.com"
+
+        # Production resource limits (medium tier)
+        weaviate_cpu_limit: "6"
+        weaviate_memory_limit: "12G"
+        weaviate_cpu_reservation: "3"
+        weaviate_memory_reservation: "6G"
+
+        weaviate_multi2vec_cpu_limit: "3"
+        weaviate_multi2vec_memory_limit: "6G"
+        weaviate_multi2vec_cpu_reservation: "2"
+        weaviate_multi2vec_memory_reservation: "3G"
+
+        weaviate_traefik_cpu_limit: "1"
+        weaviate_traefik_memory_limit: "1G"
+        weaviate_traefik_cpu_reservation: "1"
+        weaviate_traefik_memory_reservation: "512M"
+
+        # Enable automated backups for production
+        weaviate_enable_automated_backups: true
+        weaviate_backup_schedule: "0 2 * * *"  # 2 AM daily
+        weaviate_backup_retention_days: 30
+```
 
 ## Security Considerations
 

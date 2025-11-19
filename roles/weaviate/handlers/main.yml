@@ -1,10 +1,45 @@
 ---
-# handlers file for weaviate
+##############################################################################
+# Weaviate Service Handlers
+##############################################################################
+
 - name: Restart docker compose weaviate
   become: true
   command: ./weaviate-docker.sh restart
   args:
     chdir: "{{ weaviate_working_directory }}"
+  register: weaviate_restart_result
+  failed_when: weaviate_restart_result.rc != 0
+  retries: 2
+  delay: 5
+  listen: "restart docker weaviate"
+
+- name: Verify weaviate containers are running after restart
+  become: true
+  command: docker compose --project-directory "{{ weaviate_working_directory }}" ps --format json
+  args:
+    chdir: "{{ weaviate_working_directory }}"
+  register: weaviate_containers_status
+  until: >
+    weaviate_containers_status.stdout | from_json | selectattr('State', 'equalto', 'running') | list | length == 3
+  retries: 12
+  delay: 10
+  failed_when: >
+    weaviate_containers_status.stdout | from_json | selectattr('State', 'equalto', 'running') | list | length != 3
+  listen: "restart docker weaviate"
+
+- name: Wait for weaviate health check after restart
+  uri:
+    url: "https://{{ weaviate_domain }}/v1/.well-known/ready"
+    method: GET
+    status_code: 200
+    validate_certs: false
+    timeout: 10
+  register: weaviate_health_check
+  until: weaviate_health_check.status == 200
+  retries: 18
+  delay: 10
+  failed_when: weaviate_health_check.status != 200
   listen: "restart docker weaviate"
 
 - name: Start docker compose weaviate
@@ -12,4 +47,36 @@
   command: ./weaviate-docker.sh start
   args:
     chdir: "{{ weaviate_working_directory }}"
+  register: weaviate_start_result
+  failed_when: weaviate_start_result.rc != 0
+  retries: 2
+  delay: 5
+  listen: "start docker weaviate"
+
+- name: Verify weaviate containers are running after start
+  become: true
+  command: docker compose --project-directory "{{ weaviate_working_directory }}" ps --format json
+  args:
+    chdir: "{{ weaviate_working_directory }}"
+  register: weaviate_containers_status_start
+  until: >
+    weaviate_containers_status_start.stdout | from_json | selectattr('State', 'equalto', 'running') | list | length == 3
+  retries: 12
+  delay: 10
+  failed_when: >
+    weaviate_containers_status_start.stdout | from_json | selectattr('State', 'equalto', 'running') | list | length != 3
+  listen: "start docker weaviate"
+
+- name: Wait for weaviate health check after start
+  uri:
+    url: "https://{{ weaviate_domain }}/v1/.well-known/ready"
+    method: GET
+    status_code: 200
+    validate_certs: false
+    timeout: 10
+  register: weaviate_health_check_start
+  until: weaviate_health_check_start.status == 200
+  retries: 18
+  delay: 10
+  failed_when: weaviate_health_check_start.status != 200
   listen: "start docker weaviate"

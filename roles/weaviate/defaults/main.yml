@@ -23,20 +23,30 @@ weaviate_deployment_user_comment: "User to deploy weaviate to this host"
 # Weaviate Configuration
 ##############################################################################
 
-# Domain configuration (REQUIRED)
-weaviate_domain: # FIXME - e.g., weaviate.example.com
+# Domain configuration (REQUIRED - must be set in playbook or inventory)
+# The fully qualified domain name that will be used to access Weaviate via HTTPS
+# Example: "weaviate.example.com"
+# This domain must have a DNS A record pointing to your server's IP address
+weaviate_domain: ""
 
-# API Authentication (REQUIRED)
-# Generate a strong API key using: openssl rand -base64 32
-weaviate_api_key: # FIXME
+# API Authentication (REQUIRED - must be set in playbook or inventory)
+# A strong random API key for authenticating requests to Weaviate
+# Generate using: openssl rand -base64 32
+# Store this in Ansible Vault for production deployments
+# Example: "dGhpcyBpcyBhIHNlY3VyZSBhcGkga2V5IGZvciBkZW1vIHB1cnBvc2VzIG9ubHk="
+weaviate_api_key: ""
+
+# Username associated with the API key
 weaviate_api_user: "admin"
 
 # Logging
 # Options: trace, debug, info, warning, error, fatal, panic
 weaviate_log_level: "info"
 
-# Let's Encrypt Configuration (REQUIRED)
-letsencrypt_email: # FIXME - e.g., your-email@example.com
+# Let's Encrypt Configuration (REQUIRED - must be set in playbook or inventory)
+# Email address for Let's Encrypt certificate notifications and renewal reminders
+# Example: "admin@example.com"
+letsencrypt_email: ""
 
 # IP Safelisting (Optional)
 # Default: accessible from everywhere with API key authentication
@@ -56,24 +66,43 @@ weaviate_enable_cuda: "0"
 ##############################################################################
 # Resource Limits
 ##############################################################################
+#
+# IMPORTANT: The defaults below are optimized for DEVELOPMENT/TESTING on
+# modest hardware (8-12GB RAM total). For PRODUCTION deployments, you should
+# increase these limits based on your workload and available resources.
+#
+# Default totals (development):
+#   - CPU Limits: 4 cores, Reservations: 2 cores
+#   - Memory Limits: 6.5GB, Reservations: 3.25GB
+#
+# Recommended production values:
+#   - Small (16GB RAM): Weaviate 4CPU/8GB, CLIP 2CPU/4GB, Traefik 1CPU/1GB
+#   - Medium (32GB RAM): Weaviate 6CPU/12GB, CLIP 3CPU/6GB, Traefik 1CPU/1GB
+#   - Large (64GB+ RAM): Weaviate 8CPU/16GB, CLIP 4CPU/8GB, Traefik 1CPU/1GB
+#
+# See README.md for detailed resource planning guidance.
+##############################################################################
 
-# Traefik Resources
+# Traefik Resources (reverse proxy - minimal requirements)
+# Note: Traefik is very lightweight; 1 CPU is more than sufficient
 weaviate_traefik_cpu_limit: "1"
-weaviate_traefik_memory_limit: "1G"
-weaviate_traefik_cpu_reservation: "0.5"
-weaviate_traefik_memory_reservation: "512M"
+weaviate_traefik_memory_limit: "512M"
+weaviate_traefik_cpu_reservation: "1"
+weaviate_traefik_memory_reservation: "256M"
 
-# Weaviate Resources
-weaviate_cpu_limit: "8"
-weaviate_memory_limit: "16G"
-weaviate_cpu_reservation: "4"
-weaviate_memory_reservation: "8G"
+# Weaviate Resources (vector database - adjust based on dataset size)
+# Development defaults support small datasets and light usage
+weaviate_cpu_limit: "2"
+weaviate_memory_limit: "4G"
+weaviate_cpu_reservation: "1"
+weaviate_memory_reservation: "2G"
 
-# Multi2vec-CLIP Resources
-weaviate_multi2vec_cpu_limit: "4"
-weaviate_multi2vec_memory_limit: "8G"
-weaviate_multi2vec_cpu_reservation: "2"
-weaviate_multi2vec_memory_reservation: "4G"
+# Multi2vec-CLIP Resources (ML model - CPU-only inference)
+# Development defaults for basic embedding generation
+weaviate_multi2vec_cpu_limit: "1"
+weaviate_multi2vec_memory_limit: "2G"
+weaviate_multi2vec_cpu_reservation: "1"
+weaviate_multi2vec_memory_reservation: "1G"
 
 ##############################################################################
 # Backup Configuration
