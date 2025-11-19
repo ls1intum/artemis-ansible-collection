@@ -1,0 +1,303 @@
+---
+##############################################################################
+# Pre-deployment Validation
+##############################################################################
+
+- name: Validate weaviate_domain is set
+  assert:
+    that:
+      - weaviate_domain is defined
+      - weaviate_domain | length > 0
+      - weaviate_domain is string
+    fail_msg: |
+      ❌ REQUIRED VARIABLE MISSING: weaviate_domain
+
+      The 'weaviate_domain' variable must be set to your Weaviate server's fully qualified domain name.
+
+      Example:
+        weaviate_domain: "weaviate.example.com"
+
+      Requirements:
+        - Must be a valid domain name
+        - Must have a DNS A record pointing to your server's IP address
+        - Must be publicly accessible for Let's Encrypt certificate validation
+
+      Set this variable in your playbook, inventory, or group_vars.
+    quiet: true
+
+- name: Validate weaviate_api_key is set
+  assert:
+    that:
+      - weaviate_api_key is defined
+      - weaviate_api_key | length > 0
+      - weaviate_api_key is string
+    fail_msg: |
+      ❌ REQUIRED VARIABLE MISSING: weaviate_api_key
+
+      The 'weaviate_api_key' variable must be set to a strong random API key.
+
+      Generate a secure API key:
+        openssl rand -base64 32
+
+      Example playbook configuration (use Ansible Vault for production):
+        weaviate_api_key: "{{ vault_weaviate_api_key }}"
+
+      Security recommendations:
+        - Use a cryptographically secure random key (minimum 32 characters)
+        - Store in Ansible Vault for production deployments
+        - Never commit plain-text API keys to version control
+        - Rotate keys periodically
+
+      Set this variable in your playbook, inventory, or group_vars.
+    quiet: true
+
+- name: Validate letsencrypt_email is set
+  assert:
+    that:
+      - letsencrypt_email is defined
+      - letsencrypt_email | length > 0
+      - letsencrypt_email is string
+      - "'@' in letsencrypt_email"
+    fail_msg: |
+      ❌ REQUIRED VARIABLE MISSING: letsencrypt_email
+
+      The 'letsencrypt_email' variable must be set to a valid email address.
+
+      Example:
+        letsencrypt_email: "admin@example.com"
+
+      Purpose:
+        - Let's Encrypt uses this email for certificate expiry notifications
+        - Required for certificate renewal reminders
+        - Must be a valid, monitored email address
+
+      Set this variable in your playbook, inventory, or group_vars.
+    quiet: true
+
+- name: Validate domain format
+  assert:
+    that:
+      - weaviate_domain is match('^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$')
+    fail_msg: |
+      ❌ INVALID DOMAIN FORMAT: weaviate_domain
+
+      The domain '{{ weaviate_domain }}' does not appear to be a valid domain name.
+
+      Valid domain examples:
+        - weaviate.example.com
+        - db.weaviate.example.org
+        - weaviate-prod.company.io
+
+      Invalid examples:
+        - localhost (use a real domain for HTTPS)
+        - 192.168.1.100 (use a domain name, not an IP)
+        - weaviate..example.com (double dots)
+        - -weaviate.example.com (cannot start with hyphen)
+
+      Fix the 'weaviate_domain' variable in your configuration.
+    quiet: true
+
+- name: Display configuration summary
+  debug:
+    msg:
+      - "✓ Weaviate Configuration Validated"
+      - "  Domain: {{ weaviate_domain }}"
+      - "  API User: {{ weaviate_api_user }}"
+      - "  Let's Encrypt Email: {{ letsencrypt_email }}"
+      - "  Working Directory: {{ weaviate_working_directory }}"
+      - "  Weaviate Version: {{ weaviate_build_version }}"
+      - "  Automated Backups: {{ 'Enabled' if weaviate_enable_automated_backups else 'Disabled' }}"
+
+##############################################################################
+# System Setup
+##############################################################################
+
+- name: Ensure weaviate group {{ weaviate_user_group }} exists
+  become: true
+  group:
+    name: "{{ weaviate_user_group }}"
+    gid: "{{ weaviate_user_gid }}"
+    state: present
+
+- name: Ensure weaviate user {{ weaviate_user_name }} exists
+  become: true
+  user:
+    name: "{{ weaviate_user_name }}"
+    state: present
+    uid: "{{ weaviate_user_uid }}"
+    group: "{{ weaviate_user_group }}"
+    groups: "docker"
+
+- name: Ensure deployment user {{ weaviate_deployment_user_name }} exists
+  become: true
+  user:
+    name: "{{ weaviate_deployment_user_name }}"
+    comment: "{{ weaviate_deployment_user_comment }}"
+    state: present
+    uid: "{{ weaviate_deployment_user_uid }}"
+    group: "{{ weaviate_user_group }}"
+    groups: "sudo,docker"
+    append: true
+  when: (weaviate_create_deployment_user | bool)
+
+- name: Ensure (limited) sudo privileges for user {{ weaviate_deployment_user_name }}
+  become: true
+  template:
+    src: weaviate_deployment_sudoers.j2
+    dest: /etc/sudoers.d/weaviate_deployment
+    validate: "visudo -cf %s"
+    mode: "440"
+  when: (weaviate_create_deployment_user | bool)
+
+- name: Authorize ssh-key for deployment user
+  become: true
+  ansible.posix.authorized_key:
+    user: "{{ weaviate_deployment_user_name }}"
+    state: present
+    key: "{{ weaviate_deployment_user_public_key }}"
+  when: (weaviate_create_deployment_user | bool)
+
+- name: Create weaviate directories
+  become: true
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "775"
+  loop:
+    - "{{ weaviate_working_directory }}"
+    - "{{ weaviate_traefik_directory }}"
+    - "{{ weaviate_backup_directory }}"
+
+- name: Set permissions for weaviate directories
+  become: true
+  file:
+    path: "{{ item }}"
+    state: directory
+    recurse: true
+    owner: "{{ weaviate_user_name }}"
+    group: "{{ weaviate_user_group }}"
+  loop:
+    - "{{ weaviate_working_directory }}"
+    - "{{ weaviate_traefik_directory }}"
+    - "{{ weaviate_backup_directory }}"
+  notify: restart docker weaviate
+
+- name: Copy configuration templates that trigger restart
+  become: true
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ weaviate_user_name }}"
+    group: "{{ weaviate_user_group }}"
+    mode: "660"
+  loop:
+    - src: docker-compose.yml.j2
+      dest: "{{ weaviate_working_directory }}/docker-compose.yml"
+    - src: docker.env.j2
+      dest: "{{ weaviate_working_directory }}/.env"
+    - src: traefik.yml.j2
+      dest: "{{ weaviate_traefik_directory }}/traefik.yml"
+  notify: restart docker weaviate
+
+- name: Generate Traefik config.yml from template
+  become: true
+  template:
+    src: "config.yml.j2"
+    dest: "{{ weaviate_traefik_directory }}/config.yml"
+    owner: "{{ weaviate_user_name }}"
+    group: "{{ weaviate_user_group }}"
+    mode: "660"
+  notify: restart docker weaviate
+
+- name: Create acme.json for Let's Encrypt certificates
+  become: true
+  file:
+    path: "{{ weaviate_traefik_directory }}/acme.json"
+    state: touch
+    owner: "{{ weaviate_user_name }}"
+    group: "{{ weaviate_user_group }}"
+    mode: "600"
+    modification_time: preserve
+    access_time: preserve
+
+- name: Copy templated shell scripts
+  become: true
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ weaviate_working_directory }}/{{ item }}"
+    owner: "{{ weaviate_user_name }}"
+    group: "{{ weaviate_user_group }}"
+    mode: "770"
+  loop:
+    - backup.sh
+    - restore.sh
+    - weaviate-docker.sh
+
+- name: Validate backup schedule format
+  assert:
+    that:
+      - weaviate_backup_schedule is defined
+      - weaviate_backup_schedule is string
+      - weaviate_backup_schedule.split() | length == 5
+    fail_msg: |
+      ❌ INVALID CRON SCHEDULE FORMAT: weaviate_backup_schedule
+
+      The backup schedule '{{ weaviate_backup_schedule }}' is not a valid cron format.
+
+      Expected format: "minute hour day month weekday"
+
+      Valid examples:
+        - "0 2 * * *"       (Daily at 2:00 AM)
+        - "30 3 * * 0"      (Sundays at 3:30 AM)
+        - "0 */6 * * *"     (Every 6 hours)
+        - "15 14 1 * *"     (1st of every month at 2:15 PM)
+
+      Current value: "{{ weaviate_backup_schedule }}"
+      Field count: {{ weaviate_backup_schedule.split() | length }}
+
+      A cron schedule must have exactly 5 space-separated fields:
+        1. Minute (0-59)
+        2. Hour (0-23)
+        3. Day of month (1-31)
+        4. Month (1-12)
+        5. Day of week (0-7, where 0 and 7 are Sunday)
+
+      Fix the 'weaviate_backup_schedule' variable in your configuration.
+    quiet: true
+  when: weaviate_enable_automated_backups | bool
+
+- name: Setup automated backups cron job
+  become: true
+  cron:
+    name: "Weaviate automated backup"
+    minute: "{{ weaviate_backup_schedule.split()[0] }}"
+    hour: "{{ weaviate_backup_schedule.split()[1] }}"
+    day: "{{ weaviate_backup_schedule.split()[2] }}"
+    month: "{{ weaviate_backup_schedule.split()[3] }}"
+    weekday: "{{ weaviate_backup_schedule.split()[4] }}"
+    job: "cd {{ weaviate_working_directory }} && ./backup.sh >> {{ weaviate_working_directory }}/backup.log 2>&1"
+    user: "{{ weaviate_user_name }}"
+    state: present
+  when: weaviate_enable_automated_backups | bool
+
+- name: Setup automated backup cleanup cron job
+  become: true
+  cron:
+    name: "Weaviate backup cleanup"
+    minute: "30"
+    hour: "3"
+    job: "find {{ weaviate_backup_directory }} -name 'backup-*.tar.gz' -mtime +{{ weaviate_backup_retention_days }} -delete"
+    user: "{{ weaviate_user_name }}"
+    state: present
+  when: weaviate_enable_automated_backups | bool
+
+- name: Ensure handlers are flushed before starting
+  meta: flush_handlers
+
+- name: Start Weaviate services
+  become: true
+  command: ./weaviate-docker.sh start
+  args:
+    chdir: "{{ weaviate_working_directory }}"
+  register: weaviate_start_result
+  changed_when: "'Starting' in weaviate_start_result.stdout"
