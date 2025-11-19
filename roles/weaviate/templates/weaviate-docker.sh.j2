@@ -50,7 +50,11 @@ function logs {
 
 function backup {
     echo "Creating backup..."
-    cd "$PROJECT_DIR" && ./backup.sh
+    if ! cd "$PROJECT_DIR"; then
+        echo "Error: Could not access project directory: $PROJECT_DIR"
+        exit 1
+    fi
+    ./backup.sh
 }
 
 function restore {
@@ -61,7 +65,11 @@ function restore {
         exit 1
     fi
     echo "Restoring from backup: $backup_id"
-    cd "$PROJECT_DIR" && ./restore.sh "$backup_id"
+    if ! cd "$PROJECT_DIR"; then
+        echo "Error: Could not access project directory: $PROJECT_DIR"
+        exit 1
+    fi
+    ./restore.sh "$backup_id"
 }
 
 function status {
