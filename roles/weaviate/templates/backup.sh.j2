@@ -89,7 +89,17 @@ fi
 
 echo ""
 echo "Creating compressed archive..."
-tar -czf "$BACKUP_DIR/$BACKUP_ID.tar.gz" -C "$BACKUP_DIR" "$BACKUP_ID"
+if ! tar -czf "$BACKUP_DIR/$BACKUP_ID.tar.gz" -C "$BACKUP_DIR" "$BACKUP_ID"; then
+    echo "Error: Failed to create compressed archive"
+    echo "Backup directory preserved at: $BACKUP_DIR/$BACKUP_ID"
+    exit 1
+fi
+
+# Verify archive was created and is not empty
+if [ ! -s "$BACKUP_DIR/$BACKUP_ID.tar.gz" ]; then
+    echo "Error: Archive is empty or was not created"
+    exit 1
+fi
 
 # Remove uncompressed backup directory
 rm -rf "$BACKUP_DIR/$BACKUP_ID"
