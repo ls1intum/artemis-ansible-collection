@@ -3,7 +3,9 @@ set -e
 
 # Load environment variables from .env file
 if [ -f .env ]; then
-    export $(grep -v '^#' .env | xargs)
+    set -a
+    source .env
+    set +a
 fi
 
 # Configuration
@@ -33,6 +35,8 @@ echo ""
 # Initiate backup via Weaviate API
 echo "Initiating backup..."
 BACKUP_RESPONSE=$(curl -s -w "\n%{http_code}" \
+    --max-time 60 \
+    --connect-timeout 10 \
     -X POST \
     -H "Authorization: Bearer $WEAVIATE_API_KEY" \
     -H "Content-Type: application/json" \

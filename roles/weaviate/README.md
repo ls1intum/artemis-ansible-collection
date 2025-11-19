@@ -20,11 +20,11 @@ Before using this role, ensure the following requirements are met:
 
 ### System Requirements
 
-- **Operating System**: Ubuntu 20.04+ or Debian 11+
+- **Operating System**: Ubuntu 22.04 LTS+ or Debian 12+
 - **Docker Engine**: 20.10 or later
 - **Docker Compose**: v2.0 or later
 - **Ports**: 80, 443, and 50051 must be accessible from the internet
-- **Resources**: Minimum 8GB RAM, 4 CPU cores recommended
+- **Resources**: Minimum 24GB RAM, 8 CPU cores recommended (based on default resource allocations)
 
 ### DNS Configuration
 
@@ -37,7 +37,7 @@ Before using this role, ensure the following requirements are met:
 This role **does not** install Docker. You must install Docker and Docker Compose before running this role. You can:
 
 1. Use a Docker installation role from Ansible Galaxy
-2. Install manually: https://docs.docker.com/engine/install/
+2. Install manually: [Docker installation docs](https://docs.docker.com/engine/install/)
 3. Use your organization's preferred Docker installation method
 
 ## Configuration
@@ -316,7 +316,7 @@ weaviate_allowed_ips: "203.0.113.42/32"
 The role includes rate limiting middleware:
 - Average: 100 requests/second
 - Burst: 200 requests
-- Adjust in `templates/config.yml.template.j2` if needed
+- Adjust in `templates/config.yml.j2` if needed
 
 ## Troubleshooting
 
