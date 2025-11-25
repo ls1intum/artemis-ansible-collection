@@ -2,7 +2,7 @@
 
 services:
   redis:
-    image: redis/redis-stack-server:latest
+    image: redis/redis-stack-server:{{ redis.version }}
     restart: always
     ports:
       - "6379:6379"
@@ -12,10 +12,6 @@ services:
     command: [
       "redis-server",
       "/usr/local/etc/redis/redis.conf",
-      "--requirepass {{ redis.password }}",
-      "--user {{ redis.user }} on >{{ redis.password }} +@all &* ~*",
-      "--user default off nopass nocommands",
-      "--protected-mode no"
     ]
     healthcheck:
       test: ["CMD", "redis-cli", "-a", "{{ redis.password }}", "ping"]

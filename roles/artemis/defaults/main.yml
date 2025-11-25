@@ -220,7 +220,7 @@ artemis_eureka_urls: "{% if registry.url is defined and registry.url is not none
   %}"
 artemis_eureka_instance_id: "{{ node_id }}"
 
-artemis_redis_client_name: "{% if artemis_redis_client_name is defined %}{{ artemis_redis_client_name }}{% else %}{{ artemis_eureka_instance_id }}{% endif %}"
+artemis_redis_client_name: "{{ artemis_eureka_instance_id }}"
 
 node_short_name: unnamed-artemis-node
 node_display_name: Unnamed Artemis Node
