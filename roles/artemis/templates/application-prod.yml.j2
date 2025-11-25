@@ -38,6 +38,8 @@ spring:
 
 {% if spring_ai is defined and spring_ai.azure_openai is defined %}
   ai:
+    model:
+      chat: azure-openai
     azure:
       openai:
         api-key: {{ spring_ai.azure_openai.api_key | quote }}
@@ -117,6 +119,12 @@ artemis:
 {% for cidr in artemis_internal_ip_allowlist %}
         - {{ cidr }}
 {% endfor %}
+{% endif %}
+{% if artemis_rate_limit is defined and artemis_rate_limit is not none %}
+  rate-limiting:
+    enabled: true
+    account-management-rpm: {{ artemis_rate_limit.account_management_rpm }}
+    authentication-rpm: {{ artemis_rate_limit.authentication_rpm }}
 {% endif %}
   user-management:
 {% if ldap.url is defined and ldap.url is not none%}
@@ -245,10 +253,6 @@ artemis:
     id: artemis_lti
     oauth-key: artemis_lti_key
     oauth-secret: {{ lti.oauth_secret }}
-    user-prefix-edx: edx_
-    user-prefix-u4i: u4i_
-    user-group-name-edx: edx
-    user-group-name-u4i: u4i
 {% endif %}
 
 {% if athena is defined %}
@@ -256,6 +260,18 @@ artemis:
     url: {{ athena.url }}
     secret: {{ athena.secret }}
     restricted-modules: {{ athena.restricted_modules }}
+{% endif %}
+
+{% if atlas is defined %}
+  atlas:
+    enabled: {{ atlas.enabled | lower }}
+
+{% if atlas.atlasml is defined and atlas.atlasml.enabled %}
+    atlasml:
+      enabled: {{ atlas.atlasml.enabled | lower }}
+      base-url: {{ atlas.atlasml.base-url }}
+      auth-token: {{ atlas.atlasml.auth-token }}
+{% endif %}
 {% endif %}
 
 {% if apollon_url is defined %}
@@ -282,6 +298,11 @@ artemis:
     enabled: true
     url: {{ nebula.url }}
     secret-token: {{ nebula.secret }}
+{% endif %}
+
+{% if tum_live_base_url is defined and tum_live_base_url is not none %}
+  tum-live:
+    api-base-url: {{ tum_live_base_url }}
 {% endif %}
 
 {% if enable_science_event_logging is defined %}

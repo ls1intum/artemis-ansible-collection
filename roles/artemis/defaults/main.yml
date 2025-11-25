@@ -236,6 +236,7 @@ node_display_name: Unnamed Artemis Node
 #nebula:
 #  url:
 #  secret:
+#tum_live_base_url: "https://tum.live/api/v2"
 
 ##############################################################################
 # Aeolus Configuration
@@ -248,7 +249,11 @@ node_display_name: Unnamed Artemis Node
 # Atlas Configuration
 ##############################################################################
 #atlas:
-# More configuration options will be added in the future.
+#  enabled:
+#  atlasml:
+#    enabled:
+#    base-url:
+#    auth-token:
 
 ##############################################################################
 # Hyperion / Spring AI (Azure OpenAI) Configuration
@@ -277,6 +282,13 @@ artemis_hyperion_enabled: false
 ##############################################################################
 # List of CIDR ranges that are allowed to access internal endpoints (e.g. /api/*/internal/**)
 artemis_internal_ip_allowlist: []
+
+##############################################################################
+# Rate Limit Configuration
+##############################################################################
+#artemis_rate_limit:
+#  account_management_rpm: 5
+#  authentication_rpm: 30
 
 ##############################################################################
 # Helios Configuration
@@ -319,7 +331,7 @@ artemis_spring_profile_docker: "{% if use_docker %},docker{% endif %}"
 artemis_spring_profile_iris: "{% if iris is defined and iris is not none %},iris{% endif %}"
 artemis_spring_profile_theia: "{% if theia is defined and theia is not none %},theia{% endif %}"
 artemis_spring_profile_aeolus: "{% if aeolus is defined and aeolus is not none %},aeolus{% endif %}"
-artemis_spring_profile_atlas: "{% if atlas is defined %},atlas{% endif %}" # TODO: Add and atlas is not none check as soon as the additional configuration options are added
+artemis_spring_profile_atlas: "{% if atlas is defined and atlas is not none %},atlas{% endif %}"
 artemis_spring_profile_lti: "{% if lti.oauth_secret is defined and lti.oauth_secret is not none %},lti{% endif %}"
 artemis_spring_profile_sharing: "{% if sharing is defined and sharing is not none %},sharing{% endif %}"
 
