@@ -45,8 +45,22 @@ spring:
   hazelcast:
     interface: "{{ hazelcast_address }}"
 {% endif %}
-
 {% if artemis_computed_is_core_node %}
+
+{% if spring_ai is defined and spring_ai.azure_openai is defined %}
+  ai:
+    model:
+      chat: azure-openai
+    azure:
+      openai:
+        api-key: {{ spring_ai.azure_openai.api_key | quote }}
+        endpoint: {{ spring_ai.azure_openai.endpoint | quote }}
+        chat:
+          options:
+            deployment-name: {{ spring_ai.azure_openai.deployment_name | quote }}
+            temperature: {{ spring_ai.azure_openai.temperature | default(1.0) }}
+{% endif %}
+
 {% if shared_monitoring_host_v4 is not none %}
   prometheus:
     monitoringIp: "{{ shared_monitoring_host_v4 }}"
@@ -93,6 +107,9 @@ server:
       internal-proxies: 10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|169\.254\.\d{1,3}\.\d{1,3}|127\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.1[6-9]{1}\.\d{1,3}\.\d{1,3}|172\.2[0-9]{1}\.\d{1,3}\.\d{1,3}|172\.3[0-1]{1}\.\d{1,3}\.\d{1,3}|0:0:0:0:0:0:0:1|::1|fcfe::f:1|fcfe:0:0:0:0:0:f:1
 
 artemis:
+{% if artemis_tmp_directory is defined and artemis_tmp_directory is not none and artemis_tmp_directory != "" %}
+  temp-path: {{ artemis_tmp_directory }}
+{% endif %}
 {% if artemis_computed_is_core_node %}
   course-archives-path: {{ artemis_repo_basepath }}/course-archives
   repo-clone-path: {{ artemis_repo_basepath }}/repos
@@ -105,6 +122,20 @@ artemis:
   bcrypt-salt-rounds: {{ artemis_bcrypt_salt_rounds }}
 {% if push_notification_relay is defined and push_notification_relay is not none %}
   push-notification-relay: {{ push_notification_relay }}
+{% endif %}
+{% if artemis_internal_ip_allowlist is defined and artemis_internal_ip_allowlist is not none %}
+  security:
+    internal:
+      allowed-cidrs:
+{% for cidr in artemis_internal_ip_allowlist %}
+        - {{ cidr }}
+{% endfor %}
+{% endif %}
+{% if artemis_rate_limit is defined and artemis_rate_limit is not none %}
+  rate-limiting:
+    enabled: true
+    account-management-rpm: {{ artemis_rate_limit.account_management_rpm }}
+    authentication-rpm: {{ artemis_rate_limit.authentication_rpm }}
 {% endif %}
   user-management:
 {% if ldap.url is defined and ldap.url is not none%}
@@ -143,6 +174,12 @@ artemis:
 {% endif %}
     login:
       account-name: {{ artemis_account_login_info }}
+{% if sharing is defined %}
+  sharing:
+    serverurl: {{ sharing.url }}
+    apikey: {{ sharing.apikey }}
+    actionname: {{ sharing.actionname }}
+{% endif %}
 {% endif %}
 
 {% if version_control.localvc is defined %}
@@ -227,10 +264,6 @@ artemis:
     id: artemis_lti
     oauth-key: artemis_lti_key
     oauth-secret: {{ lti.oauth_secret }}
-    user-prefix-edx: edx_
-    user-prefix-u4i: u4i_
-    user-group-name-edx: edx
-    user-group-name-u4i: u4i
 {% endif %}
 
 {% if athena is defined %}
@@ -238,6 +271,18 @@ artemis:
     url: {{ athena.url }}
     secret: {{ athena.secret }}
     restricted-modules: {{ athena.restricted_modules }}
+{% endif %}
+
+{% if atlas is defined %}
+  atlas:
+    enabled: {{ atlas.enabled | lower }}
+
+{% if atlas.atlasml is defined and atlas.atlasml.enabled %}
+    atlasml:
+      enabled: {{ atlas.atlasml.enabled | lower }}
+      base-url: {{ atlas.atlasml.base-url }}
+      auth-token: {{ atlas.atlasml.auth-token }}
+{% endif %}
 {% endif %}
 
 {% if apollon_url is defined %}
@@ -259,11 +304,26 @@ artemis:
     secret-token: {{ iris.secret }}
 {% endif %}
 
+{% if nebula is defined and nebula is not none %}
+  nebula:
+    enabled: true
+    url: {{ nebula.url }}
+    secret-token: {{ nebula.secret }}
+{% endif %}
+
+{% if tum_live_base_url is defined and tum_live_base_url is not none %}
+  tum-live:
+    api-base-url: {{ tum_live_base_url }}
+{% endif %}
+
 {% if enable_science_event_logging is defined %}
   science:
     event-logging:
       enable: {{ enable_science_event_logging | lower }}
 {% endif %}
+
+  hyperion:
+    enabled: {{ artemis_hyperion_enabled | lower }}
 
   telemetry:
     enabled: {{ artemis_telemetry_enabled | lower }}
@@ -328,13 +388,32 @@ jhipster:
     base-url: {{ artemis_server_url }}
     from: '{{artemis_notification_from}} <{{ artemis_email.split("@")[0] }}+notification@{{ artemis_email.split("@")[1] }}>'
 
+{% if sentry.dsn | default('') | length %}
+sentry:
+  dsn: {{ sentry.dsn | quote }}
+  send-default-pii: {{ sentry.send_default_pii | default(false)}}
+  traces-sample-rate: {{ sentry.traces_sample_rate | default(0.0) }}
+  logging:
+    enabled: true
+    minimum-breadcrumb-level: error
+    minimum-event-level: error
+{% if sentry.environment is defined and sentry.environment|length %}
+  environment: {{ sentry.environment }}
+{% elif is_testserver is defined and is_testserver is sameas true %}
+  environment: test
+{% elif is_testserver is defined and is_testserver is sameas false %}
+  environment: prod
+{% else %}
+  environment: local
+{% endif %}
+{% endif %}
+
 {% if artemis_computed_is_core_node %}
 # Properties to be exposed on the /info management endpoint
 info:
   operatorName: {{ artemis_operator_name }}
   operatorAdminName: {{ artemis_operator_admin_name }}
   contact: {{ artemis_email }}
-  imprint: https://ase.in.tum.de/lehrstuhl_1/component/content/article/179-imprint
 {% if is_testserver is defined and is_testserver is sameas true %}
   testServer: true
 {% endif %}
@@ -343,7 +422,23 @@ info:
 {% endif %}
   textAssessmentAnalyticsEnabled: true
   sentry:
-    dsn: https://e52d0b9b6b61769f50b088634b4bc781@sentry.ase.in.tum.de/2
+{% if sentry.dsn | default('') | length %}
+    dsn: {{ sentry.dsn | quote }}
+{% else %}
+    dsn:
+{% endif %}
+
+{% if helios is defined %}
+helios:
+  status:
+    enabled: true
+    environment-name: {{ helios.environment_name }}
+    endpoints:
+{% for endpoint in helios.endpoints %}
+      - url: {{ endpoint.url }}
+        secret-key: {{ endpoint.secret_key }}
+{% endfor %}
+{% endif %}
 {% endif %}
 
 {% if is_multinode_install and artemis_eureka_urls is defined and hazelcast_address is defined %}

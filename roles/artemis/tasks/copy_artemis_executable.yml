@@ -13,12 +13,26 @@
   set_fact:
     is_release: "{{ artemis_version is match('^\\d+\\.\\d+\\.\\d+$') }}"
 
+- name: "Copying Artemis.war to {{ artemis_working_directory }}/artemis.war.new ..."
+  debug:
+    msg: "Copying Artemis.war to {{ artemis_working_directory }}/artemis.war.new ..."
+
 - name: Copy local Artemis.war to {{ artemis_working_directory }}
   become: true
-  copy:
+  ansible.posix.synchronize:
     src: "{{ artemis_version }}"
     dest: "{{ artemis_working_directory }}/artemis.war.new"
-    owner: "{{ artemis_user_name }}"
+    mode: push
+    archive: true
+    owner: false
+    group: false
+  when: not (is_release | bool)
+
+- name: Set correct ownership and permissions on artemis.war.new
+  become: true
+  file:
+    path: "{{ artemis_working_directory }}/artemis.war.new"
+    owner: "{{ artemis_deployment_user_name }}"
     group: "{{ artemis_user_group }}"
     mode: "644"
   when: not (is_release | bool)
@@ -28,7 +42,7 @@
   get_url:
     url: "{{ artemis_war_url }}"
     dest: "{{ artemis_working_directory }}/artemis.war.new"
-    owner: "{{ artemis_user_name }}"
+    owner: "{{ artemis_deployment_user_name }}"
     group: "{{ artemis_user_group }}"
     mode: "644"
     force: true

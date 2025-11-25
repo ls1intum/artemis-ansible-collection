@@ -4,14 +4,14 @@
   file:
     path: "{{ artemis_working_directory }}"
     state: directory
-    mode: "0775"
+    mode: "775"
 
 - name: Create artemis data directory
   become: true
   file:
     path: "{{ artemis_working_directory }}/{{ item }}"
     state: directory
-    mode: "0770"
+    mode: "770"
   loop:
     - "data"
     - "data/database"
@@ -26,7 +26,6 @@
     recurse: true
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
-  register: permissions
   notify: restart docker artemis
 
 - name: Set permissions for postgres directory
@@ -50,7 +49,6 @@
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
     mode: "660"
-  register: config
   notify: restart docker artemis
 
 - name: Copy artemis.env to artemis directory
@@ -61,7 +59,6 @@
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
     mode: "660"
-  register: config
   notify: restart docker artemis
 
 - name: Copy database.env to artemis directory
@@ -72,7 +69,6 @@
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
     mode: "660"
-  register: config
   notify: restart docker artemis
 
 - name: Copy node env files
@@ -87,14 +83,12 @@
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
     mode: "660"
-  register: config
   notify: restart docker artemis
 
 - include_tasks: generate_ssh_keys.yml
   when:
     - version_control.localvc is defined and version_control.localvc is not none
     - version_control.localvc.ssh_key_path is defined and version_control.localvc.ssh_key_path|length > 0
-    - not (only_update_artemis_config | bool)
 
 - name: Create artemis ssh key directory
   become: true
@@ -129,5 +123,4 @@
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
     mode: "770"
-  register: config
   notify: restart docker artemis
