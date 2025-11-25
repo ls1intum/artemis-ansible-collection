@@ -377,6 +377,26 @@ jhipster:
     base-url: {{ artemis_server_url }}
     from: '{{artemis_notification_from}} <{{ artemis_email.split("@")[0] }}+notification@{{ artemis_email.split("@")[1] }}>'
 
+{% if sentry.dsn | default('') | length %}
+sentry:
+  dsn: {{ sentry.dsn | quote }}
+  send-default-pii: {{ sentry.send_default_pii | default(false)}}
+  traces-sample-rate: {{ sentry.traces_sample_rate | default(0.0) }}
+  logging:
+    enabled: true
+    minimum-breadcrumb-level: error
+    minimum-event-level: error
+{% if sentry.environment is defined and sentry.environment|length %}
+  environment: {{ sentry.environment }}
+{% elif is_testserver is defined and is_testserver is sameas true %}
+  environment: test
+{% elif is_testserver is defined and is_testserver is sameas false %}
+  environment: prod
+{% else %}
+  environment: local
+{% endif %}
+{% endif %}
+
 {% if artemis_computed_is_core_node %}
 # Properties to be exposed on the /info management endpoint
 info:
@@ -391,7 +411,11 @@ info:
 {% endif %}
   textAssessmentAnalyticsEnabled: true
   sentry:
-    dsn: https://e52d0b9b6b61769f50b088634b4bc781@sentry.ase.in.tum.de/2
+{% if sentry.dsn | default('') | length %}
+    dsn: {{ sentry.dsn | quote }}
+{% else %}
+    dsn:
+{% endif %}
 
 {% if helios is defined %}
 helios:
