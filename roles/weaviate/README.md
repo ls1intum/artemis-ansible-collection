@@ -172,12 +172,14 @@ letsencrypt_email=admin@example.com
 After running the role, verify the installation:
 
 1. **Check service status**:
+
    ```bash
    cd /opt/weaviate
    ./weaviate-docker.sh status
    ```
 
 2. **View logs**:
+
    ```bash
    ./weaviate-docker.sh logs
    # Or for specific service:
@@ -185,6 +187,7 @@ After running the role, verify the installation:
    ```
 
 3. **Test API access**:
+
    ```bash
    curl -H "Authorization: Bearer YOUR_API_KEY" \
         https://weaviate.example.com/v1/.well-known/ready
@@ -249,22 +252,26 @@ tail -f /opt/weaviate/backup.log
 To update Weaviate to a new version:
 
 1. **Update the version variable** in your playbook or inventory:
+
    ```yaml
    weaviate_build_version: "1.31.0"  # New version
    ```
 
 2. **Re-run the Ansible playbook**:
+
    ```bash
    ansible-playbook -i inventory playbook.yml
    ```
 
 3. **Verify the update**:
+
    ```bash
    cd /opt/weaviate
    ./weaviate-docker.sh logs weaviate
    ```
 
 **Important Notes**:
+
 - The Weaviate data volume persists across updates
 - Weaviate handles schema migrations automatically on startup
 - Always check [Weaviate release notes](https://github.com/weaviate/weaviate/releases) for breaking changes
@@ -301,6 +308,7 @@ weaviate_allowed_ips: "203.0.113.42/32"
 ### Rate Limiting
 
 The role includes rate limiting middleware:
+
 - Average: 100 requests/second
 - Burst: 200 requests
 - Adjust in `templates/config.yml.template.j2` if needed
