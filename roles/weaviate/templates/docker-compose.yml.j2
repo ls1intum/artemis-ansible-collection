@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: traefik:v3.2
+    image: traefik:v3.6
     container_name: traefik
     restart: unless-stopped
     security_opt:
@@ -30,8 +30,8 @@ services:
           cpus: '{{ weaviate_traefik_cpu_limit }}'
           memory: {{ weaviate_traefik_memory_limit }}
         reservations:
-          cpus: '{{ weaviate_traefik_cpu_reservation }}'
-          memory: {{ weaviate_traefik_memory_reservation }}
+          cpus: '{{ weaviate_traefik_cpu_limit }}'
+          memory: {{ weaviate_traefik_memory_limit }}
 
   weaviate:
     image: cr.weaviate.io/semitechnologies/weaviate:${WEAVIATE_VERSION:-{{ weaviate_build_version }}}
@@ -78,26 +78,27 @@ services:
       - "traefik.http.routers.weaviate.entrypoints=http"
       - "traefik.http.routers.weaviate.rule=Host(`${WEAVIATE_DOMAIN}`)"
       - "traefik.http.middlewares.weaviate-https-redirect.redirectscheme.scheme=https"
-      - "traefik.http.routers.weaviate.middlewares=weaviate-https-redirect"
+      - "traefik.http.routers.weaviate.middlewares=https-redirectscheme@file"
       - "traefik.http.routers.weaviate-secure.entrypoints=https"
       - "traefik.http.routers.weaviate-secure.rule=Host(`${WEAVIATE_DOMAIN}`)"
       - "traefik.http.routers.weaviate-secure.tls=true"
       - "traefik.http.routers.weaviate-secure.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.weaviate-secure.tls.options=default@file"
-      - "traefik.http.routers.weaviate-secure.middlewares=default-headers,rate-limit"
+      - "traefik.http.routers.weaviate-secure.tls.options=default"
+      - "traefik.http.routers.weaviate-secure.middlewares=default-headers@file,rate-limit@file"
       - "traefik.http.routers.weaviate-secure.service=weaviate"
       - "traefik.http.services.weaviate.loadbalancer.server.port=8080"
+
     deploy:
       resources:
         limits:
           cpus: '{{ weaviate_cpu_limit }}'
           memory: {{ weaviate_memory_limit }}
         reservations:
-          cpus: '{{ weaviate_cpu_reservation }}'
-          memory: {{ weaviate_memory_reservation }}
+          cpus: '{{ weaviate_cpu_limit }}'
+          memory: {{ weaviate_memory_limit }}
     depends_on:
       multi2vec-clip:
-        condition: service_healthy
+        condition: service_started
 
   multi2vec-clip:
     image: {{ weaviate_multi2vec_image }}
@@ -109,20 +110,14 @@ services:
       - weaviate_network
     environment:
       ENABLE_CUDA: '{{ weaviate_enable_cuda }}'
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/.well-known/ready"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
     deploy:
       resources:
         limits:
           cpus: '{{ weaviate_multi2vec_cpu_limit }}'
           memory: {{ weaviate_multi2vec_memory_limit }}
         reservations:
-          cpus: '{{ weaviate_multi2vec_cpu_reservation }}'
-          memory: {{ weaviate_multi2vec_memory_reservation }}
+          cpus: '{{ weaviate_multi2vec_cpu_limit }}'
+          memory: {{ weaviate_multi2vec_memory_limit }}
 
 networks:
   weaviate_network:

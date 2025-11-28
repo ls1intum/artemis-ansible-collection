@@ -34,7 +34,7 @@ serversTransport:
 certificatesResolvers:
   letsencrypt:
     acme:
-      email: ${LETSENCRYPT_EMAIL}
+      email: {{ letsencrypt_email }}
       storage: acme.json
       httpChallenge:
         entryPoint: http
