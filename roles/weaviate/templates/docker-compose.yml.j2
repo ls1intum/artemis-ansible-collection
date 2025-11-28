@@ -60,7 +60,7 @@ services:
       AUTHENTICATION_APIKEY_ALLOWED_KEYS: '${WEAVIATE_API_KEY}'
       AUTHENTICATION_APIKEY_USERS: '${WEAVIATE_API_USER:-{{ weaviate_api_user }}}'
       PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
-      ENABLE_MODULES: 'multi2vec-clip'
+      ENABLE_MODULES: 'multi2vec-clip,backup-filesystem'
       ENABLE_API_BASED_MODULES: 'true'
       CLIP_INFERENCE_API: 'http://multi2vec-clip:8080'
       CLUSTER_HOSTNAME: 'node1'
