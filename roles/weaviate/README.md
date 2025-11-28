@@ -53,7 +53,7 @@ The following variables **must** be set:
 weaviate_domain: "weaviate.example.com"
 
 # API key for authentication (generate with: openssl rand -base64 32)
-weaviate_api_key: "your-secure-44-character-api-key-here"
+weaviate_api_key: "your-secure-api-key-here"
 
 # Email for Let's Encrypt certificate notifications
 letsencrypt_email: "your-email@example.com"
@@ -131,7 +131,7 @@ Here is an example playbook for a single node installation:
     - role: ls1intum.artemis.weaviate
       vars:
         weaviate_domain: "weaviate.example.com"
-        weaviate_api_key: "{{ vault_weaviate_api_key }}"  # Store in Ansible Vault
+        weaviate_api_key: "your-secure-api-key-here"
         letsencrypt_email: "admin@example.com"
 ```
 
@@ -143,7 +143,7 @@ Here is an example playbook for a single node installation:
     - role: ls1intum.artemis.weaviate
       vars:
         weaviate_domain: "weaviate.example.com"
-        weaviate_api_key: "{{ vault_weaviate_api_key }}"
+        weaviate_api_key: "your-secure-api-key-here"
         letsencrypt_email: "admin@example.com"
 
         # Restrict access to private networks only
