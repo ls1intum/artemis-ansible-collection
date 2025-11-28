@@ -114,8 +114,6 @@ weaviate_backup_retention_days: 7
 # Weaviate container resources
 weaviate_cpu_limit: "8"
 weaviate_memory_limit: "16G"
-weaviate_cpu_reservation: "4"
-weaviate_memory_reservation: "8G"
 
 # Traefik resources
 weaviate_traefik_cpu_limit: "1"
@@ -342,7 +340,6 @@ Weaviate is configured with 16GB memory limit by default. If this is too high fo
 
 ```yaml
 weaviate_memory_limit: "8G"
-weaviate_memory_reservation: "4G"
 ```
 
 ### Backup Failures

@@ -60,21 +60,16 @@ weaviate_enable_cuda: "0"
 
 # Traefik Resources
 weaviate_traefik_cpu_limit: "1"
-weaviate_traefik_memory_limit: "1G"
-weaviate_traefik_cpu_reservation: "0.5"
-weaviate_traefik_memory_reservation: "512M"
+weaviate_traefik_memory_limit: "512M"
+
 
 # Weaviate Resources
-weaviate_cpu_limit: "8"
-weaviate_memory_limit: "16G"
-weaviate_cpu_reservation: "4"
-weaviate_memory_reservation: "8G"
+weaviate_cpu_limit: "2"
+weaviate_memory_limit: "4G"
 
 # Multi2vec-CLIP Resources
-weaviate_multi2vec_cpu_limit: "4"
-weaviate_multi2vec_memory_limit: "8G"
-weaviate_multi2vec_cpu_reservation: "2"
-weaviate_multi2vec_memory_reservation: "4G"
+weaviate_multi2vec_cpu_limit: "1"
+weaviate_multi2vec_memory_limit: "2G"
 
 ##############################################################################
 # Backup Configuration
