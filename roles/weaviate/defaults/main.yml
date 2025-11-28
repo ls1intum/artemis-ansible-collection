@@ -6,19 +6,13 @@ weaviate_traefik_directory: "{{ weaviate_working_directory }}/traefik"
 weaviate_backup_directory: "{{ weaviate_working_directory }}/backups"
 
 ##############################################################################
-# Weaviate Linux Users
+# Weaviate Linux User
 ##############################################################################
 
 weaviate_user_name: "weaviate"
 weaviate_user_group: "weaviate"
 weaviate_user_uid: "1339"
 weaviate_user_gid: "1339"
-
-weaviate_create_deployment_user: false
-weaviate_deployment_user_name: deployment
-weaviate_deployment_user_uid: 1340
-weaviate_deployment_user_public_key: ""
-weaviate_deployment_user_comment: "User to deploy weaviate to this host"
 
 ##############################################################################
 # Weaviate Configuration

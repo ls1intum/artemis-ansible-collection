@@ -29,35 +29,6 @@
     group: "{{ weaviate_user_group }}"
     groups: "docker"
 
-- name: Ensure deployment user {{ weaviate_deployment_user_name }} exists
-  become: true
-  user:
-    name: "{{ weaviate_deployment_user_name }}"
-    comment: "{{ weaviate_deployment_user_comment }}"
-    state: present
-    uid: "{{ weaviate_deployment_user_uid }}"
-    group: "{{ weaviate_user_group }}"
-    groups: "sudo,docker"
-    append: true
-  when: (weaviate_create_deployment_user | bool)
-
-- name: Ensure (limited) sudo privileges for user {{ weaviate_deployment_user_name }}
-  become: true
-  template:
-    src: weaviate_deployment_sudoers.j2
-    dest: /etc/sudoers.d/weaviate_deployment
-    validate: "visudo -cf %s"
-    mode: "440"
-  when: (weaviate_create_deployment_user | bool)
-
-- name: Authorize ssh-key for deployment user
-  become: true
-  ansible.posix.authorized_key:
-    user: "{{ weaviate_deployment_user_name }}"
-    state: present
-    key: "{{ weaviate_deployment_user_public_key }}"
-  when: (weaviate_create_deployment_user | bool)
-
 - name: Create weaviate directories
   become: true
   file:

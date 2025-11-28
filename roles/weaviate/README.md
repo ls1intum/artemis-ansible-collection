@@ -75,11 +75,6 @@ weaviate_working_directory: "/opt/weaviate"
 ```yaml
 weaviate_user_name: "weaviate"
 weaviate_user_uid: "1339"
-
-# Optional deployment user with SSH access
-weaviate_create_deployment_user: false
-weaviate_deployment_user_name: "deployment"
-weaviate_deployment_user_public_key: "ssh-rsa AAA..."
 ```
 
 #### Security Configuration
@@ -157,10 +152,6 @@ Here is an example playbook for a single node installation:
         # Custom backup schedule (every 6 hours)
         weaviate_backup_schedule: "0 */6 * * *"
         weaviate_backup_retention_days: 14
-
-        # Enable deployment user for CI/CD
-        weaviate_create_deployment_user: true
-        weaviate_deployment_user_public_key: "{{ vault_deployment_ssh_key }}"
 ```
 
 ### Inventory Example
