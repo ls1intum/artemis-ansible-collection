@@ -84,7 +84,7 @@ services:
       - "traefik.http.routers.weaviate-secure.tls=true"
       - "traefik.http.routers.weaviate-secure.tls.certresolver=letsencrypt"
       - "traefik.http.routers.weaviate-secure.tls.options=default"
-      - "traefik.http.routers.weaviate-secure.middlewares=default-headers@file,rate-limit@file"
+      - "traefik.http.routers.weaviate-secure.middlewares=default-headers@file,rate-limit@file,default-whitelist@file"
       - "traefik.http.routers.weaviate-secure.service=weaviate"
       - "traefik.http.services.weaviate.loadbalancer.server.port=8080"
 
