@@ -6,10 +6,3 @@
   args:
     chdir: "{{ weaviate_working_directory }}"
   listen: "restart docker weaviate"
-
-- name: Start docker compose weaviate
-  become: true
-  command: ./weaviate-docker.sh start
-  args:
-    chdir: "{{ weaviate_working_directory }}"
-  listen: "start docker weaviate"
