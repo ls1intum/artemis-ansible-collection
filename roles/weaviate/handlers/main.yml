@@ -1,0 +1,8 @@
+---
+# handlers file for weaviate
+- name: Restart docker compose weaviate
+  become: true
+  command: ./weaviate-docker.sh restart
+  args:
+    chdir: "{{ weaviate_working_directory }}"
+  listen: "restart docker weaviate"

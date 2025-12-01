@@ -1,0 +1,81 @@
+---
+weaviate_build_version: "1.30.0"
+weaviate_working_directory: "/opt/weaviate"
+weaviate_data_directory: "{{ weaviate_working_directory }}/data"
+weaviate_traefik_directory: "{{ weaviate_working_directory }}/traefik"
+weaviate_backup_directory: "{{ weaviate_working_directory }}/backups"
+
+##############################################################################
+# Weaviate Linux User
+##############################################################################
+
+weaviate_user_name: "weaviate"
+weaviate_user_group: "weaviate"
+weaviate_user_uid: "1339"
+weaviate_user_gid: "1339"
+
+##############################################################################
+# Weaviate Configuration
+##############################################################################
+
+# Domain configuration (REQUIRED)
+weaviate_domain: # FIXME - e.g., weaviate.example.com
+
+# API Authentication (REQUIRED)
+# Generate a strong API key using: openssl rand -base64 32
+weaviate_api_key: # FIXME
+weaviate_api_user: "admin"
+
+# Logging
+# Options: trace, debug, info, warning, error, fatal, panic
+weaviate_log_level: "info"
+
+# Let's Encrypt Configuration (REQUIRED)
+letsencrypt_email: # FIXME - e.g., your-email@example.com
+
+# IP Safelisting (Optional)
+# Default: accessible from everywhere with API key authentication
+# Examples:
+#   Single IP: "203.0.113.1/32"
+#   Multiple: "10.0.0.0/8,192.168.0.0/16,172.16.0.0/12"
+#   Private networks: "10.0.0.0/8,192.168.0.0/16,172.16.0.0/12"
+weaviate_allowed_ips: ""
+
+##############################################################################
+# Multi2vec-CLIP Configuration
+##############################################################################
+
+weaviate_multi2vec_image: "cr.weaviate.io/semitechnologies/multi2vec-clip:sentence-transformers-clip-ViT-B-32-multilingual-v1"
+weaviate_enable_cuda: "0"
+
+##############################################################################
+# Resource Limits
+##############################################################################
+
+# Traefik Resources
+weaviate_traefik_cpu_limit: "1"
+weaviate_traefik_memory_limit: "512M"
+
+
+# Weaviate Resources
+weaviate_cpu_limit: "2"
+weaviate_memory_limit: "4G"
+
+# Multi2vec-CLIP Resources
+weaviate_multi2vec_cpu_limit: "1"
+weaviate_multi2vec_memory_limit: "2G"
+
+##############################################################################
+# Backup Configuration
+##############################################################################
+
+# Enable automated backups via cron
+weaviate_enable_automated_backups: true
+
+# Backup schedule (cron format)
+# Default: Daily at 2 AM
+weaviate_backup_schedule: "0 2 * * *"
+
+# Backup retention period in days
+# Old backups will be automatically deleted
+weaviate_backup_retention_days: 7
