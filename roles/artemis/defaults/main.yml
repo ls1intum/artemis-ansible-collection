@@ -220,8 +220,16 @@ artemis_eureka_urls: "{% if registry.url is defined and registry.url is not none
   %}"
 artemis_eureka_instance_id: "{{ node_id }}"
 
+artemis_redis_client_name: "{{ artemis_eureka_instance_id }}"
+
 node_short_name: unnamed-artemis-node
 node_display_name: Unnamed Artemis Node
+
+#redis:
+#  host:
+#  port:
+#  username:
+#  password:
 
 ##############################################################################
 # Iris Configuration
