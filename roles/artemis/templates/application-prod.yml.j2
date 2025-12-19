@@ -165,6 +165,7 @@ artemis:
       account-name: {{ artemis_account_login_info }}
 {% if sharing is defined %}
   sharing:
+    enabled: true
     serverurl: {{ sharing.url }}
     apikey: {{ sharing.apikey }}
     actionname: {{ sharing.actionname }}
