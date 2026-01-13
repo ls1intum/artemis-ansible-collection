@@ -1,0 +1,144 @@
+---
+# Validate required variables
+- name: Validate required variables are set
+  assert:
+    that:
+      - weaviate_domain is defined and weaviate_domain != ""
+      - weaviate_api_key is defined and weaviate_api_key != ""
+      - letsencrypt_email is defined and letsencrypt_email != ""
+    fail_msg: |
+      Required variables are missing!
+      Please ensure the following are set:
+        - weaviate_domain (e.g., weaviate.example.com)
+        - weaviate_api_key (generate with: openssl rand -base64 32)
+        - letsencrypt_email (e.g., your-email@example.com)
+
+- name: Ensure weaviate group {{ weaviate_user_group }} exists
+  become: true
+  group:
+    name: "{{ weaviate_user_group }}"
+    gid: "{{ weaviate_user_gid }}"
+    state: present
+
+- name: Ensure weaviate user {{ weaviate_user_name }} exists
+  become: true
+  user:
+    name: "{{ weaviate_user_name }}"
+    state: present
+    uid: "{{ weaviate_user_uid }}"
+    group: "{{ weaviate_user_group }}"
+    groups: "docker"
+
+- name: Create weaviate directories
+  become: true
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "775"
+  loop:
+    - "{{ weaviate_working_directory }}"
+    - "{{ weaviate_traefik_directory }}"
+    - "{{ weaviate_backup_directory }}"
+    - "{{ weaviate_data_directory }}"
+
+- name: Set permissions for weaviate directories
+  become: true
+  file:
+    path: "{{ item }}"
+    state: directory
+    recurse: true
+    owner: "{{ weaviate_user_name }}"
+    group: "{{ weaviate_user_group }}"
+  loop:
+    - "{{ weaviate_working_directory }}"
+    - "{{ weaviate_traefik_directory }}"
+    - "{{ weaviate_backup_directory }}"
+    - "{{ weaviate_data_directory }}"
+  notify: restart docker weaviate
+
+- name: Copy configuration templates that trigger restart
+  become: true
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ weaviate_user_name }}"
+    group: "{{ weaviate_user_group }}"
+    mode: "660"
+  loop:
+    - src: docker-compose.yml.j2
+      dest: "{{ weaviate_working_directory }}/docker-compose.yml"
+    - src: docker.env.j2
+      dest: "{{ weaviate_working_directory }}/.env"
+    - src: traefik.yml.j2
+      dest: "{{ weaviate_traefik_directory }}/traefik.yml"
+  notify: restart docker weaviate
+
+- name: Generate Traefik config.yml from template
+  become: true
+  template:
+    src: "config.yml.j2"
+    dest: "{{ weaviate_traefik_directory }}/config.yml"
+    owner: "{{ weaviate_user_name }}"
+    group: "{{ weaviate_user_group }}"
+    mode: "660"
+  notify: restart docker weaviate
+
+- name: Create acme.json for Let's Encrypt certificates
+  become: true
+  file:
+    path: "{{ weaviate_traefik_directory }}/acme.json"
+    state: touch
+    owner: "{{ weaviate_user_name }}"
+    group: "{{ weaviate_user_group }}"
+    mode: "600"
+    modification_time: preserve
+    access_time: preserve
+
+- name: Copy templated shell scripts
+  become: true
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ weaviate_working_directory }}/{{ item }}"
+    owner: "{{ weaviate_user_name }}"
+    group: "{{ weaviate_user_group }}"
+    mode: "770"
+  loop:
+    - backup.sh
+    - restore.sh
+    - weaviate-docker.sh
+
+- name: Setup automated backups cron job
+  become: true
+  cron:
+    name: "Weaviate automated backup"
+    minute: "{{ weaviate_backup_schedule.split()[0] }}"
+    hour: "{{ weaviate_backup_schedule.split()[1] }}"
+    day: "{{ weaviate_backup_schedule.split()[2] }}"
+    month: "{{ weaviate_backup_schedule.split()[3] }}"
+    weekday: "{{ weaviate_backup_schedule.split()[4] }}"
+    job: "cd {{ weaviate_working_directory }} && ./backup.sh >> {{ weaviate_working_directory }}/backup.log 2>&1"
+    user: "{{ weaviate_user_name }}"
+    state: present
+  when: weaviate_enable_automated_backups | bool
+
+- name: Setup automated backup cleanup cron job
+  become: true
+  cron:
+    name: "Weaviate backup cleanup"
+    minute: "30"
+    hour: "3"
+    job: "find {{ weaviate_backup_directory }} -name 'backup-*.tar.gz' -mtime +{{ weaviate_backup_retention_days }} -delete"
+    user: "{{ weaviate_user_name }}"
+    state: present
+  when: weaviate_enable_automated_backups | bool
+
+- name: Ensure handlers are flushed before starting
+  meta: flush_handlers
+
+- name: Start Weaviate services
+  become: true
+  command: ./weaviate-docker.sh start
+  args:
+    chdir: "{{ weaviate_working_directory }}"
+  register: weaviate_start_result
+  changed_when: "'Starting' in weaviate_start_result.stdout"
