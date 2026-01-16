@@ -31,12 +31,13 @@
   copy:
     dest: ./decryption_Keys.txt
     content: "{{ borg_keys.stdout }}"
+    mode: "600"
   delegate_to: localhost
 
 - name: Deploy storage backup script
   become: true
   template:
-    src: "templates/backup.sh.j2"
+    src: "backup.sh.j2"
     dest: "{{ storage_backup_script_path }}"
     mode: "700"
 
