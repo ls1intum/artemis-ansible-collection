@@ -228,6 +228,9 @@ artemis:
   continuous-integration:
     artemis-authentication-token-value: "demo"
     specify-concurrent-builds: {{ (continuous_integration.localci.concurrent_build_size is defined) | lower }}
+{% if redis is defined and redis is not none %}
+    data-store: "Redis"
+{% endif %}
 {% if continuous_integration.localci.concurrent_build_size is defined %}
     concurrent-build-size: {{ continuous_integration.localci.concurrent_build_size }}
 {% endif %}
