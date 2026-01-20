@@ -341,12 +341,11 @@ artemis_spring_profile_theia: "{% if theia is defined and theia is not none %},t
 artemis_spring_profile_aeolus: "{% if aeolus is defined and aeolus is not none %},aeolus{% endif %}"
 artemis_spring_profile_atlas: "{% if atlas is defined and atlas is not none %},atlas{% endif %}"
 artemis_spring_profile_lti: "{% if lti.oauth_secret is defined and lti.oauth_secret is not none %},lti{% endif %}"
-artemis_spring_profile_sharing: "{% if sharing is defined and sharing is not none %},sharing{% endif %}"
 
 artemis_spring_profile_core: "{% if artemis_computed_is_core_node %},core{{ artemis_spring_profile_ldap }}{{ artemis_spring_profile_version_control
   }}{{ artemis_spring_profile_continuous_integration }}{{ artemis_spring_profile_athena }}{{ artemis_spring_profile_apollon }}{{ artemis_spring_profile_scheduling }}{{ artemis_spring_profile_docker
   }}{{ artemis_spring_profile_iris }}{{ artemis_spring_profile_theia }}{{ artemis_spring_profile_aeolus }}{{ artemis_spring_profile_atlas }}{{ artemis_spring_profile_lti
-  }}{{ artemis_spring_profile_sharing }}{% endif %}"
+  }}{% endif %}"
 artemis_spring_profile_buildagent: "{% if continuous_integration.localci is defined and continuous_integration.localci is not none %}{% if continuous_integration.localci.is_build_agent
   is defined and continuous_integration.localci.is_build_agent is not none and continuous_integration.localci.is_build_agent %},buildagent{% endif %}{% endif %}"
 
