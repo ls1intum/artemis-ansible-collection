@@ -7,3 +7,18 @@
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
     mode: "600"
+
+- name: Copy artemis.service systemd configuration
+  become: true
+  template:
+    src: artemis.service.j2
+    dest: "/etc/systemd/system/artemis.service"
+    mode: "644"
+
+- name: Enable artemis service
+  become: true
+  systemd:
+    daemon_reload: true
+    name: artemis
+    enabled: true
+    masked: false

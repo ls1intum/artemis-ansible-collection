@@ -72,7 +72,7 @@
   notify: restart docker artemis
 
 - name: Copy node env files
-  loop: "{{ range(1, artemis_node_count + 1) }}"
+  loop: "{{ range(1, artemis_node_count + 1) | list }}"
   loop_control:
     loop_var: docker_node_id
   when: is_multinode_install

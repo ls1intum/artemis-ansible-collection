@@ -20,7 +20,7 @@
     - not (use_docker | bool)
     - setup_system | bool
 
-# Configure the Artemis systemd service
+# Install other dependencies and setup host
 - include_tasks: artemis_setup.yml
   when:
     - not (use_docker | bool)

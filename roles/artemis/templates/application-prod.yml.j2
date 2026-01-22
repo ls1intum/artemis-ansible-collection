@@ -35,8 +35,8 @@ spring:
   data:
     redis:
       host: {{ redis.host }}
-      port: {{ redis.port}}
-      username: {{ redis.username}}
+      port: {{ redis.port }}
+      username: {{ redis.username }}
       password: {{ redis.password }}
       client-name: {{ artemis_redis_client_name }}
 {% endif %}
@@ -176,6 +176,7 @@ artemis:
       account-name: {{ artemis_account_login_info }}
 {% if sharing is defined %}
   sharing:
+    enabled: true
     serverurl: {{ sharing.url }}
     apikey: {{ sharing.apikey }}
     actionname: {{ sharing.actionname }}
@@ -444,7 +445,7 @@ helios:
 {% endif %}
 {% endif %}
 
-{% if is_multinode_install and artemis_eureka_urls is defined and hazelcast_address is defined %}
+{% if is_multinode_install and artemis_eureka_urls is defined and hazelcast_address is defined and hazelcast_address is not none and hazelcast_address != "" %}
 # Eureka configuration
 eureka:
   client:
