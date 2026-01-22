@@ -251,6 +251,7 @@ artemis:
 {% if artemis_computed_is_core_node %}
 {% if lti is defined %}
   lti:
+    enabled: true
     id: artemis_lti
     oauth-key: artemis_lti_key
     oauth-secret: {{ lti.oauth_secret }}
