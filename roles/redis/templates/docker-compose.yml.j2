@@ -5,7 +5,7 @@ services:
     image: redis/redis-stack-server:{{ redis.version }}
     restart: always
     ports:
-      - "6379:6379"
+      - "{{ redis.port }}:6379"
     volumes:
       - ./redis.conf:/usr/local/etc/redis/redis.conf
       - ./redis-data:/data

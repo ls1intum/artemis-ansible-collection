@@ -3,3 +3,4 @@ redis:
   password: #FIXME
   working_directory: /opt/redis
   version: 6.2.6-v18
+  port: 6379
