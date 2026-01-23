@@ -1,0 +1,6 @@
+- name: Restart redis
+  become: true
+  community.docker.docker_compose_v2:
+    project_src: "{{ redis.working_directory }}"
+    state: restarted
+    recreate: always

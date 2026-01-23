@@ -25,7 +25,7 @@ host_ipv4_address:
 # Address of the node inside the network.
 wireguard_interface_address: "fcfe:0:0:0:0:0:a:1"
 
-# Wireguard Keys - Autmatically generated!
+# Wireguard Keys - Automatically generated!
 wireguard_pubkey: 
 wireguard_privkey: 
 ```
