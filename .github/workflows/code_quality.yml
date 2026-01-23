@@ -1,7 +1,7 @@
 name: Code Quality
 # ref: https://github.com/marketplace/actions/ansible-lint
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
   lint:
