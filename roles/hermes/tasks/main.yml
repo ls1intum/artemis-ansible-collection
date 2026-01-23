@@ -1,0 +1,31 @@
+---
+- name: Create working directory
+  become: true
+  file:
+    path: "{{ hermes_working_directory }}"
+    state: directory
+
+- name: Create docker-compose file
+  become: true
+  template:
+    src: "docker-compose.yml.j2"
+    dest: "{{ hermes_working_directory }}/docker-compose.yml"
+    mode: '0600'
+
+- name: Create Google certificate file
+  ansible.builtin.copy:
+    content: "{{ hermes_google_application_credentials_content }}"
+    dest: "{{ hermes_working_directory }}/{{ hermes_google_application_credentials_json_path }}"
+    mode: "0600"
+    owner: "root"
+    group: "root"
+  become: true
+
+- name: Create Apple certificate file
+  ansible.builtin.copy:
+    content: "{{ hermes_apns_certificate_content | b64decode }}"
+    dest: "{{ hermes_working_directory }}/{{ hermes_apns_certificate_path }}"
+    mode: "0600"
+    owner: "root"
+    group: "root"
+  become: true
