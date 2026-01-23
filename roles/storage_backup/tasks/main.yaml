@@ -1,0 +1,50 @@
+---
+- name: Install dependencies
+  become: true
+  apt:
+    name:
+      - borgbackup
+    state: present
+    update_cache: true
+
+- name: Initialise Borg repository
+  become: true
+  command: borg init --encryption=repokey {{ storage_backup_dir }}
+  environment:
+    BORG_PASSPHRASE: '{{ storage_backup_password }}'
+  register: init_borg_output
+  changed_when: init_borg_output.rc != 2
+  failed_when:
+    - init_borg_output.rc != 2
+    - init_borg_output.rc != 0
+
+- name: Get encryption keys
+  become: true
+  command: borg key export --paper {{ storage_backup_dir }}
+  register: borg_keys
+
+- name: Print encryption keys
+  debug:
+    msg: "{{ borg_keys }}"
+
+- name: Write keys to file
+  copy:
+    dest: ./decryption_Keys.txt
+    content: "{{ borg_keys.stdout }}"
+    mode: "600"
+  delegate_to: localhost
+
+- name: Deploy storage backup script
+  become: true
+  template:
+    src: "backup.sh.j2"
+    dest: "{{ storage_backup_script_path }}"
+    mode: "700"
+
+- name: Add backup cronjob
+  become: true
+  cron:
+    name: "Backup artemis storage"
+    minute: "{{ storage_backup_minute }}"
+    hour: "{{ storage_backup_hour }}"
+    job: "{{ storage_backup_script_path }} -sp"
