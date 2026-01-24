@@ -1,11 +1,7 @@
 name: Code Quality
 # ref: https://github.com/marketplace/actions/ansible-lint
 
-on: [push, pull_request]
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
-  cancel-in-progress: true
+on: [push]
 
 jobs:
   lint:
