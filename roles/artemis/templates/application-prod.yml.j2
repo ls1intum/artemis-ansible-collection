@@ -330,16 +330,17 @@ artemis:
 {% endif %}
 
 {% if theia is defined and theia is not none %}
-theia:
+  theia:
+    enabled: true
 {% if theia.portal_url is defined and theia.portal_url is not none %}
-  portal-url: {{ theia.portal_url }}
+    portal-url: {{ theia.portal_url }}
 {% endif %}
 {% if theia.images is defined and theia.images is not none %}
-  images:
+    images:
 {% for programming_language_key, programming_language_value in theia.images.items() %}
-    {{ programming_language_key }}:
+      {{ programming_language_key }}:
 {% for image_key, image_value in programming_language_value.items() %}
-      {{ image_key }}: {{ image_value }}
+        {{ image_key }}: {{ image_value }}
 {% endfor %}
 {% endfor %}
 {% endif %}
