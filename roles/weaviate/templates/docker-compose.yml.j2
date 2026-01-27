@@ -10,6 +10,7 @@ services:
     ports:
       - "80:80"
       - "443:443"
+      - "50051:50051"
     environment:
       - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
     volumes:
@@ -85,6 +86,12 @@ services:
       - "traefik.http.routers.weaviate-secure.middlewares=default-headers@file,rate-limit@file,default-whitelist@file"
       - "traefik.http.routers.weaviate-secure.service=weaviate"
       - "traefik.http.services.weaviate.loadbalancer.server.port=8080"
+      - "traefik.tcp.routers.weaviate-grpc.entrypoints=grpc"
+      - "traefik.tcp.routers.weaviate-grpc.rule=HostSNI(`${WEAVIATE_DOMAIN}`)"
+      - "traefik.tcp.routers.weaviate-grpc.tls=true"
+      - "traefik.tcp.routers.weaviate-grpc.tls.certresolver=letsencrypt"
+      - "traefik.tcp.routers.weaviate-grpc.service=weaviate-grpc"
+      - "traefik.tcp.services.weaviate-grpc.loadbalancer.server.port=50051"
 
     deploy:
       resources:
