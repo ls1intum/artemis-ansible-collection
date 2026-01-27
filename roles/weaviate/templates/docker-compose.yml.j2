@@ -10,6 +10,7 @@ services:
     ports:
       - "80:80"
       - "443:443"
+      - "50051:50051"
     environment:
       - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
     volumes:
