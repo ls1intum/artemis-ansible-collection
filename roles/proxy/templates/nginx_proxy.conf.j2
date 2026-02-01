@@ -14,12 +14,18 @@ upstream app {
 server_tokens off;
 
 {% if proxy_rate_limit_exempt_ips | length > 0 %}
-# Map to exempt certain IPs from git rate limiting (empty string = no rate limit)
-geo $rate_limit_key {
-    default $binary_remote_addr;
+# Geo block to identify exempt IPs (1 = exempt, 0 = not exempt)
+geo $rate_limit_exempt {
+    default 0;
 {% for exempt in proxy_rate_limit_exempt_ips %}
-    {{ exempt.ip }} "";  # {{ exempt.comment | default('Exempt from git rate limiting') }}
+    {{ exempt.ip }} 1;  # {{ exempt.comment | default('Exempt from git rate limiting') }}
 {% endfor %}
+}
+
+# Map exempt flag to rate limit key (empty string = no rate limit)
+map $rate_limit_exempt $rate_limit_key {
+    0 $binary_remote_addr;
+    1 "";
 }
 {% endif %}
 
