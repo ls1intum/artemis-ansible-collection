@@ -13,10 +13,20 @@ upstream app {
 # Remove nginx version from HTTP response
 server_tokens off;
 
+{% if proxy_rate_limit_exempt_ips | length > 0 %}
+# Map to exempt certain IPs from git rate limiting (empty string = no rate limit)
+geo $rate_limit_key {
+    default $binary_remote_addr;
+{% for exempt in proxy_rate_limit_exempt_ips %}
+    {{ exempt.ip }} "";  # {{ exempt.comment | default('Exempt from git rate limiting') }}
+{% endfor %}
+}
+{% endif %}
+
 # Rate limit for the login REST call, at most one requests per two seconds
 limit_req_zone $binary_remote_addr zone=loginlimit:10m rate=30r/m;
 # Rate limit for git operations, at most 15 requests per second
-limit_req_zone $binary_remote_addr zone=gitlimit:10m rate=15r/s;
+limit_req_zone {% if proxy_rate_limit_exempt_ips | length > 0 %}$rate_limit_key{% else %}$binary_remote_addr{% endif %} zone=gitlimit:10m rate=15r/s;
 
 server {
     listen 80 default_server;
