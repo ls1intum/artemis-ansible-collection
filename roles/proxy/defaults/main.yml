@@ -57,3 +57,4 @@ proxy_health_check_enabled: true
 proxy_health_check_endpoint: "/ping"
 proxy_health_check_interval: 2        # seconds between health checks
 proxy_health_check_timeout: 1         # seconds to wait for response
+proxy_health_check_retries: 2         # number of attempts before marking node as down
