@@ -46,3 +46,8 @@ proxy_send_timeout: "900s"
 proxy_read_timeout: "900s"
 fastcgi_send_timeout: "900s"
 fastcgi_read_timeout: "900s"
+
+# IPs exempt from git rate limiting (e.g., benchmark servers)
+proxy_rate_limit_exempt_ips: []
+#   - ip: "131.159.89.112"
+#     comment: "Benchmark server"
