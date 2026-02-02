@@ -12,17 +12,30 @@ MAX_RETRIES={{ proxy_health_check_retries }}
 
 # Check if a server is healthy, with retries
 # Returns 0 if healthy, 1 if unhealthy after all retries
+# Sets FAILED_ATTEMPTS to number of failed attempts before success (for logging)
 check_health() {
     local url="$1"
+    local server="$2"
     local attempt=1
+    FAILED_ATTEMPTS=0
 
     while [[ $attempt -le $MAX_RETRIES ]]; do
         if curl -sf --connect-timeout "$CONNECT_TIMEOUT" --max-time "$MAX_TIME" "$url" > /dev/null 2>&1; then
+            if [[ $FAILED_ATTEMPTS -gt 0 ]]; then
+                logger -t nginx-health-check "Server $server recovered after $FAILED_ATTEMPTS failed attempt(s)"
+            fi
             return 0
         fi
+        ((FAILED_ATTEMPTS++))
         ((attempt++))
     done
     return 1
+}
+
+# Check if a server was previously marked as down
+was_down() {
+    local server="$1"
+    grep -q "server ${server}.* down;" "$UPSTREAM_FILE" 2>/dev/null
 }
 
 # Build new upstream config
@@ -32,11 +45,17 @@ NEW_CONFIG+="{{ proxy_load_balancing_method }};\n"
 {% endif %}
 {% for node in proxy_available_nodes %}
 {% set node_port = node.port | default(proxy_target_port) %}
-if check_health "{{ proxy_node_protocol }}://{{ node.hostname }}:{{ node_port }}${HEALTH_ENDPOINT}"; then
+SERVER="{{ node.hostname }}:{{ node_port }}"
+if check_health "{{ proxy_node_protocol }}://${SERVER}${HEALTH_ENDPOINT}" "$SERVER"; then
     NEW_CONFIG+="server {{ node.hostname }}:{{ node_port }}{% if node.weight is defined %} weight={{ node.weight }}{% endif %};\n"
+    if was_down "$SERVER"; then
+        logger -t nginx-health-check "Server $SERVER is back UP"
+    fi
 else
     NEW_CONFIG+="server {{ node.hostname }}:{{ node_port }}{% if node.weight is defined %} weight={{ node.weight }}{% endif %} down;\n"
-    logger -t nginx-health-check "Server {{ node.hostname }}:{{ node_port }} marked DOWN after $MAX_RETRIES failed attempts"
+    if ! was_down "$SERVER"; then
+        logger -t nginx-health-check "Server $SERVER marked DOWN after $MAX_RETRIES failed attempts"
+    fi
 fi
 {% endfor %}
 
