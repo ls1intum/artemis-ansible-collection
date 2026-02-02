@@ -1,0 +1,11 @@
+# {{ ansible_managed }}
+[Unit]
+Description=Run Nginx Health Check every {{ proxy_health_check_interval }} seconds
+
+[Timer]
+OnBootSec=10s
+OnUnitActiveSec={{ proxy_health_check_interval }}s
+AccuracySec=500ms
+
+[Install]
+WantedBy=timers.target

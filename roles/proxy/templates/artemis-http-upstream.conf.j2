@@ -1,0 +1,9 @@
+# {{ ansible_managed }}
+# Initial upstream config - managed dynamically by health check script
+{% if proxy_load_balancing_method is defined %}
+{{ proxy_load_balancing_method }};
+{% endif %}
+{% for node in proxy_available_nodes %}
+{% set node_port = node.port | default(proxy_target_port) %}
+server {{ node.hostname }}:{{ node_port }}{% if node.weight is defined %} weight={{ node.weight }}{% endif %};
+{% endfor %}
