@@ -297,6 +297,7 @@ artemis_internal_ip_allowlist: []
 #artemis_rate_limit:
 #  account_management_rpm: 5
 #  authentication_rpm: 30
+#  websocket_connections_rpm: 60
 
 ##############################################################################
 # Helios Configuration

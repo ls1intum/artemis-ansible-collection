@@ -31,8 +31,15 @@ map $rate_limit_exempt $rate_limit_key {
 
 # Rate limit for the login REST call, at most one requests per two seconds
 limit_req_zone $binary_remote_addr zone=loginlimit:10m rate=30r/m;
+
 # Rate limit for git operations, at most 15 requests per second
 limit_req_zone {% if proxy_rate_limit_exempt_ips | length > 0 %}$rate_limit_key{% else %}$binary_remote_addr{% endif %} zone=gitlimit:10m rate=15r/s;
+
+# Rate limit for WebSocket connections, at most 1 connection per second with burst
+limit_req_zone $binary_remote_addr zone=wslimit:10m rate=1r/s;
+
+# Limit concurrent WebSocket connections per IP
+limit_conn_zone $binary_remote_addr zone=ws_conn:10m;
 
 server {
     listen 80 default_server;
@@ -152,6 +159,27 @@ server {
         fastcgi_send_timeout 900s;
         fastcgi_read_timeout 900s;
         client_max_body_size 128M;
+    }
+
+    location /websocket {
+        proxy_pass {{ proxy_node_protocol }}://app/websocket;
+        # Rate limit WebSocket connection upgrades
+        # * burst allows up to 50 connections to queue
+        # * nodelay means excess requests are rejected immediately
+        limit_req zone=wslimit burst=50 nodelay;
+        # Limit concurrent WebSocket connections per IP to 50
+        # (allows users with multiple tabs open)
+        limit_conn ws_conn 50;
+
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        proxy_send_timeout 900s;
+        proxy_read_timeout 900s;
     }
 
     location /favicon.ico {

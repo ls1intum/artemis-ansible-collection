@@ -136,6 +136,7 @@ artemis:
     enabled: true
     account-management-rpm: {{ artemis_rate_limit.account_management_rpm }}
     authentication-rpm: {{ artemis_rate_limit.authentication_rpm }}
+    websocket-connections-rpm: {{ artemis_rate_limit.websocket_connections_rpm | default(60) }}
 {% endif %}
   user-management:
 {% if ldap.url is defined and ldap.url is not none%}
