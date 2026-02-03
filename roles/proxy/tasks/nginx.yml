@@ -156,7 +156,7 @@
     src: nginx_proxy.conf.j2
     dest: /etc/nginx/sites-available/proxy.conf
     mode: "644"
-  notify: Reload nginx
+  notify: Restart nginx  # Restart required for rate limit zone changes
 
 - name: Enable proxy site config
   become: true
