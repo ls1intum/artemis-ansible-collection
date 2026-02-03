@@ -11,6 +11,7 @@
     src: "docker-compose.yml.j2"
     dest: "{{ hermes_working_directory }}/docker-compose.yml"
     mode: '0600'
+  notify: Restart hermes
 
 - name: Create Google certificate file
   ansible.builtin.copy:
@@ -20,6 +21,7 @@
     owner: "root"
     group: "root"
   become: true
+  notify: Restart hermes
 
 - name: Create Apple certificate file
   ansible.builtin.copy:
@@ -29,3 +31,4 @@
     owner: "root"
     group: "root"
   become: true
+  notify: Restart hermes
