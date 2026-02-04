@@ -280,6 +280,11 @@ node_display_name: Unnamed Artemis Node
 
 artemis_hyperion_enabled: false
 
+#artemis_llm_cost:
+#  gpt-5-mini:
+#    input_cost_per_million_eur: 0.23
+#    output_cost_per_million_eur: 1.84
+
 ##############################################################################
 # CORS Configuration
 ##############################################################################
