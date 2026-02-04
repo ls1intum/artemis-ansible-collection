@@ -330,6 +330,16 @@ artemis:
   hyperion:
     enabled: {{ artemis_hyperion_enabled | lower }}
 
+{% if artemis_llm_cost is defined %}
+  llm:
+    model-costs:
+{% for model, cost in artemis_llm_cost.items() %}
+      {{ model }}:
+        input-cost-per-million-eur: {{ cost.input_cost_per_million_eur }}
+        output-cost-per-million-eur: {{ cost.output_cost_per_million_eur }}
+{% endfor %}
+{% endif %}
+
   telemetry:
     enabled: {{ artemis_telemetry_enabled | lower }}
     sendAdminDetails: {{ artemis_send_admin_details | lower }}

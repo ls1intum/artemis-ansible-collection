@@ -1,0 +1,6 @@
+---
+- name: Restart hermes
+  community.docker.docker_compose_v2:
+    project_src: "{{ hermes_working_directory }}"
+    state: present
+  become: true
