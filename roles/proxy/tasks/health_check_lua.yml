@@ -1,0 +1,74 @@
+---
+# Lua-based active health check setup for nginx/OpenResty
+# This is an alternative to the systemd-based health check (health_check.yml)
+#
+# Requirements:
+#   - OpenResty OR nginx compiled with lua-nginx-module
+#   - lua-resty-http module
+
+- name: Check if OpenResty is installed
+  become: true
+  stat:
+    path: /usr/local/openresty/nginx/sbin/nginx
+  register: openresty_check
+
+- name: Set nginx binary path
+  set_fact:
+    nginx_bin: "{{ '/usr/local/openresty/nginx/sbin/nginx' if openresty_check.stat.exists else '/usr/sbin/nginx' }}"
+    nginx_lua_path: "{{ '/usr/local/openresty/lualib' if openresty_check.stat.exists else '/usr/share/lua/5.1' }}"
+
+- name: Verify Lua module is available
+  become: true
+  command: "{{ nginx_bin }} -V"
+  register: nginx_version_output
+  changed_when: false
+  failed_when: "'lua' not in nginx_version_output.stderr.lower() and 'openresty' not in nginx_version_output.stderr.lower()"
+
+- name: Create Lua modules directory
+  become: true
+  file:
+    path: /etc/nginx/lua
+    state: directory
+    mode: '0755'
+
+- name: Install lua-resty-http (OpenResty)
+  become: true
+  command: opm get ledgetech/lua-resty-http
+  when: openresty_check.stat.exists
+  register: opm_install
+  changed_when: "'already installed' not in opm_install.stdout"
+  failed_when: opm_install.rc != 0 and 'already installed' not in opm_install.stdout
+
+- name: Install lua-resty-http (luarocks fallback)
+  become: true
+  command: luarocks install lua-resty-http
+  when: not openresty_check.stat.exists
+  register: luarocks_install
+  changed_when: "'is now installed' in luarocks_install.stdout"
+  failed_when: luarocks_install.rc != 0 and 'already installed' not in luarocks_install.stdout
+  ignore_errors: true
+
+- name: Deploy health check Lua module
+  become: true
+  template:
+    src: lua/healthcheck.lua.j2
+    dest: /etc/nginx/lua/healthcheck.lua
+    mode: '0644'
+  notify: Reload nginx
+
+- name: Deploy Lua-based nginx config
+  become: true
+  template:
+    src: nginx_proxy_lua.conf.j2
+    dest: /etc/nginx/sites-available/proxy.conf
+    mode: '0644'
+  notify: Restart nginx  # Restart required for Lua init changes
+
+- name: Ensure systemd health check is disabled (if it exists)
+  become: true
+  systemd:
+    name: nginx-health-check.timer
+    enabled: false
+    state: stopped
+  ignore_errors: true
+  when: proxy_health_check_method == 'lua'

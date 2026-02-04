@@ -58,3 +58,8 @@ proxy_health_check_endpoint: "/ping"
 proxy_health_check_interval: 2        # seconds between health checks
 proxy_health_check_timeout: 1         # seconds to wait for response
 proxy_health_check_retries: 2         # number of attempts before marking node as down
+
+# Health check method: "systemd" (default) or "lua" (requires OpenResty or lua-nginx-module)
+# - systemd: External bash script runs via systemd timer, reloads nginx config on changes
+# - lua: In-process health checks using Lua, no config reloads, requires OpenResty/lua-nginx-module
+proxy_health_check_method: "systemd"

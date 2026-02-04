@@ -75,7 +75,90 @@ proxy_send_timeout: "900s"
 proxy_read_timeout: "900s"
 fastcgi_send_timeout: "900s"
 fastcgi_read_timeout: "900s"
+
+# Health check settings
+proxy_health_check_enabled: true
+proxy_health_check_endpoint: "/ping"
+proxy_health_check_interval: 2
+proxy_health_check_timeout: 1
+proxy_health_check_retries: 2
+proxy_health_check_method: "systemd"  # or "lua"
 ```
+
+## Active Health Checks
+
+The proxy role includes active health checking to automatically detect and remove unresponsive upstream servers from the load balancing pool. This prevents user requests from hanging when a node freezes (e.g., due to GC pauses or process issues).
+
+### Health Check Methods
+
+Two methods are available:
+
+| Method | Description | Requirements | Pros | Cons |
+|--------|-------------|--------------|------|------|
+| `systemd` (default) | External bash script runs periodically via systemd timer | Standard nginx | Simple, no special modules | Requires nginx reload on changes |
+| `lua` | In-process health checks using Lua | OpenResty or nginx with lua-nginx-module | No reloads, faster failover | Requires OpenResty/Lua setup |
+
+### Configuration
+
+```yaml
+# Enable/disable health checks (default: true)
+proxy_health_check_enabled: true
+
+# Health check endpoint on upstream servers (default: "/ping")
+proxy_health_check_endpoint: "/ping"
+
+# Interval between checks in seconds (default: 2)
+proxy_health_check_interval: 2
+
+# Timeout for each check in seconds (default: 1)
+proxy_health_check_timeout: 1
+
+# Number of retries before marking server down (default: 2)
+proxy_health_check_retries: 2
+
+# Health check method: "systemd" or "lua" (default: "systemd")
+proxy_health_check_method: "systemd"
+```
+
+### Systemd Method
+
+The systemd method uses a bash script that runs every `proxy_health_check_interval` seconds:
+
+1. Probes each upstream server's `/ping` endpoint
+2. If a server fails after `proxy_health_check_retries` attempts, marks it as `down` in the nginx config
+3. Reloads nginx if the config changed
+4. When server recovers, removes the `down` marker
+
+**Monitoring:**
+```bash
+# Check timer status
+systemctl status nginx-health-check.timer
+
+# Watch health check logs
+journalctl -t nginx-health-check -f
+
+# View current upstream status
+cat /etc/nginx/artemis-http-upstream.conf
+```
+
+### Lua Method
+
+The Lua method runs health checks inside nginx worker processes:
+
+1. Requires OpenResty or nginx compiled with lua-nginx-module
+2. Health state stored in shared memory (`lua_shared_dict`)
+3. Uses `balancer_by_lua_block` to route only to healthy backends
+4. No config reloads needed - failover is immediate
+
+**Monitoring:**
+```bash
+# Access the health status page (restricted to localhost and upstream nodes)
+curl http://localhost/upstream-health
+```
+
+**Requirements for Lua method:**
+- OpenResty (`apt install openresty`) OR
+- nginx with lua-nginx-module and lua-resty-http
 
 ## Example Usage
 
@@ -113,4 +196,31 @@ Here is an example playbook:
         proxy_read_timeout: "900s"
         fastcgi_send_timeout: "900s"
         fastcgi_read_timeout: "900s"
+        # Health check configuration
+        proxy_health_check_enabled: true
+        proxy_health_check_method: "systemd"  # or "lua" for OpenResty
+```
+
+### Example with Lua Health Checks (OpenResty)
+
+```yaml
+- hosts: proxy
+  roles:
+    - role: ls1intum.proxy
+      vars:
+        servers:
+          - name: "example.com"
+            ssl_certificate_path: "/etc/ssl/certs/example.com.crt"
+            ssl_certificate_key_path: "/etc/ssl/private/example.com.key"
+            default_server: true
+        proxy_available_nodes:
+          - hostname: "node1.example.com"
+          - hostname: "node2.example.com"
+        proxy_target_port: 8080
+        # Use Lua-based health checks (requires OpenResty)
+        proxy_health_check_enabled: true
+        proxy_health_check_method: "lua"
+        proxy_health_check_interval: 2
+        proxy_health_check_timeout: 1
+        proxy_health_check_retries: 2
 ```

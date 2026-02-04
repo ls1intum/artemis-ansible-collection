@@ -1,0 +1,301 @@
+-- Active health check module for Artemis upstream servers
+-- {{ ansible_managed }}
+--
+-- This module runs periodic health checks against upstream servers
+-- and maintains their health status in shared memory.
+
+local _M = {}
+
+local http = require "resty.http"
+local cjson = require "cjson.safe"
+
+-- Configuration
+local HEALTH_CHECK_INTERVAL = {{ proxy_health_check_interval }} -- seconds
+local HEALTH_CHECK_TIMEOUT = {{ proxy_health_check_timeout }} * 1000 -- milliseconds
+local HEALTH_CHECK_ENDPOINT = "{{ proxy_health_check_endpoint }}"
+local MAX_RETRIES = {{ proxy_health_check_retries }}
+local PROTOCOL = "{{ proxy_node_protocol }}"
+
+-- Upstream servers configuration
+local upstream_servers = {
+{% for node in proxy_available_nodes %}
+{% set node_port = node.port | default(proxy_target_port) %}
+    {
+        host = "{{ node.hostname }}",
+        port = {{ node_port }},
+        weight = {{ node.weight | default(1) }},
+        name = "{{ node.hostname }}:{{ node_port }}"
+    },
+{% endfor %}
+}
+
+-- Get shared dictionary for health state
+local function get_shm()
+    return ngx.shared.healthcheck
+end
+
+-- Initialize all servers as healthy
+function _M.init()
+    local shm = get_shm()
+    for _, server in ipairs(upstream_servers) do
+        local key = server.name
+        -- Initialize as healthy (1 = healthy, 0 = unhealthy)
+        local current = shm:get(key .. ":status")
+        if current == nil then
+            shm:set(key .. ":status", 1)
+            shm:set(key .. ":fail_count", 0)
+        end
+    end
+    ngx.log(ngx.INFO, "[healthcheck] Initialized health check state for ", #upstream_servers, " servers")
+end
+
+-- Check health of a single server
+local function check_server(server)
+    local httpc = http.new()
+    httpc:set_timeout(HEALTH_CHECK_TIMEOUT)
+
+    local url = PROTOCOL .. "://" .. server.host .. ":" .. server.port .. HEALTH_CHECK_ENDPOINT
+
+    local res, err = httpc:request_uri(url, {
+        method = "GET",
+        headers = {
+            ["Host"] = server.host,
+            ["User-Agent"] = "nginx-healthcheck/1.0",
+        },
+    })
+
+    if not res then
+        return false, err
+    end
+
+    if res.status == 200 then
+        return true, nil
+    end
+
+    return false, "status " .. res.status
+end
+
+-- Check server with retries
+local function check_server_with_retries(server)
+    local failed_attempts = 0
+
+    for attempt = 1, MAX_RETRIES do
+        local ok, err = check_server(server)
+        if ok then
+            return true, failed_attempts
+        end
+        failed_attempts = failed_attempts + 1
+    end
+
+    return false, failed_attempts
+end
+
+-- Run health checks for all servers
+function _M.run_checks()
+    local shm = get_shm()
+
+    for _, server in ipairs(upstream_servers) do
+        local key = server.name
+        local was_healthy = (shm:get(key .. ":status") or 1) == 1
+
+        local ok, failed_attempts = check_server_with_retries(server)
+
+        if ok then
+            -- Server is healthy
+            if not was_healthy then
+                ngx.log(ngx.NOTICE, "[healthcheck] Server ", server.name, " is back UP")
+            elseif failed_attempts > 0 then
+                ngx.log(ngx.NOTICE, "[healthcheck] Server ", server.name,
+                    " recovered after ", failed_attempts, " failed attempt(s)")
+            end
+            shm:set(key .. ":status", 1)
+            shm:set(key .. ":fail_count", 0)
+        else
+            -- Server is unhealthy
+            if was_healthy then
+                ngx.log(ngx.WARN, "[healthcheck] Server ", server.name,
+                    " marked DOWN after ", MAX_RETRIES, " failed attempts")
+            end
+            shm:set(key .. ":status", 0)
+            shm:set(key .. ":fail_count", failed_attempts)
+        end
+    end
+end
+
+-- Start periodic health check timer
+function _M.spawn_checker()
+    local function do_check(premature)
+        if premature then
+            return
+        end
+
+        local ok, err = pcall(_M.run_checks)
+        if not ok then
+            ngx.log(ngx.ERR, "[healthcheck] Check failed: ", err)
+        end
+
+        -- Schedule next check
+        local ok, err = ngx.timer.at(HEALTH_CHECK_INTERVAL, do_check)
+        if not ok then
+            ngx.log(ngx.ERR, "[healthcheck] Failed to create timer: ", err)
+        end
+    end
+
+    -- Start first check after a short delay
+    local ok, err = ngx.timer.at(1, do_check)
+    if not ok then
+        ngx.log(ngx.ERR, "[healthcheck] Failed to create initial timer: ", err)
+        return false, err
+    end
+
+    ngx.log(ngx.INFO, "[healthcheck] Health check timer started (interval: ",
+        HEALTH_CHECK_INTERVAL, "s)")
+    return true
+end
+
+-- Get a healthy peer for load balancing
+-- Returns host, port or nil if no healthy peers
+function _M.get_healthy_peer()
+    local shm = get_shm()
+    local healthy_servers = {}
+    local total_weight = 0
+
+    for _, server in ipairs(upstream_servers) do
+        local key = server.name
+        local status = shm:get(key .. ":status")
+        if status == 1 or status == nil then
+            table.insert(healthy_servers, server)
+            total_weight = total_weight + server.weight
+        end
+    end
+
+    if #healthy_servers == 0 then
+        ngx.log(ngx.ERR, "[healthcheck] No healthy upstream servers available")
+        return nil, nil
+    end
+
+{% if proxy_load_balancing_method is defined and proxy_load_balancing_method == "ip_hash" %}
+    -- IP hash load balancing
+    local client_ip = ngx.var.remote_addr or "127.0.0.1"
+    local hash = ngx.crc32_long(client_ip)
+    local index = (hash % #healthy_servers) + 1
+    local server = healthy_servers[index]
+{% elif proxy_load_balancing_method is defined and proxy_load_balancing_method == "least_conn" %}
+    -- Least connections: use round-robin as approximation in Lua
+    -- (True least_conn requires connection tracking which is complex)
+    local rr_key = "round_robin_index"
+    local index = (shm:incr(rr_key, 1, 0) % #healthy_servers) + 1
+    local server = healthy_servers[index]
+{% else %}
+    -- Weighted round-robin
+    local rr_key = "round_robin_counter"
+    local counter = shm:incr(rr_key, 1, 0)
+
+    -- Select server based on weighted distribution
+    local point = counter % total_weight
+    local cumulative = 0
+    local server = healthy_servers[1]
+
+    for _, s in ipairs(healthy_servers) do
+        cumulative = cumulative + s.weight
+        if point < cumulative then
+            server = s
+            break
+        end
+    end
+{% endif %}
+
+    return server.host, server.port
+end
+
+-- Check if a specific server is healthy
+function _M.is_healthy(server_name)
+    local shm = get_shm()
+    local status = shm:get(server_name .. ":status")
+    return status == 1 or status == nil
+end
+
+-- Get status of all servers (for status page)
+function _M.get_status()
+    local shm = get_shm()
+    local status = {}
+
+    for _, server in ipairs(upstream_servers) do
+        local key = server.name
+        local is_healthy = (shm:get(key .. ":status") or 1) == 1
+        local fail_count = shm:get(key .. ":fail_count") or 0
+
+        table.insert(status, {
+            name = server.name,
+            host = server.host,
+            port = server.port,
+            weight = server.weight,
+            healthy = is_healthy,
+            fail_count = fail_count,
+        })
+    end
+
+    return status
+end
+
+-- Generate status page HTML
+function _M.status_page()
+    local status = _M.get_status()
+    local healthy_count = 0
+    local total_count = #status
+
+    local html = [[
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upstream Health Status</title>
+    <style>
+        body { font-family: monospace; margin: 20px; }
+        table { border-collapse: collapse; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background: #f5f5f5; }
+        .healthy { color: green; font-weight: bold; }
+        .unhealthy { color: red; font-weight: bold; }
+    </style>
+    <meta http-equiv="refresh" content="5">
+</head>
+<body>
+    <h1>Artemis Upstream Health Status</h1>
+    <table>
+        <tr>
+            <th>Server</th>
+            <th>Status</th>
+            <th>Weight</th>
+            <th>Failed Checks</th>
+        </tr>
+]]
+
+    for _, server in ipairs(status) do
+        local status_class = server.healthy and "healthy" or "unhealthy"
+        local status_text = server.healthy and "UP" or "DOWN"
+        if server.healthy then
+            healthy_count = healthy_count + 1
+        end
+
+        html = html .. string.format([[
+        <tr>
+            <td>%s</td>
+            <td class="%s">%s</td>
+            <td>%d</td>
+            <td>%d</td>
+        </tr>
+]], server.name, status_class, status_text, server.weight, server.fail_count)
+    end
+
+    html = html .. string.format([[
+    </table>
+    <p>Healthy: %d / %d servers</p>
+    <p><small>Auto-refresh every 5 seconds</small></p>
+</body>
+</html>
+]], healthy_count, total_count)
+
+    return html
+end
+
+return _M
