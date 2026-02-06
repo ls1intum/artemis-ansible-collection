@@ -437,6 +437,7 @@ info:
   testServer: false
 {% endif %}
   textAssessmentAnalyticsEnabled: true
+  localLLMDeploymentEnabled: {{ artemis_local_llm_deployment_enabled | lower }}
   sentry:
 {% if sentry.dsn | default('') | length %}
     dsn: {{ sentry.dsn | quote }}
