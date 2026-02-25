@@ -1,4 +1,6 @@
 ---
+ansible_managed: "Ansible managed: Do not make changes here - they will be overwritten."
+
 artemis_version: # Set to version or local path to war file for non-docker installation and docker tag for docker version
 is_testserver: false
 is_multinode_install: false

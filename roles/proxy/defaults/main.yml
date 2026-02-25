@@ -1,4 +1,6 @@
 ---
+ansible_managed: "Ansible managed: Do not make changes here - they will be overwritten."
+
 servers: []
 #   - name:
 #     ssl_certificate_path:
