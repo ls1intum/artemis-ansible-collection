@@ -305,6 +305,7 @@ artemis:
 
 {% if iris is defined and iris is not none %}
   iris:
+    enabled: true
     url: {{ iris.url }}
     secret-token: {{ iris.secret }}
 {% endif %}
@@ -330,6 +331,16 @@ artemis:
   hyperion:
     enabled: {{ artemis_hyperion_enabled | lower }}
 
+{% if artemis_llm_cost is defined %}
+  llm:
+    model-costs:
+{% for model, cost in artemis_llm_cost.items() %}
+      {{ model }}:
+        input-cost-per-million-eur: {{ cost.input_cost_per_million_eur }}
+        output-cost-per-million-eur: {{ cost.output_cost_per_million_eur }}
+{% endfor %}
+{% endif %}
+
   telemetry:
     enabled: {{ artemis_telemetry_enabled | lower }}
     sendAdminDetails: {{ artemis_send_admin_details | lower }}
@@ -345,16 +356,17 @@ artemis:
 {% endif %}
 
 {% if theia is defined and theia is not none %}
-theia:
+  theia:
+    enabled: true
 {% if theia.portal_url is defined and theia.portal_url is not none %}
-  portal-url: {{ theia.portal_url }}
+    portal-url: {{ theia.portal_url }}
 {% endif %}
 {% if theia.images is defined and theia.images is not none %}
-  images:
+    images:
 {% for programming_language_key, programming_language_value in theia.images.items() %}
-    {{ programming_language_key }}:
+      {{ programming_language_key }}:
 {% for image_key, image_value in programming_language_value.items() %}
-      {{ image_key }}: {{ image_value }}
+        {{ image_key }}: {{ image_value }}
 {% endfor %}
 {% endfor %}
 {% endif %}
@@ -426,6 +438,7 @@ info:
   testServer: false
 {% endif %}
   textAssessmentAnalyticsEnabled: true
+  localLLMDeploymentEnabled: {{ artemis_local_llm_deployment_enabled | lower }}
   sentry:
 {% if sentry.dsn | default('') | length %}
     dsn: {{ sentry.dsn | quote }}
