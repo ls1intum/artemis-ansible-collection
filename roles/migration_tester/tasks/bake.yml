@@ -66,11 +66,11 @@
 
 - name: Copy data
   ansible.builtin.command:
-    cmd: "docker cp /tmp/mysql artemis-temp-db:/var/lib/mysqlsafe"
+    cmd: "docker cp /tmp/mysql {{ artemis_database_temp_container_name }}:/var/lib/mysqlsafe"
 
 - name: Copy migration.cnf into container
   ansible.builtin.command:
-    cmd: "docker cp /tmp/migration.cnf artemis-temp-db:/etc/mysql/conf.d/migration.cnf"
+    cmd: "docker cp /tmp/migration.cnf {{ artemis_database_temp_container_name }}:/etc/mysql/conf.d/migration.cnf"
 
 - name: Commit to new image
   ansible.builtin.command:

@@ -4,7 +4,7 @@
   lineinfile:
     path: /etc/environment
     regexp: '^MYSQL_IMAGE='
-    line: 'MYSQL_IMAGE="artemis_db"'
+    line: 'MYSQL_IMAGE="{{ mysql_baked }}"'
 
 - name: Shut down Artemis
   community.docker.docker_compose_v2:
