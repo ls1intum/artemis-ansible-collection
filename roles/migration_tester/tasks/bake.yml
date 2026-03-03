@@ -44,8 +44,8 @@
     published_ports:
       - "{{ db_port }}:3306"
     volumes:
-        - "{{ dump_dest }}/artemis.sql:/docker-entrypoint-initdb.d/init.sql:ro"
-        - "/tmp/mysql:/var/lib/mysql"
+      - "{{ dump_dest }}/artemis.sql:/docker-entrypoint-initdb.d/init.sql:ro"
+      - "/tmp/mysql:/var/lib/mysql"
     healthcheck:
       test: mysqladmin ping -h 127.0.0.1 -u root --silent
       interval: 2s

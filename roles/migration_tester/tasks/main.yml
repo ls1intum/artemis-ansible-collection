@@ -11,7 +11,7 @@
     project_src: "{{ artemis_working_directory }}/Artemis/docker"
     files:
       - "test-server-mysql.yml"
-    env_files: 
+    env_files:
       - "{{ artemis_working_directory }}/docker.env"
     state: absent
     remove_volumes: true
@@ -30,8 +30,8 @@
     path: "{{ artemis_working_directory }}/data/database"
     state: directory
     mode: "770"
-  
-- name: Run bake 
+
+- name: Run bake
   ansible.builtin.include_tasks: bake.yml
   when: bake | bool
 
@@ -40,7 +40,7 @@
     project_src: "{{ artemis_working_directory }}/Artemis/docker"
     files:
       - "test-server-mysql.yml"
-    env_files: 
+    env_files:
       - "{{ artemis_working_directory }}/docker.env"
     pull: missing
     state: present
