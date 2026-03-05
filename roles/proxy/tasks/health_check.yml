@@ -1,0 +1,40 @@
+---
+- name: Create health check script
+  become: true
+  template:
+    src: nginx-health-check.sh.j2
+    dest: /usr/local/bin/nginx-health-check.sh
+    mode: '0755'
+  notify: Restart nginx-health-check timer
+
+- name: Create initial upstream config
+  become: true
+  template:
+    src: artemis-http-upstream.conf.j2
+    dest: /etc/nginx/artemis-http-upstream.conf
+    mode: '0644'
+  notify: Reload nginx
+
+- name: Create systemd health check service
+  become: true
+  template:
+    src: nginx-health-check.service.j2
+    dest: /etc/systemd/system/nginx-health-check.service
+    mode: '0644'
+  notify: Reload systemd daemon
+
+- name: Create systemd health check timer
+  become: true
+  template:
+    src: nginx-health-check.timer.j2
+    dest: /etc/systemd/system/nginx-health-check.timer
+    mode: '0644'
+  notify: Reload systemd daemon
+
+- name: Enable and start health check timer
+  become: true
+  systemd:
+    name: nginx-health-check.timer
+    enabled: true
+    state: started
+    daemon_reload: true

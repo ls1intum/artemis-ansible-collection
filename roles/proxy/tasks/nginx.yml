@@ -193,6 +193,10 @@
     mode: "644"
   notify: Reload nginx
 
+- name: Setup health check
+  include_tasks: health_check.yml
+  when: proxy_health_check_enabled | default(true)
+
 - name: Validate nginx config
   become: true
   command: nginx -t
