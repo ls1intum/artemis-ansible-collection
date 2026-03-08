@@ -1,3 +1,6 @@
+---
+ansible_managed: "Ansible managed: Do not make changes here - they will be overwritten."
+
 redis:
   username: artemis
   password: #FIXME
