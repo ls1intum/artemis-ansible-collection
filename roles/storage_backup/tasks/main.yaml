@@ -45,4 +45,4 @@
     name: "Backup artemis storage"
     minute: "{{ storage_backup_minute }}"
     hour: "{{ storage_backup_hour }}"
-    job: "{{ storage_backup_script_path }} -sp"
+    job: "{{ storage_backup_script_path }} -sp >> /var/log/storage-backup.log 2>&1 || echo 'Backup failed' | logger -t storage-backup"
