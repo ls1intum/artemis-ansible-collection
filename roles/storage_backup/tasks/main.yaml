@@ -14,9 +14,7 @@
     BORG_PASSPHRASE: '{{ storage_backup_password }}'
   register: init_borg_output
   changed_when: init_borg_output.rc != 2
-  failed_when:
-    - init_borg_output.rc != 2
-    - init_borg_output.rc != 0
+  failed_when: init_borg_output.rc not in [0, 2]
 
 - name: Get encryption keys
   become: true
