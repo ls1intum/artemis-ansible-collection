@@ -29,7 +29,7 @@
   ansible.builtin.copy:
     dest: ./decryption_Keys.txt
     content: "{{ borg_keys.stdout }}"
-    mode: "600"
+    mode: "0600"
   delegate_to: localhost
 
 - name: Deploy storage backup script
