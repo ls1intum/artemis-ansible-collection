@@ -31,7 +31,7 @@ Here is an example playbook:
 ```yaml
 - hosts: storage
   roles:
-    - role: ls1intum.storage_backup
+    - role: ls1intum.artemis.storage_backup
       vars:
         storage_export: /srv/artemis
         storage_backup_password: "your_storage_backup_password"
