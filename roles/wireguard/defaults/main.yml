@@ -1,4 +1,6 @@
 ---
+ansible_managed: "Ansible managed: Do not make changes here - they will be overwritten."
+
 wireguard_hostgroup: "{{ groups.yourgroup }}"
 
 wireguard_port: 51820

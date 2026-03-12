@@ -6,6 +6,7 @@ PROJECT_DIR="{{ artemis_working_directory }}/Artemis/docker"
 {% set multi_node_compose_file = "test-server-multi-node-" + artemis_database_type + "-localci.yml" %}
 
 COMPOSE_FILE="{% if is_multinode_install is defined and is_multinode_install %}{{ multi_node_compose_file }}{% elif continuous_integration.localci is defined %}{{ localci_compose_file }}{% else %}{{ default_compose_file }}{% endif %}"
+DOCKER_IMAGE_ENV_FILE="{{ artemis_working_directory }}/Artemis/.env"
 ENV_FILE="{{ artemis_working_directory }}/docker.env"
 {% if continuous_integration.localci is defined %}
 export DOCKER_GROUP_ID=$(getent group docker | cut -d: -f3)
@@ -33,10 +34,10 @@ function start {
     rm -rf Artemis
     git clone https://github.com/ls1intum/Artemis.git -b "$pr_branch" Artemis
     sed -i "s/ARTEMIS_DOCKER_TAG=.*/ARTEMIS_DOCKER_TAG='$pr_tag'/g" $ENV_FILE
-    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --pull always --no-build --remove-orphans
+    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" up -d --pull always --no-build --remove-orphans
     
     # Reload Nginx configuration as Nginx may still be running from a previous start. This is necessary to apply the new configuration.
-    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" exec nginx nginx -s reload || true
+    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" exec nginx nginx -s reload || true
 }
 
 function stop {
@@ -45,10 +46,10 @@ function stop {
     echo "Stopping Artemis"
 
     # Get all docker-compose services that are not called nginx.
-    services=$(docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" ps --services)
+    services=$(docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" ps --services)
     artemis_services=$(echo "$services" | grep -v "^nginx")
 
-    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" stop $artemis_services
+    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" stop $artemis_services
 }
 
 function restart {
@@ -58,18 +59,18 @@ function restart {
 
 function artemis_logs {
     # Get all docker-compose services matching artemis-app* to be multi-node and single-node compatible.
-    services=$(docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" ps --services)
+    services=$(docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" ps --services)
     artemis_services=$(echo "$services" | grep "^artemis-app")
 
-    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" logs -f $artemis_services
+    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" logs -f $artemis_services
 }
 
 function all_logs {
-    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" logs -f
+    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" logs -f
 }
 
 function run_docker_compose_cmd {
-    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" "$@"
+    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" "$@"
 }
 
 # read subcommand `artemis-docker subcommand server` in variable and remove base command from argument list

@@ -1,4 +1,6 @@
 ---
+ansible_managed: "Ansible managed: Do not make changes here - they will be overwritten."
+
 # user.yml task
 artemis_user_name: artemis
 artemis_user_comment: Artemis
