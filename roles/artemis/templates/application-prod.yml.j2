@@ -227,10 +227,18 @@ artemis:
 
 {% if continuous_integration.jenkins_stateless is defined %}
   continuous-integration:
-    artemis-authentication-token-value: {{ continuous_integration.jenkins_stateless.artemis_auth_token_value }}
-
-  external-ci:
     url: {{ continuous_integration.jenkins_stateless.url }}
+    artemis-authentication-token-value: {{ continuous_integration.jenkins_stateless.artemis_auth_token_value }}
+{% endif %}
+
+{% if continuous_integration.hades is defined %}
+  continuous-integration:
+    url: {{ continuous_integration.hades.url }}
+    artemis-authentication-token-value: {{ continuous_integration.hades.artemis_auth_token_value }}
+    hades:
+      auth-key: {{ continuous_integration.hades.auth_key }}
+      adapter:
+        endpoint: {{ continuous_integration.hades.adapter_endpoint }}
 {% endif %}
 
 {% if continuous_integration.localci is defined %}
