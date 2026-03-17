@@ -86,12 +86,13 @@ services:
       - "traefik.http.routers.weaviate-secure.middlewares=default-headers@file,rate-limit@file,default-whitelist@file"
       - "traefik.http.routers.weaviate-secure.service=weaviate"
       - "traefik.http.services.weaviate.loadbalancer.server.port=8080"
-      - "traefik.tcp.routers.weaviate-grpc.entrypoints=grpc"
-      - "traefik.tcp.routers.weaviate-grpc.rule=HostSNI(`${WEAVIATE_DOMAIN}`)"
-      - "traefik.tcp.routers.weaviate-grpc.tls=true"
-      - "traefik.tcp.routers.weaviate-grpc.tls.certresolver=letsencrypt"
-      - "traefik.tcp.routers.weaviate-grpc.service=weaviate-grpc"
-      - "traefik.tcp.services.weaviate-grpc.loadbalancer.server.port=50051"
+      - "traefik.http.routers.weaviate-grpc.entrypoints=grpc"
+      - "traefik.http.routers.weaviate-grpc.rule=Host(`${WEAVIATE_DOMAIN}`)"
+      - "traefik.http.routers.weaviate-grpc.tls=true"
+      - "traefik.http.routers.weaviate-grpc.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.weaviate-grpc.service=weaviate-grpc"
+      - "traefik.http.services.weaviate-grpc.loadbalancer.server.port=50051"
+      - "traefik.http.services.weaviate-grpc.loadbalancer.server.scheme=h2c"
 
     deploy:
       resources:
