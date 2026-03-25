@@ -88,6 +88,24 @@ continuous_integration:
     artemis_auth_token_value: "jenkins_artemis_auth_token_value"
 ```
 
+Jenkins Stateless configuration (uses an instance of [jenkins-connector](https://github.com/ls1intum/jenkins-connector)):
+```
+continuous_integration:
+  jenkins_stateless:
+    url: "https://artemis-jenkins-connector.example.com"
+    artemis_auth_token_value: "jenkins_stateless_artemis_auth_token_value"
+```
+
+Hades configuration (uses an instance of [hades](https://github.com/ls1intum/hades) and [hades-artemis-adapter](https://github.com/ls1intum/hades-artemis-adapter)):
+```
+continuous_integration:
+  hades:
+    url: "https://hades.example.com"
+    artemis_auth_token_value: "hades_artemis_auth_token_value"
+    auth_key: "key_used_to_authenticate_artemis_to_hades"
+    adapter_endpoint: "https://hades-artemis-adapter.example.com/adapter/test-results"
+```
+
 Athena configuration:
 ```
 athena:
