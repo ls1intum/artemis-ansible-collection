@@ -229,6 +229,7 @@ artemis:
   continuous-integration:
     url: {{ continuous_integration.jenkins_stateless.url }}
     artemis-authentication-token-value: {{ continuous_integration.jenkins_stateless.artemis_auth_token_value }}
+    vcs-credentials: {{ continuous_integration.jenkins_stateless.vcs_credentials }}
 {% endif %}
 
 {% if continuous_integration.hades is defined %}

@@ -167,6 +167,7 @@ artemis_passkey_enabled: false
 #  jenkins_stateless:
 #    url: "https://artemis-jenkins-connector.artemis.cit.tum.de" # Instance of https://github.com/ls1intum/jenkins-connector
 #    artemis_auth_token_value:
+#    vcs_credentials:
 #
 #  hades:
 #    url: "https://hades-test.aet.cit.tum.de" # Instance of https://github.com/ls1intum/hades
