@@ -423,6 +423,9 @@ sentry:
 {% else %}
   environment: local
 {% endif %}
+{% else %}
+sentry:
+  dsn:
 {% endif %}
 
 {% if artemis_computed_is_core_node %}
