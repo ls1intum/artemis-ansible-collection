@@ -211,6 +211,7 @@ artemis:
 {% if version_control.localvc.ssh_url is defined %}
     ssh-template-clone-url: {{ version_control.localvc.ssh_url }}
 {% endif %}
+    repository-authentication-mechanisms: {{ version_control.localvc.repository_authentication_mechanisms | default("token,ssh,password") }}
 {% endif %}
 
 {% if continuous_integration.jenkins is defined %}
