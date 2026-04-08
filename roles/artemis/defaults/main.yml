@@ -152,6 +152,7 @@ artemis_passkey_enabled: false
 #     password:
 #   user: # An artemis admin user for the local version control system
 #   password: # The password of the artemis admin user for the local version control system
+#   repository_authentication_mechanisms: token,ssh,password
 #
 #continuous_integration:
 #
