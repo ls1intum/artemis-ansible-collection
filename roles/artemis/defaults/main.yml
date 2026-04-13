@@ -100,7 +100,7 @@ artemis_version_control_default_branch_name: main
 
 enable_science_event_logging: false
 
-push_notification_relay: "https://hermes.artemis.cit.tum.de"
+push_notification_relay: "https://hermes-prod.artemis.cit.tum.de"
 
 sentry:
   dsn: ""
