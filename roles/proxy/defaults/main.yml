@@ -53,3 +53,10 @@ fastcgi_read_timeout: "900s"
 proxy_rate_limit_exempt_ips: []
 #   - ip: "131.159.89.112"
 #     comment: "Benchmark server"
+
+# Health check configuration for active upstream monitoring
+proxy_health_check_enabled: true
+proxy_health_check_endpoint: "/ping"
+proxy_health_check_interval: 2        # seconds between health checks
+proxy_health_check_timeout: 1         # seconds to wait for response
+proxy_health_check_retries: 2         # number of attempts before marking node as down
