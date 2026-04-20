@@ -318,6 +318,29 @@ artemis:
     secret-token: {{ nebula.secret }}
 {% endif %}
 
+{% if weaviate is defined and weaviate is not none %}
+  weaviate:
+    enabled: {{ weaviate.enabled | default(true) | lower }}
+    http-host: {{ weaviate.http_host }}
+    http-port: {{ weaviate.http_port | default(443) }}
+    grpc-port: {{ weaviate.grpc_port | default(50051) }}
+    scheme: {{ weaviate.scheme | default('https') }}
+    collection-prefix: {{ weaviate.collection_prefix | default('') }}
+    vectorizer-module: {{ weaviate.vectorizer_module | default('none') }}
+{% if weaviate.open_ai_embedding_model is defined %}
+    open-ai-embedding-model: {{ weaviate.open_ai_embedding_model }}
+{% endif %}
+{% if weaviate.open_ai_base_url is defined %}
+    open-ai-base-url: {{ weaviate.open_ai_base_url }}
+{% endif %}
+{% if weaviate.gpu_api_key is defined %}
+    gpu-api-key: {{ weaviate.gpu_api_key }}
+{% endif %}
+{% if weaviate.api_key is defined %}
+    api-key: {{ weaviate.api_key }}
+{% endif %}
+{% endif %}
+
 {% if tum_live_base_url is defined and tum_live_base_url is not none %}
   tum-live:
     api-base-url: {{ tum_live_base_url }}

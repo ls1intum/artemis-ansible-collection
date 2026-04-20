@@ -252,6 +252,22 @@ artemis_local_llm_deployment_enabled: false
 #tum_live_base_url: "https://tum.live/api/v2"
 
 ##############################################################################
+# Weaviate Configuration
+##############################################################################
+#weaviate:
+#  enabled: true
+#  http_host:
+#  http_port: 443
+#  grpc_port: 50051
+#  scheme: https
+#  collection_prefix:
+#  vectorizer_module: text2vec-openai
+#  open_ai_embedding_model:
+#  open_ai_base_url:
+#  gpu_api_key:
+#  api_key:
+
+##############################################################################
 # Aeolus Configuration
 ##############################################################################
 #aeolus:
