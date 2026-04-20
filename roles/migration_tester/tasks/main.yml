@@ -1,0 +1,48 @@
+---
+- name: Add database env variables
+  become: true
+  lineinfile:
+    path: /etc/environment
+    regexp: '^MYSQL_IMAGE='
+    line: 'MYSQL_IMAGE="{{ mysql_baked }}"'
+
+- name: Shut down Artemis
+  community.docker.docker_compose_v2:
+    project_src: "{{ artemis_working_directory }}/Artemis/docker"
+    files:
+      - "test-server-mysql.yml"
+    env_files:
+      - "{{ artemis_working_directory }}/docker.env"
+    state: absent
+    remove_volumes: true
+  become: true
+
+- name: Remove docker data
+  become: true
+  ansible.builtin.file:
+    path: "{{ artemis_working_directory }}/data/database"
+    state: absent
+
+- name: Create artemis database directory
+  become: true
+  become_user: artemis
+  file:
+    path: "{{ artemis_working_directory }}/data/database"
+    state: directory
+    mode: "770"
+
+- name: Run bake
+  ansible.builtin.include_tasks: bake.yml
+  when: bake | bool
+
+- name: Start Artemis
+  community.docker.docker_compose_v2:
+    project_src: "{{ artemis_working_directory }}/Artemis/docker"
+    files:
+      - "test-server-mysql.yml"
+    env_files:
+      - "{{ artemis_working_directory }}/docker.env"
+    pull: missing
+    state: present
+    recreate: always
+  become: true
