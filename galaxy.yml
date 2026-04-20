@@ -30,7 +30,7 @@ dependencies: {}
 repository: https://github.com/ls1intum/artemis-ansible-collection
 
 # The URL to any online docs
-documentation: https://docs.artemis.cit.tum.de
+documentation: https://docs.artemis.tum.de
 
 # The URL to the homepage of the collection/project
 homepage: https://artemis.tum.de
