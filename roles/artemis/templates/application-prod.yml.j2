@@ -181,6 +181,10 @@ artemis:
     apikey: {{ sharing.apikey }}
     actionname: {{ sharing.actionname }}
 {% endif %}
+{% if artemis_global_search_enabled is defined %}
+  global-search:
+    enabled: {{ artemis_global_search_enabled | lower }}
+{% endif %}
 {% endif %}
 
 {% if version_control.localvc is defined %}
