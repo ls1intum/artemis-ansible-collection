@@ -345,6 +345,17 @@ artemis:
 {% endif %}
 {% endif %}
 
+{% if deimos is defined %}
+  deimos:
+    enabled: true
+    llm:
+      base-url: {{ deimos.llm.base_url }}
+      api-key: {{ deimos.llm.api_key }}
+      model: {{ deimos.llm.model }}
+      completions-path: {{ deimos.llm.completions_path }}
+      temperature: {{ deimos.llm.temperature }}
+{% endif %}
+
 {% if tum_live_base_url is defined and tum_live_base_url is not none %}
   tum-live:
     api-base-url: {{ tum_live_base_url }}

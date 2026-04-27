@@ -270,6 +270,17 @@ artemis_local_llm_deployment_enabled: false
 #  api_key:
 
 ##############################################################################
+# Deimos Configuration
+##############################################################################
+# deimos:
+#   llm:
+#     base_url: https://gpu.aet.cit.tum.de
+#     api_key: 
+#     model: openai/gpt-oss-120b
+#     completions_path: /api/chat/completions
+#     temperature: 0.3
+
+##############################################################################
 # Aeolus Configuration
 ##############################################################################
 #aeolus:
