@@ -127,6 +127,7 @@
         }
         server {
           listen 7921;
+          listen [::]:7921;
           proxy_pass artemis_ssh;
         }
       }
