@@ -181,6 +181,10 @@ artemis:
     apikey: {{ sharing.apikey }}
     actionname: {{ sharing.actionname }}
 {% endif %}
+{% if artemis_global_search_enabled is defined %}
+  global-search:
+    enable: {{ artemis_global_search_enabled | lower }}
+{% endif %}
 {% endif %}
 
 {% if version_control.localvc is defined %}
@@ -211,6 +215,7 @@ artemis:
 {% if version_control.localvc.ssh_url is defined %}
     ssh-template-clone-url: {{ version_control.localvc.ssh_url }}
 {% endif %}
+    repository-authentication-mechanisms: {{ version_control.localvc.repository_authentication_mechanisms | default("token,ssh,password") }}
 {% endif %}
 
 {% if continuous_integration.jenkins is defined %}
@@ -315,6 +320,40 @@ artemis:
     enabled: true
     url: {{ nebula.url }}
     secret-token: {{ nebula.secret }}
+{% endif %}
+
+{% if weaviate is defined and weaviate is not none %}
+  weaviate:
+    enabled: {{ weaviate.enabled | default(true) | lower }}
+    http-host: {{ weaviate.http_host }}
+    http-port: {{ weaviate.http_port | default(443) }}
+    grpc-port: {{ weaviate.grpc_port | default(50051) }}
+    scheme: {{ weaviate.scheme | default('https') }}
+    collection-prefix: {{ weaviate.collection_prefix | default('') }}
+    vectorizer-module: {{ weaviate.vectorizer_module | default('none') }}
+{% if weaviate.open_ai_embedding_model is defined %}
+    open-ai-embedding-model: {{ weaviate.open_ai_embedding_model }}
+{% endif %}
+{% if weaviate.open_ai_base_url is defined %}
+    open-ai-base-url: {{ weaviate.open_ai_base_url }}
+{% endif %}
+{% if weaviate.gpu_api_key is defined %}
+    gpu-api-key: {{ weaviate.gpu_api_key }}
+{% endif %}
+{% if weaviate.api_key is defined %}
+    api-key: {{ weaviate.api_key }}
+{% endif %}
+{% endif %}
+
+{% if deimos is defined %}
+  deimos:
+    enabled: true
+    llm:
+      base-url: {{ deimos.llm.base_url }}
+      api-key: {{ deimos.llm.api_key }}
+      model: {{ deimos.llm.model }}
+      completions-path: {{ deimos.llm.completions_path }}
+      temperature: {{ deimos.llm.temperature }}
 {% endif %}
 
 {% if tum_live_base_url is defined and tum_live_base_url is not none %}
@@ -423,6 +462,9 @@ sentry:
 {% else %}
   environment: local
 {% endif %}
+{% else %}
+sentry:
+  dsn:
 {% endif %}
 
 {% if artemis_computed_is_core_node %}
