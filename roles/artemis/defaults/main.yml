@@ -167,6 +167,17 @@ artemis_passkey_enabled: false
 #    artemis_auth_token_key:
 #    artemis_auth_token_value:
 #
+#  jenkins_stateless:
+#    url: "https://artemis-jenkins-connector.artemis.cit.tum.de" # Instance of https://github.com/ls1intum/jenkins-connector
+#    artemis_auth_token_value:
+#    vcs_credentials:
+#
+#  hades:
+#    url: "https://hades-test.aet.cit.tum.de" # Instance of https://github.com/ls1intum/hades
+#    artemis_auth_token_value: # The key used to authenticate hades to artemis when sending build results.
+#    auth_key: # The key used to authenticate artemis to hades. This should also be configured in hades as a valid key for authentication.
+#    adapter_endpoint: "https://hades-artemis-connector.student.k8s.aet.cit.tum.de/adapter/test-results" # Instance of https://github.com/ls1intum/hades-artemis-adapter
+#
 #  localci:
 #    is_core_node: true
 #    is_build_agent: true
@@ -370,7 +381,8 @@ artemis_spring_profile_version_control: "{% if version_control.localvc is define
   %}"
 artemis_spring_profile_continuous_integration: "{% if continuous_integration.jenkins
   is defined and continuous_integration.jenkins is not none %},jenkins{% elif continuous_integration.localci is defined and continuous_integration.localci is not
-  none %},localci{% elif continuous_integration.gitlabci is defined and continuous_integration.gitlabci is not none %},gitlabci{% endif %}"
+  none %},localci{% elif continuous_integration.jenkins_stateless is defined and continuous_integration.jenkins_stateless is not none %},stateless-jenkins,external-ci{% elif
+  continuous_integration.hades is defined and continuous_integration.hades is not none %},hades,external-ci{% endif %}"
 artemis_spring_profile_athena: "{% if athena is defined and athena is not none %},athena{% endif %}"
 artemis_spring_profile_apollon: "{% if apollon_url is defined and apollon_url is not none %},apollon{% endif %}"
 artemis_spring_profile_scheduling: "{% if node_id is defined and node_id == 1 %},scheduling{% endif %}"
