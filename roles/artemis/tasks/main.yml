@@ -1,4 +1,35 @@
 ---
+# Catch unquoted 2-segment YAML floats (e.g. `artemis_version: 9.2` → float, `9.10` → 9.1)
+# before they reach the WAR URL, the Docker tag, or the helper script's tag argument.
+- name: Assert artemis_version is a string when set
+  ansible.builtin.assert:
+    that:
+      - artemis_version is string
+    fail_msg: >-
+      artemis_version is not a string (got type {{ artemis_version | type_debug }},
+      value {{ artemis_version }}). In YAML inventory/group_vars (or JSON/YAML
+      extra-vars), 2-segment release tags like 9.2 must be quoted ("9.2") —
+      otherwise they parse as floats and "9.10" silently becomes "9.1".
+  when:
+    - artemis_version is defined
+    - artemis_version is not none
+    - artemis_version != ""
+
+- name: Assert artemis_build_version is a string when overridden
+  ansible.builtin.assert:
+    that:
+      - artemis_build_version is string
+    fail_msg: >-
+      artemis_build_version is not a string (got type
+      {{ artemis_build_version | type_debug }}, value {{ artemis_build_version }}).
+      Same YAML-float footgun as artemis_version: in group_vars/host_vars or
+      inline JSON/YAML-form extra-vars, 2-segment Docker tags must be quoted
+      (e.g. "9.2").
+  when:
+    - artemis_build_version is defined
+    - artemis_build_version is not none
+    - artemis_build_version != ""
+
 # Check if variables are set correctly
 - include_tasks: variable_checks.yml
   when: (setup_system | bool) or (update_artemis_config | bool)
