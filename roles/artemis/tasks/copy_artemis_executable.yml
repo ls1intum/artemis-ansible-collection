@@ -11,7 +11,7 @@
 
 - name: Check if version matches release pattern
   set_fact:
-    is_release: "{{ artemis_version is match('^\\d+\\.\\d+\\.\\d+$') }}"
+    is_release: "{{ artemis_version is match('^[0-9]+\\.[0-9]+(?:\\.[0-9]+)?\\Z') }}"
 
 - name: "Copying Artemis.war to {{ artemis_working_directory }}/artemis.war.new ..."
   debug:
