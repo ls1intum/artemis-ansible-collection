@@ -12,6 +12,16 @@ ENV_FILE="{{ artemis_working_directory }}/docker.env"
 export DOCKER_GROUP_ID=$(getent group docker | cut -d: -f3)
 {% endif %}
 
+# Helper: runs docker compose with the project's standard arguments (project dir,
+# compose file, env files). Every compose invocation in this script goes through
+# this so the flags are defined in exactly one place.
+compose_cmd() {
+    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" "$@"
+}
+
+ARTEMIS_REPO_URL="https://github.com/ls1intum/Artemis.git"
+ARTEMIS_CLONE_DIR="{{ artemis_working_directory }}/Artemis"
+
 # Function: Print general usage information
 function general_help {
     cat << HELP
@@ -26,18 +36,308 @@ Commands:
 HELP
 }
 
+# Inspect the org.opencontainers.image.revision label on a GHCR image WITHOUT
+# pulling it. Returns "<revision> <platform-manifest-digest>" on success, or
+# an empty string on any failure (network error, missing label, etc.).
+#
+# This is intentionally GHCR-specific: it uses the ghcr.io token endpoint
+# directly. Other registries would need a different auth flow.
+#
+# Flow: resolve tag → (if manifest list, pick host-platform entry) → fetch
+# platform manifest → fetch config blob → read Labels map.
+# Total data transferred is ~10-15 KB vs 200+ MB for a full pull.
+get_remote_image_revision() {
+    local image_ref="$1"  # e.g. ghcr.io/ls1intum/artemis:pr-123
+
+    # Split "ghcr.io/ls1intum/artemis:pr-123" into path and tag.
+    local image_path="${image_ref%%:*}"        # ghcr.io/ls1intum/artemis
+    image_path="${image_path#ghcr.io/}"        # ls1intum/artemis
+    local image_tag="${image_ref##*:}"         # pr-123
+
+    # Detect host platform so we can pick the right manifest from a multi-arch
+    # image list. Docker images are OS+arch specific; pulling the wrong one
+    # would fail at runtime.
+    local arch
+    arch=$(uname -m)
+    case "$arch" in
+        x86_64)  arch="amd64" ;;
+        aarch64) arch="arm64" ;;
+        # uname -m on macOS already returns arm64 for Apple Silicon
+    esac
+    local os="linux"
+
+    python3 - "$image_path" "$image_tag" "$os" "$arch" <<'PYEOF'
+import hashlib, json, sys, urllib.request, urllib.error
+
+image_path, image_tag, want_os, want_arch = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+
+def fetch(url, token, accept=None):
+    """Fetch URL and return (raw_bytes, parsed_json, response_headers)."""
+    headers = {"Authorization": f"Bearer {token}"}
+    if accept:
+        headers["Accept"] = accept
+    req = urllib.request.Request(url, headers=headers)
+    with urllib.request.urlopen(req) as resp:
+        body = resp.read()
+        hdrs = resp.headers
+        return body, json.loads(body), hdrs
+
+def fetch_json(url, token, accept=None):
+    _, data, _ = fetch(url, token, accept)
+    return data
+
+try:
+    # 1. Get anonymous pull token from GHCR.
+    token_url = f"https://ghcr.io/token?scope=repository:{image_path}:pull&service=ghcr.io"
+    with urllib.request.urlopen(token_url) as resp:
+        token = json.loads(resp.read())["token"]
+
+    base = f"https://ghcr.io/v2/{image_path}"
+
+    # 2. Fetch the tag's manifest. Accept both manifest-list and single-manifest
+    #    types so we handle multi-arch and single-arch images uniformly.
+    accept = ", ".join([
+        "application/vnd.oci.image.index.v1+json",
+        "application/vnd.docker.distribution.manifest.list.v2+json",
+        "application/vnd.oci.image.manifest.v1+json",
+        "application/vnd.docker.distribution.manifest.v2+json",
+    ])
+    raw_manifest, manifest, manifest_hdrs = fetch(f"{base}/manifests/{image_tag}", token, accept)
+
+    config_digest = None
+    platform_digest = None
+
+    if "manifests" in manifest:
+        # This is a manifest list / OCI index — find the entry that matches
+        # the host platform. Skip attestation manifests (they have a different
+        # mediaType and no platform).
+        for entry in manifest["manifests"]:
+            p = entry.get("platform", {})
+            if p.get("os") == want_os and p.get("architecture") == want_arch:
+                platform_digest = entry["digest"]
+                break
+        if not platform_digest:
+            print(f"WARNING: No manifest for {want_os}/{want_arch}", file=sys.stderr)
+            sys.exit(0)
+
+        # Fetch the platform-specific manifest to get the config blob digest.
+        plat_manifest = fetch_json(
+            f"{base}/manifests/{platform_digest}", token,
+            "application/vnd.oci.image.manifest.v1+json, application/vnd.docker.distribution.manifest.v2+json",
+        )
+        config_digest = plat_manifest["config"]["digest"]
+    else:
+        # Single-platform manifest — config and digest are derived from the
+        # same response to avoid a TOCTOU race (the mutable tag could change
+        # between two requests).
+        config_digest = manifest["config"]["digest"]
+        digest_header = manifest_hdrs.get("Docker-Content-Digest", "")
+        if digest_header:
+            platform_digest = digest_header
+        else:
+            # Fallback: compute digest from the raw response body.
+            platform_digest = "sha256:" + hashlib.sha256(raw_manifest).hexdigest()
+
+    # 3. Fetch the config blob (~10 KB JSON) and read the OCI revision label.
+    config = fetch_json(f"{base}/blobs/{config_digest}", token)
+    labels = config.get("config", {}).get("Labels", {})
+    revision = labels.get("org.opencontainers.image.revision", "")
+
+    if revision and platform_digest:
+        print(f"{revision} {platform_digest}")
+    # else: no label present — print nothing (empty output signals "unknown")
+
+except Exception as e:
+    print(f"WARNING: Registry check failed: {e}", file=sys.stderr)
+    # Exit 0 — this is a soft failure; caller falls through to local build.
+PYEOF
+}
+
 function start {
     local pr_tag=$1
     local pr_branch=$2
 
     echo "Starting Artemis with PR tag: $pr_tag and branch: $pr_branch"
-    rm -rf Artemis
-    git clone https://github.com/ls1intum/Artemis.git -b "$pr_branch" Artemis
-    sed -i "s/ARTEMIS_DOCKER_TAG=.*/ARTEMIS_DOCKER_TAG='$pr_tag'/g" $ENV_FILE
-    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" up -d --pull always --no-build --remove-orphans
-    
-    # Reload Nginx configuration as Nginx may still be running from a previous start. This is necessary to apply the new configuration.
-    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" exec nginx nginx -s reload || true
+
+    # --- Prerequisite checks ---------------------------------------------------
+
+    # python3 is required for JSON parsing of compose config and registry metadata.
+    if ! command -v python3 &>/dev/null; then
+        echo "ERROR: python3 is required but not found" >&2; exit 1
+    fi
+
+    # --- Clone / update Artemis source -----------------------------------------
+    # Reuse existing clone when possible to avoid re-downloading the full repo
+    # (~1.5 GB) on every deploy. git clean -fdx ensures no leftover build
+    # artifacts from a previous run can affect the new build.
+
+    if [ -d "$ARTEMIS_CLONE_DIR/.git" ]; then
+        current_remote=$(cd "$ARTEMIS_CLONE_DIR" && git remote get-url origin 2>/dev/null)
+        if [ "$current_remote" = "$ARTEMIS_REPO_URL" ]; then
+            (cd "$ARTEMIS_CLONE_DIR" && git fetch --prune origin && git checkout "$pr_branch" && git reset --hard "origin/$pr_branch" && git clean -fdx) \
+                || { echo "ERROR: Failed to update Artemis repo" >&2; exit 1; }
+        else
+            rm -rf "$ARTEMIS_CLONE_DIR"
+            git clone "$ARTEMIS_REPO_URL" -b "$pr_branch" "$ARTEMIS_CLONE_DIR" \
+                || { echo "ERROR: Failed to clone Artemis repo" >&2; exit 1; }
+        fi
+    else
+        rm -rf "$ARTEMIS_CLONE_DIR"
+        git clone "$ARTEMIS_REPO_URL" -b "$pr_branch" "$ARTEMIS_CLONE_DIR" \
+            || { echo "ERROR: Failed to clone Artemis repo" >&2; exit 1; }
+    fi
+
+    # Update the image tag in the env file so compose resolves the right image name.
+    # Hard failure: if this fails, the script would check/pull the wrong image.
+    sed -i "s/ARTEMIS_DOCKER_TAG=.*/ARTEMIS_DOCKER_TAG='$pr_tag'/g" "$ENV_FILE" \
+        || { echo "ERROR: Failed to update ARTEMIS_DOCKER_TAG in $ENV_FILE" >&2; exit 1; }
+
+    # --- Resolve Artemis services and image name --------------------------------
+    # We need to know which compose services are "artemis-app*" (supports both
+    # single-node and multi-node setups) and what image they reference.
+
+    # docker compose must support --format json for service resolution.
+    # Checked here (after clone) because the compose file lives inside the clone.
+    if ! compose_cmd config --format json > /dev/null 2>&1; then
+        echo "ERROR: docker compose does not support --format json. Upgrade the compose plugin." >&2; exit 1
+    fi
+
+    local commit_sha
+    commit_sha=$(cd "$ARTEMIS_CLONE_DIR" && git rev-parse HEAD)
+    echo "Commit SHA: $commit_sha"
+
+    local artemis_services
+    artemis_services=$(compose_cmd config --services | grep "^artemis-app")
+    if [ -z "$artemis_services" ]; then
+        echo "ERROR: No artemis-app services found in compose config" >&2; exit 1
+    fi
+
+    # Extract the image name from compose config via python3. We verify all
+    # artemis-app services reference the same base image (without tag) as a
+    # sanity check — a mismatch would indicate a broken compose file.
+    local compose_json
+    compose_json=$(compose_cmd config --format json)
+
+    local image_with_tag
+    image_with_tag=$(echo "$compose_json" | ARTEMIS_SERVICES="$artemis_services" python3 -c "
+import json, os, sys
+config = json.load(sys.stdin)
+services = os.environ['ARTEMIS_SERVICES'].strip().split('\n')
+images = set()
+full_image = None
+for svc in services:
+    img = config['services'][svc].get('image', '')
+    if not img:
+        print(f'ERROR: Service {svc} has no image defined', file=sys.stderr)
+        sys.exit(1)
+    full_image = img
+    # Strip tag to get base image for comparison
+    base = img.rsplit(':', 1)[0] if ':' in img else img
+    images.add(base)
+if len(images) > 1:
+    print(f'ERROR: Artemis services use different base images: {images}', file=sys.stderr)
+    sys.exit(1)
+print(full_image)
+") || { echo "ERROR: Failed to resolve Artemis image from compose config" >&2; exit 1; }
+
+    local image_base="${image_with_tag%%:*}"
+    echo "Resolved image: $image_with_tag (base: $image_base)"
+
+    # --- Decide: pull verified image or build locally ---------------------------
+    # Strategy: check the OCI revision label on the remote image. If it matches
+    # the commit we just checked out, pull by digest (immutable reference) to
+    # avoid a TOCTOU race where the mutable pr tag gets overwritten between our
+    # check and the pull. If anything goes wrong, fall through to a local build.
+
+    local use_pull=false
+    local verified_digest=""
+
+    echo "Checking remote image revision for $image_with_tag ..."
+    local rev_info
+    rev_info=$(get_remote_image_revision "$image_with_tag")
+
+    if [ -n "$rev_info" ]; then
+        local remote_revision
+        remote_revision=$(echo "$rev_info" | awk '{print $1}')
+        verified_digest=$(echo "$rev_info" | awk '{print $2}')
+
+        if [ "$remote_revision" = "$commit_sha" ]; then
+            echo "Remote image revision matches commit — will pull by digest."
+            use_pull=true
+        else
+            echo "Remote image revision ($remote_revision) does not match commit ($commit_sha) — will build locally."
+        fi
+    else
+        echo "Could not determine remote image revision — will build locally."
+    fi
+
+    # --- PULL PATH: image matches, pull by verified digest ----------------------
+    # Pulling by digest (sha256:...) instead of by tag guarantees we get the
+    # exact image we just verified. After pulling, we re-tag it with the pr tag
+    # so compose can reference it normally.
+    if [ "$use_pull" = true ] && [ -n "$verified_digest" ]; then
+        echo "Pulling $image_base@$verified_digest ..."
+        if docker pull "$image_base@$verified_digest"; then
+            docker tag "$image_base@$verified_digest" "$image_with_tag" \
+                || { echo "WARNING: Failed to tag pulled image — falling back to local build." >&2; use_pull=false; }
+
+            if [ "$use_pull" = true ]; then
+                echo "Pull successful. Starting services..."
+                compose_cmd up -d --no-build --remove-orphans \
+                    || { echo "ERROR: compose up failed after pull" >&2; exit 1; }
+            fi
+        else
+            echo "WARNING: Pull by digest failed — falling back to local build." >&2
+            use_pull=false
+        fi
+    fi
+
+    # --- BUILD PATH: no verified image available, build from source -------------
+    # We re-resolve the service list after checkout because a different commit
+    # may define different services (e.g., a PR adding a new node).
+    if [ "$use_pull" = false ]; then
+        echo "Building Artemis from source at $commit_sha ..."
+
+        # Ensure we're on the exact commit (not just the branch tip, which we
+        # already reset to — but this makes the intent explicit).
+        (cd "$ARTEMIS_CLONE_DIR" && git checkout "$commit_sha") \
+            || { echo "ERROR: Failed to checkout commit $commit_sha" >&2; exit 1; }
+
+        # Re-resolve services from the checked-out compose file — it may differ
+        # from the branch tip if git history was rewritten.
+        local build_services
+        build_services=$(compose_cmd config --services | grep "^artemis-app")
+        if [ -z "$build_services" ]; then
+            echo "ERROR: No artemis-app services found after checkout" >&2; exit 1
+        fi
+
+        # Verify that all services have a build: section — without it,
+        # compose build would silently skip the service and we'd have no image.
+        local build_json
+        build_json=$(compose_cmd config --format json)
+        echo "$build_json" | ARTEMIS_SERVICES="$build_services" python3 -c "
+import json, os, sys
+config = json.load(sys.stdin)
+services = os.environ['ARTEMIS_SERVICES'].strip().split('\n')
+for svc in services:
+    if 'build' not in config['services'][svc]:
+        print(f'ERROR: Service {svc} has no build: section — cannot build locally', file=sys.stderr)
+        sys.exit(1)
+" || { echo "ERROR: Cannot build — missing build configuration" >&2; exit 1; }
+
+        # --pull in compose build pulls base images (e.g., eclipse-temurin),
+        # not the artemis image itself.
+        compose_cmd build --pull $build_services \
+            || { echo "ERROR: compose build failed" >&2; exit 1; }
+
+        echo "Build successful. Starting services..."
+        compose_cmd up -d --no-build --remove-orphans \
+            || { echo "ERROR: compose up failed" >&2; exit 1; }
+    fi
+
+    # Reload Nginx configuration as Nginx may still be running from a previous
+    # start. This is necessary to apply the new configuration.
+    compose_cmd exec nginx nginx -s reload || true
 }
 
 function stop {
@@ -46,10 +346,10 @@ function stop {
     echo "Stopping Artemis"
 
     # Get all docker-compose services that are not called nginx.
-    services=$(docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" ps --services)
+    services=$(compose_cmd ps --services)
     artemis_services=$(echo "$services" | grep -v "^nginx")
 
-    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" stop $artemis_services
+    compose_cmd stop $artemis_services
 }
 
 function restart {
@@ -59,18 +359,18 @@ function restart {
 
 function artemis_logs {
     # Get all docker-compose services matching artemis-app* to be multi-node and single-node compatible.
-    services=$(docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" ps --services)
+    services=$(compose_cmd ps --services)
     artemis_services=$(echo "$services" | grep "^artemis-app")
 
-    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" logs -f $artemis_services
+    compose_cmd logs -f $artemis_services
 }
 
 function all_logs {
-    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" logs -f
+    compose_cmd logs -f
 }
 
 function run_docker_compose_cmd {
-    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" "$@"
+    compose_cmd "$@"
 }
 
 # read subcommand `artemis-docker subcommand server` in variable and remove base command from argument list
