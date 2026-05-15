@@ -155,10 +155,11 @@
     - continuous_integration.localci.build_container_cache is defined
     - continuous_integration.localci.build_container_cache.gradle is defined
 
-# Weekly housekeeping: prune cache entries that have not been read in the last 30 days. Uses
-# access time (-atime), which assumes the host filesystem is mounted without `noatime`; on
-# noatime mounts switch the predicate to `-mtime`. The job runs as root because the directory
-# is owned by root.
+# Weekly housekeeping: prune cache entries unread for 30+ days, then sweep the directories
+# that are now empty so the tree does not keep growing forever after files are deleted.
+# Uses access time (-atime), which assumes the host filesystem is mounted without `noatime`;
+# on noatime mounts switch the predicate to `-mtime`. The job runs as root because the
+# directory is owned by root.
 - name: Schedule weekly prune of Maven build-container cache
   become: true
   cron:
@@ -167,7 +168,7 @@
     hour: "4"
     minute: "0"
     user: root
-    job: "find {{ continuous_integration.localci.build_container_cache.maven }} -atime +30 -type f -delete"
+    job: "find {{ continuous_integration.localci.build_container_cache.maven }} -atime +30 -type f -delete && find {{ continuous_integration.localci.build_container_cache.maven }} -mindepth 1 -type d -empty -delete"
   when:
     - continuous_integration.localci is defined
     - continuous_integration.localci.build_container_cache is defined
@@ -181,7 +182,7 @@
     hour: "4"
     minute: "15"
     user: root
-    job: "find {{ continuous_integration.localci.build_container_cache.gradle }} -atime +30 -type f -delete"
+    job: "find {{ continuous_integration.localci.build_container_cache.gradle }} -atime +30 -type f -delete && find {{ continuous_integration.localci.build_container_cache.gradle }} -mindepth 1 -type d -empty -delete"
   when:
     - continuous_integration.localci is defined
     - continuous_integration.localci.build_container_cache is defined
