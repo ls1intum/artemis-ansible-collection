@@ -266,6 +266,9 @@ artemis:
 {% if continuous_integration.localci.build_container_cache.gradle is defined %}
       gradle: {{ continuous_integration.localci.build_container_cache.gradle }}
 {% endif %}
+{% if continuous_integration.localci.build_container_cache.read_only is defined %}
+      read-only: {{ continuous_integration.localci.build_container_cache.read_only | lower }}
+{% endif %}
 {% endif %}
     build-agent:
         short-name: {{ node_short_name }}

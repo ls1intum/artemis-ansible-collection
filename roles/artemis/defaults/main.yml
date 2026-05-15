@@ -183,10 +183,14 @@ artemis_passkey_enabled: false
 #    # student submissions reuse a per-agent cache instead of re-downloading every transitive dependency
 #    # from Maven Central (avoids the 429 rate-limit responses on heavily-loaded agents). Both keys are
 #    # independent; the host directories are created by the role with root:root / 0755 when defined.
+#    # `read_only: true` forces both caches to be mounted read-only (security: prevents student submissions
+#    # from poisoning the shared cache). When read_only is true the cache must be populated out of band
+#    # because student builds can no longer write to it. Defaults to false (read-write).
 #    # See: https://docs.artemis.tum.de/admin/production-setup/programming-exercise-adjustments#caching-bind-mounts
 #    build_container_cache:
 #      maven: /var/cache/artemis-buildagent/m2
 #      gradle: /var/cache/artemis-buildagent/gradle
+#      read_only: false
 #
 #athena:
 #  url:
