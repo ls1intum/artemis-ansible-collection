@@ -258,6 +258,15 @@ artemis:
       expiry-days: {{ continuous_integration.localci.image_cleanup.expiry_days }}
       cleanup-schedule-time: {{ continuous_integration.localci.image_cleanup.schedule_time }}
 {% endif %}
+{% if continuous_integration.localci.build_container_cache is defined %}
+    build-container-cache:
+{% if continuous_integration.localci.build_container_cache.maven is defined %}
+      maven: {{ continuous_integration.localci.build_container_cache.maven }}
+{% endif %}
+{% if continuous_integration.localci.build_container_cache.gradle is defined %}
+      gradle: {{ continuous_integration.localci.build_container_cache.gradle }}
+{% endif %}
+{% endif %}
     build-agent:
         short-name: {{ node_short_name }}
         display-name: {{ node_display_name }}

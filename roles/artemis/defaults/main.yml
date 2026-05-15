@@ -179,6 +179,14 @@ artemis_passkey_enabled: false
 #    image_cleanup:
 #      expiry_days: 3
 #      schedule_time: "0 0 4 * * *"
+#    # Optional: persistent Maven/Gradle dependency caches bind-mounted into every build container so
+#    # student submissions reuse a per-agent cache instead of re-downloading every transitive dependency
+#    # from Maven Central (avoids the 429 rate-limit responses on heavily-loaded agents). Both keys are
+#    # independent; the host directories are created by the role with root:root / 0755 when defined.
+#    # See: https://docs.artemis.tum.de/admin/production-setup/programming-exercise-adjustments#caching-bind-mounts
+#    build_container_cache:
+#      maven: /var/cache/artemis-buildagent/m2
+#      gradle: /var/cache/artemis-buildagent/gradle
 #
 #athena:
 #  url:
