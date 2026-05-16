@@ -12,14 +12,15 @@
 #     World-writable (0777) is intentionally avoided; the security trade-off is discussed in the Artemis docs.
 #     On rootless Docker / `--userns-remap`, the in-container root maps to an unprivileged host UID — in that case
 #     the operator must either set `read_only: true` (and warm the cache externally) or chown the host directory.
-#   - Install a weekly cron job that prunes cache entries unread for 30+ days, then sweeps empty leaf directories.
-#     Paths are shell-quoted; `|| true` keeps a missing-path day from sending root mail every Sunday.
-#   - If the maven/gradle key is later removed from inventory, the matching cron job is removed too (state: absent).
+#   - Remove any legacy host-cron prune jobs that earlier versions of this role installed. The build agent JVM now
+#     owns cleanup via BuildContainerCacheCleanupService (pause → prune → resume), which avoids the race between a
+#     host-side `find -delete` and an active build reading the same file. Removal is unconditional so re-running
+#     this role on an upgraded agent cleans up its previous state.
 
 # --- Path validation -----------------------------------------------------------------------------------------------
-# Catch dangerous values (empty, "/", well-known system roots) before we install a `find ... -delete` running as
-# root. This is defense-in-depth — inventories under our control would never set these values, but a typo or a
-# vault-rendered empty string would otherwise turn the weekly prune into a system-wide file deletion.
+# Catch dangerous values (empty, "/", well-known system roots) before we create the cache directory. We no longer
+# install a host `find ... -delete` cron, but the validation is still cheap insurance against a typo or a vault-
+# rendered empty string accidentally pointing the bind mount at a system root.
 
 - name: Validate Maven build-container cache path is safe
   ansible.builtin.assert:
@@ -91,34 +92,14 @@
     - continuous_integration.localci.build_container_cache is defined
     - continuous_integration.localci.build_container_cache.gradle is defined
 
-# --- Cron jobs -----------------------------------------------------------------------------------------------------
-# Schedule: 04:00 / 04:15 Sunday. Avoid Saturday/weekday clashes with the in-JVM image_cleanup (typically 04:00
-# daily) by giving each prune its own minute. Paths are shell-quoted to survive spaces or special characters; the
-# pipeline ends in `|| true` so a missing-path day doesn't trigger cron mail to root every week.
+# --- Legacy host-cron removal --------------------------------------------------------------------------------------
+# Older versions of this role installed a root crontab that pruned the cache once a week (Sun 04:00/04:15) via
+# `find -atime +30 -type f -delete`. That mechanism is superseded by the JVM-driven cleanup in
+# BuildContainerCacheCleanupService, which pauses the agent before pruning so it cannot race with a running build.
+# Re-running this role on an upgraded agent must remove the legacy entries. The removal is unconditional (no
+# `when:` gate on whether the cache key is set) so it cleans up agents whose inventory still mentions the path.
 
-- name: Schedule weekly prune of Maven build-container cache
-  become: true
-  ansible.builtin.cron:
-    name: artemis-buildagent-maven-cache-prune
-    state: present
-    weekday: "0"
-    hour: "4"
-    minute: "0"
-    user: root
-    job: >-
-      find {{ continuous_integration.localci.build_container_cache.maven | quote }}
-      -atime +30 -type f -delete
-      && find {{ continuous_integration.localci.build_container_cache.maven | quote }}
-      -mindepth 1 -type d -empty -delete
-      || true
-  when:
-    - continuous_integration.localci is defined
-    - continuous_integration.localci.is_build_agent is defined
-    - continuous_integration.localci.is_build_agent | bool
-    - continuous_integration.localci.build_container_cache is defined
-    - continuous_integration.localci.build_container_cache.maven is defined
-
-- name: Remove Maven build-container cache prune cron when key is unset
+- name: Remove legacy host-cron Maven build-container cache prune (superseded by JVM-driven cleanup)
   become: true
   ansible.builtin.cron:
     name: artemis-buildagent-maven-cache-prune
@@ -127,32 +108,8 @@
     - continuous_integration.localci is defined
     - continuous_integration.localci.is_build_agent is defined
     - continuous_integration.localci.is_build_agent | bool
-    - (continuous_integration.localci.build_container_cache is not defined
-       or continuous_integration.localci.build_container_cache.maven is not defined)
 
-- name: Schedule weekly prune of Gradle build-container cache
-  become: true
-  ansible.builtin.cron:
-    name: artemis-buildagent-gradle-cache-prune
-    state: present
-    weekday: "0"
-    hour: "4"
-    minute: "15"
-    user: root
-    job: >-
-      find {{ continuous_integration.localci.build_container_cache.gradle | quote }}
-      -atime +30 -type f -delete
-      && find {{ continuous_integration.localci.build_container_cache.gradle | quote }}
-      -mindepth 1 -type d -empty -delete
-      || true
-  when:
-    - continuous_integration.localci is defined
-    - continuous_integration.localci.is_build_agent is defined
-    - continuous_integration.localci.is_build_agent | bool
-    - continuous_integration.localci.build_container_cache is defined
-    - continuous_integration.localci.build_container_cache.gradle is defined
-
-- name: Remove Gradle build-container cache prune cron when key is unset
+- name: Remove legacy host-cron Gradle build-container cache prune (superseded by JVM-driven cleanup)
   become: true
   ansible.builtin.cron:
     name: artemis-buildagent-gradle-cache-prune
@@ -161,5 +118,3 @@
     - continuous_integration.localci is defined
     - continuous_integration.localci.is_build_agent is defined
     - continuous_integration.localci.is_build_agent | bool
-    - (continuous_integration.localci.build_container_cache is not defined
-       or continuous_integration.localci.build_container_cache.gradle is not defined)

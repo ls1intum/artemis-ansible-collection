@@ -261,7 +261,13 @@ artemis:
 {% if continuous_integration.localci.build_container_cache is defined and (
        continuous_integration.localci.build_container_cache.maven is defined
     or continuous_integration.localci.build_container_cache.gradle is defined
-    or continuous_integration.localci.build_container_cache.read_only is defined) %}
+    or continuous_integration.localci.build_container_cache.read_only is defined
+    or continuous_integration.localci.build_container_cache.cleanup_enabled is defined
+    or continuous_integration.localci.build_container_cache.cleanup_cron is defined
+    or continuous_integration.localci.build_container_cache.cleanup_max_age_days is defined
+    or continuous_integration.localci.build_container_cache.maven_max_size is defined
+    or continuous_integration.localci.build_container_cache.gradle_max_size is defined
+    or continuous_integration.localci.build_container_cache.size_low_watermark_ratio is defined) %}
     build-container-cache:
 {% if continuous_integration.localci.build_container_cache.maven is defined %}
       maven: {{ continuous_integration.localci.build_container_cache.maven }}
@@ -271,6 +277,24 @@ artemis:
 {% endif %}
 {% if continuous_integration.localci.build_container_cache.read_only is defined %}
       read-only: {{ continuous_integration.localci.build_container_cache.read_only | lower }}
+{% endif %}
+{% if continuous_integration.localci.build_container_cache.cleanup_enabled is defined %}
+      cleanup-enabled: {{ continuous_integration.localci.build_container_cache.cleanup_enabled | lower }}
+{% endif %}
+{% if continuous_integration.localci.build_container_cache.cleanup_cron is defined %}
+      cleanup-cron: "{{ continuous_integration.localci.build_container_cache.cleanup_cron }}"
+{% endif %}
+{% if continuous_integration.localci.build_container_cache.cleanup_max_age_days is defined %}
+      cleanup-max-age-days: {{ continuous_integration.localci.build_container_cache.cleanup_max_age_days }}
+{% endif %}
+{% if continuous_integration.localci.build_container_cache.maven_max_size is defined %}
+      maven-max-size: {{ continuous_integration.localci.build_container_cache.maven_max_size }}
+{% endif %}
+{% if continuous_integration.localci.build_container_cache.gradle_max_size is defined %}
+      gradle-max-size: {{ continuous_integration.localci.build_container_cache.gradle_max_size }}
+{% endif %}
+{% if continuous_integration.localci.build_container_cache.size_low_watermark_ratio is defined %}
+      size-low-watermark-ratio: {{ continuous_integration.localci.build_container_cache.size_low_watermark_ratio }}
 {% endif %}
 {% endif %}
     build-agent:
