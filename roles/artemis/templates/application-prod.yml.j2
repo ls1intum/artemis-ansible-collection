@@ -258,7 +258,10 @@ artemis:
       expiry-days: {{ continuous_integration.localci.image_cleanup.expiry_days }}
       cleanup-schedule-time: {{ continuous_integration.localci.image_cleanup.schedule_time }}
 {% endif %}
-{% if continuous_integration.localci.build_container_cache is defined %}
+{% if continuous_integration.localci.build_container_cache is defined and (
+       continuous_integration.localci.build_container_cache.maven is defined
+    or continuous_integration.localci.build_container_cache.gradle is defined
+    or continuous_integration.localci.build_container_cache.read_only is defined) %}
     build-container-cache:
 {% if continuous_integration.localci.build_container_cache.maven is defined %}
       maven: {{ continuous_integration.localci.build_container_cache.maven }}

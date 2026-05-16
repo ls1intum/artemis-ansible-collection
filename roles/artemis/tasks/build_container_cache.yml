@@ -1,0 +1,165 @@
+---
+# Configures the host-side state for the per-agent Maven/Gradle build-container cache
+# (see https://docs.artemis.tum.de/admin/production-setup/programming-exercise-adjustments#caching-bind-mounts).
+# This task file is intentionally separate from artemis_setup.yml / artemis_config.yml / docker_deploy_artemis.yml
+# because the cache needs to be provisioned for both deployment modes (host-JVM and Docker), and on both a fresh
+# `setup_system` run and a routine `update_artemis_config` refresh. main.yml includes us once if any of those
+# gates are active.
+#
+# Behavior summary:
+#   - Validate that any configured cache path is non-empty, absolute, and not a top-level system directory.
+#   - Create the host directory `root:root 0755` so the container's root user can write but no other host user can.
+#     World-writable (0777) is intentionally avoided; the security trade-off is discussed in the Artemis docs.
+#     On rootless Docker / `--userns-remap`, the in-container root maps to an unprivileged host UID — in that case
+#     the operator must either set `read_only: true` (and warm the cache externally) or chown the host directory.
+#   - Install a weekly cron job that prunes cache entries unread for 30+ days, then sweeps empty leaf directories.
+#     Paths are shell-quoted; `|| true` keeps a missing-path day from sending root mail every Sunday.
+#   - If the maven/gradle key is later removed from inventory, the matching cron job is removed too (state: absent).
+
+# --- Path validation -----------------------------------------------------------------------------------------------
+# Catch dangerous values (empty, "/", well-known system roots) before we install a `find ... -delete` running as
+# root. This is defense-in-depth — inventories under our control would never set these values, but a typo or a
+# vault-rendered empty string would otherwise turn the weekly prune into a system-wide file deletion.
+
+- name: Validate Maven build-container cache path is safe
+  ansible.builtin.assert:
+    that:
+      - continuous_integration.localci.build_container_cache.maven is string
+      - continuous_integration.localci.build_container_cache.maven | length > 1
+      - continuous_integration.localci.build_container_cache.maven.startswith('/')
+      - continuous_integration.localci.build_container_cache.maven not in ['/', '/var', '/etc', '/usr', '/bin',
+          '/sbin', '/lib', '/lib64', '/boot', '/dev', '/proc', '/sys', '/root', '/home', '/opt', '/tmp', '/srv',
+          '/run', '/media', '/mnt']
+    fail_msg: >-
+      continuous_integration.localci.build_container_cache.maven must be a non-empty absolute path and cannot be
+      a top-level system directory (got: '{{ continuous_integration.localci.build_container_cache.maven }}').
+  when:
+    - continuous_integration.localci is defined
+    - continuous_integration.localci.is_build_agent is defined
+    - continuous_integration.localci.is_build_agent | bool
+    - continuous_integration.localci.build_container_cache is defined
+    - continuous_integration.localci.build_container_cache.maven is defined
+
+- name: Validate Gradle build-container cache path is safe
+  ansible.builtin.assert:
+    that:
+      - continuous_integration.localci.build_container_cache.gradle is string
+      - continuous_integration.localci.build_container_cache.gradle | length > 1
+      - continuous_integration.localci.build_container_cache.gradle.startswith('/')
+      - continuous_integration.localci.build_container_cache.gradle not in ['/', '/var', '/etc', '/usr', '/bin',
+          '/sbin', '/lib', '/lib64', '/boot', '/dev', '/proc', '/sys', '/root', '/home', '/opt', '/tmp', '/srv',
+          '/run', '/media', '/mnt']
+    fail_msg: >-
+      continuous_integration.localci.build_container_cache.gradle must be a non-empty absolute path and cannot be
+      a top-level system directory (got: '{{ continuous_integration.localci.build_container_cache.gradle }}').
+  when:
+    - continuous_integration.localci is defined
+    - continuous_integration.localci.is_build_agent is defined
+    - continuous_integration.localci.is_build_agent | bool
+    - continuous_integration.localci.build_container_cache is defined
+    - continuous_integration.localci.build_container_cache.gradle is defined
+
+# --- Host directory provisioning -----------------------------------------------------------------------------------
+
+- name: Create Maven build-container cache directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ continuous_integration.localci.build_container_cache.maven }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  when:
+    - continuous_integration.localci is defined
+    - continuous_integration.localci.is_build_agent is defined
+    - continuous_integration.localci.is_build_agent | bool
+    - continuous_integration.localci.build_container_cache is defined
+    - continuous_integration.localci.build_container_cache.maven is defined
+
+- name: Create Gradle build-container cache directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ continuous_integration.localci.build_container_cache.gradle }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  when:
+    - continuous_integration.localci is defined
+    - continuous_integration.localci.is_build_agent is defined
+    - continuous_integration.localci.is_build_agent | bool
+    - continuous_integration.localci.build_container_cache is defined
+    - continuous_integration.localci.build_container_cache.gradle is defined
+
+# --- Cron jobs -----------------------------------------------------------------------------------------------------
+# Schedule: 04:00 / 04:15 Sunday. Avoid Saturday/weekday clashes with the in-JVM image_cleanup (typically 04:00
+# daily) by giving each prune its own minute. Paths are shell-quoted to survive spaces or special characters; the
+# pipeline ends in `|| true` so a missing-path day doesn't trigger cron mail to root every week.
+
+- name: Schedule weekly prune of Maven build-container cache
+  become: true
+  ansible.builtin.cron:
+    name: artemis-buildagent-maven-cache-prune
+    state: present
+    weekday: "0"
+    hour: "4"
+    minute: "0"
+    user: root
+    job: >-
+      find {{ continuous_integration.localci.build_container_cache.maven | quote }}
+      -atime +30 -type f -delete
+      && find {{ continuous_integration.localci.build_container_cache.maven | quote }}
+      -mindepth 1 -type d -empty -delete
+      || true
+  when:
+    - continuous_integration.localci is defined
+    - continuous_integration.localci.is_build_agent is defined
+    - continuous_integration.localci.is_build_agent | bool
+    - continuous_integration.localci.build_container_cache is defined
+    - continuous_integration.localci.build_container_cache.maven is defined
+
+- name: Remove Maven build-container cache prune cron when key is unset
+  become: true
+  ansible.builtin.cron:
+    name: artemis-buildagent-maven-cache-prune
+    state: absent
+  when:
+    - continuous_integration.localci is defined
+    - continuous_integration.localci.is_build_agent is defined
+    - continuous_integration.localci.is_build_agent | bool
+    - (continuous_integration.localci.build_container_cache is not defined
+       or continuous_integration.localci.build_container_cache.maven is not defined)
+
+- name: Schedule weekly prune of Gradle build-container cache
+  become: true
+  ansible.builtin.cron:
+    name: artemis-buildagent-gradle-cache-prune
+    state: present
+    weekday: "0"
+    hour: "4"
+    minute: "15"
+    user: root
+    job: >-
+      find {{ continuous_integration.localci.build_container_cache.gradle | quote }}
+      -atime +30 -type f -delete
+      && find {{ continuous_integration.localci.build_container_cache.gradle | quote }}
+      -mindepth 1 -type d -empty -delete
+      || true
+  when:
+    - continuous_integration.localci is defined
+    - continuous_integration.localci.is_build_agent is defined
+    - continuous_integration.localci.is_build_agent | bool
+    - continuous_integration.localci.build_container_cache is defined
+    - continuous_integration.localci.build_container_cache.gradle is defined
+
+- name: Remove Gradle build-container cache prune cron when key is unset
+  become: true
+  ansible.builtin.cron:
+    name: artemis-buildagent-gradle-cache-prune
+    state: absent
+  when:
+    - continuous_integration.localci is defined
+    - continuous_integration.localci.is_build_agent is defined
+    - continuous_integration.localci.is_build_agent | bool
+    - (continuous_integration.localci.build_container_cache is not defined
+       or continuous_integration.localci.build_container_cache.gradle is not defined)

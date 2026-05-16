@@ -181,11 +181,22 @@ artemis_passkey_enabled: false
 #      schedule_time: "0 0 4 * * *"
 #    # Optional: persistent Maven/Gradle dependency caches bind-mounted into every build container so
 #    # student submissions reuse a per-agent cache instead of re-downloading every transitive dependency
-#    # from Maven Central (avoids the 429 rate-limit responses on heavily-loaded agents). Both keys are
-#    # independent; the host directories are created by the role with root:root / 0755 when defined.
-#    # `read_only: true` forces both caches to be mounted read-only (security: prevents student submissions
-#    # from poisoning the shared cache). When read_only is true the cache must be populated out of band
-#    # because student builds can no longer write to it. Defaults to false (read-write).
+#    # from Maven Central (avoids the 429 rate-limit responses on heavily-loaded agents). Both `maven`
+#    # and `gradle` are independent; the role creates the host directory (root:root / 0755) and a
+#    # weekly prune cron only for the keys you set. Removing a key from inventory also removes the
+#    # corresponding cron entry on the next role run.
+#    #
+#    # `read_only` is forwarded to the Artemis server config (default: false / read-write on the
+#    # server side). Set to true to mount both caches read-only inside the build container — this is
+#    # the strongest defense against cache poisoning by untrusted student submissions, but the cache
+#    # must be FULLY populated out of band first (an empty read-only cache fails builds because
+#    # Maven/Gradle cannot write fetched artifacts back). Omitting the key leaves the server at its
+#    # current default.
+#    #
+#    # Path safety: the values must be absolute, non-empty, and not top-level system directories
+#    # (`/`, `/var`, `/etc`, `/usr`, `/bin`, `/sbin`, `/root`, `/home`, `/opt`, `/tmp`, ...). The
+#    # role asserts this before installing the weekly prune cron that runs as root.
+#    #
 #    # See: https://docs.artemis.tum.de/admin/production-setup/programming-exercise-adjustments#caching-bind-mounts
 #    build_container_cache:
 #      maven: /var/cache/artemis-buildagent/m2

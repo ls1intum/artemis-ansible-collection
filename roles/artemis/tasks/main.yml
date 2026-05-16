@@ -68,6 +68,23 @@
   when:
     - (use_docker | bool)
 
+# Provision the build-container dependency cache (host directories + weekly prune cron) on build
+# agents that opt in via continuous_integration.localci.build_container_cache. Runs in any of:
+#   - fresh host setup (setup_system) so a brand-new agent gets the directories before Artemis starts
+#   - routine config refresh (update_artemis_config) so an operator who newly enables the cache
+#     without re-running the full setup play still ends up with the host directories present before
+#     the restarted JVM bind-mounts them
+#   - Docker-based deploys (use_docker) — same reasoning; Docker bind mounts cannot create a missing
+#     host source path with the correct ownership/mode
+# The cron tasks inside flip state:present <-> state:absent based on whether the inventory key is
+# currently set, so removing the key cleans up the leftover crontab entry.
+- include_tasks: build_container_cache.yml
+  when:
+    - continuous_integration.localci is defined
+    - continuous_integration.localci.is_build_agent is defined
+    - continuous_integration.localci.is_build_agent | bool
+    - (setup_system | bool) or (update_artemis_config | bool) or (use_docker | bool)
+
 # Restart Artemis
 - include_tasks: restart_artemis.yml
   when:
