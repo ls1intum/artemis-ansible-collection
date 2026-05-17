@@ -42,9 +42,11 @@
       - continuous_integration.localci.build_container_cache.maven is string
       - continuous_integration.localci.build_container_cache.maven | length > 1
       - continuous_integration.localci.build_container_cache.maven.startswith('/')
-      - continuous_integration.localci.build_container_cache.maven not in ['/', '/var', '/etc', '/usr', '/bin',
-          '/sbin', '/lib', '/lib64', '/boot', '/dev', '/proc', '/sys', '/root', '/home', '/opt', '/tmp', '/srv',
-          '/run', '/media', '/mnt']
+      # Normalise trailing slashes before the denylist comparison so that values like '/var/' or '/etc//'
+      # cannot bypass the top-level-system-directory check by accident or typo.
+      - (continuous_integration.localci.build_container_cache.maven | trim | regex_replace('/+$', '')) not in
+          ['/', '/var', '/etc', '/usr', '/bin', '/sbin', '/lib', '/lib64', '/boot', '/dev', '/proc', '/sys',
+           '/root', '/home', '/opt', '/tmp', '/srv', '/run', '/media', '/mnt']
     fail_msg: >-
       continuous_integration.localci.build_container_cache.maven must be a non-empty absolute path and cannot be
       a top-level system directory (got: '{{ continuous_integration.localci.build_container_cache.maven }}').
@@ -61,9 +63,11 @@
       - continuous_integration.localci.build_container_cache.gradle is string
       - continuous_integration.localci.build_container_cache.gradle | length > 1
       - continuous_integration.localci.build_container_cache.gradle.startswith('/')
-      - continuous_integration.localci.build_container_cache.gradle not in ['/', '/var', '/etc', '/usr', '/bin',
-          '/sbin', '/lib', '/lib64', '/boot', '/dev', '/proc', '/sys', '/root', '/home', '/opt', '/tmp', '/srv',
-          '/run', '/media', '/mnt']
+      # Normalise trailing slashes before the denylist comparison so that values like '/var/' or '/etc//'
+      # cannot bypass the top-level-system-directory check by accident or typo.
+      - (continuous_integration.localci.build_container_cache.gradle | trim | regex_replace('/+$', '')) not in
+          ['/', '/var', '/etc', '/usr', '/bin', '/sbin', '/lib', '/lib64', '/boot', '/dev', '/proc', '/sys',
+           '/root', '/home', '/opt', '/tmp', '/srv', '/run', '/media', '/mnt']
     fail_msg: >-
       continuous_integration.localci.build_container_cache.gradle must be a non-empty absolute path and cannot be
       a top-level system directory (got: '{{ continuous_integration.localci.build_container_cache.gradle }}').
