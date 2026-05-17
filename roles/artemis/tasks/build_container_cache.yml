@@ -6,16 +6,30 @@
 # `setup_system` run and a routine `update_artemis_config` refresh. main.yml includes us once if any of those
 # gates are active.
 #
-# Behavior summary:
+# Behaviour summary:
 #   - Validate that any configured cache path is non-empty, absolute, and not a top-level system directory.
-#   - Create the host directory `root:root 0755` so the container's root user can write but no other host user can.
-#     World-writable (0777) is intentionally avoided; the security trade-off is discussed in the Artemis docs.
-#     On rootless Docker / `--userns-remap`, the in-container root maps to an unprivileged host UID — in that case
-#     the operator must either set `read_only: true` (and warm the cache externally) or chown the host directory.
+#   - Install the `acl` package. The build agent JVM applies a POSIX default ACL at startup so files created by
+#     container-root inside the bind-mount can later be deleted by the (non-root) agent JVM when an operator
+#     triggers a cache wipe or cleanup. Without `acl`, the JVM logs a clear WARN at startup and the operator-
+#     triggered wipe action will report permission errors. Build itself still works.
+#   - Create the host directory owned by the agent JVM's user ("{{ artemis_user_name }}") at mode 0775. The JVM
+#     creates the directory at startup if it is missing, so this step is belt-and-braces: it guarantees correct
+#     ownership when the parent of the cache root is not writable by the agent user (for example a fresh
+#     /var/cache/artemis-buildagent).
 #   - Remove any legacy host-cron prune jobs that earlier versions of this role installed. The build agent JVM now
 #     owns cleanup via BuildContainerCacheCleanupService (pause → prune → resume), which avoids the race between a
 #     host-side `find -delete` and an active build reading the same file. Removal is unconditional so re-running
 #     this role on an upgraded agent cleans up its previous state.
+#
+# Why the cache must be deletable by the agent's JVM user:
+#   Artemis build containers run as their image's default user — root in most of the Artemis-provided images. The
+#   bind-mounted cache therefore receives root-owned files during builds. The agent JVM runs as the unprivileged
+#   `artemis` system user (typically UID 1337). Without intervention, the JVM cannot delete root-owned files when
+#   an operator clicks "Reclaim disk" or when the scheduled cleanup runs.
+#
+#   The fix is a POSIX *default* ACL: any file created inside the cache directory inherits an "u:artemis:rwx"
+#   entry, so the agent JVM can delete it regardless of who created it. The JVM applies this ACL at startup via
+#   the `setfacl` binary, which requires the `acl` package this task installs.
 
 # --- Path validation -----------------------------------------------------------------------------------------------
 # Catch dangerous values (empty, "/", well-known system roots) before we create the cache directory. We no longer
@@ -60,16 +74,36 @@
     - continuous_integration.localci.build_container_cache is defined
     - continuous_integration.localci.build_container_cache.gradle is defined
 
+# --- ACL tooling ---------------------------------------------------------------------------------------------------
+# The `acl` package provides `setfacl`/`getfacl`. The build agent JVM calls `setfacl` at startup to apply a default
+# ACL on the cache directory that grants its own user delete permission on files later created by container-root.
+# Without this package the JVM logs a WARN with the manual fix and the operator-triggered cache wipe will fail to
+# delete root-owned files. Build agents themselves still function.
+
+- name: Ensure 'acl' package is installed (needed by the build agent JVM to apply default ACLs on cache dirs)
+  become: true
+  ansible.builtin.package:
+    name: acl
+    state: present
+  when:
+    - continuous_integration.localci is defined
+    - continuous_integration.localci.is_build_agent is defined
+    - continuous_integration.localci.is_build_agent | bool
+
 # --- Host directory provisioning -----------------------------------------------------------------------------------
+# Directory ownership is set to the agent JVM's user so the JVM can both create missing subdirectories and apply
+# the default ACL via `setfacl` (only the owner can set ACLs without root). Mode 0775 keeps the cache readable for
+# operators using `du`/`ls` from a regular shell, and writable by members of the artemis group; the actual
+# JVM-vs-container interaction is governed by the ACL applied at JVM startup, not by these POSIX mode bits.
 
 - name: Create Maven build-container cache directory
   become: true
   ansible.builtin.file:
     path: "{{ continuous_integration.localci.build_container_cache.maven }}"
     state: directory
-    owner: root
-    group: root
-    mode: "0755"
+    owner: "{{ artemis_user_name }}"
+    group: "{{ artemis_user_group }}"
+    mode: "0775"
   when:
     - continuous_integration.localci is defined
     - continuous_integration.localci.is_build_agent is defined
@@ -82,9 +116,9 @@
   ansible.builtin.file:
     path: "{{ continuous_integration.localci.build_container_cache.gradle }}"
     state: directory
-    owner: root
-    group: root
-    mode: "0755"
+    owner: "{{ artemis_user_name }}"
+    group: "{{ artemis_user_group }}"
+    mode: "0775"
   when:
     - continuous_integration.localci is defined
     - continuous_integration.localci.is_build_agent is defined
