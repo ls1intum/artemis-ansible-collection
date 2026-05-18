@@ -1,12 +1,13 @@
 #!/bin/bash
 
-PROJECT_DIR="{{ artemis_working_directory }}/Artemis/docker"
+ARTEMIS_REPO_DIR="{{ artemis_working_directory }}/Artemis"
+PROJECT_DIR="$ARTEMIS_REPO_DIR/docker"
 {% set default_compose_file = "test-server-" + artemis_database_type + ".yml" %}
 {% set localci_compose_file = "test-server-" + artemis_database_type + "-localci.yml" %}
 {% set multi_node_compose_file = "test-server-multi-node-" + artemis_database_type + "-localci.yml" %}
 
 COMPOSE_FILE="{% if is_multinode_install is defined and is_multinode_install %}{{ multi_node_compose_file }}{% elif continuous_integration.localci is defined %}{{ localci_compose_file }}{% else %}{{ default_compose_file }}{% endif %}"
-DOCKER_IMAGE_ENV_FILE="{{ artemis_working_directory }}/Artemis/.env"
+DOCKER_IMAGE_ENV_FILE="$ARTEMIS_REPO_DIR/.env"
 ENV_FILE="{{ artemis_working_directory }}/docker.env"
 {% if continuous_integration.localci is defined %}
 export DOCKER_GROUP_ID=$(getent group docker | cut -d: -f3)
@@ -26,13 +27,26 @@ Commands:
 HELP
 }
 
+function update_artemis_checkout {
+    local pr_branch=$1
+
+    if [ ! -d "$ARTEMIS_REPO_DIR/.git" ]; then
+        rm -rf "$ARTEMIS_REPO_DIR"
+        git clone --depth 1 --branch "$pr_branch" https://github.com/ls1intum/Artemis.git "$ARTEMIS_REPO_DIR"
+    else
+        git -C "$ARTEMIS_REPO_DIR" fetch --depth 1 origin "+refs/heads/$pr_branch:refs/remotes/origin/$pr_branch"
+        git -C "$ARTEMIS_REPO_DIR" checkout --detach "origin/$pr_branch"
+        git -C "$ARTEMIS_REPO_DIR" reset --hard "origin/$pr_branch"
+        git -C "$ARTEMIS_REPO_DIR" clean -fd
+    fi
+}
+
 function start {
     local pr_tag=$1
     local pr_branch=$2
 
     echo "Starting Artemis with PR tag: $pr_tag and branch: $pr_branch"
-    rm -rf Artemis
-    git clone https://github.com/ls1intum/Artemis.git -b "$pr_branch" Artemis
+    update_artemis_checkout "$pr_branch"
     sed -i "s/ARTEMIS_DOCKER_TAG=.*/ARTEMIS_DOCKER_TAG='$pr_tag'/g" $ENV_FILE
     docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" up -d --pull always --no-build --remove-orphans
     
