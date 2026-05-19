@@ -27,7 +27,21 @@ HELP
 }
 
 function get_artemis_services {
-    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" config --services | grep "^artemis-app"
+    local stderr_file=$(mktemp)
+    local services
+
+    services=$(docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" config --services 2>"$stderr_file")
+    local exit_code=$?
+
+    if [ $exit_code -ne 0 ]; then
+        echo "Failed to retrieve docker compose configuration:" 1>&2
+        cat "$stderr_file" 1>&2
+        rm -f "$stderr_file"
+        return $exit_code
+    fi
+
+    rm -f "$stderr_file"
+    echo "$services" | grep "^artemis-app"
 }
 
 function start {
