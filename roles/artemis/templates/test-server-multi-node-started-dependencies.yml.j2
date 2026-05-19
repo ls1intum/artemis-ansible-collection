@@ -1,0 +1,9 @@
+# {{ ansible_managed }}
+
+services:
+{% for node_id in range(2, artemis_node_count + 1) %}
+  artemis-app-node-{{ node_id }}:
+    depends_on:
+      artemis-app-node-1:
+        condition: service_started
+{% endfor %}

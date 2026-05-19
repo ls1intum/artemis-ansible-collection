@@ -124,3 +124,17 @@
     group: "{{ artemis_user_group }}"
     mode: "770"
   notify: restart docker artemis
+
+- name: Copy test server multi-node started dependencies compose override
+  become: true
+  template:
+    src: "templates/test-server-multi-node-started-dependencies.yml.j2"
+    dest: "{{ artemis_working_directory }}/test-server-multi-node-started-dependencies.yml"
+    owner: "{{ artemis_user_name }}"
+    group: "{{ artemis_user_group }}"
+    mode: "660"
+  when:
+    - is_testserver | bool
+    - is_multinode_install | bool
+    - (artemis_node_count | int) == 3
+  notify: restart docker artemis
