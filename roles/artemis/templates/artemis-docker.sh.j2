@@ -27,13 +27,23 @@ HELP
 }
 
 function get_artemis_services {
-    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" config --services | grep "^artemis-app"
+    local services
+    local docker_compose_exit_code
+
+    services=$(docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" config --services)
+    docker_compose_exit_code=$?
+    if [ "$docker_compose_exit_code" -ne 0 ]; then
+        return "$docker_compose_exit_code"
+    fi
+
+    echo "$services" | grep "^artemis-app" || true
 }
 
 function start {
     local pr_tag=$1
     local pr_branch=$2
     local artemis_services
+    local get_artemis_services_exit_code
 
     echo "Starting Artemis with PR tag: $pr_tag and branch: $pr_branch"
     rm -rf Artemis
@@ -41,6 +51,11 @@ function start {
     sed -i "s/ARTEMIS_DOCKER_TAG=.*/ARTEMIS_DOCKER_TAG='$pr_tag'/g" "$ENV_FILE"
 
     artemis_services=$(get_artemis_services)
+    get_artemis_services_exit_code=$?
+    if [ "$get_artemis_services_exit_code" -ne 0 ]; then
+        exit "$get_artemis_services_exit_code"
+    fi
+
     if [ -z "$artemis_services" ]; then
         echo "No Artemis app services found in $COMPOSE_FILE" 1>&2
         exit 1
