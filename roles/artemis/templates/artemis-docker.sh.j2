@@ -31,13 +31,32 @@ function update_artemis_checkout {
     local pr_branch=$1
 
     if [ ! -d "$ARTEMIS_REPO_DIR/.git" ]; then
-        rm -rf "$ARTEMIS_REPO_DIR"
-        git clone --depth 1 --branch "$pr_branch" https://github.com/ls1intum/Artemis.git "$ARTEMIS_REPO_DIR"
+        if ! rm -rf "$ARTEMIS_REPO_DIR"; then
+            echo "Failed to remove ARTEMIS_REPO_DIR='$ARTEMIS_REPO_DIR' before cloning branch '$pr_branch'" 1>&2
+            return 1
+        fi
+        if ! git clone --depth 1 --branch "$pr_branch" https://github.com/ls1intum/Artemis.git "$ARTEMIS_REPO_DIR"; then
+            echo "Failed to clone branch '$pr_branch' into ARTEMIS_REPO_DIR='$ARTEMIS_REPO_DIR'" 1>&2
+            rm -rf "$ARTEMIS_REPO_DIR"
+            return 1
+        fi
     else
-        git -C "$ARTEMIS_REPO_DIR" fetch --depth 1 origin "+refs/heads/$pr_branch:refs/remotes/origin/$pr_branch"
-        git -C "$ARTEMIS_REPO_DIR" checkout --detach "origin/$pr_branch"
-        git -C "$ARTEMIS_REPO_DIR" reset --hard "origin/$pr_branch"
-        git -C "$ARTEMIS_REPO_DIR" clean -fd
+        if ! git -C "$ARTEMIS_REPO_DIR" fetch --depth 1 origin "+refs/heads/${pr_branch}:refs/remotes/origin/${pr_branch}"; then
+            echo "Failed to fetch branch '$pr_branch' in ARTEMIS_REPO_DIR='$ARTEMIS_REPO_DIR'" 1>&2
+            return 1
+        fi
+        if ! git -C "$ARTEMIS_REPO_DIR" checkout --detach "origin/$pr_branch"; then
+            echo "Failed to checkout branch '$pr_branch' in ARTEMIS_REPO_DIR='$ARTEMIS_REPO_DIR'" 1>&2
+            return 1
+        fi
+        if ! git -C "$ARTEMIS_REPO_DIR" reset --hard "origin/$pr_branch"; then
+            echo "Failed to reset branch '$pr_branch' in ARTEMIS_REPO_DIR='$ARTEMIS_REPO_DIR'" 1>&2
+            return 1
+        fi
+        if ! git -C "$ARTEMIS_REPO_DIR" clean -fd; then
+            echo "Failed to clean branch '$pr_branch' in ARTEMIS_REPO_DIR='$ARTEMIS_REPO_DIR'" 1>&2
+            return 1
+        fi
     fi
 }
 
@@ -46,8 +65,11 @@ function start {
     local pr_branch=$2
 
     echo "Starting Artemis with PR tag: $pr_tag and branch: $pr_branch"
-    update_artemis_checkout "$pr_branch"
-    sed -i "s/ARTEMIS_DOCKER_TAG=.*/ARTEMIS_DOCKER_TAG='$pr_tag'/g" $ENV_FILE
+    if ! update_artemis_checkout "$pr_branch"; then
+        echo "update_artemis_checkout failed for branch '$pr_branch'; aborting start deployment" 1>&2
+        exit 1
+    fi
+    sed -i "s/ARTEMIS_DOCKER_TAG=.*/ARTEMIS_DOCKER_TAG='$pr_tag'/g" "$ENV_FILE"
     docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" up -d --pull always --no-build --remove-orphans
     
     # Reload Nginx configuration as Nginx may still be running from a previous start. This is necessary to apply the new configuration.
