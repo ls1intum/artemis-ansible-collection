@@ -60,9 +60,30 @@ function update_artemis_checkout {
     fi
 }
 
+function get_artemis_services {
+    local stderr_file=$(mktemp)
+    local services
+    local exit_code
+
+    services=$(docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" config --services 2>"$stderr_file")
+    exit_code=$?
+
+    if [ "$exit_code" -ne 0 ]; then
+        echo "Failed to retrieve docker compose configuration:" 1>&2
+        cat "$stderr_file" 1>&2
+        rm -f "$stderr_file"
+        return "$exit_code"
+    fi
+
+    rm -f "$stderr_file"
+    echo "$services" | grep "^artemis-app" || true
+}
+
 function start {
     local pr_tag=$1
     local pr_branch=$2
+    local artemis_services
+    local get_artemis_services_exit_code
 
     echo "Starting Artemis with PR tag: $pr_tag and branch: $pr_branch"
     if ! update_artemis_checkout "$pr_branch"; then
@@ -70,7 +91,24 @@ function start {
         exit 1
     fi
     sed -i "s/ARTEMIS_DOCKER_TAG=.*/ARTEMIS_DOCKER_TAG='$pr_tag'/g" "$ENV_FILE"
-    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" up -d --pull always --no-build --remove-orphans
+
+    artemis_services=$(get_artemis_services)
+    get_artemis_services_exit_code=$?
+    if [ "$get_artemis_services_exit_code" -ne 0 ]; then
+        exit "$get_artemis_services_exit_code"
+    fi
+
+    if [ -z "$artemis_services" ]; then
+        echo "No Artemis app services found in $COMPOSE_FILE" 1>&2
+        exit 1
+    fi
+
+    if ! docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" pull $artemis_services; then
+        echo "Failed to pull Artemis services ($artemis_services) using compose file $COMPOSE_FILE" 1>&2
+        exit 1
+    fi
+
+    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" up -d --no-build --remove-orphans
     
     # Reload Nginx configuration as Nginx may still be running from a previous start. This is necessary to apply the new configuration.
     docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" exec nginx nginx -s reload || true
