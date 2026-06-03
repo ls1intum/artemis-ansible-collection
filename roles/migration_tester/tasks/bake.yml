@@ -1,0 +1,88 @@
+---
+- name: Copy db backup
+  ansible.builtin.copy:
+    src: "{{ dump_src }}"
+    dest: "{{ dump_dest }}/artemis.sql.gz"
+
+- name: Unzip db backup
+  ansible.builtin.command: "gunzip -df {{ dump_dest }}/artemis.sql.gz"
+
+- name: Make sure the baked image is not present
+  community.docker.docker_image_remove:
+    name: "{{ mysql_baked }}"
+    force: true
+
+- name: Make sure there is no old baking data
+  become: true
+  ansible.builtin.file:
+    path: "/tmp/mysql"
+    state: absent
+
+- name: Create baking directory
+  become: true
+  become_user: artemis
+  file:
+    path: "/tmp/mysql"
+    state: directory
+    mode: "770"
+
+- name: Start db for baking and import
+  community.docker.docker_container:
+    name: "{{ artemis_database_temp_container_name }}"
+    image: "{{ mysql_base }}"
+    state: healthy
+    pull: missing
+    recreate: true
+    restart_policy: unless-stopped
+    user: 1337:1337
+    command: --lower_case_table_names=1 --tls-version='' --character_set_server=utf8mb4 --collation-server=utf8mb4_unicode_ci --explicit_defaults_for_timestamp --max_connections=100000
+    env:
+      MYSQL_ROOT_PASSWORD: "{{ artemis_database_password }}"
+      MYSQL_USER: "{{ artemis_database_username }}"
+      MYSQL_PASSWORD: "{{ artemis_database_password }}"
+      MYSQL_DATABASE: "{{ artemis_database_dbname }}"
+    published_ports:
+      - "{{ db_port }}:3306"
+    volumes:
+      - "{{ dump_dest }}/artemis.sql:/docker-entrypoint-initdb.d/init.sql:ro"
+      - "/tmp/mysql:/var/lib/mysql"
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1 -u root --silent
+      interval: 2s
+      timeout: 3s
+      retries: 60
+
+- name: Stop baking db
+  community.docker.docker_container:
+    name: "{{ artemis_database_temp_container_name }}"
+    state: stopped
+
+- name: Create migration.cnf
+  ansible.builtin.copy:
+    dest: /tmp/migration.cnf
+    content: |
+      [mysqld]
+      datadir=/var/lib/mysqlsafe
+
+- name: Copy data
+  ansible.builtin.command:
+    cmd: "docker cp /tmp/mysql {{ artemis_database_temp_container_name }}:/var/lib/mysqlsafe"
+
+- name: Copy migration.cnf into container
+  ansible.builtin.command:
+    cmd: "docker cp /tmp/migration.cnf {{ artemis_database_temp_container_name }}:/etc/mysql/conf.d/migration.cnf"
+
+- name: Commit to new image
+  ansible.builtin.command:
+    cmd: "docker commit {{ artemis_database_temp_container_name }} {{ mysql_baked }}"
+  changed_when: true
+
+- name: Delete archive file
+  ansible.builtin.file:
+    state: absent
+    path: "{{ dump_dest }}/artemis.sql.gz"
+
+- name: Delete sql file
+  ansible.builtin.file:
+    state: absent
+    path: "{{ dump_dest }}/artemis.sql"

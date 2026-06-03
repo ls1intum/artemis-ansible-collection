@@ -6,7 +6,7 @@
     fail_msg: "You must set the mysql_exporter_password variable"
 
 - name: Create database user with password and PROCESS, REPLICATION CLIENT privileges
-  community.mysql.mysql_user:
+  ansible.mysql.mysql_user:
     name: "{{ mysql_exporter_user }}"
     password: "{{ mysql_exporter_password }}"
     priv: "*.*:PROCESS,REPLICATION CLIENT"

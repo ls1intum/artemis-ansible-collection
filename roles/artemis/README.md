@@ -6,6 +6,16 @@ This role installs Artemis on a host. The role supports single node installation
 
 Default variables can be found in the `defaults/main.yml` file.
 
+### `artemis_version`
+
+The deployed Artemis version. Accepted values:
+
+- A [GitHub release tag](https://github.com/ls1intum/Artemis/releases) — either 3-segment (`9.1.2`) or 2-segment (`9.2`). The role downloads the matching `Artemis.war` from the GitHub release.
+- An absolute path to a local `Artemis.war` (e.g. `/home/user/Artemis.war`). The role rsyncs it onto the target host.
+- For Docker-based deployments (`use_docker: true`), the same string is used as the `ghcr.io/ls1intum/artemis:<tag>` image tag.
+
+> **YAML quoting:** when recording a 2-segment version in YAML (`group_vars`, `host_vars`, JSON/YAML extra-vars), always quote it: `artemis_version: "9.2"`. Without quotes YAML parses `9.2` as a float, and values like `9.10` silently become `9.1`. The role asserts the value is a string at entry time and fails fast otherwise.
+
 ### Variables that have to be configured for a single node installation:
 
 ```

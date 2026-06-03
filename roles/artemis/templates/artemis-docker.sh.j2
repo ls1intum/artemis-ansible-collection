@@ -1,12 +1,13 @@
 #!/bin/bash
 
-PROJECT_DIR="{{ artemis_working_directory }}/Artemis/docker"
+ARTEMIS_REPO_DIR="{{ artemis_working_directory }}/Artemis"
+PROJECT_DIR="$ARTEMIS_REPO_DIR/docker"
 {% set default_compose_file = "test-server-" + artemis_database_type + ".yml" %}
 {% set localci_compose_file = "test-server-" + artemis_database_type + "-localci.yml" %}
 {% set multi_node_compose_file = "test-server-multi-node-" + artemis_database_type + "-localci.yml" %}
 
 COMPOSE_FILE="{% if is_multinode_install is defined and is_multinode_install %}{{ multi_node_compose_file }}{% elif continuous_integration.localci is defined %}{{ localci_compose_file }}{% else %}{{ default_compose_file }}{% endif %}"
-DOCKER_IMAGE_ENV_FILE="{{ artemis_working_directory }}/Artemis/.env"
+DOCKER_IMAGE_ENV_FILE="$ARTEMIS_REPO_DIR/.env"
 ENV_FILE="{{ artemis_working_directory }}/docker.env"
 {% if continuous_integration.localci is defined %}
 export DOCKER_GROUP_ID=$(getent group docker | cut -d: -f3)
@@ -26,15 +27,88 @@ Commands:
 HELP
 }
 
+function update_artemis_checkout {
+    local pr_branch=$1
+
+    if [ ! -d "$ARTEMIS_REPO_DIR/.git" ]; then
+        if ! rm -rf "$ARTEMIS_REPO_DIR"; then
+            echo "Failed to remove ARTEMIS_REPO_DIR='$ARTEMIS_REPO_DIR' before cloning branch '$pr_branch'" 1>&2
+            return 1
+        fi
+        if ! git clone --depth 1 --branch "$pr_branch" https://github.com/ls1intum/Artemis.git "$ARTEMIS_REPO_DIR"; then
+            echo "Failed to clone branch '$pr_branch' into ARTEMIS_REPO_DIR='$ARTEMIS_REPO_DIR'" 1>&2
+            rm -rf "$ARTEMIS_REPO_DIR"
+            return 1
+        fi
+    else
+        if ! git -C "$ARTEMIS_REPO_DIR" fetch --depth 1 origin "+refs/heads/${pr_branch}:refs/remotes/origin/${pr_branch}"; then
+            echo "Failed to fetch branch '$pr_branch' in ARTEMIS_REPO_DIR='$ARTEMIS_REPO_DIR'" 1>&2
+            return 1
+        fi
+        if ! git -C "$ARTEMIS_REPO_DIR" checkout --detach "origin/$pr_branch"; then
+            echo "Failed to checkout branch '$pr_branch' in ARTEMIS_REPO_DIR='$ARTEMIS_REPO_DIR'" 1>&2
+            return 1
+        fi
+        if ! git -C "$ARTEMIS_REPO_DIR" reset --hard "origin/$pr_branch"; then
+            echo "Failed to reset branch '$pr_branch' in ARTEMIS_REPO_DIR='$ARTEMIS_REPO_DIR'" 1>&2
+            return 1
+        fi
+        if ! git -C "$ARTEMIS_REPO_DIR" clean -fd; then
+            echo "Failed to clean branch '$pr_branch' in ARTEMIS_REPO_DIR='$ARTEMIS_REPO_DIR'" 1>&2
+            return 1
+        fi
+    fi
+}
+
+function get_artemis_services {
+    local stderr_file=$(mktemp)
+    local services
+    local exit_code
+
+    services=$(docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" config --services 2>"$stderr_file")
+    exit_code=$?
+
+    if [ "$exit_code" -ne 0 ]; then
+        echo "Failed to retrieve docker compose configuration:" 1>&2
+        cat "$stderr_file" 1>&2
+        rm -f "$stderr_file"
+        return "$exit_code"
+    fi
+
+    rm -f "$stderr_file"
+    echo "$services" | grep "^artemis-app" || true
+}
+
 function start {
     local pr_tag=$1
     local pr_branch=$2
+    local artemis_services
+    local get_artemis_services_exit_code
 
     echo "Starting Artemis with PR tag: $pr_tag and branch: $pr_branch"
-    rm -rf Artemis
-    git clone https://github.com/ls1intum/Artemis.git -b "$pr_branch" Artemis
-    sed -i "s/ARTEMIS_DOCKER_TAG=.*/ARTEMIS_DOCKER_TAG='$pr_tag'/g" $ENV_FILE
-    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" up -d --pull always --no-build --remove-orphans
+    if ! update_artemis_checkout "$pr_branch"; then
+        echo "update_artemis_checkout failed for branch '$pr_branch'; aborting start deployment" 1>&2
+        exit 1
+    fi
+    sed -i "s/ARTEMIS_DOCKER_TAG=.*/ARTEMIS_DOCKER_TAG='$pr_tag'/g" "$ENV_FILE"
+
+    artemis_services=$(get_artemis_services)
+    get_artemis_services_exit_code=$?
+    if [ "$get_artemis_services_exit_code" -ne 0 ]; then
+        exit "$get_artemis_services_exit_code"
+    fi
+
+    if [ -z "$artemis_services" ]; then
+        echo "No Artemis app services found in $COMPOSE_FILE" 1>&2
+        exit 1
+    fi
+
+    if ! docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" pull $artemis_services; then
+        echo "Failed to pull Artemis services ($artemis_services) using compose file $COMPOSE_FILE" 1>&2
+        exit 1
+    fi
+
+    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" up -d --no-build --remove-orphans
     
     # Reload Nginx configuration as Nginx may still be running from a previous start. This is necessary to apply the new configuration.
     docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" exec nginx nginx -s reload || true

@@ -1,0 +1,17 @@
+---
+artemis_database_dbname: artemis
+artemis_database_username: artemis
+artemis_database_password: #FIXME
+artemis_database_temp_container_name: artemis-temp-db
+artemis_database_container_name: artemis-db
+
+artemis_working_directory: "/opt/artemis"
+
+db_port: 3306
+
+mysql_base: mysql:8.0.45
+mysql_baked: artemis_db
+bake: false
+
+dump_src: #FIXME
+dump_dest: "/tmp"
