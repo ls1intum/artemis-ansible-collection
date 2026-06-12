@@ -125,21 +125,18 @@ artemis_hyperion_enabled: true
 Rendered into application-prod.yml under `spring_ai` and exported in `artemis.env` only if `spring_ai.azure_openai` is fully configured with non-empty `api_key`, `endpoint`, and `deployment_name`:
 
 ```text
-spring.ai.model.chat                # 'openai'
+spring.ai.model.chat = openai
 spring.ai.openai.api-key
-spring.ai.openai.base-url           # rendered from spring_ai.azure_openai.endpoint
-spring.ai.openai.microsoft-foundry  # true
-spring.ai.openai.timeout            # default 5m
-spring.ai.openai.chat.model         # rendered from spring_ai.azure_openai.deployment_name
+spring.ai.openai.base-url            # from spring_ai.azure_openai.endpoint
+spring.ai.openai.microsoft-foundry   # default true; set false for plain OpenAI-compatible endpoints
+spring.ai.openai.timeout             # default 5m
+spring.ai.openai.chat.model          # from spring_ai.azure_openai.deployment_name
 spring.ai.openai.chat.temperature
 
 artemis.hyperion.enabled
 ```
 
-> Since Spring AI 2.0.0-M6, Azure OpenAI / Microsoft Foundry is served through the unified
-> `spring.ai.openai.*` tree (the former `spring.ai.azure.openai.*` keys and the azure-openai starter
-> module were removed upstream). The inventory variable names under `spring_ai.azure_openai` are
-> unchanged for backward compatibility.
+> The `spring_ai.azure_openai.*` inventory variables render the unified `spring.ai.openai.*` properties; the variable namespace is kept for backward compatibility.
 
 Iris configuration:
 ```
