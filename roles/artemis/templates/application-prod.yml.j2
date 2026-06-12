@@ -59,7 +59,7 @@ spring:
       base-url: {{ spring_ai.azure_openai.endpoint | quote }}
       # true routes auth as an Azure api-key header; set false for plain OpenAI-compatible endpoints.
       microsoft-foundry: {{ spring_ai.azure_openai.microsoft_foundry | default(true) | lower }}
-      # Connection-level timeout feeds the HTTP client; tool-calling loops exceed the 60s default.
+      # tool-calling loops can exceed the 60s default
       timeout: {{ spring_ai.azure_openai.timeout | default('5m') }}
       chat:
         model: {{ spring_ai.azure_openai.deployment_name | quote }}

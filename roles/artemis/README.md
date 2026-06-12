@@ -128,7 +128,7 @@ Rendered into application-prod.yml under `spring_ai` and exported in `artemis.en
 spring.ai.model.chat = openai
 spring.ai.openai.api-key
 spring.ai.openai.base-url            # from spring_ai.azure_openai.endpoint
-spring.ai.openai.microsoft-foundry   # default true; set false for plain OpenAI-compatible endpoints
+spring.ai.openai.microsoft-foundry   # default true
 spring.ai.openai.timeout             # default 5m
 spring.ai.openai.chat.model          # from spring_ai.azure_openai.deployment_name
 spring.ai.openai.chat.temperature
