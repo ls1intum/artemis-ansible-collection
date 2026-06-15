@@ -377,7 +377,7 @@ artemis:
   llm:
     model-costs:
 {% for model, cost in artemis_llm_cost.items() %}
-      {{ model }}:
+      "[{{ model }}]":
         input-cost-per-million-eur: {{ cost.input_cost_per_million_eur }}
         output-cost-per-million-eur: {{ cost.output_cost_per_million_eur }}
 {% endfor %}
