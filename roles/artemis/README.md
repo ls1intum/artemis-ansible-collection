@@ -162,6 +162,7 @@ LTI configuration:
 ```
 lti:
   oauth_secret: "lti_oauth_secret"
+  trust_external_lti_systems: true
 ```
 
 ### Additional Variables for multi node installations
