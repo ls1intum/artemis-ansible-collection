@@ -81,11 +81,10 @@ spring:
     properties.mail.smtp:
       auth: {{ mail.smtp_auth | default(true) | to_json }}
       ssl:
+        trust: {{ mail.ssl_trust }}
         enable: {{ mail.smtp_ssl_enable | default(false) | to_json }}
       starttls:
         enable: {{ mail.smtp_starttls_enable | default(true) | to_json }}
-      ssl:
-        trust: {{ mail.ssl_trust }}
 {% endif %}
 {% else %}
   liquibase:
