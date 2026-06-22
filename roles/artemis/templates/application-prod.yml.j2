@@ -47,18 +47,23 @@ spring:
 {% endif %}
 {% if artemis_computed_is_core_node %}
 
-{% if spring_ai is defined and spring_ai.azure_openai is defined %}
+{% if spring_ai is defined and spring_ai.azure_openai is defined
+      and spring_ai.azure_openai.api_key | default('') | length > 0
+      and spring_ai.azure_openai.endpoint | default('') | length > 0
+      and spring_ai.azure_openai.deployment_name | default('') | length > 0 %}
   ai:
     model:
-      chat: azure-openai
-    azure:
-      openai:
-        api-key: {{ spring_ai.azure_openai.api_key | quote }}
-        endpoint: {{ spring_ai.azure_openai.endpoint | quote }}
-        chat:
-          options:
-            deployment-name: {{ spring_ai.azure_openai.deployment_name | quote }}
-            temperature: {{ spring_ai.azure_openai.temperature | default(1.0) }}
+      chat: openai
+    openai:
+      api-key: {{ spring_ai.azure_openai.api_key | quote }}
+      base-url: {{ spring_ai.azure_openai.endpoint | quote }}
+      # true routes auth as an Azure api-key header; set false for plain OpenAI-compatible endpoints.
+      microsoft-foundry: {{ spring_ai.azure_openai.microsoft_foundry | default(true) | lower }}
+      # tool-calling loops can exceed the 60s default
+      timeout: {{ spring_ai.azure_openai.timeout | default('5m') }}
+      chat:
+        model: {{ spring_ai.azure_openai.deployment_name | quote }}
+        temperature: {{ spring_ai.azure_openai.temperature | default(1.0) }}
 {% endif %}
 
 {% if shared_monitoring_host_v4 is not none %}
