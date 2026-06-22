@@ -75,7 +75,6 @@ Alternatively, you can use the built-in version control with an external continu
 The following external CI systems are supported:
 
 - **Jenkins** - Traditional Jenkins integration
-- **Jenkins Stateless** - Stateless Jenkins integration via [jenkins-connector](https://github.com/ls1intum/jenkins-connector)
 - **Hades** - External CI system via [hades](https://github.com/ls1intum/hades) and [hades-artemis-adapter](https://github.com/ls1intum/hades-artemis-adapter)
 
 # Ansible Development Setup 
