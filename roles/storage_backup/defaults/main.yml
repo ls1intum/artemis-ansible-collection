@@ -1,0 +1,10 @@
+---
+storage_export: /srv/artemis
+storage_backup_password: "" #FIXME
+storage_backup_dir: /opt/backup
+
+storage_backup_script_path: /opt/backup.sh
+storage_backup_compression: zstd
+storage_backup_retention: 30
+storage_backup_minute: 30
+storage_backup_hour: 4
