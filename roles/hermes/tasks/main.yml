@@ -20,6 +20,7 @@
     path: "{{ hermes_working_directory }}/docker-compose.yml"
     regexp: '^    image: ghcr.io/ls1intum/hermes:.*$'
     line: "    image: ghcr.io/ls1intum/hermes:{{ hermes_version }}"
+  notify: Restart hermes
   when: not setup_system
 
 - name: Create Google certificate file
