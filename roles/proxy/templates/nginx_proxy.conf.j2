@@ -1,13 +1,17 @@
 {{ ansible_managed | comment }}
 
-# Load balancing
+# Load balancing - managed dynamically by health check script when enabled
 upstream app {
+{% if proxy_health_check_enabled | default(true) %}
+    include /etc/nginx/artemis-http-upstream.conf;
+{% else %}
 {% if proxy_load_balancing_method is defined %}
     {{ proxy_load_balancing_method }};
 {% endif %}
 {% for node in proxy_available_nodes %}
     server {{ node.hostname }}{% if proxy_target_port is defined %}:{{ proxy_target_port }}{% endif %}{% if node.weight is defined %} weight={{ node.weight }}{% endif %};
 {% endfor %}
+{% endif %}
 }
 
 # Remove nginx version from HTTP response
