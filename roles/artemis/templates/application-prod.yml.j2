@@ -17,6 +17,10 @@ spring:
         prepStmtCacheSqlLimit: 2048
         useServerPrepStmts: true
   jpa:
+    # Hibernate auto-detects the dialect from JDBC DatabaseMetaData by default. Artemis disables that probe in
+    # production (hibernate.boot.allow_jdbc_metadata_access=false) to speed up startup, so the dialect must be set
+    # explicitly. Derive it from the configured database type (MySQL support is being phased out).
+    database: {{ 'MYSQL' if artemis_database_type == 'mysql' else ('POSTGRESQL' if artemis_database_type == 'postgresql' else artemis_database_type | upper) }}
     hibernate:
       connection:
         charSet: {{ artemis_database_encoding }}
