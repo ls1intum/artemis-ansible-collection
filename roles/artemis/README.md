@@ -98,6 +98,16 @@ continuous_integration:
     artemis_auth_token_value: "jenkins_artemis_auth_token_value"
 ```
 
+Hades configuration (uses an instance of [hades](https://github.com/ls1intum/hades) and [hades-artemis-adapter](https://github.com/ls1intum/hades-artemis-adapter)):
+```
+continuous_integration:
+  hades:
+    url: "https://hades.example.com"
+    artemis_auth_token_value: "hades_artemis_auth_token_value"
+    auth_key: "key_used_to_authenticate_artemis_to_hades"
+    adapter_endpoint: "https://hades-artemis-adapter.example.com/adapter/test-results"
+```
+
 Athena configuration:
 ```
 athena:
@@ -167,7 +177,10 @@ LTI configuration:
 ```
 lti:
   oauth_secret: "lti_oauth_secret"
+  trust_external_lti_systems: true
 ```
+
+**Security note:** While `lti.trust_external_lti_systems` defaults to `false`, it should only be set to `true` if you are sure to trust LTI consumers to use Artemis as an LTI provider and allow users to authenticate to Artemis from within the LTI consumer; otherwise, this might lead to unsafe configurations.
 
 ### Additional Variables for multi node installations
 

@@ -240,6 +240,16 @@ artemis:
     artemis-authentication-token-value: {{ continuous_integration.jenkins.artemis_auth_token_value }}
 {% endif %}
 
+{% if continuous_integration.hades is defined %}
+  continuous-integration:
+    url: {{ continuous_integration.hades.url }}
+    artemis-authentication-token-value: {{ continuous_integration.hades.artemis_auth_token_value }}
+    hades:
+      auth-key: {{ continuous_integration.hades.auth_key }}
+      adapter:
+        endpoint: {{ continuous_integration.hades.adapter_endpoint }}
+{% endif %}
+
 {% if continuous_integration.localci is defined %}
   continuous-integration:
     artemis-authentication-token-value: "demo"
@@ -284,6 +294,7 @@ artemis:
     id: artemis_lti
     oauth-key: artemis_lti_key
     oauth-secret: {{ lti.oauth_secret }}
+    trustExternalLTISystems: {{ lti.trust_external_lti_systems | default(false) | lower }}
 {% endif %}
 
 {% if athena is defined %}
