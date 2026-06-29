@@ -103,11 +103,85 @@
     group: "{{ weaviate_user_group }}"
     mode: "770"
   loop:
-    - backup.sh
     - restore.sh
     - weaviate-docker.sh
 
-- name: Setup automated backups cron job
+# --- Backups -----------------------------------------------------------------
+# The Weaviate container runs as root and writes backup files into the
+# bind-mounted backup directory as root:root. A non-root user can read them but
+# cannot delete them, so both backup creation and retention run as root from a
+# single root-owned script. See templates/weaviate-backup.j2.
+
+- name: Ensure backup job dependencies are installed
+  become: true
+  package:
+    name:
+      - curl
+      - jq
+      - util-linux
+    state: present
+
+- name: Ensure /etc/weaviate exists
+  become: true
+  file:
+    path: "/etc/weaviate"
+    state: directory
+    owner: root
+    group: root
+    mode: "0750"
+
+- name: Deploy backup secrets env file
+  become: true
+  template:
+    src: backup.env.j2
+    dest: "{{ weaviate_backup_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+
+- name: Deploy root-owned Weaviate backup script
+  become: true
+  template:
+    src: weaviate-backup.j2
+    dest: "{{ weaviate_backup_script_path }}"
+    owner: root
+    group: root
+    mode: "0700"
+
+# Remove the obsolete weaviate-user backup script from upgraded hosts. It ran
+# as the weaviate user, compressed to tar.gz, and could not delete the
+# root-owned backup directories — superseded by the root-owned script above.
+- name: Remove obsolete weaviate-user backup script
+  become: true
+  file:
+    path: "{{ weaviate_working_directory }}/backup.sh"
+    state: absent
+
+# Remove the legacy weaviate-user cron jobs. The old creation script could not
+# delete the root-owned backup directories (leaking one per night) and the old
+# cleanup job only matched *.tar.gz, so neither is correct any more.
+- name: Remove legacy weaviate-user backup cron jobs
+  become: true
+  cron:
+    name: "{{ item }}"
+    user: "{{ weaviate_user_name }}"
+    state: absent
+  loop:
+    - "Weaviate automated backup"
+    - "Weaviate backup cleanup"
+
+# One-time (idempotent) prune of any backup artifacts that leaked under the old
+# weaviate-user script. Runs cleanup-only (no new backup) before the new cron is
+# installed, and is protected by the same flock as the cron job, the retention
+# window, and the min-count floor.
+- name: Prune leaked/old backups once during convergence
+  become: true
+  command: "{{ weaviate_backup_script_path }} --cleanup-only"
+  register: weaviate_backup_cleanup
+  changed_when: "'pruning' in weaviate_backup_cleanup.stdout"
+  when: weaviate_enable_automated_backups | bool
+
+- name: Setup automated backup cron job (root)
   become: true
   cron:
     name: "Weaviate automated backup"
@@ -116,21 +190,18 @@
     day: "{{ weaviate_backup_schedule.split()[2] }}"
     month: "{{ weaviate_backup_schedule.split()[3] }}"
     weekday: "{{ weaviate_backup_schedule.split()[4] }}"
-    job: "cd {{ weaviate_working_directory }} && ./backup.sh >> {{ weaviate_working_directory }}/backup.log 2>&1"
-    user: "{{ weaviate_user_name }}"
+    job: "{{ weaviate_backup_script_path }} >> {{ weaviate_backup_log_file }} 2>&1"
+    user: root
     state: present
   when: weaviate_enable_automated_backups | bool
 
-- name: Setup automated backup cleanup cron job
+- name: Remove automated backup cron job when backups are disabled
   become: true
   cron:
-    name: "Weaviate backup cleanup"
-    minute: "30"
-    hour: "3"
-    job: "find {{ weaviate_backup_directory }} -name 'backup-*.tar.gz' -mtime +{{ weaviate_backup_retention_days }} -delete"
-    user: "{{ weaviate_user_name }}"
-    state: present
-  when: weaviate_enable_automated_backups | bool
+    name: "Weaviate automated backup"
+    user: root
+    state: absent
+  when: not (weaviate_enable_automated_backups | bool)
 
 - name: Ensure handlers are flushed before starting
   meta: flush_handlers

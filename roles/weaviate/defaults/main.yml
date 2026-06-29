@@ -79,3 +79,25 @@ weaviate_backup_schedule: "0 2 * * *"
 # Backup retention period in days
 # Old backups will be automatically deleted
 weaviate_backup_retention_days: 7
+
+# Minimum number of most-recent backups to always keep, even if they are older
+# than the retention window. Protects against losing every restore point after
+# a prolonged backup outage (age-based retention alone could delete them all).
+weaviate_backup_retention_min_count: 2
+
+# Base URL the backup job uses to reach the Weaviate API. Defaults to the
+# public (Traefik-fronted) endpoint, which is the path exercised in production.
+weaviate_backup_api_url: "https://{{ weaviate_domain }}"
+
+# Paths used by the root-owned backup job.
+weaviate_backup_script_path: "/usr/local/sbin/weaviate-backup"
+weaviate_backup_env_file: "/etc/weaviate/backup.env"
+# Lock file lives in a root-only runtime directory (NOT world-writable
+# /run/lock) so an unprivileged local user cannot squat the lock and stall
+# backups. The directory is created with mode 0700 by the backup script.
+weaviate_backup_lock_file: "/run/weaviate/weaviate-backup.lock"
+weaviate_backup_log_file: "/var/log/weaviate-backup.log"
+
+# node_exporter textfile-collector metric written after each run. Set to "" to
+# disable. Writing is skipped automatically if the directory does not exist.
+weaviate_backup_metrics_file: "/var/lib/node_exporter/weaviate_backup.prom"
