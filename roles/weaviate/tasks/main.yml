@@ -13,6 +13,11 @@
         - weaviate_api_key (generate with: openssl rand -base64 32)
         - letsencrypt_email (e.g., your-email@example.com)
 
+- name: Validate weaviate_embedder
+  ansible.builtin.assert:
+    that: weaviate_embedder in ['openai', 'none', 'clip']
+    fail_msg: "weaviate_embedder must be one of openai|none|clip (transformers not yet supported by this role)"
+
 - name: Ensure weaviate group {{ weaviate_user_group }} exists
   become: true
   group:

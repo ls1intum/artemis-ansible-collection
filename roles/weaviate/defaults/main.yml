@@ -1,5 +1,5 @@
 ---
-weaviate_build_version: "1.30.0"
+weaviate_build_version: "1.37.9"
 weaviate_working_directory: "/opt/weaviate"
 weaviate_data_directory: "{{ weaviate_working_directory }}/data"
 weaviate_traefik_directory: "{{ weaviate_working_directory }}/traefik"
@@ -13,6 +13,17 @@ weaviate_user_name: "weaviate"
 weaviate_user_group: "weaviate"
 weaviate_user_uid: "1339"
 weaviate_user_gid: "1339"
+
+##############################################################################
+# Embedder / Vectorizer Selection
+##############################################################################
+
+# Embedder mode for Weaviate's server-side vectorizer.
+#   openai -> text2vec-openai (cloud OpenAI or self-hosted OpenAI-compatible, e.g. Qwen)
+#   none   -> no server vectorizer (consumers self-provide vectors, e.g. Pyris/Atlas)
+#   clip   -> multi2vec-clip (opt-in only; legacy multimodal)
+#   (transformers / local-CPU embeddinggemma is planned but NOT yet supported by this role)
+weaviate_embedder: "openai"
 
 ##############################################################################
 # Weaviate Configuration
@@ -43,6 +54,7 @@ weaviate_allowed_ips: ""
 
 ##############################################################################
 # Multi2vec-CLIP Configuration
+# Only used when weaviate_embedder: clip (opt-in; not the default)
 ##############################################################################
 
 weaviate_multi2vec_image: "cr.weaviate.io/semitechnologies/multi2vec-clip:sentence-transformers-clip-ViT-B-32-multilingual-v1"
@@ -61,7 +73,7 @@ weaviate_traefik_memory_limit: "512M"
 weaviate_cpu_limit: "2"
 weaviate_memory_limit: "4G"
 
-# Multi2vec-CLIP Resources
+# Multi2vec-CLIP Resources (only used when weaviate_embedder: clip; opt-in, not the default)
 weaviate_multi2vec_cpu_limit: "1"
 weaviate_multi2vec_memory_limit: "2G"
 
