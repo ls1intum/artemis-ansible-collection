@@ -376,6 +376,8 @@ artemis:
 {% if artemis_llm_cost is defined %}
   llm:
     model-costs:
+{# Keys are bracket-quoted so dotted model names (e.g. gpt-5.4) bind to literal map keys
+   instead of being parsed as a nested path (gpt-5 -> 4) by Spring relaxed binding. #}
 {% for model, cost in artemis_llm_cost.items() %}
       "[{{ model }}]":
         input-cost-per-million-eur: {{ cost.input_cost_per_million_eur }}

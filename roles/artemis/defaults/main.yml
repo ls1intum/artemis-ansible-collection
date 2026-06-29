@@ -308,8 +308,7 @@ artemis_local_llm_deployment_enabled: false
 artemis_hyperion_enabled: false
 
 # LLM model costs for usage tracking, EUR per million tokens (OpenAI list price USD x 0.92).
-# Keys are bracket-quoted in application-prod.yml.j2 so dotted model names (e.g. gpt-5.4) bind
-# to literal map keys. Override or add entries in your inventory as needed.
+# Override or add entries in your inventory as needed.
 artemis_llm_cost:
   gpt-5-mini:        # $0.25 / $2.00
     input_cost_per_million_eur: 0.23
