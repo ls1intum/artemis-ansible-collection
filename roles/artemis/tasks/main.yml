@@ -30,6 +30,23 @@
     - artemis_build_version is not none
     - artemis_build_version != ""
 
+# The env template sanitizes each model name to ARTEMIS_LLM_MODELCOSTS_<KEY>_* by upper-casing and
+# stripping non-alphanumerics, so distinct names can collapse to the same key (e.g. gpt-54 and gpt-5.4
+# both -> GPT54). In the Docker/env path the duplicate variable silently keeps the last value (the
+# Artemis startup guard only catches this on the bare-metal YAML path), so fail fast here. Checked in
+# all paths, before any template is rendered.
+- name: Assert artemis_llm_cost model names stay unique after env-var sanitization
+  ansible.builtin.assert:
+    that:
+      - (artemis_llm_cost.keys() | map('upper') | map('regex_replace', '[^A-Z0-9]', '') | list | length)
+        == (artemis_llm_cost.keys() | map('upper') | map('regex_replace', '[^A-Z0-9]', '') | unique | list | length)
+    fail_msg: >-
+      Two or more artemis_llm_cost model names collapse to the same sanitized key once non-alphanumerics
+      are stripped for the ARTEMIS_LLM_MODELCOSTS_* environment variables (e.g. 'gpt-54' and 'gpt-5.4'
+      both become 'GPT54'). Rename or remove the colliding entry so each model keeps a distinct cost.
+  when:
+    - artemis_llm_cost is defined
+
 # Check if variables are set correctly
 - include_tasks: variable_checks.yml
   when: (setup_system | bool) or (update_artemis_config | bool)
