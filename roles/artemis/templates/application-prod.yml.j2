@@ -17,6 +17,10 @@ spring:
         prepStmtCacheSqlLimit: 2048
         useServerPrepStmts: true
   jpa:
+    # Hibernate auto-detects the dialect from JDBC DatabaseMetaData by default. Artemis disables that probe in
+    # production (hibernate.boot.allow_jdbc_metadata_access=false) to speed up startup, so the dialect must be set
+    # explicitly. Derive it from the configured database type (MySQL support is being phased out).
+    database: {{ 'MYSQL' if artemis_database_type == 'mysql' else ('POSTGRESQL' if artemis_database_type == 'postgresql' else artemis_database_type | upper) }}
     hibernate:
       connection:
         charSet: {{ artemis_database_encoding }}
@@ -47,18 +51,23 @@ spring:
 {% endif %}
 {% if artemis_computed_is_core_node %}
 
-{% if spring_ai is defined and spring_ai.azure_openai is defined %}
+{% if spring_ai is defined and spring_ai.azure_openai is defined
+      and spring_ai.azure_openai.api_key | default('') | length > 0
+      and spring_ai.azure_openai.endpoint | default('') | length > 0
+      and spring_ai.azure_openai.deployment_name | default('') | length > 0 %}
   ai:
     model:
-      chat: azure-openai
-    azure:
-      openai:
-        api-key: {{ spring_ai.azure_openai.api_key | quote }}
-        endpoint: {{ spring_ai.azure_openai.endpoint | quote }}
-        chat:
-          options:
-            deployment-name: {{ spring_ai.azure_openai.deployment_name | quote }}
-            temperature: {{ spring_ai.azure_openai.temperature | default(1.0) }}
+      chat: openai
+    openai:
+      api-key: {{ spring_ai.azure_openai.api_key | quote }}
+      base-url: {{ spring_ai.azure_openai.endpoint | quote }}
+      # true routes auth as an Azure api-key header; set false for plain OpenAI-compatible endpoints.
+      microsoft-foundry: {{ spring_ai.azure_openai.microsoft_foundry | default(true) | lower }}
+      # tool-calling loops can exceed the 60s default
+      timeout: {{ spring_ai.azure_openai.timeout | default('5m') }}
+      chat:
+        model: {{ spring_ai.azure_openai.deployment_name | quote }}
+        temperature: {{ spring_ai.azure_openai.temperature | default(1.0) }}
 {% endif %}
 
 {% if shared_monitoring_host_v4 is not none %}
@@ -231,6 +240,16 @@ artemis:
     artemis-authentication-token-value: {{ continuous_integration.jenkins.artemis_auth_token_value }}
 {% endif %}
 
+{% if continuous_integration.hades is defined %}
+  continuous-integration:
+    url: {{ continuous_integration.hades.url }}
+    artemis-authentication-token-value: {{ continuous_integration.hades.artemis_auth_token_value }}
+    hades:
+      auth-key: {{ continuous_integration.hades.auth_key }}
+      adapter:
+        endpoint: {{ continuous_integration.hades.adapter_endpoint }}
+{% endif %}
+
 {% if continuous_integration.localci is defined %}
   continuous-integration:
     artemis-authentication-token-value: "demo"
@@ -275,6 +294,7 @@ artemis:
     id: artemis_lti
     oauth-key: artemis_lti_key
     oauth-secret: {{ lti.oauth_secret }}
+    trustExternalLTISystems: {{ lti.trust_external_lti_systems | default(false) | lower }}
 {% endif %}
 
 {% if athena is defined %}
