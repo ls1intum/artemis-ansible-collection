@@ -206,6 +206,10 @@ artemis_passkey_enabled: false
 #  password:
 #  protocol:
 #  ssl_trust:
+#  tls: true
+#  smtp_auth: true
+#  smtp_ssl_enable: false
+#  smtp_starttls_enable: true
 #
 #post_hog:
 #  host:
