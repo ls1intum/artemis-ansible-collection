@@ -10,25 +10,37 @@
   template:
     src: "docker-compose.yml.j2"
     dest: "{{ hermes_working_directory }}/docker-compose.yml"
-    mode: '0600'
+    mode: '600'
   notify: Restart hermes
+  when: setup_system
+
+- name: Update version in docker-compose file
+  become: true
+  lineinfile:
+    path: "{{ hermes_working_directory }}/docker-compose.yml"
+    regexp: '^    image: ghcr.io/ls1intum/hermes:.*$'
+    line: "    image: ghcr.io/ls1intum/hermes:{{ hermes_version }}"
+  notify: Restart hermes
+  when: not setup_system
 
 - name: Create Google certificate file
   ansible.builtin.copy:
     content: "{{ hermes_google_application_credentials_content }}"
     dest: "{{ hermes_working_directory }}/{{ hermes_google_application_credentials_json_path }}"
-    mode: "0600"
+    mode: "600"
     owner: "root"
     group: "root"
   become: true
   notify: Restart hermes
+  when: setup_system
 
 - name: Create Apple certificate file
   ansible.builtin.copy:
     content: "{{ hermes_apns_certificate_content | b64decode }}"
     dest: "{{ hermes_working_directory }}/{{ hermes_apns_certificate_path }}"
-    mode: "0600"
+    mode: "600"
     owner: "root"
     group: "root"
   become: true
   notify: Restart hermes
+  when: setup_system
