@@ -71,7 +71,11 @@ This setup allows to scale Artemis to support many concurrent users.
 ## Version Control & Continuous Integration
 
 Artemis has a built-in version control and continuous integration system, the so-called Integrated Code Lifecycle.
-Alternatively, you can use the built-in version control and Jenkins as an external continuous integration system.
+Alternatively, you can use the built-in version control with an external continuous integration system.
+The following external CI systems are supported:
+
+- **Jenkins** - Traditional Jenkins integration
+- **Hades** - External CI system via [hades](https://github.com/ls1intum/hades) and [hades-artemis-adapter](https://github.com/ls1intum/hades-artemis-adapter)
 
 # Ansible Development Setup 
 
