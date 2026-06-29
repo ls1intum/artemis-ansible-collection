@@ -113,7 +113,6 @@ Athena configuration:
 athena:
   url: "https://athena.example.com"
   secret: "athena_secret"
-  restricted_modules: "module_text_llm,module_programming_llm" # optional parameter to restrict access to specific modules
 ```
 
 Hyperion (Azure OpenAI / Spring AI) configuration:
