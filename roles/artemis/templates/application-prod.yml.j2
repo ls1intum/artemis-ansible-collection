@@ -290,6 +290,7 @@ artemis:
     id: artemis_lti
     oauth-key: artemis_lti_key
     oauth-secret: {{ lti.oauth_secret }}
+    trustExternalLTISystems: {{ lti.trust_external_lti_systems | default(false) | lower }}
 {% endif %}
 
 {% if athena is defined %}

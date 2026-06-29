@@ -196,6 +196,7 @@ artemis_passkey_enabled: false
 #
 #lti:
 #  oauth_secret:
+#  trustExternalLTISystems: false
 #
 #mail:
 #  hostname:

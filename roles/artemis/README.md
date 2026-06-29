@@ -177,7 +177,10 @@ LTI configuration:
 ```
 lti:
   oauth_secret: "lti_oauth_secret"
+  trust_external_lti_systems: true
 ```
+
+**Security note:** While `lti.trust_external_lti_systems` defaults to `false`, it should only be set to `true` if you are sure to trust LTI consumers to use Artemis as an LTI provider and allow users to authenticate to Artemis from within the LTI consumer; otherwise, this might lead to unsafe configurations.
 
 ### Additional Variables for multi node installations
 
