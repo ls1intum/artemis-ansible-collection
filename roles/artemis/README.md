@@ -171,6 +171,10 @@ mail:
   password: "smtp_password"
   protocol: "smtp"
   ssl_trust: "smtp.example.com"
+  tls: true
+  smtp_auth: true
+  smtp_ssl_enable: false
+  smtp_starttls_enable: true
 ```
 
 LTI configuration:
