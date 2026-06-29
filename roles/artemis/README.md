@@ -98,6 +98,16 @@ continuous_integration:
     artemis_auth_token_value: "jenkins_artemis_auth_token_value"
 ```
 
+Hades configuration (uses an instance of [hades](https://github.com/ls1intum/hades) and [hades-artemis-adapter](https://github.com/ls1intum/hades-artemis-adapter)):
+```
+continuous_integration:
+  hades:
+    url: "https://hades.example.com"
+    artemis_auth_token_value: "hades_artemis_auth_token_value"
+    auth_key: "key_used_to_authenticate_artemis_to_hades"
+    adapter_endpoint: "https://hades-artemis-adapter.example.com/adapter/test-results"
+```
+
 Athena configuration:
 ```
 athena:
@@ -122,16 +132,21 @@ spring_ai:
 
 artemis_hyperion_enabled: true
 ```
-Rendered into application-prod.yml under `spring_ai` (if spring_ai.azure_openai is present) and general Artemis section:
+Rendered into application-prod.yml under `spring_ai` and exported in `artemis.env` only if `spring_ai.azure_openai` is fully configured with non-empty `api_key`, `endpoint`, and `deployment_name`:
 
 ```text
-spring.ai.azure.openai.api-key
-spring.ai.azure.openai.endpoint
-spring.ai.azure.openai.chat.options.deployment-name
-spring.ai.azure.openai.chat.options.temperature
+spring.ai.model.chat = openai
+spring.ai.openai.api-key
+spring.ai.openai.base-url            # from spring_ai.azure_openai.endpoint
+spring.ai.openai.microsoft-foundry   # default true
+spring.ai.openai.timeout             # default 5m
+spring.ai.openai.chat.model          # from spring_ai.azure_openai.deployment_name
+spring.ai.openai.chat.temperature
 
 artemis.hyperion.enabled
 ```
+
+> The `spring_ai.azure_openai.*` inventory variables render the unified `spring.ai.openai.*` properties; the variable namespace is kept for backward compatibility.
 
 Iris configuration:
 ```
