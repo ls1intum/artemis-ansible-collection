@@ -53,6 +53,7 @@ artemis_email: artemis.in@tum.de
 artemis_operator_name: "Anonymous University"
 artemis_operator_admin_name: "Anonymous University Admin"
 artemis_notification_from: "Artemis Notification"
+# artemis_notification_email: noreply@example.com  # defaults to <local-part>+notification@<domain> derived from artemis_email
 
 artemis_telemetry_enabled: true
 artemis_send_admin_details: true

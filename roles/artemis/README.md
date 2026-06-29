@@ -177,6 +177,8 @@ mail:
   smtp_starttls_enable: true
 ```
 
+- `artemis_notification_email` overrides the sender address of notification emails. Defaults to `<local-part>+notification@<domain>` derived from `artemis_email` (subaddressing); set it explicitly if your mail server does not support subaddressing.
+
 LTI configuration:
 ```
 lti:

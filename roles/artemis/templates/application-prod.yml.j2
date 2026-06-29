@@ -462,7 +462,7 @@ jhipster:
 
   mail:
     base-url: {{ artemis_server_url }}
-    from: '{{artemis_notification_from}} <{{ artemis_email.split("@")[0] }}+notification@{{ artemis_email.split("@")[1] }}>'
+    from: '{{artemis_notification_from}} <{{ artemis_notification_email | default([artemis_email.split("@")[0], "+notification@", artemis_email.split("@")[1]]|join()) }}>'
 
 {% if sentry.dsn | default('') | length %}
 sentry:
