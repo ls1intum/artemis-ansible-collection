@@ -132,6 +132,7 @@ artemis_external_password_reset_link_en: "https://campus.tum.de/tumonline/co_loc
 artemis_external_password_reset_link_de: "https://campus.tum.de/tumonline/co_loc_password_reset.main#lang=de"
 
 artemis_passkey_enabled: false
+artemis_passkey_require_for_administrator_features: false
 
 #artemis_global_search_enabled: false
 
