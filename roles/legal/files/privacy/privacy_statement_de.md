@@ -71,7 +71,7 @@ Soweit wir von Ihnen personenbezogene Daten verarbeiten, stehen Ihnen als Betrof
   Rechtmäßigkeit der aufgrund der Einwilligung bis zum Widerruf erfolgten Datenverarbeitung wird durch diesen nicht berührt.
 
 Sie haben das Recht, aus Gründen, die sich aus Ihrer besonderen Situation ergeben, jederzeit gegen die Verarbeitung Ihrer Daten Widerspruch einzulegen, wenn die Verarbeitung
-ausschließlich auf Grundlage des Art. 6 Abs. 1 Buchst. e oder f DSGVO erfolgt (Art. 21 Abs. 1 Satz 1 DSGVO).
+auf Grundlage des Art. 6 Abs. 1 Buchst. e DSGVO erfolgt (Art. 21 Abs. 1 Satz 1 DSGVO).
 
 #### Beschwerderecht bei der Aufsichtsbehörde
 
