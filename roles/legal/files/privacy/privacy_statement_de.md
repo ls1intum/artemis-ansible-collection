@@ -4,7 +4,7 @@ Die [Technische Universität München (TUM)](https://www.tum.de/) nimmt den Schu
 bewährten Verfahren und modernsten Technologien (z.B. HTTPS mit sicherem Zertifikat der TUM, TLS 1.3, Strict Transport Security, Forward Secrecy, Same Site Cookie Schutz) um die
 Privatsphäre der Nutzer von Artemis bestmöglich zu schützen. Artemis verarbeitet personenbezogene Daten im Rahmen der Lehre und im Rahmen von Prüfungen unter Beachtung der
 geltenden datenschutzrechtlichen Bestimmungen. Die Rechtsgrundlage für die Verarbeitung der Daten ergibt sich, soweit nichts anderes angegeben ist, aus Art. 6 Abs. 1 Lit. e DSGVO i.V.m. Art. 4 Abs. 1 BayDSG (Wahrnehmung einer Aufgabe im öffentlichen Interesse). Darüber hinaus gelten Art.
-61 [Bayerisches Hochschulgesetz (BayHschG)](https://www.gesetze-bayern.de/Content/Document/BayHSchG) sowie
+84 [Bayerisches Hochschulinnovationsgesetz (BayHIG)](https://www.gesetze-bayern.de/Content/Document/BayHIG) sowie
 die [Allgemeine Prüfungs- und Studienordnung (APSO)](https://portal.mytum.de/archiv/kompendium_rechtsangelegenheiten/apso/folder_listing) der TUM und
 die [Bayerische Fernprüfungserprobungsverordnung (BayFEV)](https://www.gesetze-bayern.de/Content/Document/BayFEV).
 
@@ -31,7 +31,7 @@ E-Mail: beauftragter@datenschutz.tum.de
 
 Zweck der Verarbeitung ist die Erfüllung der uns vom Gesetzgeber zugewiesenen öffentlichen Aufgaben, insbesondere der Lehre und der Prüfung im universitären Umfeld. Die
 Rechtsgrundlage für die Verarbeitung Ihrer Daten ergibt sich, soweit nichts anderes angegeben ist, aus Art. 6 Abs. 1 Lit. e DSGVO i.V.m. Art. 4 Abs. 1 BayDSG (Wahrnehmung einer Aufgabe im öffentlichen Interesse). Darüber hinaus gelten Art.
-61 [Bayerisches Hochschulgesetz (BayHschG)](https://www.gesetze-bayern.de/Content/Document/BayHSchG) sowie
+84 [Bayerisches Hochschulinnovationsgesetz (BayHIG)](https://www.gesetze-bayern.de/Content/Document/BayHIG) sowie
 die [Allgemeine Prüfungs- und Studienordnung (APSO)](https://portal.mytum.de/archiv/kompendium_rechtsangelegenheiten/apso/folder_listing) der TUM und
 die [Bayerische Fernprüfungserprobungsverordnung (BayFEV)](https://www.gesetze-bayern.de/Content/Document/BayFEV). Demnach ist es uns erlaubt, die zur Erfüllung einer uns
 obliegenden Aufgabe erforderlichen Daten zu verarbeiten.
@@ -154,6 +154,14 @@ Zusätzlich bietet Artemis **Passkeys** (WebAuthn/FIDO2) als passwortlose, phish
 
 **Speicherdauer:** Benutzername, Name, E-Mail-Adresse und Matrikelnummer werden für die Dauer der Nutzung der Plattform gespeichert. Bei Exmatrikulation oder auf Antrag werden die Daten gelöscht, sofern keine gesetzlichen Aufbewahrungsfristen entgegenstehen.
 
+#### Profilbilder
+
+Artemis bietet die Möglichkeit, Profilbilder hochzuladen. Diese Bilder werden ausschließlich innerhalb der Plattform angezeigt und nicht an Dritte weitergegeben. Sie können Ihr Profilbild jederzeit ändern oder löschen.
+
+***Rechtsgrundlage:** Art. 6 Abs. 1 Lit. e DSGVO i.V.m. Art. 4 Abs. 1 BayDSG. Die Bereitstellung eines Profilbildes ist freiwillig und dient der Verbesserung der Nutzererfahrung innerhalb der Plattform.
+
+**Speicherdauer:** Profilbilder werden für die Dauer der Nutzung der Plattform gespeichert. Bei Löschung des Benutzerkontos, oder auf Antrag werden die Bilder gelöscht.
+
 #### Nutzungsdaten im Rahmen der Lehre
 
 Im Rahmen der Nutzung von Artemis werden folgende Daten verarbeitet, die zur Durchführung der Lehre und Prüfung erforderlich sind:
@@ -163,7 +171,7 @@ Im Rahmen der Nutzung von Artemis werden folgende Daten verarbeitet, die zur Dur
 * Kommunikationsbeiträge (z. B. Fragen und Antworten in Kursforen)
 * Teilnahme an Kursen und Übungsgruppen
 
-**Rechtsgrundlage:** Art. 6 Abs. 1 Lit. e DSGVO i.V.m. Art. 4 Abs. 1 BayDSG sowie Art. 61 BayHSchG. Diese Daten sind zur Erfüllung der Lehr- und Prüfungsaufgaben der Universität erforderlich.
+**Rechtsgrundlage:** Art. 6 Abs. 1 Lit. e DSGVO i.V.m. Art. 4 Abs. 1 BayDSG sowie Art. 84 BayHIG. Diese Daten sind zur Erfüllung der Lehr- und Prüfungsaufgaben der Universität erforderlich.
 
 **Speicherdauer:** Übungsabgaben werden nach Ende des jeweiligen Semesters für bis zu 5 Jahre aufbewahrt, sofern gesetzliche Aufbewahrungsfristen (z. B. für Prüfungsdaten gemäß APSO) dies erfordern.
 
