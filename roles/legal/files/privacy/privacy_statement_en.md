@@ -40,7 +40,7 @@ to fulfill a duty incumbent upon us.
 #### Recipients of personal data
 
 The technical operation of our data processing systems is carried out by:
-[IT-Organisation (ITO)](https://www.cit.tum.de/ito/die-ito/) of the Technical University of Munich
+[IT Operations (ITO)](https://www.cit.tum.de/ito/die-ito/) of the Technical University of Munich
 
 Boltzmannstraße 3  
 D-85748 Garching near Munich  
@@ -93,10 +93,10 @@ For more detailed information on the processing of your data and your rights, yo
 
 #### Technical implementation
 
-The web servers of Artemis are operated by the [IT-Organisation (ITO)](https://www.cit.tum.de/ito/die-ito/) of the Technical University of Munich. The personal data you transmit
+The web servers of Artemis are operated by the [IT Operations (ITO)](https://www.cit.tum.de/ito/die-ito/) of the Technical University of Munich. The personal data you transmit
 when visiting our web presence is therefore processed on our behalf by the ITO:
 
-IT-Operations (ITO) Boltzmannstraße 3  
+IT Operations (ITO) Boltzmannstraße 3  
 D-85748 Garching near Munich  
 Telephone: (089) 289 18018  
 Email: ito@cit.tum.de  

@@ -39,7 +39,7 @@ obliegenden Aufgabe erforderlichen Daten zu verarbeiten.
 #### Empfänger von personenbezogenen Daten
 
 Der technische Betrieb unserer Datenverarbeitungssysteme erfolgt durch:
-[IT-Organisation (ITO)](https://www.cit.tum.de/ito/die-ito/) der Technischen Universität München
+[IT Operations (ITO)](https://www.cit.tum.de/ito/die-ito/) der Technischen Universität München
 
 Boltzmannstraße 3  
 D-85748 Garching bei München  
@@ -90,10 +90,10 @@ Für nähere Informationen zur Verarbeitung Ihrer Daten und zu Ihren Rechten kö
 
 #### Technische Umsetzung
 
-Die Webserver von Artemis werden durch die [IT-Organisation (ITO)](https://www.cit.tum.de/ito/die-ito/) der Technischen Universität München betrieben. Die von Ihnen im Rahmen des Besuchs
+Die Webserver von Artemis werden durch die [IT Operations (ITO)](https://www.cit.tum.de/ito/die-ito/) der Technischen Universität München betrieben. Die von Ihnen im Rahmen des Besuchs
 unseres Webauftritts übermittelten personenbezogenen Daten werden daher in unserem Auftrag durch die ITO verarbeitet:
 
-IT-Operations (ITO) Boltzmannstraße 3  
+IT Operations (ITO) Boltzmannstraße 3  
 D-85748 Garching bei München  
 Telefon: (089) 289 18018  
 E-Mail: ito@cit.tum.de  
