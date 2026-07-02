@@ -50,13 +50,8 @@ Email: ito@cit.tum.de
 
 Data backups are stored at the [Leibniz Supercomputing Centre (LRZ)](https://www.lrz.de/) of the Bavarian Academy of Sciences, exclusively within the European Union, on the basis of a data processing agreement.
 
-If necessary, your data will be transmitted to the responsible supervisory and auditing authorities for the exercise of the respective control rights.
-
 For the optional AI-based features (Iris, Athena), and only if users actively consent to their use, data is transmitted for processing to Microsoft Azure within the European Union.
 This is based on a data processing agreement (Auftragsverarbeitungsvertrag, AVV) between TUM and Microsoft. The data is not stored permanently there.
-
-In order to avert risks to information technology security, data may be forwarded to the State Office for Information Technology Security in the case of electronic transmission and
-processed there on the basis of Art. 12 ff. of the Bavarian E-Government Act.
 
 ### Duration of the storage of personal data
 

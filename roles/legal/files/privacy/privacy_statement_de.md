@@ -49,12 +49,7 @@ E-Mail: ito@cit.tum.de
 
 Die Datensicherung (Backups) erfolgt beim [Leibniz-Rechenzentrum (LRZ)](https://www.lrz.de/) der Bayerischen Akademie der Wissenschaften ausschließlich innerhalb der Europäischen Union auf Grundlage einer Auftragsverarbeitung.
 
-Gegebenenfalls werden Ihre Daten an die zuständigen Aufsichts- und Rechnungsprüfungsbehörden zur Wahrnehmung der jeweiligen Kontrollrechte übermittelt.
-
 Für die optionalen KI-gestützten Funktionen (Iris, Athena) werden, sofern Nutzende deren Verwendung aktiv einwilligen, Daten zur Verarbeitung an Microsoft Azure innerhalb der Europäischen Union übermittelt. Grundlage hierfür ist ein Auftragsverarbeitungsvertrag (AVV) zwischen der TUM und Microsoft. Eine dauerhafte Speicherung der Daten findet dort nicht statt.
-
-Zur Abwehr von Gefahren für die Sicherheit in der Informationstechnik können bei elektronischer Übermittlung Daten an das Landesamt für Sicherheit in der Informationstechnik
-weitergeleitet werden und dort auf Grundlage der Art. 12 ff. des Bayerischen E-Government-Gesetzes verarbeitet werden.
 
 ### Dauer der Speicherung der personenbezogenen Daten
 
