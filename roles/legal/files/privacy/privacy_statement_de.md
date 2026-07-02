@@ -162,6 +162,14 @@ Artemis bietet die Möglichkeit, Profilbilder hochzuladen. Diese Bilder werden a
 
 **Speicherdauer:** Profilbilder werden für die Dauer der Nutzung der Plattform gespeichert. Bei Löschung des Benutzerkontos, oder auf Antrag werden die Bilder gelöscht.
 
+#### Prüfungsbezogene Lichtbilder (Import aus TUMonline)
+
+Ausschließlich für die Durchführung von Prüfungen (Klausuren) importiert Artemis Lichtbilder der teilnehmenden Studierenden aus TUMonline. Diese dienen allein der Überprüfung der Identität der Prüfungsteilnehmenden, um die Ordnungsmäßigkeit der Prüfung sicherzustellen und Täuschungen auszuschließen. Die Lichtbilder werden nur im Kontext der jeweiligen Prüfung und ausschließlich berechtigten Personen (z. B. der Prüfungsaufsicht) angezeigt. Eine automatisierte biometrische Gesichtserkennung findet nicht statt; die Identitätsprüfung erfolgt durch einen visuellen Abgleich durch das Aufsichtspersonal.
+
+**Rechtsgrundlage:** Art. 6 Abs. 1 Lit. e DSGVO i.V.m. Art. 4 Abs. 1 BayDSG, Art. 84 BayHIG, der APSO der TUM sowie der BayFEV. Die Identitätsprüfung ist zur ordnungsgemäßen Durchführung von Prüfungen erforderlich.
+
+**Speicherdauer:** Die importierten Lichtbilder werden ausschließlich für die Dauer der jeweiligen Prüfung vorgehalten und im Anschluss gelöscht.
+
 #### Nutzungsdaten im Rahmen der Lehre
 
 Im Rahmen der Nutzung von Artemis werden folgende Daten verarbeitet, die zur Durchführung der Lehre und Prüfung erforderlich sind:
