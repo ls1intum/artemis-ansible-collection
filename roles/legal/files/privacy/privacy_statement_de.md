@@ -47,6 +47,8 @@ Telefon: (089) 289 18018
 E-Mail: ito@cit.tum.de  
 [https://www.cit.tum.de/ito/die-ito/](https://www.cit.tum.de/ito/die-ito/)  
 
+Die Datensicherung (Backups) erfolgt beim [Leibniz-Rechenzentrum (LRZ)](https://www.lrz.de/) der Bayerischen Akademie der Wissenschaften ausschließlich innerhalb der Europäischen Union auf Grundlage einer Auftragsverarbeitung.
+
 Gegebenenfalls werden Ihre Daten an die zuständigen Aufsichts- und Rechnungsprüfungsbehörden zur Wahrnehmung der jeweiligen Kontrollrechte übermittelt.
 
 Für die optionalen KI-gestützten Funktionen (Iris, Athena) werden, sofern Nutzende deren Verwendung aktiv einwilligen, Daten zur Verarbeitung an Microsoft Azure innerhalb der Europäischen Union übermittelt. Grundlage hierfür ist ein Auftragsverarbeitungsvertrag (AVV) zwischen der TUM und Microsoft. Eine dauerhafte Speicherung der Daten findet dort nicht statt.

@@ -48,6 +48,8 @@ Telephone: (089) 289 18018
 Email: ito@cit.tum.de  
 [https://www.cit.tum.de/ito/die-ito/](https://www.cit.tum.de/ito/die-ito/)  
 
+Data backups are stored at the [Leibniz Supercomputing Centre (LRZ)](https://www.lrz.de/) of the Bavarian Academy of Sciences, exclusively within the European Union, on the basis of a data processing agreement.
+
 If necessary, your data will be transmitted to the responsible supervisory and auditing authorities for the exercise of the respective control rights.
 
 For the optional AI-based features (Iris, Athena), and only if users actively consent to their use, data is transmitted for processing to Microsoft Azure within the European Union.
