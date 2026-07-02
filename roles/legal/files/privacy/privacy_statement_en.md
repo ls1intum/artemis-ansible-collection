@@ -225,7 +225,7 @@ The following data may be collected:
 This is **not** mouse or click tracking. No individual clicks or mouse movements are recorded. The Sentry headers visible in HTTP requests (e.g. `sentry-trace`, `baggage`) serve
 exclusively for tracing correlation, i.e. the mapping of a page view to the associated backend requests.
 
-**Data sovereignty:** Sentry runs on its own instance within the IT infrastructure of TUM (ITO). **No data is transferred to external or cloud services.**
+**Data sovereignty:** Sentry runs on its own instance within the IT infrastructure of TUM. **No data is transferred to external or cloud services.**
 
 **Legal basis:** Art. 6(1)(e) GDPR in conjunction with Art. 4(1) BayDSG. Error analysis and performance monitoring are necessary to ensure the trouble-free operation of a platform
 that is mandatorily used for teaching operations.

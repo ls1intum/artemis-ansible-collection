@@ -208,7 +208,7 @@ Dabei können folgende Daten erhoben werden:
 
 Es handelt sich **nicht** um Mouse- oder Click-Tracking. Es werden keine individuellen Klicks oder Mausbewegungen aufgezeichnet. Die in HTTP-Requests sichtbaren Sentry-Header (z. B. `sentry-trace`, `baggage`) dienen ausschließlich der Tracing-Korrelation, d.h. der Zuordnung eines Seitenaufrufs zu den zugehörigen Backend-Requests.
 
-**Datenhoheit:** Sentry läuft auf einer eigenen Instanz innerhalb der IT-Infrastruktur der TUM (ITO). Es werden **keine Daten an externe oder Cloud-Dienste** übertragen.
+**Datenhoheit:** Sentry läuft auf einer eigenen Instanz innerhalb der IT-Infrastruktur der TUM. Es werden **keine Daten an externe oder Cloud-Dienste** übertragen.
 
 **Rechtsgrundlage:** Art. 6 Abs. 1 Lit. e DSGVO i.V.m. Art. 4 Abs. 1 BayDSG. Die Fehleranalyse und das Performance-Monitoring sind zur Sicherstellung eines störungsfreien Betriebs einer für den Lehrbetrieb verpflichtend genutzten Plattform erforderlich.
 
