@@ -257,12 +257,15 @@ Sie können Ihre Wahl jederzeit in den **Kontoeinstellungen** unter „KI-Nutzun
 * Chat-Nachrichten mit Iris
 * Von Ihnen geschriebener Quellcode für Programmierübungen
 * Aufgabenstellungen und Kursmaterialien (als Kontext)
+* Ihr Name, damit Iris Sie im Dialog persönlich ansprechen kann
+* Ihr Bearbeitungsfortschritt in einer Aufgabe (z. B. der erreichte Punktestand in Prozent), damit Iris Sie beim Reflektieren Ihres Lernstands unterstützen kann. Ihre offiziellen Prüfungsnoten werden dabei nicht übermittelt.
+* In öffentlichen Kurskanälen (z. B. Frage-und-Antwort-Foren) auf Ihre Anfrage hin die umliegenden Nachrichten als Gesprächskontext – ausschließlich von Nutzenden, die selbst ebenfalls in die KI-Nutzung eingewilligt haben
 
 **Welche Daten werden NICHT verarbeitet:**
 
-* Persönliche Informationen (Name, Matrikelnummer, E-Mail-Adresse)
-* Noten oder Leistungsdaten
-* Daten anderer Studierender
+* Ihre Matrikelnummer und Ihre E-Mail-Adresse
+* Ihre offiziellen Prüfungsnoten
+* Nachrichten oder Daten von Studierenden, die der KI-Nutzung nicht zugestimmt haben
 
 **Datensicherheit bei Cloud AI:**
 
@@ -278,7 +281,7 @@ Sie können Ihre Wahl jederzeit in den **Kontoeinstellungen** unter „KI-Nutzun
 * Die gesamte KI-Verarbeitung findet auf Servern der TUM statt
 * Ihre Daten verlassen nicht das Netzwerk der Universität
 
-**Datenspeicherung:** Unabhängig von Ihrer KI-Wahl werden Ihre Kerndaten (Noten, Abgaben, persönliche Informationen) immer auf Servern der Universität gespeichert und niemals an externe KI-Anbieter weitergegeben.
+**Datenspeicherung:** Unabhängig von Ihrer KI-Wahl werden Ihre Daten dauerhaft ausschließlich auf Servern der Universität gespeichert. Ihre offiziellen Prüfungsnoten, Ihre Matrikelnummer und Ihre E-Mail-Adresse werden niemals an externe KI-Anbieter übermittelt.
 
 Weitere Informationen finden Sie unter [Ihre KI-Optionen in Artemis](/llm-selection).
 

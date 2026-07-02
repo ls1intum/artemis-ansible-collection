@@ -281,12 +281,15 @@ visible** to instructors and other students and has **no influence on grading**.
 * Chat messages with Iris
 * Source code you have written for programming exercises
 * Exercise descriptions and course materials (as context)
+* Your name, so that Iris can address you personally in the conversation
+* Your progress within an exercise (e.g. the score achieved as a percentage), so that Iris can help you reflect on your learning progress. Your official examination grades are not transmitted for this purpose.
+* In public course channels (e.g. question-and-answer forums), upon your request, the surrounding messages as conversational context – exclusively from users who have themselves also consented to AI usage
 
 **Which data is NOT processed:**
 
-* Personal information (name, matriculation number, email address)
-* Grades or performance data
-* Data of other students
+* Your matriculation number and email address
+* Your official examination grades
+* Messages or data of students who have not consented to AI usage
 
 **Data security with Cloud AI:**
 
@@ -302,8 +305,8 @@ visible** to instructors and other students and has **no influence on grading**.
 * All AI processing takes place on servers of TUM
 * Your data does not leave the university network
 
-**Data storage:** Regardless of your AI choice, your core data (grades, submissions, personal information) is always stored on servers of the university and is never passed on to
-external AI providers.
+**Data storage:** Regardless of your AI choice, your data is permanently stored exclusively on servers of the university. Your official examination grades, your matriculation number and
+your email address are never transmitted to external AI providers.
 
 Further information can be found under [Your AI options in Artemis](/llm-selection).
 
