@@ -116,8 +116,6 @@ Die Verarbeitung der Daten in dieser Logdatei kann wie folgt geschehen:
 * Die Logeinträge können kontinuierlich und automatisch ausgewertet werden, um Angriffe auf die Webserver erkennen und entsprechend reagieren zu können.
 * In Einzelfällen, d.h. bei gemeldeten Störungen, Fehlern und Sicherheitsvorfällen, kann eine manuelle Analyse erfolgen.
 
-**Rechtsgrundlage:** Art. 6 Abs. 1 Lit. e DSGVO i.V.m. Art. 4 Abs. 1 BayDSG (Wahrnehmung einer Aufgabe im öffentlichen Interesse). Die Protokollierung ist zur Sicherstellung eines ordnungsgemäßen Betriebs der Plattform erforderlich.
-
 **Speicherdauer:** Logdateien werden nach 90 Tagen automatisch gelöscht, sofern sie nicht zur Aufklärung eines konkreten Sicherheitsvorfalls benötigt werden.
 
 #### Cookies
@@ -135,7 +133,7 @@ Artemis verwendet ausschließlich technisch notwendige Cookies:
 
 Es werden keine Cookies zu Tracking- oder Werbezwecken eingesetzt.
 
-**Rechtsgrundlage:** Art. 6 Abs. 1 Lit. e DSGVO i.V.m. Art. 4 Abs. 1 BayDSG. Technisch notwendige Cookies sind zur Bereitstellung des Dienstes erforderlich und bedürfen keiner Einwilligung gemäß § 25 Abs. 2 Nr. 2 TDDDG.
+**Hinweis:** Technisch notwendige Cookies bedürfen keiner Einwilligung gemäß § 25 Abs. 2 Nr. 2 TDDDG.
 
 ## Informationen zu einzelnen Verarbeitungen
 
@@ -151,15 +149,11 @@ Die Verbindung zum LDAP-Server ist verschlüsselt (LDAPS/StartTLS), und die gesa
 
 Zusätzlich bietet Artemis **Passkeys** (WebAuthn/FIDO2) als passwortlose, phishing-resistente und datensparsame Authentifizierungsmethode an. Bei Verwendung eines Passkeys wird kein Passwort an den LDAP-Server übermittelt. Die Nutzung ist optional; Benutzername und Passwort bleiben als Alternative verfügbar. 
 
-**Rechtsgrundlage:** Art. 6 Abs. 1 Lit. e DSGVO i.V.m. Art. 4 Abs. 1 BayDSG. Die Authentifizierung ist technisch erforderlich, um den Zugang zur Plattform zu verwalten und die Integrität des Lehrbetriebs zu gewährleisten.
-
 **Speicherdauer:** Benutzername, Name, E-Mail-Adresse und Matrikelnummer werden für die Dauer der Nutzung der Plattform sowie darüber hinaus so lange gespeichert, wie dies aufgrund gesetzlicher Aufbewahrungsfristen für prüfungs- und notenrelevante Daten erforderlich ist. Da in jedem Kurs prüfungs- bzw. notenrelevante Daten anfallen können, werden diese Daten bis zu 5 Jahre nach Ende des jeweils letzten relevanten Semesters aufbewahrt und anschließend gelöscht. Eine frühere Löschung erfolgt auf Antrag, soweit keine gesetzlichen Aufbewahrungsfristen entgegenstehen.
 
 #### Profilbilder
 
 Artemis bietet die Möglichkeit, Profilbilder hochzuladen. Diese Bilder werden ausschließlich innerhalb der Plattform angezeigt und nicht an Dritte weitergegeben. Sie können Ihr Profilbild jederzeit ändern oder löschen.
-
-***Rechtsgrundlage:** Art. 6 Abs. 1 Lit. e DSGVO i.V.m. Art. 4 Abs. 1 BayDSG. Die Bereitstellung eines Profilbildes ist freiwillig und dient der Verbesserung der Nutzererfahrung innerhalb der Plattform.
 
 **Speicherdauer:** Profilbilder werden für die Dauer der Nutzung der Plattform gespeichert. Bei Löschung des Benutzerkontos, oder auf Antrag werden die Bilder gelöscht.
 
@@ -167,15 +161,11 @@ Artemis bietet die Möglichkeit, Profilbilder hochzuladen. Diese Bilder werden a
 
 Ausschließlich für die Durchführung von Prüfungen importiert Artemis Lichtbilder der teilnehmenden Studierenden aus TUMonline. Diese dienen allein der Überprüfung der Identität der Prüfungsteilnehmenden, um die Ordnungsmäßigkeit der Prüfung sicherzustellen und Täuschungen auszuschließen. Die Lichtbilder werden nur im Kontext der jeweiligen Prüfung und ausschließlich berechtigten Personen (z. B. der Prüfungsaufsicht) angezeigt. Eine automatisierte biometrische Gesichtserkennung findet nicht statt; die Identitätsprüfung erfolgt durch einen visuellen Abgleich durch das Aufsichtspersonal.
 
-**Rechtsgrundlage:** Art. 6 Abs. 1 Lit. e DSGVO i.V.m. Art. 4 Abs. 1 BayDSG, Art. 84 BayHIG, der APSO der TUM sowie der BayFEV. Die Identitätsprüfung ist zur ordnungsgemäßen Durchführung von Prüfungen erforderlich.
-
 **Speicherdauer:** Die importierten Lichtbilder sind Teil der Prüfungsdokumentation und werden gemäß den Aufbewahrungsfristen der APSO für bis zu 5 Jahre nach Ende des jeweiligen Semesters aufbewahrt.
 
 #### Digitale Unterschrift bei Prüfungen
 
 Im Rahmen von Prüfungen können Prüfende Studierende auffordern, ihre Teilnahme bzw. die zugehörige Prüfungserklärung digital zu unterschreiben. Dabei erfassen Sie Ihre eigenhändige Unterschrift innerhalb der Plattform (z. B. durch Zeichnen auf einem Touchscreen). Die Unterschrift dient ausschließlich der Bestätigung Ihrer Teilnahme an der Prüfung sowie der Sicherstellung der Ordnungsmäßigkeit des Prüfungsverfahrens.
-
-**Rechtsgrundlage:** Art. 6 Abs. 1 Lit. e DSGVO i.V.m. Art. 4 Abs. 1 BayDSG, Art. 84 BayHIG, der APSO der TUM sowie der BayFEV. Die digitale Unterschrift ist zur ordnungsgemäßen Durchführung und Dokumentation von Prüfungen erforderlich.
 
 **Speicherdauer:** Die Unterschrift ist Teil der Prüfungsdokumentation und wird gemäß den Aufbewahrungsfristen der APSO für bis zu 5 Jahre nach Ende des jeweiligen Semesters aufbewahrt.
 
@@ -190,8 +180,6 @@ Zur Wahrung der Ordnungsmäßigkeit von Prüfungen erfasst Artemis für jede Pr�
 
 Diese Daten werden ausschließlich im Prüfungskontext zur Aufdeckung von Täuschungsversuchen und zur Sicherstellung der Integrität des Prüfungsverfahrens verwendet.
 
-**Rechtsgrundlage:** Art. 6 Abs. 1 Lit. e DSGVO i.V.m. Art. 4 Abs. 1 BayDSG, Art. 84 BayHIG, der APSO der TUM sowie der BayFEV. Die Erfassung ist zur ordnungsgemäßen Durchführung von Prüfungen erforderlich.
-
 **Speicherdauer:** Die Sitzungsdaten sind Teil der Prüfungsdokumentation und werden gemäß den Aufbewahrungsfristen der APSO für bis zu 5 Jahre nach Ende des jeweiligen Semesters aufbewahrt.
 
 #### Nutzungsdaten im Rahmen der Lehre
@@ -202,8 +190,6 @@ Im Rahmen der Nutzung von Artemis werden folgende Daten verarbeitet, die zur Dur
 * Prüfungsleistungen und Bewertungen
 * Kommunikationsbeiträge (z. B. Fragen und Antworten in Kursforen)
 * Teilnahme an Kursen und Übungsgruppen
-
-**Rechtsgrundlage:** Art. 6 Abs. 1 Lit. e DSGVO i.V.m. Art. 4 Abs. 1 BayDSG sowie Art. 84 BayHIG. Diese Daten sind zur Erfüllung der Lehr- und Prüfungsaufgaben der Universität erforderlich.
 
 **Speicherdauer:** Übungsabgaben werden nach Ende des jeweiligen Semesters für bis zu 5 Jahre aufbewahrt, sofern gesetzliche Aufbewahrungsfristen (z. B. für Prüfungsdaten gemäß APSO) dies erfordern.
 
@@ -225,8 +211,6 @@ Dabei können folgende Daten erhoben werden:
 Es handelt sich **nicht** um Mouse- oder Click-Tracking. Es werden keine individuellen Klicks oder Mausbewegungen aufgezeichnet. Die in HTTP-Requests sichtbaren Sentry-Header (z. B. `sentry-trace`, `baggage`) dienen ausschließlich der Tracing-Korrelation, d.h. der Zuordnung eines Seitenaufrufs zu den zugehörigen Backend-Requests.
 
 **Datenhoheit:** Sentry läuft auf einer eigenen Instanz innerhalb der IT-Infrastruktur der TUM. Es werden **keine Daten an externe oder Cloud-Dienste** übertragen.
-
-**Rechtsgrundlage:** Art. 6 Abs. 1 Lit. e DSGVO i.V.m. Art. 4 Abs. 1 BayDSG. Die Fehleranalyse und das Performance-Monitoring sind zur Sicherstellung eines störungsfreien Betriebs einer für den Lehrbetrieb verpflichtend genutzten Plattform erforderlich.
 
 **Speicherdauer:** Sentry-Daten werden nach 90 Tagen automatisch gelöscht.
 
@@ -308,8 +292,6 @@ Weitere Informationen finden Sie unter [Ihre KI-Optionen in Artemis](/llm-select
 #### E-Mail-Benachrichtigungen
 
 Artemis kann E-Mail-Benachrichtigungen an Nutzer versenden, z. B. über Kursankündigungen, Bewertungsergebnisse oder Systemmeldungen. Die E-Mail-Adressen werden aus dem Verzeichnisdienst der TUM bezogen und ausschließlich für die Kommunikation im Rahmen der Lehre und des Plattformbetriebs verwendet. Sammel-E-Mails werden über das BCC-Feld versendet, sodass die E-Mail-Adressen der Empfänger nicht untereinander sichtbar sind.
-
-**Rechtsgrundlage:** Art. 6 Abs. 1 Lit. e DSGVO i.V.m. Art. 4 Abs. 1 BayDSG. Die Information der Nutzer über lehrbetriebsrelevante Vorgänge ist zur Aufgabenerfüllung erforderlich.
 
 **Speicherdauer:** Die E-Mail-Adressen werden im Rahmen der Anmeldung aus dem Verzeichnisdienst der TUM synchronisiert und in der Nutzertabelle von Artemis gespeichert (siehe Abschnitt „Anmeldung"). Die Speicherdauer richtet sich nach den gesetzlichen Aufbewahrungsfristen (bis zu 5 Jahre nach Ende des jeweiligen Semesters).
 

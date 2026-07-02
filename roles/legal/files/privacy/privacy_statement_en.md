@@ -119,9 +119,6 @@ The processing of the data in this log file can be done as follows:
 * The log entries can be continuously and automatically evaluated in order to detect attacks on the web servers and react accordingly.
 * In individual cases, i.e. in the event of reported malfunctions, errors and security incidents, a manual analysis may be carried out.
 
-**Legal basis:** Art. 6(1)(e) GDPR in conjunction with Art. 4(1) BayDSG (performance of a task carried out in the public interest). Logging is necessary to ensure the proper
-operation of the platform.
-
 **Retention period:** Log files are automatically deleted after 90 days, unless they are needed to investigate a specific security incident.
 
 #### Cookies
@@ -138,8 +135,7 @@ Artemis uses exclusively technically necessary cookies:
 
 No cookies are used for tracking or advertising purposes.
 
-**Legal basis:** Art. 6(1)(e) GDPR in conjunction with Art. 4(1) BayDSG. Technically necessary cookies are required to provide the service and do not require consent pursuant to
-§ 25(2) no. 2 TDDDG.
+**Note:** Technically necessary cookies do not require consent pursuant to § 25(2) no. 2 TDDDG.
 
 ## Information on individual processing operations
 
@@ -157,9 +153,6 @@ programming exercises. For these Git operations, you can authenticate using your
 In addition, Artemis offers **passkeys** (WebAuthn/FIDO2) as a passwordless, phishing-resistant and data-minimizing authentication method. When using a passkey, no password is
 transmitted to the LDAP server. Use is optional; username and password remain available as an alternative.
 
-**Legal basis:** Art. 6(1)(e) GDPR in conjunction with Art. 4(1) BayDSG. Authentication is technically necessary to manage access to the platform and to ensure the integrity of
-teaching operations.
-
 **Retention period:** Username, name, email address and matriculation number are stored for the duration of use of the platform and beyond that for as long as required by statutory
 retention periods for examination- and grade-relevant data. As examination- or grade-relevant data may arise in every course, this data is retained for up to 5 years after the end
 of the respective last relevant semester and is then deleted. Earlier deletion is carried out on request, unless statutory retention periods prevent this.
@@ -168,8 +161,6 @@ of the respective last relevant semester and is then deleted. Earlier deletion i
 
 Artemis offers the option of uploading profile pictures. These pictures are displayed exclusively within the platform and are not passed on to third parties. You can change or
 delete your profile picture at any time.
-
-**Legal basis:** Art. 6(1)(e) GDPR in conjunction with Art. 4(1) BayDSG. Providing a profile picture is voluntary and serves to improve the user experience within the platform.
 
 **Retention period:** Profile pictures are stored for the duration of use of the platform. Upon deletion of the user account, or on request, the pictures are deleted.
 
@@ -180,16 +171,11 @@ participants in order to ensure the proper conduct of the examination and to rul
 exclusively to authorized persons (e.g. the exam invigilators). No automated biometric facial recognition takes place; the identity check is carried out by a visual comparison
 performed by the supervisory staff.
 
-**Legal basis:** Art. 6(1)(e) GDPR in conjunction with Art. 4(1) BayDSG, Art. 84 BayHIG, the APSO of TUM and the BayFEV. The identity check is necessary for the proper conduct of
-examinations.
-
 **Retention period:** The imported photos are part of the examination documentation and are retained pursuant to the retention periods of the APSO for up to 5 years after the end of the respective semester.
 
 #### Digital signature during examinations
 
 In the context of examinations, examiners may require students to digitally sign their participation or the associated examination declaration. You provide your handwritten signature within the platform (e.g. by drawing on a touchscreen). The signature serves exclusively to confirm your participation in the examination and to ensure the proper conduct of the examination procedure.
-
-**Legal basis:** Art. 6(1)(e) GDPR in conjunction with Art. 4(1) BayDSG, Art. 84 BayHIG, the APSO of TUM and the BayFEV. The digital signature is necessary for the proper conduct and documentation of examinations.
 
 **Retention period:** The signature is part of the examination documentation and is retained pursuant to the retention periods of the APSO for up to 5 years after the end of the respective semester.
 
@@ -204,8 +190,6 @@ To safeguard the proper conduct of examinations, Artemis records technical sessi
 
 This data is used exclusively in the examination context to uncover attempts at deception and to ensure the integrity of the examination procedure.
 
-**Legal basis:** Art. 6(1)(e) GDPR in conjunction with Art. 4(1) BayDSG, Art. 84 BayHIG, the APSO of TUM and the BayFEV. The recording is necessary for the proper conduct of examinations.
-
 **Retention period:** The session data is part of the examination documentation and is retained pursuant to the retention periods of the APSO for up to 5 years after the end of the respective semester.
 
 #### Usage data in the context of teaching
@@ -216,9 +200,6 @@ As part of the use of Artemis, the following data required for the conduct of te
 * Examination performance and assessments
 * Communication contributions (e.g. questions and answers in course forums)
 * Participation in courses and exercise groups
-
-**Legal basis:** Art. 6(1)(e) GDPR in conjunction with Art. 4(1) BayDSG as well as Art. 84 BayHIG. This data is necessary to fulfill the teaching and examination duties of the
-university.
 
 **Retention period:** Exercise submissions are retained for up to 5 years after the end of the respective semester, insofar as statutory retention periods (e.g. for examination data
 pursuant to the APSO) require this.
@@ -243,9 +224,6 @@ This is **not** mouse or click tracking. No individual clicks or mouse movements
 exclusively for tracing correlation, i.e. the mapping of a page view to the associated backend requests.
 
 **Data sovereignty:** Sentry runs on its own instance within the IT infrastructure of TUM. **No data is transferred to external or cloud services.**
-
-**Legal basis:** Art. 6(1)(e) GDPR in conjunction with Art. 4(1) BayDSG. Error analysis and performance monitoring are necessary to ensure the trouble-free operation of a platform
-that is mandatorily used for teaching operations.
 
 **Retention period:** Sentry data is automatically deleted after 90 days.
 
@@ -339,8 +317,6 @@ retained in case you wish to reactivate AI usage at a later point. You can reque
 Artemis can send email notifications to users, e.g. about course announcements, assessment results or system messages. The email addresses are obtained from the directory service
 of TUM and used exclusively for communication in the context of teaching and platform operation. Bulk emails are sent via the BCC field, so that the email addresses of the
 recipients are not visible to each other.
-
-**Legal basis:** Art. 6(1)(e) GDPR in conjunction with Art. 4(1) BayDSG. Informing users about matters relevant to teaching operations is necessary for the fulfillment of duties.
 
 **Retention period:** The email addresses are synchronized from the directory service of TUM during login and stored in the user table of Artemis (see section "Login"). The
 retention period is governed by the statutory retention periods (up to 5 years after the end of the respective semester).
