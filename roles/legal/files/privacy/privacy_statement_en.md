@@ -13,21 +13,21 @@ In the following, we provide information on the type, scope and purpose of the c
 
 ## General Information
 
-#### Name and contact details of the controller
+### Name and contact details of the controller
 
 Technical University of Munich  
 Postal address: Arcisstraße 21, 80333 Munich  
 Telephone: +49-(0)89-289-01  
 Email: poststelle@tum.de  
 
-#### Contact details of the data protection officer
+### Contact details of the data protection officer
 
 The data protection officer of the Technical University of Munich  
 Postal address: Arcisstraße 21, 80333 Munich  
 Telephone: 089/289-17052  
 Email: beauftragter@datenschutz.tum.de  
 
-#### Purposes and legal bases for the processing of personal data
+### Purposes and legal bases for the processing of personal data
 
 The purpose of the processing is to fulfill the public duties assigned to us by the legislator, in particular teaching and examination in the university environment. Unless
 otherwise stated, the legal basis for processing your data results from Art. 6(1)(e) GDPR in conjunction with Art. 4(1) BayDSG (performance of a task carried out in the public
@@ -37,7 +37,7 @@ as the [Allgemeine Prüfungs- und Studienordnung (APSO)](https://portal.mytum.de
 the [Bayerische Fernprüfungserprobungsverordnung (BayFEV)](https://www.gesetze-bayern.de/Content/Document/BayFEV) apply. Accordingly, we are permitted to process the data required
 to fulfill a duty incumbent upon us.
 
-#### Recipients of personal data
+### Recipients of personal data
 
 The technical operation of our data processing systems is carried out by:
 [IT Operations (ITO)](https://www.cit.tum.de/ito/die-ito/) of the Technical University of Munich
@@ -56,12 +56,12 @@ This is based on a data processing agreement (Auftragsverarbeitungsvertrag, AVV)
 In order to avert risks to information technology security, data may be forwarded to the State Office for Information Technology Security in the case of electronic transmission and
 processed there on the basis of Art. 12 ff. of the Bavarian E-Government Act.
 
-#### Duration of the storage of personal data
+### Duration of the storage of personal data
 
 Your data will only be stored for as long as is necessary for the fulfillment of duties, taking into account statutory retention periods. Specific retention periods for the
 individual processing operations can be found in the respective sections below.
 
-#### Your rights
+### Your rights
 
 Insofar as we process personal data from you, you are entitled to the following rights as a data subject:
 
@@ -76,22 +76,22 @@ Insofar as we process personal data from you, you are entitled to the following 
 You have the right to object to the processing of your data at any time on grounds relating to your particular situation, if the processing is carried out on the basis of
 Art. 6(1)(e) GDPR (Art. 21(1)(1) GDPR).
 
-#### Right to appeal at the supervisory authority
+### Right to appeal at the supervisory authority
 
 Furthermore, you have the right to appeal at the Bavarian State Commissioner for Data Protection. You can reach them under the following contact details:
 Postal address: Postfach 22 12 19, 80502 Munich  
 Address: Wagmüllerstraße 18, 80538 Munich  
 Telephone: 089 212672-0  
 Email: poststelle@datenschutz-bayern.de  
-https://www.datenschutz-bayern.de/  
+[https://www.datenschutz-bayern.de/](https://www.datenschutz-bayern.de/)  
 
-#### Further Information
+### Further Information
 
 For more detailed information on the processing of your data and your rights, you can contact us using the contact details of the controller provided above.
 
 ## Information about the web presence
 
-#### Technical implementation
+### Technical implementation
 
 The web servers of Artemis are operated by the [IT Operations (ITO)](https://www.cit.tum.de/ito/die-ito/) of the Technical University of Munich. The personal data you transmit
 when visiting our web presence is therefore processed on our behalf by the ITO:
@@ -102,7 +102,7 @@ Telephone: (089) 289 18018
 Email: ito@cit.tum.de  
 [https://www.cit.tum.de/ito/die-ito/](https://www.cit.tum.de/ito/die-ito/)  
 
-#### Logging
+### Logging
 
 When you access this or other Artemis web pages, you transmit data to our web servers via your Internet browser. The following data is temporarily recorded in a log file during an
 ongoing connection for communication between your Internet browser and our web servers:
@@ -121,7 +121,7 @@ The processing of the data in this log file can be done as follows:
 
 **Retention period:** Log files are automatically deleted after 90 days, unless they are needed to investigate a specific security incident.
 
-#### Cookies
+### Cookies
 
 In order to extend the range of functions of our Internet offering and to make its use more comfortable for you, we partly use so-called "cookies". With the help of these cookies,
 data can be stored on your computer when you call up our website. However, you can deactivate the storage of cookies or set your browser so that cookies are only stored for the
@@ -139,7 +139,7 @@ No cookies are used for tracking or advertising purposes.
 
 ## Information on individual processing operations
 
-#### Login (authentication via LDAP)
+### Login (authentication via LDAP)
 
 When you log in to the system, your personal data is verified against the directory service (LDAP) of the Technical University of Munich. The following data is processed:
 
@@ -157,14 +157,14 @@ transmitted to the LDAP server. Use is optional; username and password remain av
 retention periods for examination- and grade-relevant data. As examination- or grade-relevant data may arise in every course, this data is retained for up to 5 years after the end
 of the respective last relevant semester and is then deleted. Earlier deletion is carried out on request, unless statutory retention periods prevent this.
 
-#### Profile pictures
+### Profile pictures
 
 Artemis offers the option of uploading profile pictures. These pictures are displayed exclusively within the platform and are not passed on to third parties. You can change or
 delete your profile picture at any time.
 
 **Retention period:** Profile pictures are stored for the duration of use of the platform. Upon deletion of the user account, or on request, the pictures are deleted.
 
-#### Exam-related photos (import from TUMonline)
+### Exam-related photos (import from TUMonline)
 
 Exclusively for the conduct of examinations, Artemis imports photos of the participating students from TUMonline. These serve solely to verify the identity of exam
 participants in order to ensure the proper conduct of the examination and to rule out deception. The photos are displayed only in the context of the respective examination and
@@ -173,13 +173,13 @@ performed by the supervisory staff.
 
 **Retention period:** The imported photos are part of the examination documentation and are retained pursuant to the retention periods of the APSO for up to 5 years after the end of the respective semester.
 
-#### Digital signature during examinations
+### Digital signature during examinations
 
 In the context of examinations, examiners may require students to digitally sign their participation or the associated examination declaration. You provide your handwritten signature within the platform (e.g. by drawing on a touchscreen). The signature serves exclusively to confirm your participation in the examination and to ensure the proper conduct of the examination procedure.
 
 **Retention period:** The signature is part of the examination documentation and is retained pursuant to the retention periods of the APSO for up to 5 years after the end of the respective semester.
 
-#### Examination sessions and detection of suspicious access
+### Examination sessions and detection of suspicious access
 
 To safeguard the proper conduct of examinations, Artemis records technical session data for each examination session in order to detect suspicious or unauthorized access (e.g. working on an examination from several devices at the same time). The following data is processed:
 
@@ -192,7 +192,7 @@ This data is used exclusively in the examination context to uncover attempts at 
 
 **Retention period:** The session data is part of the examination documentation and is retained pursuant to the retention periods of the APSO for up to 5 years after the end of the respective semester.
 
-#### Usage data in the context of teaching
+### Usage data in the context of teaching
 
 As part of the use of Artemis, the following data required for the conduct of teaching and examinations is processed:
 
@@ -204,7 +204,7 @@ As part of the use of Artemis, the following data required for the conduct of te
 **Retention period:** Exercise submissions are retained for up to 5 years after the end of the respective semester, insofar as statutory retention periods (e.g. for examination data
 pursuant to the APSO) require this.
 
-#### Error analysis and performance monitoring (Sentry)
+### Error analysis and performance monitoring (Sentry)
 
 To ensure stable and high-performing operation of the platform, Artemis may use the open-source tool Sentry for the following purposes:
 
@@ -227,7 +227,7 @@ exclusively for tracing correlation, i.e. the mapping of a page view to the asso
 
 **Retention period:** Sentry data is automatically deleted after 90 days.
 
-#### Scientific evaluation of usage behavior (Science endpoint)
+### Scientific evaluation of usage behavior (Science endpoint)
 
 **Note: This functionality is currently disabled (since 19.02.2026) and will only be reactivated after a data-protection-compliant opt-in mechanism has been implemented.**
 
@@ -256,7 +256,7 @@ This concerns the following data:
 **Retention period:** Pseudonymized data is stored for the duration of the respective research project, but for a maximum of 5 years. Anonymized evaluation results may be retained
 indefinitely.
 
-#### AI-based features (Iris and Athena)
+### AI-based features (Iris and Athena)
 
 With Iris, Artemis offers an AI-based learning assistant that supports students with programming, modeling and text exercises. In addition, the Athena subsystem can provide
 AI-based feedback on exercise submissions. The use of these AI features is **voluntary** and requires your **explicit consent (opt-in)**.
@@ -312,7 +312,7 @@ you can revoke at any time.
 deletion of your user account (e.g. after exmatriculation), the chat histories are also deleted. If you deactivate AI usage, no new data is collected; existing chat histories are
 retained in case you wish to reactivate AI usage at a later point. You can request the deletion of your chat histories at any time (Art. 17 GDPR).
 
-#### Email notifications
+### Email notifications
 
 Artemis can send email notifications to users, e.g. about course announcements, assessment results or system messages. The email addresses are obtained from the directory service
 of TUM and used exclusively for communication in the context of teaching and platform operation. Bulk emails are sent via the BCC field, so that the email addresses of the
@@ -321,12 +321,12 @@ recipients are not visible to each other.
 **Retention period:** The email addresses are synchronized from the directory service of TUM during login and stored in the user table of Artemis (see section "Login"). The
 retention period is governed by the statutory retention periods (up to 5 years after the end of the respective semester).
 
-#### Automated decision-making
+### Automated decision-making
 
 For certain exercise types (in particular programming exercises), Artemis uses automated assessment procedures, e.g. automatic tests and static code analysis. These serve to provide
 prompt feedback to students. For examination performance, a final review is always carried out by teaching staff. No profiling within the meaning of Art. 22 GDPR takes place.
 
-#### Disclosure and rectification
+### Disclosure and rectification
 
 You have the right, upon written request and free of charge, to obtain information about the personal data stored about you. In addition, you have the right to have incorrect data
 corrected. You can reach the data protection officer of the Technical University of Munich by email at beauftragter@datenschutz.tum.de or via [www.datenschutz.tum.de](https://www.datenschutz.tum.de/).
