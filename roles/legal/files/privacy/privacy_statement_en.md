@@ -134,6 +134,7 @@ Artemis uses exclusively technically necessary cookies:
 
 * **Session cookie:** To maintain your login session. It is deleted after the browser is closed or the session expires.
 * **Language setting:** To store your preferred language (German/English).
+* **Passkey login (WebAuthn):** During passwordless login with a passkey, a technically necessary, short-lived cookie is set that contains a random identifier used to correlate the associated WebAuthn challenge. The cookie is limited to 5 minutes and is deleted after login is completed.
 
 No cookies are used for tracking or advertising purposes.
 
@@ -159,8 +160,9 @@ transmitted to the LDAP server. Use is optional; username and password remain av
 **Legal basis:** Art. 6(1)(e) GDPR in conjunction with Art. 4(1) BayDSG. Authentication is technically necessary to manage access to the platform and to ensure the integrity of
 teaching operations.
 
-**Retention period:** Username, name, email address and matriculation number are stored for the duration of use of the platform. Upon exmatriculation or on request, the data is
-deleted, unless statutory retention periods prevent this.
+**Retention period:** Username, name, email address and matriculation number are stored for the duration of use of the platform and beyond that for as long as required by statutory
+retention periods for examination- and grade-relevant data. As examination- or grade-relevant data may arise in every course, this data is retained for up to 5 years after the end
+of the respective last relevant semester and is then deleted. Earlier deletion is carried out on request, unless statutory retention periods prevent this.
 
 #### Profile pictures
 
@@ -181,15 +183,30 @@ performed by the supervisory staff.
 **Legal basis:** Art. 6(1)(e) GDPR in conjunction with Art. 4(1) BayDSG, Art. 84 BayHIG, the APSO of TUM and the BayFEV. The identity check is necessary for the proper conduct of
 examinations.
 
-**Retention period:** The imported photos are held exclusively for the duration of the respective examination and are deleted afterwards.
+**Retention period:** The imported photos are part of the examination documentation and are retained pursuant to the retention periods of the APSO for up to 5 years after the end of the respective semester.
 
 #### Digital signature during examinations
 
-In the context of examinations, examiners may require students to digitally sign their participation or the associated examination declaration. You provide your handwritten signature within the platform (e.g. by drawing on a touchscreen). The signature serves exclusively to confirm your participation in the examination and to ensure the proper conduct of the examination procedure. No automated biometric analysis of the signature (e.g. of writing dynamics or pressure) takes place; only the static image of the signature is stored.
+In the context of examinations, examiners may require students to digitally sign their participation or the associated examination declaration. You provide your handwritten signature within the platform (e.g. by drawing on a touchscreen). The signature serves exclusively to confirm your participation in the examination and to ensure the proper conduct of the examination procedure.
 
 **Legal basis:** Art. 6(1)(e) GDPR in conjunction with Art. 4(1) BayDSG, Art. 84 BayHIG, the APSO of TUM and the BayFEV. The digital signature is necessary for the proper conduct and documentation of examinations.
 
 **Retention period:** The signature is part of the examination documentation and is retained pursuant to the retention periods of the APSO for up to 5 years after the end of the respective semester.
+
+#### Examination sessions and detection of suspicious access
+
+To safeguard the proper conduct of examinations, Artemis records technical session data for each examination session in order to detect suspicious or unauthorized access (e.g. working on an examination from several devices at the same time). The following data is processed:
+
+* Browser fingerprint (as a hash value)
+* IP address
+* Browser and device information (user agent)
+* Time of the session
+
+This data is used exclusively in the examination context to uncover attempts at deception and to ensure the integrity of the examination procedure.
+
+**Legal basis:** Art. 6(1)(e) GDPR in conjunction with Art. 4(1) BayDSG, Art. 84 BayHIG, the APSO of TUM and the BayFEV. The recording is necessary for the proper conduct of examinations.
+
+**Retention period:** The session data is part of the examination documentation and is retained pursuant to the retention periods of the APSO for up to 5 years after the end of the respective semester.
 
 #### Usage data in the context of teaching
 

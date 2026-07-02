@@ -131,6 +131,7 @@ Artemis verwendet ausschließlich technisch notwendige Cookies:
 
 * **Session-Cookie:** Zur Aufrechterhaltung Ihrer Anmeldesitzung. Wird nach dem Schließen des Browsers bzw. nach Ablauf der Sitzung gelöscht.
 * **Spracheinstellung:** Zur Speicherung Ihrer bevorzugten Sprache (Deutsch/Englisch).
+* **Passkey-Anmeldung (WebAuthn):** Bei der passwortlosen Anmeldung mit einem Passkey wird ein technisch notwendiges, kurzlebiges Cookie gesetzt, das eine zufällige Kennung zur Zuordnung der zugehörigen WebAuthn-Challenge enthält. Das Cookie ist auf 5 Minuten befristet und wird nach Abschluss der Anmeldung gelöscht.
 
 Es werden keine Cookies zu Tracking- oder Werbezwecken eingesetzt.
 
@@ -152,7 +153,7 @@ Zusätzlich bietet Artemis **Passkeys** (WebAuthn/FIDO2) als passwortlose, phish
 
 **Rechtsgrundlage:** Art. 6 Abs. 1 Lit. e DSGVO i.V.m. Art. 4 Abs. 1 BayDSG. Die Authentifizierung ist technisch erforderlich, um den Zugang zur Plattform zu verwalten und die Integrität des Lehrbetriebs zu gewährleisten.
 
-**Speicherdauer:** Benutzername, Name, E-Mail-Adresse und Matrikelnummer werden für die Dauer der Nutzung der Plattform gespeichert. Bei Exmatrikulation oder auf Antrag werden die Daten gelöscht, sofern keine gesetzlichen Aufbewahrungsfristen entgegenstehen.
+**Speicherdauer:** Benutzername, Name, E-Mail-Adresse und Matrikelnummer werden für die Dauer der Nutzung der Plattform sowie darüber hinaus so lange gespeichert, wie dies aufgrund gesetzlicher Aufbewahrungsfristen für prüfungs- und notenrelevante Daten erforderlich ist. Da in jedem Kurs prüfungs- bzw. notenrelevante Daten anfallen können, werden diese Daten bis zu 5 Jahre nach Ende des jeweils letzten relevanten Semesters aufbewahrt und anschließend gelöscht. Eine frühere Löschung erfolgt auf Antrag, soweit keine gesetzlichen Aufbewahrungsfristen entgegenstehen.
 
 #### Profilbilder
 
@@ -168,7 +169,7 @@ Ausschließlich für die Durchführung von Prüfungen importiert Artemis Lichtbi
 
 **Rechtsgrundlage:** Art. 6 Abs. 1 Lit. e DSGVO i.V.m. Art. 4 Abs. 1 BayDSG, Art. 84 BayHIG, der APSO der TUM sowie der BayFEV. Die Identitätsprüfung ist zur ordnungsgemäßen Durchführung von Prüfungen erforderlich.
 
-**Speicherdauer:** Die importierten Lichtbilder werden ausschließlich für die Dauer der jeweiligen Prüfung vorgehalten und im Anschluss gelöscht.
+**Speicherdauer:** Die importierten Lichtbilder sind Teil der Prüfungsdokumentation und werden gemäß den Aufbewahrungsfristen der APSO für bis zu 5 Jahre nach Ende des jeweiligen Semesters aufbewahrt.
 
 #### Digitale Unterschrift bei Prüfungen
 
@@ -177,6 +178,21 @@ Im Rahmen von Prüfungen können Prüfende Studierende auffordern, ihre Teilnahm
 **Rechtsgrundlage:** Art. 6 Abs. 1 Lit. e DSGVO i.V.m. Art. 4 Abs. 1 BayDSG, Art. 84 BayHIG, der APSO der TUM sowie der BayFEV. Die digitale Unterschrift ist zur ordnungsgemäßen Durchführung und Dokumentation von Prüfungen erforderlich.
 
 **Speicherdauer:** Die Unterschrift ist Teil der Prüfungsdokumentation und wird gemäß den Aufbewahrungsfristen der APSO für bis zu 5 Jahre nach Ende des jeweiligen Semesters aufbewahrt.
+
+#### Prüfungssitzungen und Erkennung auffälliger Zugriffe
+
+Zur Wahrung der Ordnungsmäßigkeit von Prüfungen erfasst Artemis für jede Prüfungssitzung technische Sitzungsdaten, um auffällige oder unberechtigte Zugriffe (z. B. das gleichzeitige Bearbeiten einer Prüfung von mehreren Geräten) erkennen zu können. Dabei werden verarbeitet:
+
+* Browser-Fingerprint (als Hashwert)
+* IP-Adresse
+* Browser- und Geräteinformationen (User-Agent)
+* Zeitpunkt der Sitzung
+
+Diese Daten werden ausschließlich im Prüfungskontext zur Aufdeckung von Täuschungsversuchen und zur Sicherstellung der Integrität des Prüfungsverfahrens verwendet.
+
+**Rechtsgrundlage:** Art. 6 Abs. 1 Lit. e DSGVO i.V.m. Art. 4 Abs. 1 BayDSG, Art. 84 BayHIG, der APSO der TUM sowie der BayFEV. Die Erfassung ist zur ordnungsgemäßen Durchführung von Prüfungen erforderlich.
+
+**Speicherdauer:** Die Sitzungsdaten sind Teil der Prüfungsdokumentation und werden gemäß den Aufbewahrungsfristen der APSO für bis zu 5 Jahre nach Ende des jeweiligen Semesters aufbewahrt.
 
 #### Nutzungsdaten im Rahmen der Lehre
 
