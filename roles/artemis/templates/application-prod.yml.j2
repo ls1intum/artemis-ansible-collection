@@ -79,12 +79,12 @@ spring:
   mail:
     host: {{ mail.hostname }}
     port: {{ mail.port }}
-    {% if mail.username is defined and mail.username is not none %}
+{% if mail.username is defined and mail.username is not none %}
     username: {{ mail.username }}
-    {% endif %}
-    {% if mail.password is defined and mail.password is not none %}
+{% endif %}
+{% if mail.password is defined and mail.password is not none %}
     password: {{ mail.password }}
-    {% endif %}
+{% endif %}
     protocol: {{ mail.protocol }}
     tls: {{ mail.tls | default(true) | to_json }}
     properties.mail.smtp:
