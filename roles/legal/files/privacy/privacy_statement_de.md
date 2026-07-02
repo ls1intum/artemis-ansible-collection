@@ -164,11 +164,19 @@ Artemis bietet die Möglichkeit, Profilbilder hochzuladen. Diese Bilder werden a
 
 #### Prüfungsbezogene Lichtbilder (Import aus TUMonline)
 
-Ausschließlich für die Durchführung von Prüfungen (Klausuren) importiert Artemis Lichtbilder der teilnehmenden Studierenden aus TUMonline. Diese dienen allein der Überprüfung der Identität der Prüfungsteilnehmenden, um die Ordnungsmäßigkeit der Prüfung sicherzustellen und Täuschungen auszuschließen. Die Lichtbilder werden nur im Kontext der jeweiligen Prüfung und ausschließlich berechtigten Personen (z. B. der Prüfungsaufsicht) angezeigt. Eine automatisierte biometrische Gesichtserkennung findet nicht statt; die Identitätsprüfung erfolgt durch einen visuellen Abgleich durch das Aufsichtspersonal.
+Ausschließlich für die Durchführung von Prüfungen importiert Artemis Lichtbilder der teilnehmenden Studierenden aus TUMonline. Diese dienen allein der Überprüfung der Identität der Prüfungsteilnehmenden, um die Ordnungsmäßigkeit der Prüfung sicherzustellen und Täuschungen auszuschließen. Die Lichtbilder werden nur im Kontext der jeweiligen Prüfung und ausschließlich berechtigten Personen (z. B. der Prüfungsaufsicht) angezeigt. Eine automatisierte biometrische Gesichtserkennung findet nicht statt; die Identitätsprüfung erfolgt durch einen visuellen Abgleich durch das Aufsichtspersonal.
 
 **Rechtsgrundlage:** Art. 6 Abs. 1 Lit. e DSGVO i.V.m. Art. 4 Abs. 1 BayDSG, Art. 84 BayHIG, der APSO der TUM sowie der BayFEV. Die Identitätsprüfung ist zur ordnungsgemäßen Durchführung von Prüfungen erforderlich.
 
 **Speicherdauer:** Die importierten Lichtbilder werden ausschließlich für die Dauer der jeweiligen Prüfung vorgehalten und im Anschluss gelöscht.
+
+#### Digitale Unterschrift bei Prüfungen
+
+Im Rahmen von Prüfungen können Prüfende Studierende auffordern, ihre Teilnahme bzw. die zugehörige Prüfungserklärung digital zu unterschreiben. Dabei erfassen Sie Ihre eigenhändige Unterschrift innerhalb der Plattform (z. B. durch Zeichnen auf einem Touchscreen). Die Unterschrift dient ausschließlich der Bestätigung Ihrer Teilnahme an der Prüfung sowie der Sicherstellung der Ordnungsmäßigkeit des Prüfungsverfahrens.
+
+**Rechtsgrundlage:** Art. 6 Abs. 1 Lit. e DSGVO i.V.m. Art. 4 Abs. 1 BayDSG, Art. 84 BayHIG, der APSO der TUM sowie der BayFEV. Die digitale Unterschrift ist zur ordnungsgemäßen Durchführung und Dokumentation von Prüfungen erforderlich.
+
+**Speicherdauer:** Die Unterschrift ist Teil der Prüfungsdokumentation und wird gemäß den Aufbewahrungsfristen der APSO für bis zu 5 Jahre nach Ende des jeweiligen Semesters aufbewahrt.
 
 #### Nutzungsdaten im Rahmen der Lehre
 

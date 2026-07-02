@@ -173,7 +173,7 @@ delete your profile picture at any time.
 
 #### Exam-related photos (import from TUMonline)
 
-Exclusively for the conduct of examinations (written exams), Artemis imports photos of the participating students from TUMonline. These serve solely to verify the identity of exam
+Exclusively for the conduct of examinations, Artemis imports photos of the participating students from TUMonline. These serve solely to verify the identity of exam
 participants in order to ensure the proper conduct of the examination and to rule out deception. The photos are displayed only in the context of the respective examination and
 exclusively to authorized persons (e.g. the exam invigilators). No automated biometric facial recognition takes place; the identity check is carried out by a visual comparison
 performed by the supervisory staff.
@@ -182,6 +182,14 @@ performed by the supervisory staff.
 examinations.
 
 **Retention period:** The imported photos are held exclusively for the duration of the respective examination and are deleted afterwards.
+
+#### Digital signature during examinations
+
+In the context of examinations, examiners may require students to digitally sign their participation or the associated examination declaration. You provide your handwritten signature within the platform (e.g. by drawing on a touchscreen). The signature serves exclusively to confirm your participation in the examination and to ensure the proper conduct of the examination procedure. No automated biometric analysis of the signature (e.g. of writing dynamics or pressure) takes place; only the static image of the signature is stored.
+
+**Legal basis:** Art. 6(1)(e) GDPR in conjunction with Art. 4(1) BayDSG, Art. 84 BayHIG, the APSO of TUM and the BayFEV. The digital signature is necessary for the proper conduct and documentation of examinations.
+
+**Retention period:** The signature is part of the examination documentation and is retained pursuant to the retention periods of the APSO for up to 5 years after the end of the respective semester.
 
 #### Usage data in the context of teaching
 
