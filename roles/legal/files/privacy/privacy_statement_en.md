@@ -51,7 +51,8 @@ Email: ito@cit.tum.de
 Data backups are stored at the [Leibniz Supercomputing Centre (LRZ)](https://www.lrz.de/) of the Bavarian Academy of Sciences, exclusively within the European Union, on the basis of a data processing agreement.
 
 For the optional AI-based features (Iris, Athena), and only if users actively consent to their use, data is transmitted for processing to Microsoft Azure within the European Union.
-This is based on a data processing agreement (Auftragsverarbeitungsvertrag, AVV) between TUM and Microsoft. The data is not stored permanently there.
+This may include the content required for the respective AI request and, where needed for personal address, the first name of the requesting user. This is based on a data processing
+agreement (Auftragsverarbeitungsvertrag, AVV) between TUM and Microsoft. The data is not stored permanently there.
 
 ### Duration of the storage of personal data
 
@@ -73,9 +74,9 @@ Insofar as we process personal data from you, you are entitled to the following 
 You have the right to object to the processing of your data at any time on grounds relating to your particular situation, if the processing is carried out on the basis of
 Art. 6(1)(e) GDPR (Art. 21(1)(1) GDPR).
 
-### Right to appeal at the supervisory authority
+### Right to lodge a complaint with the supervisory authority
 
-Furthermore, you have the right to appeal at the Bavarian State Commissioner for Data Protection. You can reach them under the following contact details:
+Furthermore, you have the right to lodge a complaint with the Bavarian State Commissioner for Data Protection. You can reach them under the following contact details:
 Postal address: Postfach 22 12 19, 80502 Munich  
 Address: Wagmüllerstraße 18, 80538 Munich  
 Telephone: 089 212672-0  
@@ -126,7 +127,7 @@ duration of the respective connection to the Internet. This could, however, limi
 
 Artemis uses exclusively technically necessary cookies:
 
-* **Session cookie:** To maintain your login session. It is deleted after the browser is closed or the session expires.
+* **Login and session cookie:** To maintain your login session. It is deleted after logout, after the browser is closed or when the configured validity period expires.
 * **Language setting:** To store your preferred language (German/English).
 * **Passkey login (WebAuthn):** During passwordless login with a passkey, a technically necessary, short-lived cookie is set that contains a random identifier used to correlate the associated WebAuthn challenge. The cookie is limited to 5 minutes and is deleted after login is completed.
 
@@ -150,9 +151,9 @@ programming exercises. For these Git operations, you can authenticate using your
 In addition, Artemis offers **passkeys** (WebAuthn/FIDO2) as a passwordless, phishing-resistant and data-minimizing authentication method. When using a passkey, no password is
 transmitted to the LDAP server. Use is optional; username and password remain available as an alternative.
 
-**Retention period:** Username, name, email address and matriculation number are stored for the duration of use of the platform and beyond that for as long as required by statutory
-retention periods for examination- and grade-relevant data. As examination- or grade-relevant data may arise in every course, this data is retained for up to 5 years after the end
-of the respective last relevant semester and is then deleted. Earlier deletion is carried out on request, unless statutory retention periods prevent this.
+**Retention period:** Username, name, email address and matriculation number are stored for the duration of use of the platform. Upon exmatriculation or on request, this data is
+deleted unless statutory retention periods prevent deletion. Where master data is required to associate examination- or assessment-relevant records, it may remain stored together
+with those records pursuant to statutory retention periods for up to 5 years after the end of the respective relevant semester.
 
 ### Profile pictures
 
@@ -258,7 +259,7 @@ indefinitely.
 With Iris, Artemis offers an AI-based learning assistant that supports students with programming, modeling and text exercises. In addition, the Athena subsystem can provide
 AI-based feedback on exercise submissions. The use of these AI features is **voluntary** and requires your **explicit consent (opt-in)**.
 
-**Opt-in and choices:** On your first login, you are asked to choose one of the following options:
+**Opt-in and choices:** Before first using an AI function, you are asked to choose one of the following options:
 
 1. **Cloud AI:** Use of AI models (e.g. GPT-4, GPT-5) via Microsoft Azure within the European Union.
 2. **Local AI (experimental):** Use of open-source models (e.g. Gemma, Llama) that run exclusively on the GPU infrastructure of TUM.
@@ -273,9 +274,9 @@ visible** to instructors and other students and has **no influence on grading**.
 * Chat messages with Iris
 * Source code you have written for programming exercises
 * Exercise descriptions and course materials (as context)
-* Your name, so that Iris can address you personally in the conversation
+* Your first name, so that Iris can address you personally in the conversation
 * Your progress within an exercise (e.g. the score achieved as a percentage), so that Iris can help you reflect on your learning progress. Your official examination grades are not transmitted for this purpose.
-* In public course channels (e.g. question-and-answer forums), upon your request, the surrounding messages as conversational context – exclusively from users who have themselves also consented to AI usage
+* In public course channels (e.g. question-and-answer forums), upon your request, the surrounding messages as conversational context – exclusively from users who have themselves also consented to AI usage; system-managed names and other direct identifiers of the authors are pseudonymized in this context
 
 **Which data is NOT processed:**
 
@@ -285,12 +286,12 @@ visible** to instructors and other students and has **no influence on grading**.
 
 **Data security with Cloud AI:**
 
-* GDPR-compliant processing in EU data centers of Microsoft Azure
+* Processing in EU data centers of Microsoft Azure on the basis of a data processing agreement
 * Your data does not leave the European Union
 * Enterprise security infrastructure of Microsoft Azure, secured by a data processing agreement (Auftragsverarbeitungsvertrag, AVV) between TUM and Microsoft
 * Your data is **not** used to train or improve AI models
 * All data transfers are encrypted
-* Exercise content is only sent to Azure for processing and is not stored permanently there
+* The content required for the respective AI request (e.g. questions, chat messages, exercise content and the first name for personalization) is sent to Azure only for processing and is not stored permanently there
 
 **Data security with local AI:**
 
@@ -306,8 +307,9 @@ Further information can be found under [Your AI options in Artemis](/llm-selecti
 you can revoke at any time.
 
 **Retention period:** Chat histories with Iris are stored as long as your user account is active on the platform, so that you can access previous conversations at any time. Upon
-deletion of your user account (e.g. after exmatriculation), the chat histories are also deleted. If you deactivate AI usage, no new data is collected; existing chat histories are
-retained in case you wish to reactivate AI usage at a later point. You can request the deletion of your chat histories at any time (Art. 17 GDPR).
+deletion of your user account (e.g. after exmatriculation), the chat histories are also deleted. If you deactivate AI usage or revoke your consent to further AI usage, no new AI data
+is collected or processed. Existing chat histories are not automatically deleted and remain stored in case you wish to reactivate AI usage at a later point or access previous
+conversations. You can request the deletion of your chat histories at any time (Art. 17 GDPR).
 
 ### Email notifications
 
@@ -315,8 +317,8 @@ Artemis can send email notifications to users, e.g. about course announcements, 
 of TUM and used exclusively for communication in the context of teaching and platform operation. Bulk emails are sent via the BCC field, so that the email addresses of the
 recipients are not visible to each other.
 
-**Retention period:** The email addresses are synchronized from the directory service of TUM during login and stored in the user table of Artemis (see section "Login"). The
-retention period is governed by the statutory retention periods (up to 5 years after the end of the respective semester).
+**Retention period:** The email addresses are synchronized from the directory service of TUM during login and stored in the user table of Artemis. The retention period is governed by
+the section "Login".
 
 ### Automated decision-making
 

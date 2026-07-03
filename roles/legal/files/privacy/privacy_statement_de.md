@@ -49,7 +49,7 @@ E-Mail: ito@cit.tum.de
 
 Die Datensicherung (Backups) erfolgt beim [Leibniz-Rechenzentrum (LRZ)](https://www.lrz.de/) der Bayerischen Akademie der Wissenschaften ausschließlich innerhalb der Europäischen Union auf Grundlage einer Auftragsverarbeitung.
 
-Für die optionalen KI-gestützten Funktionen (Iris, Athena) werden, sofern Nutzende deren Verwendung aktiv einwilligen, Daten zur Verarbeitung an Microsoft Azure innerhalb der Europäischen Union übermittelt. Grundlage hierfür ist ein Auftragsverarbeitungsvertrag (AVV) zwischen der TUM und Microsoft. Eine dauerhafte Speicherung der Daten findet dort nicht statt.
+Für die optionalen KI-gestützten Funktionen (Iris, Athena) werden, sofern Nutzende deren Verwendung aktiv einwilligen, Daten zur Verarbeitung an Microsoft Azure innerhalb der Europäischen Union übermittelt. Dies kann die für die jeweilige KI-Anfrage erforderlichen Inhalte sowie, soweit für eine persönliche Ansprache erforderlich, den Vornamen der anfragenden Person umfassen. Grundlage hierfür ist ein Auftragsverarbeitungsvertrag (AVV) zwischen der TUM und Microsoft. Eine dauerhafte Speicherung der Daten findet dort nicht statt.
 
 ### Dauer der Speicherung der personenbezogenen Daten
 
@@ -57,7 +57,7 @@ Ihre Daten werden nur so lange gespeichert, wie dies unter Beachtung gesetzliche
 
 ### Ihre Rechte
 
-Soweit wir von Ihnen personenbezogene Daten verarbeiten, stehen Ihnen als Betroffener nachfolgende Rechte zu:
+Soweit wir von Ihnen personenbezogene Daten verarbeiten, stehen Ihnen als betroffener Person nachfolgende Rechte zu:
 
 * Sie haben das Recht auf Auskunft über die zu Ihrer Person gespeicherten Daten (Art. 15 DSGVO).
 * Sollten unrichtige personenbezogene Daten verarbeitet werden, steht Ihnen ein Recht auf Berichtigung zu (Art. 16 DSGVO).
@@ -124,7 +124,7 @@ eingeschränkt werden.
 
 Artemis verwendet ausschließlich technisch notwendige Cookies:
 
-* **Session-Cookie:** Zur Aufrechterhaltung Ihrer Anmeldesitzung. Wird nach dem Schließen des Browsers bzw. nach Ablauf der Sitzung gelöscht.
+* **Anmelde- und Sitzungs-Cookie:** Zur Aufrechterhaltung Ihrer Anmeldesitzung. Wird nach dem Abmelden, nach dem Schließen des Browsers bzw. nach Ablauf der konfigurierten Gültigkeitsdauer gelöscht.
 * **Spracheinstellung:** Zur Speicherung Ihrer bevorzugten Sprache (Deutsch/Englisch).
 * **Passkey-Anmeldung (WebAuthn):** Bei der passwortlosen Anmeldung mit einem Passkey wird ein technisch notwendiges, kurzlebiges Cookie gesetzt, das eine zufällige Kennung zur Zuordnung der zugehörigen WebAuthn-Challenge enthält. Das Cookie ist auf 5 Minuten befristet und wird nach Abschluss der Anmeldung gelöscht.
 
@@ -146,7 +146,7 @@ Die Verbindung zum LDAP-Server ist verschlüsselt (LDAPS/StartTLS), und die gesa
 
 Zusätzlich bietet Artemis **Passkeys** (WebAuthn/FIDO2) als passwortlose, phishing-resistente und datensparsame Authentifizierungsmethode an. Bei Verwendung eines Passkeys wird kein Passwort an den LDAP-Server übermittelt. Die Nutzung ist optional; Benutzername und Passwort bleiben als Alternative verfügbar. 
 
-**Speicherdauer:** Benutzername, Name, E-Mail-Adresse und Matrikelnummer werden für die Dauer der Nutzung der Plattform sowie darüber hinaus so lange gespeichert, wie dies aufgrund gesetzlicher Aufbewahrungsfristen für prüfungs- und notenrelevante Daten erforderlich ist. Da in jedem Kurs prüfungs- bzw. notenrelevante Daten anfallen können, werden diese Daten bis zu 5 Jahre nach Ende des jeweils letzten relevanten Semesters aufbewahrt und anschließend gelöscht. Eine frühere Löschung erfolgt auf Antrag, soweit keine gesetzlichen Aufbewahrungsfristen entgegenstehen.
+**Speicherdauer:** Benutzername, Name, E-Mail-Adresse und Matrikelnummer werden für die Dauer der Nutzung der Plattform gespeichert. Bei Exmatrikulation oder auf Antrag werden diese Daten gelöscht, soweit keine gesetzlichen Aufbewahrungsfristen entgegenstehen. Soweit Stammdaten zur Zuordnung prüfungs- oder bewertungsrelevanter Unterlagen erforderlich sind, können sie zusammen mit diesen Unterlagen gemäß den gesetzlichen Aufbewahrungsfristen für bis zu 5 Jahre nach Ende des jeweiligen relevanten Semesters gespeichert bleiben.
 
 ### Profilbilder
 
@@ -240,7 +240,7 @@ Es werden **keine** Inhalte Ihrer Abgaben, Nachrichten oder persönlichen Daten 
 
 Artemis bietet mit Iris eine KI-gestützte Lernassistentin an, die Studierende bei Programmierübungen, Modellierungs- und Textaufgaben unterstützt. Darüber hinaus kann das Subsystem Athena KI-gestütztes Feedback zu Übungsabgaben bereitstellen. Die Nutzung dieser KI-Funktionen ist **freiwillig** und erfordert Ihre **ausdrückliche Einwilligung (Opt-In)**.
 
-**Opt-In und Wahlmöglichkeiten:** Beim ersten Login werden Sie aufgefordert, eine der folgenden Optionen zu wählen:
+**Opt-In und Wahlmöglichkeiten:** Vor der erstmaligen Nutzung einer KI-Funktion werden Sie aufgefordert, eine der folgenden Optionen zu wählen:
 
 1. **Cloud AI:** Nutzung von KI-Modellen (z. B. GPT-4, GPT-5) über Microsoft Azure innerhalb der Europäischen Union.
 2. **Lokale KI (experimentell):** Nutzung von Open-Source-Modellen (z. B. Gemma, Llama), die ausschließlich auf der GPU-Infrastruktur der TUM laufen.
@@ -254,9 +254,9 @@ Sie können Ihre Wahl jederzeit in den **Kontoeinstellungen** unter „KI-Nutzun
 * Chat-Nachrichten mit Iris
 * Von Ihnen geschriebener Quellcode für Programmierübungen
 * Aufgabenstellungen und Kursmaterialien (als Kontext)
-* Ihr Name, damit Iris Sie im Dialog persönlich ansprechen kann
+* Ihr Vorname, damit Iris Sie im Dialog persönlich ansprechen kann
 * Ihr Bearbeitungsfortschritt in einer Aufgabe (z. B. der erreichte Punktestand in Prozent), damit Iris Sie beim Reflektieren Ihres Lernstands unterstützen kann. Ihre offiziellen Prüfungsnoten werden dabei nicht übermittelt.
-* In öffentlichen Kurskanälen (z. B. Frage-und-Antwort-Foren) auf Ihre Anfrage hin die umliegenden Nachrichten als Gesprächskontext – ausschließlich von Nutzenden, die selbst ebenfalls in die KI-Nutzung eingewilligt haben
+* In öffentlichen Kurskanälen (z. B. Frage-und-Antwort-Foren) auf Ihre Anfrage hin die umliegenden Nachrichten als Gesprächskontext – ausschließlich von Nutzenden, die selbst ebenfalls in die KI-Nutzung eingewilligt haben; systemseitig geführte Namen und andere direkte Kennungen der Autorinnen und Autoren werden dabei pseudonymisiert
 
 **Welche Daten werden NICHT verarbeitet:**
 
@@ -266,12 +266,12 @@ Sie können Ihre Wahl jederzeit in den **Kontoeinstellungen** unter „KI-Nutzun
 
 **Datensicherheit bei Cloud AI:**
 
-* DSGVO-konforme Verarbeitung in EU-Rechenzentren von Microsoft Azure
+* Verarbeitung in EU-Rechenzentren von Microsoft Azure auf Grundlage eines Auftragsverarbeitungsvertrags
 * Ihre Daten verlassen nicht die Europäische Union
 * Enterprise-Sicherheitsinfrastruktur von Microsoft Azure, abgesichert durch einen Auftragsverarbeitungsvertrag (AVV) zwischen der TUM und Microsoft
 * Ihre Daten werden **nicht** zum Trainieren oder Verbessern von KI-Modellen verwendet
 * Alle Datenübertragungen sind verschlüsselt
-* Übungsinhalte werden nur zur Verarbeitung an Azure gesendet und dort nicht dauerhaft gespeichert
+* Die für die jeweilige KI-Anfrage erforderlichen Inhalte (z. B. Fragen, Chat-Nachrichten, Übungsinhalte und der Vorname zur Personalisierung) werden nur zur Verarbeitung an Azure gesendet und dort nicht dauerhaft gespeichert
 
 **Datensicherheit bei lokaler KI:**
 
@@ -284,13 +284,13 @@ Weitere Informationen finden Sie unter [Ihre KI-Optionen in Artemis](/llm-select
 
 **Rechtsgrundlage:** Art. 6 Abs. 1 Lit. a DSGVO (Einwilligung). Die Nutzung von Iris und Athena und die damit verbundene Datenverarbeitung erfolgt ausschließlich auf Basis Ihrer ausdrücklichen Einwilligung, die Sie jederzeit widerrufen können.
 
-**Speicherdauer:** Chat-Verläufe mit Iris werden gespeichert, solange Ihr Benutzerkonto auf der Plattform aktiv ist, damit Sie jederzeit auf frühere Konversationen zugreifen können. Bei Löschung Ihres Benutzerkontos (z. B. nach Exmatrikulation) werden die Chat-Verläufe ebenfalls gelöscht. Wenn Sie die KI-Nutzung deaktivieren, werden keine neuen Daten erhoben; bestehende Chat-Verläufe bleiben erhalten, falls Sie die KI-Nutzung zu einem späteren Zeitpunkt wieder aktivieren möchten. Sie können jederzeit die Löschung Ihrer Chat-Verläufe verlangen (Art. 17 DSGVO).
+**Speicherdauer:** Chat-Verläufe mit Iris werden gespeichert, solange Ihr Benutzerkonto auf der Plattform aktiv ist, damit Sie jederzeit auf frühere Konversationen zugreifen können. Bei Löschung Ihres Benutzerkontos (z. B. nach Exmatrikulation) werden die Chat-Verläufe ebenfalls gelöscht. Wenn Sie die KI-Nutzung deaktivieren oder Ihre Einwilligung zur weiteren KI-Nutzung widerrufen, werden keine neuen KI-Daten erhoben oder verarbeitet. Bereits bestehende Chat-Verläufe werden dadurch nicht automatisch gelöscht und bleiben erhalten, falls Sie die KI-Nutzung zu einem späteren Zeitpunkt wieder aktivieren oder frühere Konversationen nachvollziehen möchten. Sie können jederzeit die Löschung Ihrer Chat-Verläufe verlangen (Art. 17 DSGVO).
 
 ### E-Mail-Benachrichtigungen
 
 Artemis kann E-Mail-Benachrichtigungen an Nutzer versenden, z. B. über Kursankündigungen, Bewertungsergebnisse oder Systemmeldungen. Die E-Mail-Adressen werden aus dem Verzeichnisdienst der TUM bezogen und ausschließlich für die Kommunikation im Rahmen der Lehre und des Plattformbetriebs verwendet. Sammel-E-Mails werden über das BCC-Feld versendet, sodass die E-Mail-Adressen der Empfänger nicht untereinander sichtbar sind.
 
-**Speicherdauer:** Die E-Mail-Adressen werden im Rahmen der Anmeldung aus dem Verzeichnisdienst der TUM synchronisiert und in der Nutzertabelle von Artemis gespeichert (siehe Abschnitt „Anmeldung"). Die Speicherdauer richtet sich nach den gesetzlichen Aufbewahrungsfristen (bis zu 5 Jahre nach Ende des jeweiligen Semesters).
+**Speicherdauer:** Die E-Mail-Adressen werden im Rahmen der Anmeldung aus dem Verzeichnisdienst der TUM synchronisiert und in der Nutzertabelle von Artemis gespeichert. Die Speicherdauer richtet sich nach dem Abschnitt „Anmeldung".
 
 ### Automatisierte Entscheidungsfindung
 
