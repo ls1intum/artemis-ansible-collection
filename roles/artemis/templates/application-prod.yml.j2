@@ -93,17 +93,12 @@ spring:
 {% else %}
   liquibase:
       enabled: false #not needed for build agents
-  autoconfigure:
-      exclude:
-          # Hibernate and DataSource are not needed in the build agent
-          - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
-          - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
-          # Those metrics are repeated here, because overriding the `exclude` array is not possible
-          - org.springframework.boot.actuate.autoconfigure.metrics.data.RepositoryMetricsAutoConfiguration
-          - org.springframework.boot.actuate.autoconfigure.metrics.jdbc.DataSourcePoolMetricsAutoConfiguration
-          - org.springframework.boot.actuate.autoconfigure.metrics.startup.StartupTimeMetricsListenerAutoConfiguration
-          - org.springframework.boot.actuate.autoconfigure.metrics.task.TaskExecutorMetricsAutoConfiguration
-          - org.springframework.boot.actuate.autoconfigure.metrics.web.tomcat.TomcatMetricsAutoConfiguration
+  # Hibernate, DataSource and the related metrics auto-configurations are excluded for build agents by
+  # the WAR-bundled config/application-buildagent.yml (active whenever the "buildagent" profile is set).
+  # Do NOT repeat spring.autoconfigure.exclude here: this external file outranks the bundled config and
+  # the exclude list replaces rather than merges, so a stale copy silently overrides the WAR list. That
+  # is exactly what broke every prod build agent when the Spring Boot 4 upgrade relocated these classes
+  # but this template kept the old package names.
 {% endif %}
 
 
@@ -406,7 +401,7 @@ artemis:
 {% endif %}
 {% endif %}
 
-{% if theia is defined and theia is not none %}
+{% if artemis_computed_is_core_node and theia is defined and theia is not none %}
   theia:
     enabled: true
 {% if theia.portal_url is defined and theia.portal_url is not none %}
