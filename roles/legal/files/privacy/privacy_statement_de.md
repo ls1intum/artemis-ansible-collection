@@ -15,9 +15,9 @@ werden.
 
 ### Name und Kontaktdaten des Verantwortlichen
 
-Prof. Dr. Stephan Krusche
-krusche@tum.de
-+49 89 289 18233
+Prof. Dr. Stephan Krusche  
+krusche@tum.de  
++49 89 289 18233  
 
 Technische Universität München  
 Postanschrift: Arcisstraße 21, 80333 München  

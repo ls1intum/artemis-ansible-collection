@@ -15,9 +15,9 @@ In the following, we provide information on the type, scope and purpose of the c
 
 ### Name and contact details of the controller
 
-Prof. Dr. Stephan Krusche
-krusche@tum.de
-+49 89 289 18233
+Prof. Dr. Stephan Krusche  
+krusche@tum.de  
++49 89 289 18233  
 
 Technical University of Munich  
 Postal address: Arcisstraße 21, 80333 Munich  
