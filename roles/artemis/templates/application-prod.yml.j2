@@ -2,6 +2,26 @@
 
 spring:
 {% if artemis_computed_is_core_node %}
+{% if artemis_oidc is defined and artemis_oidc.enabled | default(false) %}
+  security:
+    oauth2:
+      client:
+        registration:
+          oidc:
+            client-id: {{ artemis_oidc.client_id | quote }}
+            client-secret: {{ artemis_oidc.client_secret | quote }}
+            scope:
+              - openid
+              - profile
+              - email
+        provider:
+          oidc:
+            issuer-uri: {{ artemis_oidc.issuer_uri | quote }}
+            authorization-uri: {{ artemis_oidc.authorization_uri | quote }}
+            token-uri: {{ artemis_oidc.token_uri | quote }}
+            user-info-uri: {{ artemis_oidc.user_info_uri | quote }}
+            jwk-set-uri: {{ artemis_oidc.jwk_set_uri | quote }}
+{% endif %}
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     url: jdbc:{{ artemis_database_type }}://{{ artemis_database_host }}:{{ artemis_database_port }}/{{ artemis_database_dbname }}?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
@@ -150,6 +170,16 @@ artemis:
 {% if ldap.url is defined and ldap.url is not none%}
     use-external: true
 {% else %}
+{% if artemis_oidc is defined and artemis_oidc.enabled | default(false) %}
+    oidc:
+      enabled: true
+      mappings:
+        username: "{{ artemis_oidc.mappings.username | default('preferred_username') }}"
+        matriculation-number: "{{ artemis_oidc.mappings.matriculation_number | default('matriculation_number') }}"
+        first-name: "{{ artemis_oidc.mappings.first_name | default('given_name') }}"
+        last-name: "{{ artemis_oidc.mappings.last_name | default('family_name') }}"
+        email: "{{ artemis_oidc.mappings.email | default('email') }}"
+{% endif %}
     use-external: false
 {% endif %}
 {% if artemis_passkey_enabled %}
@@ -498,6 +528,10 @@ info:
 {% endif %}
   textAssessmentAnalyticsEnabled: true
   localLLMDeploymentEnabled: {{ artemis_local_llm_deployment_enabled | lower }}
+{% if artemis_oidc is defined and artemis_oidc.enabled | default(false) %}
+  oidc:
+    buttonLabel: {{ artemis_oidc.button_label | default('TUM Login') | quote }}
+{% endif %}
   sentry:
 {% if sentry.dsn | default('') | length %}
     dsn: {{ sentry.dsn | quote }}
