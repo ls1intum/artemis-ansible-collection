@@ -184,11 +184,11 @@ artemis:
     oidc:
       enabled: true
       mappings:
-        username: "{{ artemis_oidc.mappings.username | default('preferred_username') }}"
-        matriculation-number: "{{ artemis_oidc.mappings.matriculation_number | default('matriculation_number') }}"
-        first-name: "{{ artemis_oidc.mappings.first_name | default('given_name') }}"
-        last-name: "{{ artemis_oidc.mappings.last_name | default('family_name') }}"
-        email: "{{ artemis_oidc.mappings.email | default('email') }}"
+        username: "{{ (artemis_oidc.mappings | default({})).username | default('preferred_username') }}"
+        matriculation-number: "{{ (artemis_oidc.mappings | default({})).matriculation_number | default('matriculation_number') }}"
+        first-name: "{{ (artemis_oidc.mappings | default({})).first_name | default('given_name') }}"
+        last-name: "{{ (artemis_oidc.mappings | default({})).last_name | default('family_name') }}"
+        email: "{{ (artemis_oidc.mappings | default({})).email | default('email') }}"
 {% endif %}
     use-external: false
 {% endif %}
