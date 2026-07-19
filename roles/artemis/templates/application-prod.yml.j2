@@ -16,11 +16,21 @@ spring:
               - email
         provider:
           oidc:
+{% if artemis_oidc.issuer_uri | default('') | length > 0 %}
             issuer-uri: {{ artemis_oidc.issuer_uri | quote }}
+{% endif %}
+{% if artemis_oidc.authorization_uri | default('') | length > 0 %}
             authorization-uri: {{ artemis_oidc.authorization_uri | quote }}
+{% endif %}
+{% if artemis_oidc.token_uri | default('') | length > 0 %}
             token-uri: {{ artemis_oidc.token_uri | quote }}
+{% endif %}
+{% if artemis_oidc.user_info_uri | default('') | length > 0 %}
             user-info-uri: {{ artemis_oidc.user_info_uri | quote }}
+{% endif %}
+{% if artemis_oidc.jwk_set_uri | default('') | length > 0 %}
             jwk-set-uri: {{ artemis_oidc.jwk_set_uri | quote }}
+{% endif %}
 {% endif %}
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
