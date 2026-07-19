@@ -1,7 +1,14 @@
 ---
 storage_export: /srv/artemis
 storage_backup_password: "" #FIXME
-storage_backup_dir: /opt/backup
+
+storage_backup_borg_server_user: borg
+storage_backup_borg_server_user_home: /backup
+storage_backup_borg_ssh_identity: /root/.ssh/id_borg
+storage_backup_borg_server_url: "" #FIXME
+storage_backup_borg_server_port: 22
+storage_backup_borg_repo_name: artemis-storage
+
 
 storage_backup_script_path: /opt/backup.sh
 storage_backup_compression: zstd
