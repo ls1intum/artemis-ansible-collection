@@ -134,22 +134,24 @@ artemis_external_password_reset_link_de: "https://campus.tum.de/tumonline/co_loc
 artemis_passkey_enabled: false
 artemis_passkey_require_for_administrator_features: false
 
-artemis_oidc:
-  enabled: false
-  button_label: "TUM Login"
-  client_id: ""
-  client_secret: ""
-  issuer_uri: ""
-  authorization_uri: ""
-  token_uri: ""
-  user_info_uri: ""
-  jwk_set_uri: ""
-  mappings:
-    username: "preferred_username"
-    matriculation_number: "matriculation_number"
-    first_name: "given_name"
-    last_name: "family_name"
-    email: "email"
+
+# OIDC / OAuth2 login (e.g. TUM Login). Alternative to LDAP for external authentication.
+#artemis_oidc:
+#  enabled: false
+#  button_label: "TUM Login"
+#  client_id: ""
+#  client_secret: ""
+#  issuer_uri: ""
+#  authorization_uri: ""
+#  token_uri: ""
+#  user_info_uri: ""
+#  jwk_set_uri: ""
+#  mappings:
+#    username: "preferred_username"
+#    matriculation_number: "matriculation_number"
+#    first_name: "given_name"
+#    last_name: "family_name"
+#    email: "email"
 
 #artemis_global_search_enabled: false
 
