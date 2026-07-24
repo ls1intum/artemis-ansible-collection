@@ -34,10 +34,10 @@
   notify: Restart hermes
   when: setup_system
 
-- name: Create Apple certificate file
+- name: Create Apple APNs signing key file
   ansible.builtin.copy:
-    content: "{{ hermes_apns_certificate_content | b64decode }}"
-    dest: "{{ hermes_working_directory }}/{{ hermes_apns_certificate_path }}"
+    content: "{{ hermes_apns_token_key_content | b64decode }}"
+    dest: "{{ hermes_working_directory }}/{{ hermes_apns_token_key_path }}"
     mode: "600"
     owner: "root"
     group: "root"
