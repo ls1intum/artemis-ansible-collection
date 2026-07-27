@@ -34,12 +34,16 @@
 # at daemon start (DOCKER, DOCKER-USER, DOCKER-FORWARD, ...) and the nat MASQUERADE rule for
 # the bridge network. Reloading unconditionally therefore broke container networking on every
 # repeat run of this role.
-- name: Load IPv4 rules
+#
+# These deliberately are not handlers: the reload has to happen before the Docker check below,
+# while handlers only run at the end of the play. Using `meta: flush_handlers` instead would
+# also fire pending handlers of earlier roles, which is not what we want here.
+- name: Load IPv4 rules # noqa: no-handler
   become: true
   shell: "iptables-restore < /etc/iptables/rules.v4"
   when: copy4.changed
 
-- name: Load IPv6 rules
+- name: Load IPv6 rules # noqa: no-handler
   become: true
   shell: "ip6tables-restore < /etc/iptables/rules.v6"
   when: copy6.changed
