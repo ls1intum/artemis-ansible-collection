@@ -8,10 +8,9 @@
     state: latest
     update_cache: true
 
-- name: Check if docker service exists
-  stat:
-    path: /etc/systemd/system/docker.service.d/
-  register: docker_service
+- name: Gather service facts
+  become: true
+  service_facts:
 
 - name: Copy rules.v4
   become: true
@@ -58,7 +57,7 @@
   changed_when: false
   failed_when: false
   check_mode: false
-  when: docker_service.stat.exists
+  when: "'docker.service' in ansible_facts.services"
 
 - name: Restart docker to reinstall its iptables rules
   become: true
@@ -66,6 +65,6 @@
     name: docker
     state: restarted
   when:
-    - docker_service.stat.exists
+    - "'docker.service' in ansible_facts.services"
     - docker_nat_rules.stdout is defined
     - "'MASQUERADE' not in docker_nat_rules.stdout"
