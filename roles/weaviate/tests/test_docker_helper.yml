@@ -1,0 +1,55 @@
+---
+- name: Test Weaviate Docker helper image-pull modes
+  hosts: localhost
+  gather_facts: false
+  vars:
+    weaviate_working_directory: /opt/weaviate
+  tasks:
+    - name: Create isolated test directory
+      ansible.builtin.tempfile:
+        state: directory
+        prefix: weaviate-helper-test.
+      register: weaviate_helper_test_root
+
+    - name: Render credential-only helper
+      ansible.builtin.template:
+        src: "{{ playbook_dir | dirname }}/templates/weaviate-docker.sh.j2"
+        dest: "{{ weaviate_helper_test_root.path }}/no-pull.sh"
+        mode: "0700"
+      vars:
+        weaviate_pull_images: false
+
+    - name: Render default helper
+      ansible.builtin.template:
+        src: "{{ playbook_dir | dirname }}/templates/weaviate-docker.sh.j2"
+        dest: "{{ weaviate_helper_test_root.path }}/pull.sh"
+        mode: "0700"
+      vars:
+        weaviate_pull_images: true
+
+    - name: Read rendered helpers
+      ansible.builtin.slurp:
+        src: "{{ item }}"
+      loop:
+        - "{{ weaviate_helper_test_root.path }}/no-pull.sh"
+        - "{{ weaviate_helper_test_root.path }}/pull.sh"
+      register: weaviate_rendered_helpers
+
+    - name: Verify image-pull modes
+      ansible.builtin.assert:
+        that:
+          - "'--pull always' not in (weaviate_rendered_helpers.results[0].content | b64decode)"
+          - "'--pull never' in (weaviate_rendered_helpers.results[0].content | b64decode)"
+          - "'--pull always' in (weaviate_rendered_helpers.results[1].content | b64decode)"
+          - "'--pull never' not in (weaviate_rendered_helpers.results[1].content | b64decode)"
+
+    - name: Verify rendered shell syntax
+      ansible.builtin.command:
+        argv:
+          - bash
+          - -n
+          - "{{ item }}"
+      loop:
+        - "{{ weaviate_helper_test_root.path }}/no-pull.sh"
+        - "{{ weaviate_helper_test_root.path }}/pull.sh"
+      changed_when: false

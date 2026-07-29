@@ -24,7 +24,7 @@ HELP
 
 function start {
     echo "Starting Weaviate services..."
-    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --pull always
+    docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --pull {{ 'always' if weaviate_pull_images | bool else 'never' }}
 }
 
 function stop {
@@ -108,7 +108,7 @@ case "$subcommand" in
         run_docker_compose_cmd "$@"
         ;;
     *)
-        printf "Invalid Command: $subcommand\n\n" 1>&2
+        printf 'Invalid Command: %s\n\n' "$subcommand" 1>&2
         general_help
         exit 1
         ;;

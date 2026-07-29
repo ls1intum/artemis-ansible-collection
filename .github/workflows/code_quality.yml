@@ -15,6 +15,14 @@ jobs:
     steps:
     # Important: This sets up your GITHUB_WORKSPACE environment variable
       - uses: actions/checkout@v4
+      - name: Test Pyris deployment helper
+        run: bash roles/pyris/tests/test_pyris_docker.sh
+      - name: Install Ansible Core
+        run: python -m pip install ansible-core
+      - name: Test Pyris bootstrap state
+        run: ansible-playbook roles/pyris/tests/test_bootstrap_state.yml
+      - name: Test Weaviate Docker helper
+        run: ansible-playbook roles/weaviate/tests/test_docker_helper.yml
       - name: Run ansible-lint
         uses: ansible/ansible-lint@39ea20ef8957633d89c45485028b68e232a8c1c2
         with:

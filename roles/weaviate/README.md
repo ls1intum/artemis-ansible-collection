@@ -52,8 +52,12 @@ The following variables **must** be set:
 # Domain name for Weaviate instance
 weaviate_domain: "weaviate.example.com"
 
-# API key for authentication (generate with: openssl rand -base64 32)
-weaviate_api_key: "your-secure-api-key-here"
+# Primary API key used by service scripts
+weaviate_primary_api_key: "your-secure-api-key-here"
+
+# Keys accepted by Weaviate. The primary key must be a member.
+weaviate_accepted_api_keys:
+  - "your-secure-api-key-here"
 
 # Email for Let's Encrypt certificate notifications
 letsencrypt_email: "your-email@example.com"
@@ -68,7 +72,12 @@ Default variables can be found in the [defaults/main.yml](defaults/main.yml) fil
 ```yaml
 weaviate_build_version: "1.30.0"
 weaviate_working_directory: "/opt/weaviate"
+weaviate_pull_images: true
 ```
+
+Set `weaviate_pull_images: false` for a credential-only restart that must use
+Compose's `--pull never` policy and reuse the images already present on the
+host. Verify image IDs before and after such a rollout.
 
 #### User Management
 
@@ -131,7 +140,10 @@ Here is an example playbook for a single node installation:
     - role: ls1intum.artemis.weaviate
       vars:
         weaviate_domain: "weaviate.example.com"
-        weaviate_api_key: "your-secure-api-key-here"
+        weaviate_primary_api_key: "your-secure-api-key-here"
+        weaviate_accepted_api_keys:
+          - "your-secure-api-key-here"
+        weaviate_apply_runtime: false
         letsencrypt_email: "admin@example.com"
 ```
 
@@ -143,7 +155,9 @@ Here is an example playbook for a single node installation:
     - role: ls1intum.artemis.weaviate
       vars:
         weaviate_domain: "weaviate.example.com"
-        weaviate_api_key: "your-secure-api-key-here"
+        weaviate_primary_api_key: "your-secure-api-key-here"
+        weaviate_accepted_api_keys:
+          - "your-secure-api-key-here"
         letsencrypt_email: "admin@example.com"
 
         # Restrict access to private networks only
