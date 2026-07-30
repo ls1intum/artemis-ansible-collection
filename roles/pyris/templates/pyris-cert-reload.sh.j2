@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-/usr/bin/docker restart "{{ pyris_nginx_container_name }}"
+/usr/bin/docker exec "{{ pyris_nginx_container_name }}" nginx -s reload

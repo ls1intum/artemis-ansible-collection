@@ -72,12 +72,7 @@ Default variables can be found in the [defaults/main.yml](defaults/main.yml) fil
 ```yaml
 weaviate_build_version: "1.30.0"
 weaviate_working_directory: "/opt/weaviate"
-weaviate_pull_images: true
 ```
-
-Set `weaviate_pull_images: false` for a credential-only restart that must use
-Compose's `--pull never` policy and reuse the images already present on the
-host. Verify image IDs before and after such a rollout.
 
 #### User Management
 

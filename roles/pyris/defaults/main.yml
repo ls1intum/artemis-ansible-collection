@@ -48,4 +48,4 @@ proxy_ssl_certificate_path: # FIXME
 proxy_ssl_certificate_key_path: # FIXME
 proxy_ssl_certificate_source_path: # FIXME
 proxy_ssl_certificate_key_source_path: # FIXME
-pyris_nginx_container_name: "nginx"
+pyris_nginx_container_name: "pyris-nginx"

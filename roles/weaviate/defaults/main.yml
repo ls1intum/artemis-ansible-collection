@@ -29,7 +29,6 @@ weaviate_accepted_api_keys:
   - "{{ weaviate_primary_api_key }}"
 weaviate_api_user: "admin"
 weaviate_apply_runtime: false
-weaviate_pull_images: true
 
 # Logging
 # Options: trace, debug, info, warning, error, fatal, panic
