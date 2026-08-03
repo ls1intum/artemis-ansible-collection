@@ -132,12 +132,22 @@ server {
 		# If an attacker spams this endpoint, only the first three requests will come through.
 		# This only resets if the violation of the rate limit stops.
         limit_req zone=loginlimit burst=3 delay=2;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 
     # SAML2 login callback: exchanges an established SAML2 context for an Artemis JWT cookie.
     location /api/core/public/saml2 {
         proxy_pass {{ proxy_node_protocol }}://app/api/core/public/saml2;
         limit_req zone=loginlimit burst=3 delay=2;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 
     # Account recovery and registration. Each of these either sends mail to a user-supplied address or
@@ -147,21 +157,41 @@ server {
     location /api/core/public/account/reset-password/init {
         proxy_pass {{ proxy_node_protocol }}://app/api/core/public/account/reset-password/init;
         limit_req zone=accountrecoverylimit burst=3 nodelay;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 
     location /api/core/public/account/reset-password/finish {
         proxy_pass {{ proxy_node_protocol }}://app/api/core/public/account/reset-password/finish;
         limit_req zone=accountrecoverylimit burst=3 nodelay;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 
     location /api/core/public/register {
         proxy_pass {{ proxy_node_protocol }}://app/api/core/public/register;
         limit_req zone=accountrecoverylimit burst=3 nodelay;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 
     location /api/core/public/activate {
         proxy_pass {{ proxy_node_protocol }}://app/api/core/public/activate;
         limit_req zone=accountrecoverylimit burst=3 nodelay;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 
     location /login/webauthn {
@@ -173,6 +203,11 @@ server {
 		# If an attacker spams this endpoint, only the first three requests will come through.
 		# This only resets if the violation of the rate limit stops.
         limit_req zone=loginlimit burst=3 delay=2;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 
     # Git credential handshake. Every git-over-HTTP operation starts with exactly one /info/refs
