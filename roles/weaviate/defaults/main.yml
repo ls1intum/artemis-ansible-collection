@@ -41,6 +41,10 @@ letsencrypt_email: # FIXME - e.g., your-email@example.com
 #   Private networks: "10.0.0.0/8,192.168.0.0/16,172.16.0.0/12"
 weaviate_allowed_ips: ""
 
+# HTTP request limits enforced by Traefik per source.
+weaviate_rate_limit_average: 1000
+weaviate_rate_limit_burst: 2000
+
 ##############################################################################
 # Multi2vec-CLIP Configuration
 ##############################################################################
