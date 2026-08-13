@@ -246,10 +246,6 @@ artemis:
 {% if version_control.localvc.use_version_control_access_token is defined %}
     use-version-control-access-token: {{ version_control.localvc.use_version_control_access_token | lower }}
 {% endif %}
-{% if artemis_computed_is_core_node or (version_control.localvc.build_agent_git_credentials is not defined and version_control.localvc.build_agent_use_ssh is not defined) %}
-    user: {{ artemis_internal_admin_user }}
-    password: {{ artemis_internal_admin_password }}
-{% endif %}
 {% if version_control.localvc.build_agent_git_credentials is defined %}
     build-agent-git-username: {{ version_control.localvc.build_agent_git_credentials.user }}
     build-agent-git-password: {{ version_control.localvc.build_agent_git_credentials.password }}
