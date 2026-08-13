@@ -43,6 +43,17 @@ ldap:
   password: "your_ldap_password"
 ```
 
+OIDC login configuration (e.g. TUM Login, an alternative to LDAP):
+```
+artemis_oidc:
+  enabled: true
+  button_label: "TUM Login"
+  client_id: "your_client_id"
+  client_secret: "your_client_secret"
+  issuer_uri: "https://login.example.com"
+```
+You can provide `authorization_uri`, `token_uri`, `user_info_uri`, and `jwk_set_uri` individually. Claim mappings default to standard OIDC claims and can be overridden via `mappings.*`.
+
 To allow internal user registration:
 ```
 user_management:

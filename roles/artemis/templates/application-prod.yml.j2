@@ -2,6 +2,36 @@
 
 spring:
 {% if artemis_computed_is_core_node %}
+{% if artemis_oidc is defined and artemis_oidc.enabled | default(false) %}
+  security:
+    oauth2:
+      client:
+        registration:
+          oidc:
+            client-id: {{ artemis_oidc.client_id | quote }}
+            client-secret: {{ artemis_oidc.client_secret | quote }}
+            scope:
+              - openid
+              - profile
+              - email
+        provider:
+          oidc:
+{% if artemis_oidc.issuer_uri | default('') | length > 0 %}
+            issuer-uri: {{ artemis_oidc.issuer_uri | quote }}
+{% endif %}
+{% if artemis_oidc.authorization_uri | default('') | length > 0 %}
+            authorization-uri: {{ artemis_oidc.authorization_uri | quote }}
+{% endif %}
+{% if artemis_oidc.token_uri | default('') | length > 0 %}
+            token-uri: {{ artemis_oidc.token_uri | quote }}
+{% endif %}
+{% if artemis_oidc.user_info_uri | default('') | length > 0 %}
+            user-info-uri: {{ artemis_oidc.user_info_uri | quote }}
+{% endif %}
+{% if artemis_oidc.jwk_set_uri | default('') | length > 0 %}
+            jwk-set-uri: {{ artemis_oidc.jwk_set_uri | quote }}
+{% endif %}
+{% endif %}
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     url: jdbc:{{ artemis_database_type }}://{{ artemis_database_host }}:{{ artemis_database_port }}/{{ artemis_database_dbname }}?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
@@ -150,6 +180,16 @@ artemis:
 {% if ldap.url is defined and ldap.url is not none%}
     use-external: true
 {% else %}
+{% if artemis_oidc is defined and artemis_oidc.enabled | default(false) %}
+    oidc:
+      enabled: true
+      mappings:
+        username: {{ (artemis_oidc.mappings | default({})).username | default('preferred_username') | to_json }}
+        matriculation-number: {{ (artemis_oidc.mappings | default({})).matriculation_number | default('matriculation_number') | to_json }}
+        first-name: {{ (artemis_oidc.mappings | default({})).first_name | default('given_name') | to_json }}
+        last-name: {{ (artemis_oidc.mappings | default({})).last_name | default('family_name') | to_json }}
+        email: {{ (artemis_oidc.mappings | default({})).email | default('email') | to_json }}
+{% endif %}
     use-external: false
 {% endif %}
 {% if artemis_passkey_enabled %}
@@ -494,6 +534,10 @@ info:
 {% endif %}
   textAssessmentAnalyticsEnabled: true
   localLLMDeploymentEnabled: {{ artemis_local_llm_deployment_enabled | lower }}
+{% if artemis_oidc is defined and artemis_oidc.enabled | default(false) %}
+  oidc:
+    buttonLabel: {{ artemis_oidc.button_label | default('TUM Login') | quote }}
+{% endif %}
   sentry:
 {% if sentry.dsn | default('') | length %}
     dsn: {{ sentry.dsn | quote }}
