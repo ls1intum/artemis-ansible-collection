@@ -1,14 +1,44 @@
 ---
+- name: Validate Pyris configuration
+  ansible.builtin.assert:
+    that:
+      - pyris_general_config is mapping
+      - pyris_llm_config is sequence
+      - pyris_llm_config is not string
+      - proxy_ssl_certificate_path | length > 0
+      - proxy_ssl_certificate_key_path | length > 0
+      - proxy_ssl_certificate_source_path | length > 0
+      - proxy_ssl_certificate_key_source_path | length > 0
+    fail_msg: "Pyris configuration and certificate paths must be provided"
+
+- name: Validate Pyris secret-bearing configuration
+  ansible.builtin.assert:
+    that:
+      - pyris_general_config.api_keys | default([]) | length == 1
+      - (pyris_general_config.api_keys | default([{}], true) | first) is mapping
+      - (pyris_general_config.api_keys | default([{}], true) | first).token | default('') | length > 0
+      - pyris_general_config.weaviate.api_key | default('') | length > 0
+      - pyris_llm_config | length > 0
+      - pyris_llm_config | select('mapping') | list | length == pyris_llm_config | length
+    fail_msg: "Pyris must have exactly one API token plus non-empty Weaviate and LLM configuration"
+  no_log: true
+
+- name: Initialize durable Pyris bootstrap state
+  ansible.builtin.include_tasks:
+    file: bootstrap_state.yml
+    apply:
+      become: true
+
 - name: Ensure pyris group {{ pyris_user_group }} exists
   become: true
-  group:
+  ansible.builtin.group:
     name: "{{ pyris_user_group }}"
     gid: "{{ pyris_user_gid }}"
     state: present
 
 - name: Ensure pyris user {{ pyris_user_name }} exists
   become: true
-  user:
+  ansible.builtin.user:
     name: "{{ pyris_user_name }}"
     state: present
     uid: "{{ pyris_user_uid }}"
@@ -17,7 +47,7 @@
 
 - name: Ensure deployment user {{ pyris_deployment_user_name }} exists
   become: true
-  user:
+  ansible.builtin.user:
     name: "{{ pyris_deployment_user_name }}"
     comment: "{{ pyris_deployment_user_comment }}"
     state: present
@@ -29,7 +59,7 @@
 
 - name: Ensure (limited) sudo privileges for user {{ pyris_deployment_user_name }}
   become: true
-  template:
+  ansible.builtin.template:
     src: pyris_deployment_sudoers.j2
     dest: /etc/sudoers.d/pyris_deployment
     validate: "visudo -cf %s"
@@ -41,83 +71,154 @@
   ansible.posix.authorized_key:
     user: "{{ pyris_deployment_user_name }}"
     state: present
-    key: "{{ pyris_deployment_user_public_key }}"
+    key: "{{ pyris_deployment_user_public_keys | join('\n') }}"
+    exclusive: "{{ pyris_deployment_user_authorized_keys_exclusive | bool }}"
   when: (pyris_create_deployment_user | bool)
 
 - name: Create pyris directory
   become: true
-  file:
+  ansible.builtin.file:
     path: "{{ pyris_working_directory }}"
     state: directory
     mode: "775"
 
-- name: Set permissions for pyris directory
+- name: Set ownership for pyris directory
   become: true
-  file:
+  ansible.builtin.file:
     path: "{{ pyris_working_directory }}"
     state: directory
-    recurse: true
     owner: "{{ pyris_user_name }}"
     group: "{{ pyris_user_group }}"
-  notify: restart docker pyris
 
 - name: Create weaviate directory
   become: true
-  file:
+  ansible.builtin.file:
     path: "{{ pyris_weaviate_directory }}"
     state: directory
-    mode: "777"
+    mode: "0775"
 
-- name: Set permissions for weaviate directory
+- name: Set ownership for weaviate directory
   become: true
-  file:
+  ansible.builtin.file:
     path: "{{ pyris_weaviate_directory }}"
     state: directory
-    recurse: true
     owner: "{{ pyris_user_name }}"
     group: "{{ pyris_user_group }}"
-  notify: restart docker pyris
+
+- name: Create transcription data directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ pyris_transcription_data_directory }}"
+    state: directory
+    owner: "{{ pyris_user_name }}"
+    group: "{{ pyris_user_group }}"
+    mode: "0755"
+
+- name: Create stable RBG certificate links
+  become: true
+  ansible.builtin.file:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    state: link
+    force: true
+  loop:
+    - src: "{{ proxy_ssl_certificate_source_path }}"
+      dest: "{{ proxy_ssl_certificate_path }}"
+    - src: "{{ proxy_ssl_certificate_key_source_path }}"
+      dest: "{{ proxy_ssl_certificate_key_path }}"
 
 - name: Copy docker.env to pyris directory
   become: true
-  template:
-    src: "templates/docker.env.j2"
-    dest: "{{ pyris_working_directory }}/docker.env"
+  ansible.builtin.template:
+    src: "docker.env.j2"
+    dest: "{{ pyris_stable_env_file }}"
     owner: "{{ pyris_user_name }}"
     group: "{{ pyris_user_group }}"
-    mode: "660"
-  register: config
-  notify: restart docker pyris
+    mode: "0660"
+
+- name: Bootstrap deployment-owned runtime.env
+  become: true
+  ansible.builtin.copy:
+    content: "PYRIS_DOCKER_TAG='{{ pyris_build_version }}'\n"
+    dest: "{{ pyris_runtime_env_file }}"
+    owner: "{{ pyris_deployment_user_name if pyris_create_deployment_user | bool else pyris_user_name }}"
+    group: "{{ pyris_user_group }}"
+    mode: "0660"
+    force: false
 
 - name: Copy application.yml to pyris directory
   become: true
-  template:
-    src: "templates/application.yml.j2"
+  ansible.builtin.template:
+    src: "application.yml.j2"
     dest: "{{ pyris_working_directory }}/application.yml"
     owner: "{{ pyris_user_name }}"
     group: "{{ pyris_user_group }}"
-    mode: "660"
-  register: config
-  notify: restart docker pyris
+    mode: "0600"
+  diff: false
+  no_log: true
 
 - name: Copy llm_config.yml to pyris directory
   become: true
-  template:
-    src: "templates/llm_config.yml.j2"
+  ansible.builtin.template:
+    src: "llm_config.yml.j2"
     dest: "{{ pyris_working_directory }}/llm_config.yml"
     owner: "{{ pyris_user_name }}"
     group: "{{ pyris_user_group }}"
-    mode: "660"
-  register: config
-  notify: restart docker pyris
+    mode: "0600"
+  diff: false
+  no_log: true
 
 - name: Copy pyris-docker.sh helper script
   become: true
-  template:
-    src: "templates/pyris-docker.sh.j2"
+  ansible.builtin.template:
+    src: "pyris-docker.sh.j2"
     dest: "{{ pyris_working_directory }}/pyris-docker.sh"
     owner: "{{ pyris_user_name }}"
     group: "{{ pyris_user_group }}"
-    mode: "770"
-  register: config
-  notify: restart docker pyris
+    mode: "0770"
+
+- name: Install Pyris certificate reload hook
+  become: true
+  ansible.builtin.template:
+    src: "pyris-cert-reload.sh.j2"
+    dest: "/usr/local/cert.d/pyris"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Bootstrap or explicitly apply Pyris runtime
+  become: true
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/bash
+      - "{{ pyris_working_directory }}/pyris-docker.sh"
+      - start
+      - "{{ pyris_build_version }}"
+      - "{{ pyris_bootstrap_branch }}"
+    chdir: "{{ pyris_working_directory }}"
+  when:
+    - not ansible_check_mode
+    - (pyris_apply_runtime | bool) or (pyris_bootstrap_required | bool)
+  changed_when: true
+
+- name: Mark automatic Pyris bootstrap as complete
+  become: true
+  ansible.builtin.copy:
+    content: "Pyris was bootstrapped successfully by Ansible.\n"
+    dest: "{{ pyris_bootstrap_complete_file }}"
+    owner: "{{ pyris_bootstrap_state_owner }}"
+    group: "{{ pyris_bootstrap_state_group }}"
+    mode: "0644"
+    force: false
+  when:
+    - pyris_bootstrap_required | bool
+    - not ansible_check_mode
+
+- name: Clear the pending Pyris bootstrap marker
+  become: true
+  ansible.builtin.file:
+    path: "{{ pyris_bootstrap_pending_file }}"
+    state: absent
+  when:
+    - pyris_bootstrap_required | bool
+    - not ansible_check_mode
