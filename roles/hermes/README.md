@@ -28,11 +28,11 @@ This role **does not** install Docker. You must install Docker and Docker Compos
 2. Install manually: https://docs.docker.com/engine/install/
 3. Use your organization's preferred Docker installation method
 
-### Certificates
+### Credentials
 
 You need to obtain the following credentials before deploying:
 
-- **Apple APNs Certificate**: A `.p12` certificate for sending push notifications to iOS devices
+- **Apple APNs Signing Key**: A `.p8` token signing key — together with its Team ID and Key ID — for sending push notifications to iOS devices (token-based authentication)
 - **Google Firebase Credentials**: A service account JSON file for sending push notifications to Android devices
 
 ## Configuration
@@ -53,10 +53,11 @@ hermes_working_directory: "/opt/hermes"
 # Port to expose Hermes on (maps to container port 8080)
 hermes_port: "8080"
 
-# Apple Push Notification Service (APNs) configuration
-hermes_apns_certificate_path: "artemis-apns.p12"
-hermes_apns_certificate_password: "your-certificate-password"
-hermes_apns_certificate_content: "base64-encoded-p12-certificate"
+# Apple Push Notification Service (APNs) token-based configuration
+hermes_apns_token_key_path: "artemis-apns.p8"
+hermes_apns_team_id: "your-apple-team-id"
+hermes_apns_key_id: "your-apns-key-id"
+hermes_apns_token_key_content: "base64-encoded-p8-signing-key"
 hermes_apns_prod_environment: true
 
 # Google Firebase Cloud Messaging configuration
@@ -73,11 +74,12 @@ hermes_google_application_credentials_content: |
 | Variable | Description |
 |---|---|
 | `hermes_version` | Docker image tag for `ghcr.io/ls1intum/hermes` |
-| `hermes_working_directory` | Directory where Docker Compose and certificates are stored |
+| `hermes_working_directory` | Directory where Docker Compose and credentials are stored |
 | `hermes_port` | Host port mapped to Hermes container port 8080 |
-| `hermes_apns_certificate_path` | Filename for the APNs `.p12` certificate on disk |
-| `hermes_apns_certificate_password` | Password for the APNs `.p12` certificate |
-| `hermes_apns_certificate_content` | Base64-encoded content of the APNs `.p12` certificate |
+| `hermes_apns_token_key_path` | Filename for the APNs `.p8` signing key on disk |
+| `hermes_apns_team_id` | Apple Developer Team ID that owns the signing key |
+| `hermes_apns_key_id` | Key ID of the APNs signing key |
+| `hermes_apns_token_key_content` | Base64-encoded content of the APNs `.p8` signing key |
 | `hermes_apns_prod_environment` | Set to `true` for production APNs, `false` for sandbox |
 | `hermes_google_application_credentials_json_path` | Filename for the Firebase credentials JSON on disk |
 | `hermes_google_application_credentials_content` | Content of the Firebase service account JSON file |
@@ -94,9 +96,10 @@ hermes_google_application_credentials_content: |
         hermes_version: "1.0.0"
         hermes_working_directory: "/opt/hermes"
         hermes_port: "8080"
-        hermes_apns_certificate_path: "artemis-apns.p12"
-        hermes_apns_certificate_password: "{{ vault_apns_password }}"
-        hermes_apns_certificate_content: "{{ vault_apns_certificate_b64 }}"
+        hermes_apns_token_key_path: "artemis-apns.p8"
+        hermes_apns_team_id: "{{ vault_apns_team_id }}"
+        hermes_apns_key_id: "{{ vault_apns_key_id }}"
+        hermes_apns_token_key_content: "{{ vault_apns_token_key_b64 }}"
         hermes_apns_prod_environment: true
         hermes_google_application_credentials_json_path: "firebase.json"
         hermes_google_application_credentials_content: "{{ vault_firebase_credentials }}"
@@ -132,10 +135,10 @@ After running the role, verify the installation:
 
 ## Security Considerations
 
-- Store all secrets (APNs certificate password, certificate content, Firebase credentials) in **Ansible Vault**
-- The APNs certificate and Firebase credentials files are created with `0600` permissions (root-only access)
+- Store all secrets (APNs signing key content, Team ID, Key ID, Firebase credentials) in **Ansible Vault**
+- The APNs signing key and Firebase credentials files are created with `0600` permissions (root-only access)
 - The `docker-compose.yml` is created with `0600` permissions to protect environment variables
-- Certificate volumes are mounted as read-only (`:ro`) in the container
+- Credential volumes are mounted as read-only (`:ro`) in the container
 
 ## Files and Directories
 
@@ -144,7 +147,7 @@ After deployment, the following structure exists:
 ```
 /opt/hermes/                     # (or custom hermes_working_directory)
 ├── docker-compose.yml           # Docker Compose configuration
-├── artemis-apns.p12             # APNs certificate
+├── artemis-apns.p8              # APNs signing key
 └── firebase.json                # Firebase credentials
 ```
 
