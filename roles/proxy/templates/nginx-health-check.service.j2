@@ -1,0 +1,8 @@
+# {{ ansible_managed }}
+[Unit]
+Description=Nginx Upstream Health Check
+After=nginx.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/nginx-health-check.sh

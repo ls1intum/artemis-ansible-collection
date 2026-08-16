@@ -18,3 +18,14 @@
 - name: Reboot system
   become: true
   reboot:
+
+- name: Reload systemd daemon
+  become: true
+  systemd:
+    daemon_reload: true
+
+- name: Restart nginx-health-check timer
+  become: true
+  systemd:
+    name: nginx-health-check.timer
+    state: restarted
