@@ -50,7 +50,8 @@ function logs {
 
 function backup {
     echo "Creating backup..."
-    cd "$PROJECT_DIR" && ./backup.sh
+    # The backup job is root-owned (it must delete root-owned backup files).
+    "{{ weaviate_backup_script_path }}"
 }
 
 function restore {
