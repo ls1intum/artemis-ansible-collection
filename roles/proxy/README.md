@@ -143,8 +143,13 @@ version_control:
 ```
 
 An Artemis node refuses an SSH connection that arrives from a listed address without a valid header, and treats a
-connection from any other address as ordinary SSH. Connections that bypass the proxy are therefore unaffected, and a
-header cannot be forged by someone who reaches port 7921 directly.
+connection from any other address as ordinary SSH. Connections that bypass the proxy are therefore unaffected.
+
+A PROXY protocol header carries no signature and no shared secret, so nothing about the header itself proves it is
+genuine. What makes it trustworthy is only which source addresses may send one, and a TCP source address cannot be
+forged without being on the network path. The consequence is that anything able to connect from a listed address can
+name any client address it likes: list the proxy's single address rather than a whole subnet, and restrict port 7921 at
+the firewall so that only the proxy can reach it.
 
 > [!WARNING]
 > Enable both halves in the same deployment. `proxy_ssh_proxy_protocol: true` without
