@@ -14,11 +14,14 @@ upstream app {
 server_tokens off;
 
 {% if proxy_rate_limit_exempt_ips | length > 0 %}
-# Geo block to identify exempt IPs (1 = exempt, 0 = not exempt)
+# Geo block to identify exempt IPs (1 = exempt, 0 = not exempt). An address listed here is exempt from
+# the git and login zones below, which is what a load generator needs: it drives thousands of logins and
+# clones from a single address, and the per-address budgets that protect a shared campus NAT would
+# otherwise reject nearly all of them. Account recovery stays limited for everyone - see below.
 geo $rate_limit_exempt {
     default 0;
 {% for exempt in proxy_rate_limit_exempt_ips %}
-    {{ exempt.ip }} 1;  # {{ exempt.comment | default('Exempt from git rate limiting') }}
+    {{ exempt.ip }} 1;  # {{ exempt.comment | default('Exempt from git and login rate limiting') }}
 {% endfor %}
 }
 
@@ -34,8 +37,11 @@ map $rate_limit_exempt $rate_limit_key {
 # application-level limiter returns (RateLimitExceededException -> 429).
 limit_req_status 429;
 
-# Rate limit for the login REST call, at most one requests per two seconds
-limit_req_zone $binary_remote_addr zone=loginlimit:10m rate=30r/m;
+# Rate limit for the login REST call, at most one requests per two seconds. Exemptible, because a
+# benchmark run logs every simulated student in from one address within a few seconds: at 30r/m with a
+# burst of 3, all but a handful would get a 429 and be dropped from the run, and the tool would report
+# the configured student count while having measured almost none of them.
+limit_req_zone {% if proxy_rate_limit_exempt_ips | length > 0 %}$rate_limit_key{% else %}$binary_remote_addr{% endif %} zone=loginlimit:10m rate=30r/m;
 # Rate limit for account recovery and registration (password reset init/finish, register, activate).
 # Stricter than the login zone: these endpoints send mail and mutate credentials, and no legitimate
 # client calls them repeatedly. Deliberately not exemptible - no automation uses them.
