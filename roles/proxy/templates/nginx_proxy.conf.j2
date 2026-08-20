@@ -36,6 +36,11 @@ limit_req_status 429;
 
 # Rate limit for the login REST call, at most one requests per two seconds
 limit_req_zone $binary_remote_addr zone=loginlimit:10m rate=30r/m;
+# Rate limit for the login-options lookup behind the identifier-first login form. The client calls it once
+# per login attempt, immediately before POST authenticate, so it gets the same budget as the login zone -
+# but in a zone of its own, so spending it does not reduce the number of logins a shared campus address
+# can still perform.
+limit_req_zone $binary_remote_addr zone=loginoptionslimit:10m rate=30r/m;
 # Rate limit for account recovery and registration (password reset init/finish, register, activate).
 # Stricter than the login zone: these endpoints send mail and mutate credentials, and no legitimate
 # client calls them repeatedly. Deliberately not exemptible - no automation uses them.
@@ -148,6 +153,18 @@ server {
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Login options lookup for the identifier-first login form. NOTE: the path must match the endpoint
+    # PublicAccountResource actually serves (@RequestMapping("api/core/public/") + @GetMapping("login-options")).
+    # Bounded here as well as by the Artemis application-level limiter, so a flood is dropped at the edge
+    # instead of reaching a database lookup per request; this zone also keys on the real TCP peer, which the
+    # application-level limiter does not see directly.
+    location /api/core/public/login-options {
+        proxy_pass {{ proxy_node_protocol }}://app/api/core/public/login-options;
+        # Same shape as the login block above: the first 2 requests pass immediately, the third waits for a
+        # slot, the rest are answered 429. A real client sends exactly one of these per login attempt.
+        limit_req zone=loginoptionslimit burst=3 delay=2;
     }
 
     # Account recovery and registration. Each of these either sends mail to a user-supplied address or
