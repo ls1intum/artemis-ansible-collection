@@ -20,9 +20,9 @@ http:
 
     rate-limit:
       rateLimit:
-        average: 100
+        average: {{ weaviate_rate_limit_average }}
         period: 1s
-        burst: 200
+        burst: {{ weaviate_rate_limit_burst }}
 
     default-whitelist:
       ipAllowList:
