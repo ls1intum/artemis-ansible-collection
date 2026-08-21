@@ -26,6 +26,15 @@ proxy_target_port: 8080
 # Port forwarding configuration of Artemis nodes for SSH Git communication with Artemis ICL LocalVC
 proxy_forward_ssh: true
 
+# Whether to announce the real ssh client to the Artemis nodes using the HAProxy PROXY protocol.
+# Forwarding port 7921 at the TCP level otherwise hides the client, so every ssh connection appears to come from this
+# proxy: git ssh rate limiting shares a single bucket across all users, and Artemis cannot check which address a build
+# agent connects from.
+# Only enable this together with version_control.localvc.ssh_proxy_protocol_trusted_sources on the Artemis nodes,
+# listing this proxy. Enabling one half without the other breaks ssh in one direction or the other, which is why this
+# defaults to false. Requires an Artemis version that supports the PROXY protocol on its ssh listener.
+proxy_ssh_proxy_protocol: false
+
 # Protocol used to communicate with nodes (either http or https)
 proxy_node_protocol: http
 

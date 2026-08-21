@@ -129,6 +129,12 @@
           listen 7921;
           listen [::]:7921;
           proxy_pass artemis_ssh;
+          # Announce the real client to the Artemis ssh server. Without this, a TCP proxy_pass hides it and every
+          # ssh connection is attributed to this proxy: git ssh rate limiting shares one bucket across all users,
+          # the access log records the proxy, and Artemis cannot tell which build agent a connection came from.
+          # Requires artemis.version-control.ssh-proxy-protocol.trusted-sources to list this proxy on the nodes,
+          # which is why it is off by default: enabling only one of the two halves breaks ssh.
+          proxy_protocol {{ 'on' if proxy_ssh_proxy_protocol else 'off' }};
         }
       }
   when: proxy_forward_ssh
