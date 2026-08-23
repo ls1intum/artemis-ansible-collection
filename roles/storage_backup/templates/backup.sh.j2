@@ -24,13 +24,14 @@ if [ $OPTIND -eq 1 ]; then printf "Invalid Option: %s requires options.\nRun %s 
 shift $((OPTIND -1))
 
 export BORG_PASSPHRASE="{{ storage_backup_password }}"
+export BORG_RSH="ssh -i {{ storage_backup_borg_ssh_identity }}"
 
 if [ "$prune" = true ]; then # Prune old backups
-    borg prune --keep-within {{ storage_backup_retention }}d "ssh://{{ storage_backup_borg_server_user }}@{{ storage_backup_borg_server_url }}:{{ storage_backup_borg_server_port }}/{{ storage_backup_borg_server_user_home }}/{{ storage_backup_borg_repo_name }}"
+    borg prune --keep-within {{ storage_backup_retention }}d "ssh://{{ storage_backup_borg_server_user }}@{{ storage_backup_borg_server_url }}:{{ storage_backup_borg_server_port }}{{ storage_backup_borg_server_user_home }}/{{ storage_backup_borg_repo_name }}"
 fi
 
 if [ "$storage" = true ]; then # Storage Backup
-    borg create -C {{ storage_backup_compression }} "ssh://{{ storage_backup_borg_server_user }}@{{ storage_backup_borg_server_url }}:{{ storage_backup_borg_server_port }}/{{ storage_backup_borg_server_user_home }}/{{ storage_backup_borg_repo_name }}::{hostname}-{now:%Y-%m-%dT%H:%M:%S}" "{{ storage_export }}"
+    borg create -C {{ storage_backup_compression }} "ssh://{{ storage_backup_borg_server_user }}@{{ storage_backup_borg_server_url }}:{{ storage_backup_borg_server_port }}{{ storage_backup_borg_server_user_home }}/{{ storage_backup_borg_repo_name }}::{hostname}-{now:%Y-%m-%dT%H:%M:%S}" "{{ storage_export }}"
 fi
 
 unset BORG_PASSPHRASE
