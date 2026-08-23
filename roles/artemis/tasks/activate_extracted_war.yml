@@ -1,0 +1,29 @@
+---
+# Activate the exploded layout for the Artemis service, during the stopped window.
+# Normal path: a fast local swap of the layout that copy_artemis_executable.yml pre-extracted
+# into "<app>.new" while the old instance was still running. The previous layout is kept as
+# "<app>.old" for rollback, mirroring the artemis.war -> artemis.war.old backup.
+#
+# Fallback path: if extraction is enabled but no pre-extracted layout is present (for example
+# the flag was turned on via a config-only update without a new WAR download), extract the
+# current packed WAR so the unit can start from the exploded layout. This only triggers when
+# the exploded layout is missing, so plain restarts stay a no-op.
+- name: Activate extracted WAR layout
+  become: true
+  ansible.builtin.shell: |
+    set -euo pipefail
+    app="{{ artemis_extracted_app_directory }}"
+    if [ -d "$app.new" ]; then
+      rm -rf "$app.old"
+      if [ -d "$app" ]; then mv "$app" "$app.old"; fi
+      mv "$app.new" "$app"
+    elif [ ! -e "$app/artemis.war" ] && [ -f "{{ artemis_working_directory }}/artemis.war" ]; then
+      rm -rf "$app"
+      /usr/bin/java -Djarmode=tools -jar "{{ artemis_working_directory }}/artemis.war" extract --destination "$app"
+      chown -R {{ artemis_user_name }}:{{ artemis_user_group }} "$app"
+    fi
+  args:
+    executable: /bin/bash
+  when:
+    - artemis_extract_war | bool
+    - not ansible_check_mode

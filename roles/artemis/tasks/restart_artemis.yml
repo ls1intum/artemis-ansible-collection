@@ -58,6 +58,11 @@
     - node_id is defined
     - node_id == 1
 
+- include_tasks: activate_extracted_war.yml
+  when:
+    - node_id is defined
+    - node_id == 1
+
 - name: Start artemis on node 1
   become: true
   service:
@@ -99,6 +104,10 @@
     - node_id == 1
     - not ansible_check_mode
   throttle: 1
+
+- include_tasks: activate_extracted_war.yml
+  when:
+    - node_id is undefined or not (node_id == 1)
 
 - name: Start artemis on other nodes
   become: true
