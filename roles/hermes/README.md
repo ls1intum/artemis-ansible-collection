@@ -147,8 +147,8 @@ After deployment, the following structure exists:
 ```
 /opt/hermes/                     # (or custom hermes_working_directory)
 ├── docker-compose.yml           # Docker Compose configuration
-├── artemis-apns.p8              # APNs signing key
-└── firebase.json                # Firebase credentials
+├── <hermes_apns_token_key_path> # APNs signing key, e.g. artemis-apns.p8
+└── <hermes_google_application_credentials_json_path>  # Firebase credentials, e.g. firebase.json
 ```
 
 ## Related Documentation
