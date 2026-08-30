@@ -2,6 +2,36 @@
 
 spring:
 {% if artemis_computed_is_core_node %}
+{% if artemis_oidc is defined and artemis_oidc.enabled | default(false) %}
+  security:
+    oauth2:
+      client:
+        registration:
+          oidc:
+            client-id: {{ artemis_oidc.client_id | quote }}
+            client-secret: {{ artemis_oidc.client_secret | quote }}
+            scope:
+              - openid
+              - profile
+              - email
+        provider:
+          oidc:
+{% if artemis_oidc.issuer_uri | default('') | length > 0 %}
+            issuer-uri: {{ artemis_oidc.issuer_uri | quote }}
+{% endif %}
+{% if artemis_oidc.authorization_uri | default('') | length > 0 %}
+            authorization-uri: {{ artemis_oidc.authorization_uri | quote }}
+{% endif %}
+{% if artemis_oidc.token_uri | default('') | length > 0 %}
+            token-uri: {{ artemis_oidc.token_uri | quote }}
+{% endif %}
+{% if artemis_oidc.user_info_uri | default('') | length > 0 %}
+            user-info-uri: {{ artemis_oidc.user_info_uri | quote }}
+{% endif %}
+{% if artemis_oidc.jwk_set_uri | default('') | length > 0 %}
+            jwk-set-uri: {{ artemis_oidc.jwk_set_uri | quote }}
+{% endif %}
+{% endif %}
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     url: jdbc:{{ artemis_database_type }}://{{ artemis_database_host }}:{{ artemis_database_port }}/{{ artemis_database_dbname }}?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
@@ -79,12 +109,12 @@ spring:
   mail:
     host: {{ mail.hostname }}
     port: {{ mail.port }}
-    {% if mail.username is defined and mail.username is not none %}
+{% if mail.username is defined and mail.username is not none %}
     username: {{ mail.username }}
-    {% endif %}
-    {% if mail.password is defined and mail.password is not none %}
+{% endif %}
+{% if mail.password is defined and mail.password is not none %}
     password: {{ mail.password }}
-    {% endif %}
+{% endif %}
     protocol: {{ mail.protocol }}
     tls: {{ mail.tls | default(true) | to_json }}
     properties.mail.smtp:
@@ -98,17 +128,12 @@ spring:
 {% else %}
   liquibase:
       enabled: false #not needed for build agents
-  autoconfigure:
-      exclude:
-          # Hibernate and DataSource are not needed in the build agent
-          - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
-          - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
-          # Those metrics are repeated here, because overriding the `exclude` array is not possible
-          - org.springframework.boot.actuate.autoconfigure.metrics.data.RepositoryMetricsAutoConfiguration
-          - org.springframework.boot.actuate.autoconfigure.metrics.jdbc.DataSourcePoolMetricsAutoConfiguration
-          - org.springframework.boot.actuate.autoconfigure.metrics.startup.StartupTimeMetricsListenerAutoConfiguration
-          - org.springframework.boot.actuate.autoconfigure.metrics.task.TaskExecutorMetricsAutoConfiguration
-          - org.springframework.boot.actuate.autoconfigure.metrics.web.tomcat.TomcatMetricsAutoConfiguration
+  # Hibernate, DataSource and the related metrics auto-configurations are excluded for build agents by
+  # the WAR-bundled config/application-buildagent.yml (active whenever the "buildagent" profile is set).
+  # Do NOT repeat spring.autoconfigure.exclude here: this external file outranks the bundled config and
+  # the exclude list replaces rather than merges, so a stale copy silently overrides the WAR list. That
+  # is exactly what broke every prod build agent when the Spring Boot 4 upgrade relocated these classes
+  # but this template kept the old package names.
 {% endif %}
 
 
@@ -155,11 +180,22 @@ artemis:
 {% if ldap.url is defined and ldap.url is not none%}
     use-external: true
 {% else %}
+{% if artemis_oidc is defined and artemis_oidc.enabled | default(false) %}
+    oidc:
+      enabled: true
+      mappings:
+        username: {{ (artemis_oidc.mappings | default({})).username | default('preferred_username') | to_json }}
+        matriculation-number: {{ (artemis_oidc.mappings | default({})).matriculation_number | default('matriculation_number') | to_json }}
+        first-name: {{ (artemis_oidc.mappings | default({})).first_name | default('given_name') | to_json }}
+        last-name: {{ (artemis_oidc.mappings | default({})).last_name | default('family_name') | to_json }}
+        email: {{ (artemis_oidc.mappings | default({})).email | default('email') | to_json }}
+{% endif %}
     use-external: false
 {% endif %}
 {% if artemis_passkey_enabled %}
     passkey:
       enabled: true
+      require-for-administrator-features: {{ artemis_passkey_require_for_administrator_features | lower }}
 {% endif %}
 {% if artemis_external_password_provider is defined and artemis_external_password_provider is not none %}
     password-reset:
@@ -209,10 +245,6 @@ artemis:
     default-branch: {{ artemis_version_control_default_branch_name }}
 {% if version_control.localvc.use_version_control_access_token is defined %}
     use-version-control-access-token: {{ version_control.localvc.use_version_control_access_token | lower }}
-{% endif %}
-{% if artemis_computed_is_core_node or (version_control.localvc.build_agent_git_credentials is not defined and version_control.localvc.build_agent_use_ssh is not defined) %}
-    user: {{ artemis_internal_admin_user }}
-    password: {{ artemis_internal_admin_password }}
 {% endif %}
 {% if version_control.localvc.build_agent_git_credentials is defined %}
     build-agent-git-username: {{ version_control.localvc.build_agent_git_credentials.user }}
@@ -423,7 +455,7 @@ artemis:
 {% endif %}
 {% endif %}
 
-{% if theia is defined and theia is not none %}
+{% if artemis_computed_is_core_node and theia is defined and theia is not none %}
   theia:
     enabled: true
 {% if theia.portal_url is defined and theia.portal_url is not none %}
@@ -502,6 +534,10 @@ info:
 {% endif %}
   textAssessmentAnalyticsEnabled: true
   localLLMDeploymentEnabled: {{ artemis_local_llm_deployment_enabled | lower }}
+{% if artemis_oidc is defined and artemis_oidc.enabled | default(false) %}
+  oidc:
+    buttonLabel: {{ artemis_oidc.button_label | default('TUM Login') | quote }}
+{% endif %}
   sentry:
 {% if sentry.dsn | default('') | length %}
     dsn: {{ sentry.dsn | quote }}
