@@ -103,6 +103,8 @@ enable_science_event_logging: false
 
 push_notification_relay: "https://hermes-prod.artemis.cit.tum.de"
 
+artemis_maven_mirror_url: "https://reposilite.aet.cit.tum.de/releases"
+
 sentry:
   dsn: ""
 # send_default_pii: false

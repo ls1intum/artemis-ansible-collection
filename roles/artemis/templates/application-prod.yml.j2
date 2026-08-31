@@ -325,6 +325,10 @@ artemis:
     email: {{ artemis_email }}
 
 {% if artemis_computed_is_core_node %}
+
+  programming:
+    maven-central-mirror-url: {{ artemis_maven_mirror_url }}
+
 {% if lti is defined %}
   lti:
     enabled: true
