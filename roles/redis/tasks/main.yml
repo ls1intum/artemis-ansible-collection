@@ -10,7 +10,7 @@
   file:
     path: "{{ redis.working_directory }}"
     state: directory
-    mode: '0775'
+    mode: "775"
   notify: Restart redis
 
 - name: Copy configuration file
@@ -18,7 +18,7 @@
   template:
     src: "{{ item.src }}"
     dest: "{{ redis.working_directory }}/{{ item.dest }}"
-    mode: '0600'
+    mode: "600"
   notify: Restart redis
   with_items:
     - src: redis.conf.j2

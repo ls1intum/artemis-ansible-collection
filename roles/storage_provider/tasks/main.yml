@@ -37,7 +37,7 @@
     state: directory
     owner: root
     group: root
-    mode: "u=rwx,g=rx,o=rx"
+    mode: "755"
   when: storage_nfs_after_units | length > 0
 
 - name: Order nfs-server after the interface carrying the storage address
@@ -47,7 +47,7 @@
     dest: /etc/systemd/system/nfs-server.service.d/10-wait-for-address.conf
     owner: root
     group: root
-    mode: "u=rw,g=r,o=r"
+    mode: "644"
   when: storage_nfs_after_units | length > 0
   notify: Reload systemd and restart nfs-server
 
@@ -58,7 +58,7 @@
     dest: /etc/nfs.conf
     owner: root
     group: root
-    mode: "u=rw,g=r,o=r"
+    mode: "644"
   notify: Restart nfs-server
 
 - name: Configure export
@@ -68,5 +68,5 @@
     dest: /etc/exports
     owner: root
     group: root
-    mode: "u=rw,g=r,o=r"
+    mode: "644"
   notify: Restart nfs-server
