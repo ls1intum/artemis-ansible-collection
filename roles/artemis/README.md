@@ -72,8 +72,10 @@ localvc:
   ssh_key_path: "/opt/artemis/ssh-keys" # Key path for the SSH host keys
   build_agent_use_ssh: true # Setting whether SSH should be used.
   ssh_url: "ssh://git@artemis.example.com:7921/" # URL template for SSH clone operations.
-  user: "localvc_user"
-  password: "localvc_password"
+  # Proxies that forward port 7921 at the TCP level and announce the real client with a PROXY protocol header.
+  # Only set this together with proxy_ssh_proxy_protocol on those proxies; enabling one half breaks SSH.
+  ssh_proxy_protocol_trusted_sources:
+    - "10.0.0.1"
 ```
 
 **Build agent authentication.** Pick the first that applies; neither of the first two needs a secret from you,

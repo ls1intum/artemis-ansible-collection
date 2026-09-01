@@ -277,6 +277,13 @@ artemis:
 {% if version_control.localvc.ssh_url is defined %}
     ssh-template-clone-url: {{ version_control.localvc.ssh_url }}
 {% endif %}
+{% if version_control.localvc.ssh_proxy_protocol_trusted_sources | default([], true) | length > 0 %}
+    ssh-proxy-protocol:
+      trusted-sources:
+{% for trusted_source in version_control.localvc.ssh_proxy_protocol_trusted_sources %}
+        - "{{ trusted_source }}"
+{% endfor %}
+{% endif %}
     repository-authentication-mechanisms: {{ version_control.localvc.repository_authentication_mechanisms | default("token,ssh,password") }}
 {% endif %}
 
