@@ -1,0 +1,12 @@
+{{ ansible_managed | comment }}
+
+# nfsd is pinned to a single address in /etc/nfs.conf ([nfsd] host={{ storage_server_address }}), so it
+# cannot start before that address exists. `network-online.target` does not wait for WireGuard, so on a
+# host where the storage network is a WireGuard interface nfsd loses the race at boot and exits with
+#   rpc.nfsd: unable to bind AF_INET6 TCP socket: errno 99 (Cannot assign requested address)
+# leaving every client hanging on a hard mount until someone starts the service by hand.
+[Unit]
+{% for unit in storage_nfs_after_units %}
+After={{ unit }}
+Wants={{ unit }}
+{% endfor %}
