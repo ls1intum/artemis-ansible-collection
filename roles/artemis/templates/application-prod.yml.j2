@@ -305,6 +305,21 @@ artemis:
 {% if continuous_integration.localci is defined %}
   continuous-integration:
     artemis-authentication-token-value: "demo"
+{% if continuous_integration.localci.build_agent_network is defined and continuous_integration.localci.build_agent_network is not none %}
+    build-agent-network:
+{% if continuous_integration.localci.build_agent_network.allowed_ranges is defined and continuous_integration.localci.build_agent_network.allowed_ranges | length > 0 %}
+      allowed-ranges:
+{% for allowed_range in continuous_integration.localci.build_agent_network.allowed_ranges %}
+        - "{{ allowed_range }}"
+{% endfor %}
+{% endif %}
+{% if continuous_integration.localci.build_agent_network.trusted_proxies is defined and continuous_integration.localci.build_agent_network.trusted_proxies | length > 0 %}
+      trusted-proxies:
+{% for trusted_proxy in continuous_integration.localci.build_agent_network.trusted_proxies %}
+        - "{{ trusted_proxy }}"
+{% endfor %}
+{% endif %}
+{% endif %}
     specify-concurrent-builds: {{ (continuous_integration.localci.concurrent_build_size is defined) | lower }}
 {% if redis is defined and redis is not none %}
     data-store: "Redis"
