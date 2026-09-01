@@ -5,11 +5,12 @@ services:
     ports:
       - "{{ hermes_port }}:8080"
     environment:
-      - APNS_CERTIFICATE_PWD={{ hermes_apns_certificate_password }}
+      - APNS_TEAM_ID={{ hermes_apns_team_id }}
+      - APNS_KEY_ID={{ hermes_apns_key_id }}
       - APNS_PROD_ENVIRONMENT={{ hermes_apns_prod_environment }}
-      - APNS_CERTIFICATE_PATH=/key/artemis-apns.p12
+      - APNS_TOKEN_KEY_PATH=/key/artemis-apns.p8
       - GOOGLE_APPLICATION_CREDENTIALS=/firebase.json
     volumes:
-      - {{ hermes_working_directory }}/{{ hermes_apns_certificate_path }}:/key/artemis-apns.p12:ro
+      - {{ hermes_working_directory }}/{{ hermes_apns_token_key_path }}:/key/artemis-apns.p8:ro
       - {{ hermes_working_directory }}/{{ hermes_google_application_credentials_json_path }}:/firebase.json:ro
     restart: on-failure

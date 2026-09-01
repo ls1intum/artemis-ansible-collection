@@ -1,11 +1,13 @@
 ---
 hermes_version:
 
-hermes_apns_certificate_path:
+hermes_apns_token_key_path:
 
-hermes_apns_certificate_password:
+hermes_apns_team_id:
 
-hermes_apns_certificate_content:
+hermes_apns_key_id:
+
+hermes_apns_token_key_content:
 
 hermes_apns_prod_environment:
 

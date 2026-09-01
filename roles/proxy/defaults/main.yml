@@ -58,7 +58,11 @@ proxy_read_timeout: "900s"
 fastcgi_send_timeout: "900s"
 fastcgi_read_timeout: "900s"
 
-# IPs exempt from git rate limiting (e.g., benchmark servers)
+# IPs exempt from the git and login rate limits (e.g., benchmark servers). Add both address families
+# for a dual-stack host: the exemption matches the address nginx actually sees, so listing only the IPv4
+# silently leaves an IPv6 client throttled. Account recovery and registration stay limited for everyone.
 proxy_rate_limit_exempt_ips: []
 #   - ip: "131.159.89.112"
 #     comment: "Benchmark server"
+#   - ip: "2a09:80c0:89::112"
+#     comment: "Benchmark server (IPv6)"

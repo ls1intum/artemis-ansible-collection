@@ -34,16 +34,31 @@ spring:
 {% endif %}
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:{{ artemis_database_type }}://{{ artemis_database_host }}:{{ artemis_database_port }}/{{ artemis_database_dbname }}?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
+    # readOnlyPropagatesToServer=false keeps Connection.setReadOnly() on the client. Spring Data JPA marks every
+    # repository read method read-only, so without this the driver sends SET SESSION TRANSACTION READ ONLY before the
+    # query and READ WRITE after it. Measured on staging: 5.7 such round trips per request, 1.1 million over a single
+    # 2000 student run, and removing them took total database round trips per request from 41.3 to 35.0. What is given
+    # up is InnoDB's read-only transaction optimisation, which is worth far less than two round trips per query.
+    # Only safe while reads and writes go to the same server; revisit if read replicas are introduced.
+    url: jdbc:{{ artemis_database_type }}://{{ artemis_database_host }}:{{ artemis_database_port }}/{{ artemis_database_dbname }}?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC{% if artemis_database_type == 'mysql' %}&readOnlyPropagatesToServer=false{% endif %}
     username: {{ artemis_database_username }}
     password: {{ artemis_database_password }}
     hikari:
       poolName: Hikari
       auto-commit: false
-      maximumPoolSize: 100
+      # 100 per node against a database with a handful of cores is far more than it can serve at once. Three nodes
+      # held 301 connections open on staging, where the database has 4 CPUs, so most of them could only queue. A pool
+      # is a queue either way; keeping it at the database rather than in front of it just adds context switching and,
+      # as below, multiplies the prepared statement footprint.
+      maximumPoolSize: {{ artemis_database_max_pool_size | default(30) }}
       data-source-properties:
         cachePrepStmts: true
-        prepStmtCacheSize: 250
+        # The cache is per connection and holds this many statements. Artemis issues 368 distinct statements, so a
+        # 250 entry cache evicts constantly and the driver re-parses on every miss: profiling found 16.8% of node CPU
+        # in the driver's SQL string parser, and the server saw one prepare for every 8.7 executes. 400 covers the
+        # whole set with room to grow.
+        prepStmtCacheSize: {{ artemis_database_prep_stmt_cache_size | default(400) }}
+        # The longest statement Artemis generates is 1751 characters, so this bound is not reached.
         prepStmtCacheSqlLimit: 2048
         useServerPrepStmts: true
   jpa:
@@ -297,6 +312,21 @@ artemis:
 {% if continuous_integration.localci is defined %}
   continuous-integration:
     artemis-authentication-token-value: "demo"
+{% if continuous_integration.localci.build_agent_network is defined and continuous_integration.localci.build_agent_network is not none %}
+    build-agent-network:
+{% if continuous_integration.localci.build_agent_network.allowed_ranges is defined and continuous_integration.localci.build_agent_network.allowed_ranges | length > 0 %}
+      allowed-ranges:
+{% for allowed_range in continuous_integration.localci.build_agent_network.allowed_ranges %}
+        - "{{ allowed_range }}"
+{% endfor %}
+{% endif %}
+{% if continuous_integration.localci.build_agent_network.trusted_proxies is defined and continuous_integration.localci.build_agent_network.trusted_proxies | length > 0 %}
+      trusted-proxies:
+{% for trusted_proxy in continuous_integration.localci.build_agent_network.trusted_proxies %}
+        - "{{ trusted_proxy }}"
+{% endfor %}
+{% endif %}
+{% endif %}
     specify-concurrent-builds: {{ (continuous_integration.localci.concurrent_build_size is defined) | lower }}
 {% if redis is defined and redis is not none %}
     data-store: "Redis"
@@ -332,6 +362,10 @@ artemis:
     email: {{ artemis_email }}
 
 {% if artemis_computed_is_core_node %}
+
+  programming:
+    maven-central-mirror-url: {{ artemis_maven_mirror_url }}
+
 {% if lti is defined %}
   lti:
     enabled: true

@@ -103,6 +103,8 @@ enable_science_event_logging: false
 
 push_notification_relay: "https://hermes-prod.artemis.cit.tum.de"
 
+artemis_maven_mirror_url: "https://reposilite.aet.cit.tum.de/releases"
+
 sentry:
   dsn: ""
 # send_default_pii: false
@@ -166,11 +168,18 @@ artemis_passkey_require_for_administrator_features: false
 #   repo_storage_base_path:
 #   use_version_control_access_token: false
 #   ssh_key_path: /opt/artemis/ssh-keys # Key path for the SSH host keys
-# # Build Agent specific configuration: The build agent needs some sort of authentication method in order to perform clone operations.
-# # This can either be: SSH, spearate credentails, or the artemis admin user
+# # Build agent authentication: how a build agent proves itself when it clones. Pick the first that applies to you;
+# # neither of the first two needs a secret from you, because the agents establish their own credentials.
+# #   1. SSH keys (recommended): set build_agent_use_ssh and ssh_url. Each agent generates its own key pair at
+# #      startup and publishes only the public half, so there is nothing to distribute or rotate.
+# #   2. Build job clone tokens: used automatically over https when build_agent_use_ssh is false. Needs no
+# #      configuration at all; each build job carries a credential for its own repositories.
+# #   3. build_agent_git_credentials: a shared username and password, accepted only on a local VC node that does
+# #      NOT run local CI - in practice Jenkins with LocalVC. A node running local CI refuses to start with it, and
+# #      this role fails the play before that happens.
 #   build_agent_use_ssh: # Setting whether SSH should be used.
 #   ssh_url: # URL template for SSH clone operations. (e.g. ssh://git@hostname.artemis.cit.tum.de:7921/)
-#   build_agent_git_credentials: # Config for separate build agent git credentails
+#   build_agent_git_credentials: # Jenkins with LocalVC only - see 3. above
 #     user:
 #     password:
 #   user: # An artemis admin user for the local version control system
@@ -199,6 +208,14 @@ artemis_passkey_require_for_administrator_features: false
 #    is_build_agent: true
 #    concurrent_build_size: 2
 #    thread_pool_size: 2
+# #  Optional. Bounds which hosts may act as a build agent at all, and which reverse proxies may be believed when
+# #  resolving the client of a git request. An empty allowed_ranges means no restriction, which is the default so
+# #  that adding this role to an existing installation does not stop its agents. Both accept CIDR blocks and single
+# #  addresses, IPv4 and IPv6. Narrow server.tomcat.remoteip.internal-proxies alongside allowed_ranges, or a caller
+# #  inside your private network can present an address of its choosing and pass the restriction.
+#    build_agent_network:
+#      allowed_ranges: [] # e.g. ["10.0.0.0/8"]
+#      trusted_proxies: [] # e.g. ["10.0.0.1"]
 #    proxy:
 #      http_proxy: "http://proxy:8080"
 #      https_proxy: "http://proxy:8080"
