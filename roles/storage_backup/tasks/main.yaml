@@ -1,0 +1,52 @@
+---
+- name: Install dependencies
+  become: true
+  ansible.builtin.apt:
+    name:
+      - borgbackup
+    state: present
+    update_cache: true
+
+- name: Initialise Borg repository
+  become: true
+  ansible.builtin.command: borg init --encryption=repokey ssh://{{ storage_backup_borg_server_user }}@{{ storage_backup_borg_server_url }}:{{ storage_backup_borg_server_port }}{{ storage_backup_borg_server_user_home }}/{{ storage_backup_borg_repo_name }}
+  environment:
+    BORG_PASSPHRASE: "{{ storage_backup_password }}"
+    BORG_RSH: "ssh -i {{ storage_backup_borg_ssh_identity }}"
+  register: init_borg_output
+  changed_when: init_borg_output.rc != 2
+  failed_when: init_borg_output.rc not in [0, 2]
+
+- name: Get encryption keys
+  become: true
+  ansible.builtin.command: borg key export --paper ssh://{{ storage_backup_borg_server_user }}@{{ storage_backup_borg_server_url }}:{{ storage_backup_borg_server_port }}{{ storage_backup_borg_server_user_home }}/{{ storage_backup_borg_repo_name }}
+  environment:
+    BORG_RSH: "ssh -i {{ storage_backup_borg_ssh_identity }}"
+  register: borg_keys
+
+- name: Print encryption keys
+  ansible.builtin.debug:
+    msg: "{{ borg_keys.stdout }}"
+
+- name: Write keys to file
+  ansible.builtin.copy:
+    dest: ./decryption_keys.txt
+    content: "{{ borg_keys.stdout }}"
+    mode: "600"
+  delegate_to: localhost
+  become: false
+
+- name: Deploy storage backup script
+  become: true
+  ansible.builtin.template:
+    src: "backup.sh.j2"
+    dest: "{{ storage_backup_script_path }}"
+    mode: "700"
+
+- name: Add backup cronjob
+  become: true
+  ansible.builtin.cron:
+    name: "Backup artemis storage"
+    minute: "{{ storage_backup_minute }}"
+    hour: "{{ storage_backup_hour }}"
+    job: "{{ storage_backup_script_path }} -sp >> /var/log/storage-backup.log 2>&1 || echo 'Backup failed' | logger -t storage-backup"
