@@ -57,7 +57,7 @@ Für die optionalen KI-gestützten Funktionen (Iris, Athena) werden, sofern Nutz
 
 ### Dauer der Speicherung der personenbezogenen Daten
 
-Ihre Daten werden nur so lange gespeichert, wie dies unter Beachtung gesetzlicher Aufbewahrungsfristen zur Aufgabenerfüllung erforderlich ist. Konkrete Speicherfristen für die einzelnen Verarbeitungsvorgänge finden Sie in den jeweiligen Abschnitten unten.
+Ihre Daten werden nur so lange gespeichert, wie dies unter Beachtung gesetzlicher Aufbewahrungsfristen zur Aufgabenerfüllung erforderlich ist. Konkrete Speicherfristen für die einzelnen Verarbeitungsvorgänge finden Sie in den jeweiligen Abschnitten unten. Sobald die für einen Kurs geltende Aufbewahrungsfrist abgelaufen ist, werden die personenbezogenen Daten dieses Kurses (etwa Teilnahmen, Abgaben, Ergebnisse, Feedback und Plagiatsfälle) automatisch gelöscht, während die Kursstruktur und die Lehrmaterialien erhalten bleiben.
 
 ### Ihre Rechte
 
@@ -150,7 +150,7 @@ Die Verbindung zum LDAP-Server ist verschlüsselt (LDAPS/StartTLS), und die gesa
 
 Zusätzlich bietet Artemis **Passkeys** (WebAuthn/FIDO2) als passwortlose, phishing-resistente und datensparsame Authentifizierungsmethode an. Bei Verwendung eines Passkeys wird kein Passwort an den LDAP-Server übermittelt. Die Nutzung ist optional; Benutzername und Passwort bleiben als Alternative verfügbar. 
 
-**Speicherdauer:** Benutzername, Name, E-Mail-Adresse und Matrikelnummer werden für die Dauer der Nutzung der Plattform gespeichert. Bei Exmatrikulation oder auf Antrag werden diese Daten gelöscht, soweit keine gesetzlichen Aufbewahrungsfristen entgegenstehen. Soweit Stammdaten zur Zuordnung prüfungs- oder bewertungsrelevanter Unterlagen erforderlich sind, können sie zusammen mit diesen Unterlagen gemäß den gesetzlichen Aufbewahrungsfristen für bis zu 5 Jahre nach Ende des jeweiligen relevanten Semesters gespeichert bleiben.
+**Speicherdauer:** Benutzername, Name, E-Mail-Adresse und Matrikelnummer werden für die Dauer der Nutzung der Plattform gespeichert. Bei Exmatrikulation oder auf Antrag werden diese Daten gelöscht, soweit keine gesetzlichen Aufbewahrungsfristen entgegenstehen. Soweit Stammdaten zur Zuordnung prüfungs- oder bewertungsrelevanter Unterlagen erforderlich sind, können sie zusammen mit diesen Unterlagen gemäß den gesetzlichen Aufbewahrungsfristen für bis zu 5 Jahre nach Ende des jeweiligen relevanten Semesters gespeichert bleiben. Um die gespeicherten Daten auf das notwendige Maß zu beschränken, wird der Zeitpunkt Ihrer letzten erfolgreichen Anmeldung gespeichert und ausschließlich dazu verwendet, inaktive Konten zu identifizieren. Wenn Sie in keinem Kurs eingeschrieben sind und sich über einen längeren Zeitraum nicht angemeldet haben, kann Ihr Benutzerkonto gelöscht werden, nachdem Sie per E-Mail benachrichtigt wurden und eine Übergangsfrist abgelaufen ist; durch eine erneute Anmeldung innerhalb dieser Frist wird die Löschung abgebrochen. Administratorkonten sind davon ausgenommen.
 
 ### Profilbilder
 

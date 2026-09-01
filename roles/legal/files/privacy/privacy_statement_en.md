@@ -61,7 +61,8 @@ agreement (Auftragsverarbeitungsvertrag, AVV) between TUM and Microsoft. The dat
 ### Duration of the storage of personal data
 
 Your data will only be stored for as long as is necessary for the fulfillment of duties, taking into account statutory retention periods. Specific retention periods for the
-individual processing operations can be found in the respective sections below.
+individual processing operations can be found in the respective sections below. Once the applicable retention period for a course has elapsed, the personal data of that course (such
+as participations, submissions, results, feedback and plagiarism cases) is deleted automatically, while the course structure and the teaching materials are retained.
 
 ### Your rights
 
@@ -157,7 +158,10 @@ transmitted to the LDAP server. Use is optional; username and password remain av
 
 **Retention period:** Username, name, email address and matriculation number are stored for the duration of use of the platform. Upon exmatriculation or on request, this data is
 deleted unless statutory retention periods prevent deletion. Where master data is required to associate examination- or assessment-relevant records, it may remain stored together
-with those records pursuant to statutory retention periods for up to 5 years after the end of the respective relevant semester.
+with those records pursuant to statutory retention periods for up to 5 years after the end of the respective relevant semester. In order to keep stored data to the necessary
+minimum, the date of your last successful login is recorded and used solely to identify inactive accounts. If you are not enrolled in any course and have not logged in for a
+prolonged period, your account may be deleted after you have been notified by email and a grace period has elapsed; logging in again during this period cancels the deletion.
+Administrator accounts are excluded.
 
 ### Profile pictures
 
