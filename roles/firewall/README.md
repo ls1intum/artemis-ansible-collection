@@ -32,6 +32,19 @@ You have to configure a special variable to select the firewall rule set which i
 firewall_hostgroup:  # Can be 'registry', 'nodes', 'proxy' or left blank for default rules
 ```
 
+## Interaction with Docker
+
+The rule sets in `templates/` define the whole `*filter` and `*nat` tables, so loading them with
+`iptables-restore` also removes the chains Docker installs when the daemon starts (`DOCKER`,
+`DOCKER-USER`, `DOCKER-FORWARD`, ...) together with the `MASQUERADE` rule for the bridge network.
+Docker does not notice this and only reinstalls the rules on restart, so containers lose all
+outbound connectivity in the meantime.
+
+To avoid that, this role only reloads the rules when they actually changed, and afterwards checks
+whether Docker's `MASQUERADE` rule is still present. If it is missing, Docker is restarted so it
+can reinstall its rules. Note that this restart stops running containers, which on a build agent
+means losing the builds that are currently in flight.
+
 ## Example Usage
 
 Here is an example playbook for a registry:

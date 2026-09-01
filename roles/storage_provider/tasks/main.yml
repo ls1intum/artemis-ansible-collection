@@ -30,6 +30,27 @@
     owner: "{{ artemis_user }}"
     group: "{{ artemis_group }}"
 
+- name: Ensure the nfs-server drop-in directory exists
+  become: true
+  file:
+    path: /etc/systemd/system/nfs-server.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: "755"
+  when: storage_nfs_after_units | length > 0
+
+- name: Order nfs-server after the interface carrying the storage address
+  become: true
+  template:
+    src: nfs-server-wait-for-address.conf.j2
+    dest: /etc/systemd/system/nfs-server.service.d/10-wait-for-address.conf
+    owner: root
+    group: root
+    mode: "644"
+  when: storage_nfs_after_units | length > 0
+  notify: Reload systemd and restart nfs-server
+
 - name: Configure NFS Daemon
   become: true
   template:
@@ -37,7 +58,7 @@
     dest: /etc/nfs.conf
     owner: root
     group: root
-    mode: "u=rw,g=r,o=r"
+    mode: "644"
   notify: Restart nfs-server
 
 - name: Configure export
@@ -47,5 +68,5 @@
     dest: /etc/exports
     owner: root
     group: root
-    mode: "u=rw,g=r,o=r"
+    mode: "644"
   notify: Restart nfs-server

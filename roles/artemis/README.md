@@ -43,6 +43,17 @@ ldap:
   password: "your_ldap_password"
 ```
 
+OIDC login configuration (e.g. TUM Login, an alternative to LDAP):
+```
+artemis_oidc:
+  enabled: true
+  button_label: "TUM Login"
+  client_id: "your_client_id"
+  client_secret: "your_client_secret"
+  issuer_uri: "https://login.example.com"
+```
+You can provide `authorization_uri`, `token_uri`, `user_info_uri`, and `jwk_set_uri` individually. Claim mappings default to standard OIDC claims and can be overridden via `mappings.*`.
+
 To allow internal user registration:
 ```
 user_management:
@@ -61,11 +72,30 @@ localvc:
   ssh_key_path: "/opt/artemis/ssh-keys" # Key path for the SSH host keys
   build_agent_use_ssh: true # Setting whether SSH should be used.
   ssh_url: "ssh://git@artemis.example.com:7921/" # URL template for SSH clone operations.
+  # Proxies that forward port 7921 at the TCP level and announce the real client with a PROXY protocol header.
+  # Only set this together with proxy_ssh_proxy_protocol on those proxies; enabling one half breaks SSH.
+  ssh_proxy_protocol_trusted_sources:
+    - "10.0.0.1"
+```
+
+**Build agent authentication.** Pick the first that applies; neither of the first two needs a secret from you,
+because the agents establish their own credentials:
+
+1. **SSH keys (recommended).** Set `build_agent_use_ssh: true` and `ssh_url`. Each agent generates its own key pair
+   at startup and publishes only the public half, so there is nothing to distribute, rotate or keep in sync.
+2. **Build job clone tokens.** Used automatically over HTTPS when `build_agent_use_ssh` is `false`. This needs no
+   configuration at all: every build job carries a credential scoped to its own repositories.
+3. **`build_agent_git_credentials`.** A shared username and password, accepted **only on a local VC node that does
+   not run local CI** — in practice [Jenkins with LocalVC](https://docs.artemis.tum.de/admin/jenkins-localvc).
+   A node running local CI refuses to start with it, and this role fails the play before the deploy reaches that
+   point.
+
+```
+localvc:
+  # Jenkins with LocalVC only. Do not set this where continuous_integration.localci is configured.
   build_agent_git_credentials:
     user: "build_agent_user"
     password: "build_agent_password"
-  user: "localvc_user"
-  password: "localvc_password"
 ```
 
 LocalCI configuration:
@@ -83,6 +113,11 @@ continuous_integration:
     image_cleanup:
       expiry_days: 3
       schedule_time: "0 0 4 * * *"
+    # Optional. Bounds which hosts may act as a build agent, and which reverse proxies may be believed when
+    # resolving the client of a git request. An empty allowed_ranges means no restriction.
+    build_agent_network:
+      allowed_ranges: [] # e.g. ["10.0.0.0/8"]
+      trusted_proxies: [] # e.g. ["10.0.0.1"]
 ```
 
 Jenkins configuration:

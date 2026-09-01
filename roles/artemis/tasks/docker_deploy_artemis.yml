@@ -12,6 +12,8 @@
     path: "{{ artemis_working_directory }}/{{ item }}"
     state: directory
     mode: "770"
+    owner: "{{ artemis_user_name }}"
+    group: "{{ artemis_user_group }}"
   loop:
     - "data"
     - "data/database"
@@ -23,7 +25,6 @@
   file:
     path: "{{ artemis_working_directory }}"
     state: directory
-    recurse: true
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
   notify: restart docker artemis
@@ -33,7 +34,6 @@
   file:
     path: "{{ artemis_working_directory }}/data/database"
     state: directory
-    recurse: true
     # Must match UID and GID used for the postgres user
     # See e.g. https://hub.docker.com/layers/library/postgres/16.1-alpine/images/sha256-b788d196db04847b17df664f4ae18062e712328d225b9ff75d4d7cd91a16c374?context=explore
     owner: "70"
@@ -110,7 +110,6 @@
   file:
     path: "{{ artemis_data_export_path }}"
     state: directory
-    recurse: true
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
   when: artemis_data_export_path is not none and artemis_data_export_path != ""
@@ -122,5 +121,5 @@
     dest: "{{ artemis_working_directory }}/artemis-docker.sh"
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
-    mode: "770"
+    mode: "550"
   notify: restart docker artemis

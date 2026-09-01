@@ -13,3 +13,10 @@ storage_export: /srv/artemis
 # Storage Network
 storage_network: "fcfe:0:0:0:0:0:0:0/96"
 storage_server_address: "fcfe:0:0:0:0:0:9:1"
+
+# Units that must have finished before nfsd starts, because they bring up storage_server_address.
+# nfsd is pinned to that one address, so it cannot bind until the interface carrying it exists, and
+# `network-online.target` does not wait for WireGuard. Set to an empty list on a host where the storage
+# address belongs to an interface systemd already waits for.
+storage_nfs_after_units:
+  - wg-quick@wg0.service

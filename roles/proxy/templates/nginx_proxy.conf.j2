@@ -14,11 +14,14 @@ upstream app {
 server_tokens off;
 
 {% if proxy_rate_limit_exempt_ips | length > 0 %}
-# Geo block to identify exempt IPs (1 = exempt, 0 = not exempt)
+# Geo block to identify exempt IPs (1 = exempt, 0 = not exempt). An address listed here is exempt from
+# the git and login zones below, which is what a load generator needs: it drives thousands of logins and
+# clones from a single address, and the per-address budgets that protect a shared campus NAT would
+# otherwise reject nearly all of them. Account recovery stays limited for everyone - see below.
 geo $rate_limit_exempt {
     default 0;
 {% for exempt in proxy_rate_limit_exempt_ips %}
-    {{ exempt.ip }} 1;  # {{ exempt.comment | default('Exempt from git rate limiting') }}
+    {{ exempt.ip }} 1;  # {{ exempt.comment | default('Exempt from git and login rate limiting') }}
 {% endfor %}
 }
 
@@ -29,10 +32,32 @@ map $rate_limit_exempt $rate_limit_key {
 }
 {% endif %}
 
-# Rate limit for the login REST call, at most one requests per two seconds
-limit_req_zone $binary_remote_addr zone=loginlimit:10m rate=30r/m;
-# Rate limit for git operations, at most 15 requests per second
-limit_req_zone {% if proxy_rate_limit_exempt_ips | length > 0 %}$rate_limit_key{% else %}$binary_remote_addr{% endif %} zone=gitlimit:10m rate=15r/s;
+# Answer throttled requests with 429 rather than nginx's default of 503. 503 reads as "the server is
+# down", so clients and monitoring retry it; 429 is the honest status and matches what the Artemis
+# application-level limiter returns (RateLimitExceededException -> 429).
+limit_req_status 429;
+
+# Rate limit for the login REST call, at most one requests per two seconds. Exemptible, because a
+# benchmark run logs every simulated student in from one address within a few seconds: at 30r/m with a
+# burst of 3, all but a handful would get a 429 and be dropped from the run, and the tool would report
+# the configured student count while having measured almost none of them.
+limit_req_zone {% if proxy_rate_limit_exempt_ips | length > 0 %}$rate_limit_key{% else %}$binary_remote_addr{% endif %} zone=loginlimit:10m rate=30r/m;
+# Rate limit for the login-options lookup behind the identifier-first login form. The client calls it once
+# per login attempt, immediately before POST authenticate, so it gets the same budget as the login zone -
+# but in a zone of its own, so spending it does not reduce the number of logins a shared campus address
+# can still perform.
+limit_req_zone $binary_remote_addr zone=loginoptionslimit:10m rate=30r/m;
+# Rate limit for account recovery and registration (password reset init/finish, register, activate).
+# Stricter than the login zone: these endpoints send mail and mutate credentials, and no legitimate
+# client calls them repeatedly. Deliberately not exemptible - no automation uses them.
+limit_req_zone $binary_remote_addr zone=accountrecoverylimit:10m rate=5r/m;
+# Rate limit for the git credential handshake (/info/refs). Every git-over-HTTP operation starts with
+# exactly one such request, and it is the one that carries credentials, so it is bounded separately from
+# the bulk transfer below - which has to stay generous for real clones and pushes. One handshake per
+# second per client is well above interactive use.
+limit_req_zone {% if proxy_rate_limit_exempt_ips | length > 0 %}$rate_limit_key{% else %}$binary_remote_addr{% endif %} zone=gitauthlimit:10m rate=60r/m;
+# Rate limit for git data transfer, at most 5 requests per second
+limit_req_zone {% if proxy_rate_limit_exempt_ips | length > 0 %}$rate_limit_key{% else %}$binary_remote_addr{% endif %} zone=gitlimit:10m rate=5r/s;
 
 server {
     listen 80 default_server;
@@ -105,8 +130,12 @@ server {
     }
 {% endif %}
 
-    location /api/authenticate {
-        proxy_pass http://app/api/authenticate;
+    # Password login. NOTE: the path must match the endpoint PublicUserJwtResource actually serves
+    # (@RequestMapping("api/core/public/") + @PostMapping("authenticate")). Nothing serves the former
+    # /api/authenticate path, so a block pointing at it silently throttles nothing and login requests
+    # fall through to `location /` unlimited. If the endpoint moves, move this block with it.
+    location /api/core/public/authenticate {
+        proxy_pass {{ proxy_node_protocol }}://app/api/core/public/authenticate;
 		# For a given violation of the rate limit defined in the zone
 		# * the first 2 (delay) requests will be allowed without delay
 		# * the next (burst - delay) request waits until it fits in the rate limit
@@ -114,10 +143,82 @@ server {
 		# If an attacker spams this endpoint, only the first three requests will come through.
 		# This only resets if the violation of the rate limit stops.
         limit_req zone=loginlimit burst=3 delay=2;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # SAML2 login callback: exchanges an established SAML2 context for an Artemis JWT cookie.
+    location /api/core/public/saml2 {
+        proxy_pass {{ proxy_node_protocol }}://app/api/core/public/saml2;
+        limit_req zone=loginlimit burst=3 delay=2;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Login options lookup for the identifier-first login form. NOTE: the path must match the endpoint
+    # PublicAccountResource actually serves (@RequestMapping("api/core/public/") + @GetMapping("login-options")).
+    # Bounded here as well as by the Artemis application-level limiter, so a flood is dropped at the edge
+    # instead of reaching a database lookup per request; this zone also keys on the real TCP peer, which the
+    # application-level limiter does not see directly.
+    location /api/core/public/login-options {
+        proxy_pass {{ proxy_node_protocol }}://app/api/core/public/login-options;
+        # Same shape as the login block above: the first 2 requests pass immediately, the third waits for a
+        # slot, the rest are answered 429. A real client sends exactly one of these per login attempt.
+        limit_req zone=loginoptionslimit burst=3 delay=2;
+    }
+
+    # Account recovery and registration. Each of these either sends mail to a user-supplied address or
+    # mutates credentials, so they get the strict zone. Listed individually on purpose: a broader
+    # /api/core/public/ prefix would also catch GET /api/core/public/account, which the client requests
+    # on every page load, and /account/change-language.
+    location /api/core/public/account/reset-password/init {
+        proxy_pass {{ proxy_node_protocol }}://app/api/core/public/account/reset-password/init;
+        limit_req zone=accountrecoverylimit burst=3 nodelay;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /api/core/public/account/reset-password/finish {
+        proxy_pass {{ proxy_node_protocol }}://app/api/core/public/account/reset-password/finish;
+        limit_req zone=accountrecoverylimit burst=3 nodelay;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /api/core/public/register {
+        proxy_pass {{ proxy_node_protocol }}://app/api/core/public/register;
+        limit_req zone=accountrecoverylimit burst=3 nodelay;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /api/core/public/activate {
+        proxy_pass {{ proxy_node_protocol }}://app/api/core/public/activate;
+        limit_req zone=accountrecoverylimit burst=3 nodelay;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 
     location /login/webauthn {
-        proxy_pass http://app/login/webauthn;
+        proxy_pass {{ proxy_node_protocol }}://app/login/webauthn;
 		# For a given violation of the rate limit defined in the zone
 		# * the first 2 (delay) requests will be allowed without delay
 		# * the next (burst - delay) request waits until it fits in the rate limit
@@ -125,14 +226,39 @@ server {
 		# If an attacker spams this endpoint, only the first three requests will come through.
 		# This only resets if the violation of the rate limit stops.
         limit_req zone=loginlimit burst=3 delay=2;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Git credential handshake. Every git-over-HTTP operation starts with exactly one /info/refs
+    # request, and it is the one that carries credentials. The bulk zone below has to stay generous for
+    # real clones and pushes, so the handshake is bounded separately and more tightly.
+    #
+    # A regex location takes precedence over the /git/ prefix location, so this wins for /info/refs.
+    # proxy_pass must have no URI part in a regex location, which passes the original URI unchanged -
+    # equivalent to the identity mapping the prefix block does.
+    location ~ ^/git/.*/info/refs$ {
+        proxy_pass {{ proxy_node_protocol }}://app;
+        limit_req zone=gitauthlimit burst=10 nodelay;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_send_timeout 900s;
+        proxy_read_timeout 900s;
     }
 
     location /git/ {
-        proxy_pass http://app/git/;
+        proxy_pass {{ proxy_node_protocol }}://app/git/;
         # For a given violation of the rate limit defined in the zone
         # * the first 30 requests will be allowed without delay
         # * the rest will be denied
         # This only resets if the violation of the rate limit stops.
+        # NOTE: this bounds data-transfer volume; the handshake above is bounded separately.
         limit_req zone=gitlimit burst=30 nodelay;
 
         proxy_http_version 1.1;
