@@ -1,3 +1,4 @@
+import json
 import subprocess
 import argparse
 
@@ -30,7 +31,7 @@ wireguard_interface_address: "fcfe:0:0:0:0:0:{MAPPPING[h_type]}:{host_id}"
 
 # Wireguard Keys - Automatically generated!
 wireguard_pubkey: {pub}
-wireguard_privkey: {priv}
+wireguard_privkey: "{{{{ lookup('hashi_vault', 'artemis/data/TODO/wireguard').get('privkey_{h_type}{host_id:02d}') }}}}"
 """
 
     if h_type == "node":
@@ -65,6 +66,8 @@ def main():
     prefix = args['hostprefix']
     suffix = args['hostsuffix']
 
+    vault_json = {}
+
     # Iterate over all host types
     for h_type in HOST_TYPES:
 
@@ -76,11 +79,16 @@ def main():
             for i in range(number_of_nodes):
 
                 pub, priv = gen_key()
+                vault_json[f"privkey_{h_type}{i + 1:02d}"] = priv
                 store_host_var_file(pub, priv, h_type, i + 1,
-                                    prefix + h_type + str(i + 1) + suffix)
+                                    prefix + h_type + f"{i + 1:02d}" + suffix)
         else:
             pub, priv = gen_key()
+            vault_json[f"privkey_{h_type}01"] = priv
             store_host_var_file(pub, priv, h_type, 1, prefix + h_type + suffix)
+
+    with open(f"vault.json", 'w') as f:
+            json.dump(vault_json, f, ensure_ascii=False, indent=4)
 
     print("Files Written")
 
