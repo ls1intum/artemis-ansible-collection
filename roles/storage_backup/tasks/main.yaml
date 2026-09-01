@@ -26,13 +26,13 @@
 
 - name: Print encryption keys
   ansible.builtin.debug:
-    msg: "{{ borg_keys }}"
+    msg: "{{ borg_keys.stdout }}"
 
 - name: Write keys to file
   ansible.builtin.copy:
-    dest: ./decryption_Keys.txt
+    dest: ./decryption_keys.txt
     content: "{{ borg_keys.stdout }}"
-    mode: "0600"
+    mode: "600"
   delegate_to: localhost
   become: false
 
