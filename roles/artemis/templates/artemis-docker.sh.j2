@@ -2,9 +2,9 @@
 
 ARTEMIS_REPO_DIR="{{ artemis_working_directory }}/Artemis"
 PROJECT_DIR="$ARTEMIS_REPO_DIR/docker"
-{% set default_compose_file = "test-server-" + artemis_database_type + ".yml" %}
-{% set localci_compose_file = "test-server-" + artemis_database_type + "-localci.yml" %}
-{% set multi_node_compose_file = "test-server-multi-node-" + artemis_database_type + "-localci.yml" %}
+{% set default_compose_file = "test-server-postgresql.yml" %}
+{% set localci_compose_file = "test-server-postgresql-localci.yml" %}
+{% set multi_node_compose_file = "test-server-multi-node-postgresql-localci.yml" %}
 
 COMPOSE_FILE="{% if is_multinode_install is defined and is_multinode_install %}{{ multi_node_compose_file }}{% elif continuous_integration.localci is defined %}{{ localci_compose_file }}{% else %}{{ default_compose_file }}{% endif %}"
 DOCKER_IMAGE_ENV_FILE="$ARTEMIS_REPO_DIR/.env"
