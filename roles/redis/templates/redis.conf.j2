@@ -1,8 +1,61 @@
 {{ ansible_managed | comment }}
 
-requirepass {{ redis.password }}
-user {{ redis.username }} on >{{ redis.password }} +@all &* ~*
-user default off nopass nocommands
+################################## NETWORK ####################################
+
+# Loopback plus the WireGuard overlay only. The WireGuard address is mandatory
+# (no "-" prefix) so the container fails to start while wg0 is missing and the
+# restart policy retries, instead of coming up unreachable for the cluster.
+bind 127.0.0.1 -::1 {{ redis_wireguard_address }}
+port {{ redis.port }}
 protected-mode yes
-notify-keyspace-events lshKE
-bind 0.0.0.0
+
+tcp-backlog {{ redis_tcp_backlog }}
+tcp-keepalive 300
+timeout 0
+
+maxclients {{ redis_maxclients }}
+
+#################################### USERS ####################################
+
+# No `requirepass` here: it only configures the "default" user, which is
+# disabled right below, so the directive would be dead weight and misleading.
+
+# Nobody gets in without an explicit user.
+user default off nopass nocommands
+
+# Artemis application user - no administrative or destructive commands.
+user {{ redis.username }} on >{{ redis.password }} {{ redis_artemis_acl_rules }}
+
+# Administrative user. Redis cannot restrict a user to a source address, so this
+# limits privileges, not reachability - the network side is handled by `bind`
+# above plus the host firewall.
+user {{ redis.admin_username }} on >{{ redis.admin_password }} {{ redis_admin_acl_rules }}
+
+#################################### MEMORY ###################################
+
+maxmemory {{ redis_maxmemory }}
+maxmemory-policy {{ redis_maxmemory_policy }}
+
+################################## PERSISTENCE ################################
+
+dir /data
+{% if redis_persistence_enabled %}
+save {{ redis_save }}
+{% else %}
+save ""
+{% endif %}
+stop-writes-on-bgsave-error {{ 'yes' if redis_stop_writes_on_bgsave_error else 'no' }}
+rdbcompression yes
+rdbchecksum yes
+appendonly {{ 'yes' if redis_appendonly else 'no' }}
+
+################################ NOTIFICATIONS ################################
+
+notify-keyspace-events {{ redis_notify_keyspace_events }}
+
+################################## DIAGNOSTICS ################################
+
+loglevel notice
+slowlog-log-slower-than 10000
+slowlog-max-len 256
+latency-monitor-threshold 100

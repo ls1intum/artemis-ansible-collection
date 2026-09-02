@@ -2,19 +2,40 @@
 
 services:
   redis:
-    image: redis/redis-stack-server:{{ redis.version }}
+    image: {{ redis_image }}
+    container_name: {{ redis_container_name }}
     restart: always
-    ports:
-      - "{{ redis.port }}:6379"
+    # Host networking, not published ports. Docker's port publishing inserts its
+    # own DNAT/FORWARD rules that bypass the iptables INPUT chain the firewall
+    # role maintains, so a published 6379 is reachable from every interface no
+    # matter what the firewall says. On the host network the `bind` directive in
+    # redis.conf and the firewall's "wg0 and lo only" INPUT rules both apply.
+    network_mode: host
+    user: "{{ redis_uid }}:{{ redis_gid }}"
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     volumes:
-      - ./redis.conf:/usr/local/etc/redis/redis.conf
-      - ./redis-data:/data
-    command: [
-      "redis-server",
-      "/usr/local/etc/redis/redis.conf",
-    ]
+      - ./redis.conf:/usr/local/etc/redis/redis.conf:ro
+      - {{ redis_data_directory }}:/data
+    # Liveness only, so no credentials end up in `docker inspect`. An
+    # unauthenticated PING answering NOAUTH proves the server is serving.
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "{{ redis.password }}", "ping"]
+      test: ["CMD-SHELL", "redis-cli -h 127.0.0.1 -p {{ redis.port }} ping 2>&1 | grep -qE 'PONG|NOAUTH'"]
       interval: 10s
       timeout: 5s
       retries: 3
+      start_period: 30s
+    # Give Redis time to write its final snapshot instead of being SIGKILLed.
+    stop_grace_period: {{ redis_stop_grace_period }}
+    ulimits:
+      nofile:
+        soft: {{ redis_nofile_limit }}
+        hard: {{ redis_nofile_limit }}
+    logging:
+      driver: json-file
+      options:
+        max-size: "{{ redis_log_max_size }}"
+        max-file: "{{ redis_log_max_file }}"
+    deploy:
+      resources:
+        limits:
+          memory: {{ redis_container_memory_limit }}

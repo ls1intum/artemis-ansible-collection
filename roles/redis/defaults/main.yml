@@ -1,9 +1,106 @@
 ---
 ansible_managed: "Ansible managed: Do not make changes here - they will be overwritten."
 
+# Connection contract shared with the artemis role. Ansible replaces dictionaries
+# wholesale, so anything defined here is lost as soon as `redis:` is set in group_vars.
+# Only the keys the artemis role also reads live in this dict - every operational
+# setting is a flat `redis_*` variable so it keeps its default.
 redis:
   username: artemis
   password: #FIXME
-  working_directory: /opt/redis
-  version: 6.2.6-v18
+  admin_username: admin
+  admin_password: #FIXME
   port: 6379
+
+##############################################################################
+# Deployment
+##############################################################################
+
+redis_working_directory: "{{ redis.working_directory | default('/opt/redis') }}"
+redis_data_directory: "{{ redis_working_directory }}/redis-data"
+
+# Plain Redis - Artemis (Spring Data Redis / Redisson) does not use any of the
+# redis-stack modules. See README.md for the migration off redis/redis-stack-server.
+redis_image: "redis:7.4-alpine"
+redis_container_name: redis
+
+# UID/GID the official redis image runs as. The data directory and redis.conf are
+# owned by it; no host user is created so we cannot collide with existing accounts.
+redis_uid: 999
+redis_gid: 999
+
+redis_stop_grace_period: 60s
+redis_log_max_size: 100m
+redis_log_max_file: 5
+
+##############################################################################
+# Network
+##############################################################################
+
+# Address Redis listens on in addition to loopback. Deliberately not optional
+# (no "-" prefix): if wg0 is not up yet the container fails and Docker's restart
+# policy retries until the interface exists, instead of silently coming up
+# unreachable for the whole cluster.
+redis_wireguard_address: "{{ wireguard_interface_address }}"
+
+redis_tcp_backlog: 511
+# 24 nodes x Redisson connection pools add up quickly; keep well above the
+# expected peak and make sure redis_nofile_limit stays above this value.
+redis_maxclients: 10000
+redis_nofile_limit: 65535
+
+##############################################################################
+# Memory
+##############################################################################
+
+# Hard cap so Redis fails loudly instead of being OOM-killed. Set to roughly
+# 60-70% of the RAM available to Redis on this host.
+redis_maxmemory: 4gb
+# "noeviction" on purpose: Redisson locks, the LocalCI build queue and the
+# websocket bookkeeping are not disposable cache entries - evicting them
+# corrupts cluster coordination silently. Hitting the limit must be an error.
+redis_maxmemory_policy: noeviction
+redis_container_memory_limit: 6g
+
+##############################################################################
+# Persistence
+##############################################################################
+
+redis_persistence_enabled: true
+redis_save: "900 1 300 10 60 10000"
+redis_appendonly: false
+# "no" keeps Redis writable when a snapshot fails (full disk, bad permissions).
+# With the default "yes" a failed BGSAVE puts every write into MISCONF and takes
+# the whole Artemis cluster down until an operator intervenes.
+redis_stop_writes_on_bgsave_error: false
+
+##############################################################################
+# ACL
+##############################################################################
+
+# Application user: full access to keys and pub/sub channels, no administrative
+# or destructive commands. INFO and the CLIENT subcommands are added back
+# because Spring Data Redis / Lettuce and Redisson need them on every connect.
+# Denied commands show up in `ACL LOG` - check there first if something breaks.
+redis_artemis_acl_rules: >-
+  ~* &* +@all -@admin -@dangerous
+  +info +client|setname +client|setinfo +client|getname +client|id +client|info
+
+# Administrative user: everything. Redis has no source-address ACL, so this is a
+# privilege boundary, not a network boundary - see README.md.
+redis_admin_acl_rules: "~* &* +@all"
+
+##############################################################################
+# Keyspace notifications
+##############################################################################
+
+redis_notify_keyspace_events: lshKE
+
+##############################################################################
+# Host tuning
+##############################################################################
+
+# vm.overcommit_memory=1 is required for BGSAVE: without it the fork can fail on
+# a host with little free memory and persistence stops working silently.
+redis_tune_host: true
+redis_somaxconn: 1024

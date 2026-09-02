@@ -1,6 +1,10 @@
+---
+# The configuration is bind-mounted, so a restart is enough to pick it up. The
+# "Ensure redis is running" task handles image changes; recreating the container
+# on every config change would drop all client connections for longer than
+# necessary.
 - name: Restart redis
   become: true
   community.docker.docker_compose_v2:
-    project_src: "{{ redis.working_directory }}"
+    project_src: "{{ redis_working_directory }}"
     state: restarted
-    recreate: always
