@@ -32,7 +32,7 @@ Three ACL users are configured:
 | User                   | Purpose                | Privileges                                                                                       |
 | ---------------------- | ---------------------- | ------------------------------------------------------------------------------------------------ |
 | `default`              | -                      | disabled (`off nopass nocommands`)                                                                 |
-| `redis.username`       | Artemis application    | all keys and channels, `+@all -@admin -@dangerous` plus `INFO` and the `CLIENT` subcommands Lettuce/Redisson need |
+| `redis.username`       | Artemis application    | all keys and channels, `+@all -@admin -@dangerous` plus the read-only extras Lettuce/Redisson need on connect (`INFO`, `CONFIG GET`, `SORT_RO`, `CLIENT SETNAME/SETINFO/GETNAME/ID/INFO`) |
 | `redis.admin_username` | operations             | `+@all`                                                                                            |
 
 **Redis has no source-address ACL.** A user cannot be restricted to localhost or

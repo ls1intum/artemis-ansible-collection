@@ -84,7 +84,8 @@ redis_stop_writes_on_bgsave_error: false
 # Denied commands show up in `ACL LOG` - check there first if something breaks.
 redis_artemis_acl_rules: >-
   ~* &* +@all -@admin -@dangerous
-  +info +client|setname +client|setinfo +client|getname +client|id +client|info
+  +info +config|get +sort_ro
+  +client|setname +client|setinfo +client|getname +client|id +client|info
 
 # Administrative user: everything. Redis has no source-address ACL, so this is a
 # privilege boundary, not a network boundary - see README.md.
