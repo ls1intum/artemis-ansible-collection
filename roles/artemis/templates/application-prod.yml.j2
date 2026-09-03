@@ -34,13 +34,7 @@ spring:
 {% endif %}
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    # readOnlyPropagatesToServer=false keeps Connection.setReadOnly() on the client. Spring Data JPA marks every
-    # repository read method read-only, so without this the driver sends SET SESSION TRANSACTION READ ONLY before the
-    # query and READ WRITE after it. Measured on staging: 5.7 such round trips per request, 1.1 million over a single
-    # 2000 student run, and removing them took total database round trips per request from 41.3 to 35.0. What is given
-    # up is InnoDB's read-only transaction optimisation, which is worth far less than two round trips per query.
-    # Only safe while reads and writes go to the same server; revisit if read replicas are introduced.
-    url: jdbc:{{ artemis_database_type }}://{{ artemis_database_host }}:{{ artemis_database_port }}/{{ artemis_database_dbname }}?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC{% if artemis_database_type == 'mysql' %}&readOnlyPropagatesToServer=false{% endif %}
+    url: jdbc:postgresql://{{ artemis_database_host }}:{{ artemis_database_port }}/{{ artemis_database_dbname }}?sslmode=disable
     username: {{ artemis_database_username }}
     password: {{ artemis_database_password }}
     hikari:
@@ -64,12 +58,10 @@ spring:
   jpa:
     # Hibernate auto-detects the dialect from JDBC DatabaseMetaData by default. Artemis disables that probe in
     # production (hibernate.boot.allow_jdbc_metadata_access=false) to speed up startup, so the dialect must be set
-    # explicitly. Derive it from the configured database type (MySQL support is being phased out).
-    database: {{ 'MYSQL' if artemis_database_type == 'mysql' else ('POSTGRESQL' if artemis_database_type == 'postgresql' else artemis_database_type | upper) }}
+    # explicitly.
+    database: postgresql
     hibernate:
       connection:
-        charSet: {{ artemis_database_encoding }}
-        characterEncoding: {{ artemis_database_encoding }}
         useUnicode: true
 {% if is_multinode_install and broker is defined %}
   websocket:

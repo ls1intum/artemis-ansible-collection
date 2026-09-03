@@ -1,27 +1,104 @@
 ---
-- name: Check if redis.password is set
+- name: Fail on the removed redis.version variable
   fail:
-    msg: "No redis password is configured!"
-  when:
-    - redis.password is undefined or redis.password is none
+    msg: |
+      `redis.version` is no longer used. This role now deploys the official
+      `redis` image instead of `redis/redis-stack-server` - the old tag
+      (e.g. 6.2.6-v18) is not a valid tag for it. Remove `redis.version` and
+      set `redis_image` instead (default: {{ redis_image }}).
+  when: redis.version is defined
+
+- name: Validate redis configuration
+  assert:
+    that:
+      - redis.username is defined and redis.username | length > 0
+      - redis.password is defined and redis.password is not none and redis.password | length > 0
+      - redis.admin_username is defined and redis.admin_username | length > 0
+      - redis.admin_password is defined and redis.admin_password is not none and redis.admin_password | length > 0
+      - redis.username != redis.admin_username
+      - redis.password != redis.admin_password
+      - redis_wireguard_address is defined and redis_wireguard_address | length > 0
+    fail_msg: |
+      Required Redis variables are missing or invalid. Expected in group_vars/host_vars:
+        redis:
+          username: artemis
+          password: <application password>
+          admin_username: admin
+          admin_password: <administrative password, different from the above>
+          port: 6379
+      and a WireGuard address for this host (redis_wireguard_address, defaults
+      to wireguard_interface_address).
+
+# ACL rules are whitespace separated, so a password containing whitespace would
+# silently turn into additional ACL selectors instead of failing.
+- name: Validate that the passwords are usable in an ACL rule
+  assert:
+    that:
+      - redis.password is not search('\s')
+      - redis.admin_password is not search('\s')
+      - redis.password is not search('"')
+      - redis.admin_password is not search('"')
+    fail_msg: "Redis passwords must not contain whitespace or double quotes."
+
+- name: Tune host kernel parameters for redis
+  become: true
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: true
+  loop:
+    # Without this a BGSAVE fork can fail on a host under memory pressure and
+    # persistence stops working while Redis keeps serving.
+    - name: vm.overcommit_memory
+      value: "1"
+    - name: net.core.somaxconn
+      value: "{{ redis_somaxconn }}"
+  when: redis_tune_host
 
 - name: Create working directory
   become: true
   file:
-    path: "{{ redis.working_directory }}"
+    path: "{{ redis_working_directory }}"
     state: directory
-    mode: "775"
-  notify: Restart redis
+    owner: root
+    group: root
+    mode: "0750"
 
-- name: Copy configuration file
+# Owned by the UID inside the container, otherwise every RDB snapshot fails and
+# - with stop-writes-on-bgsave-error - takes the cluster's writes down with it.
+- name: Create data directory
+  become: true
+  file:
+    path: "{{ redis_data_directory }}"
+    state: directory
+    owner: "{{ redis_uid }}"
+    group: "{{ redis_gid }}"
+    mode: "0700"
+
+- name: Copy redis configuration file
   become: true
   template:
-    src: "{{ item.src }}"
-    dest: "{{ redis.working_directory }}/{{ item.dest }}"
-    mode: "600"
+    src: redis.conf.j2
+    dest: "{{ redis_working_directory }}/redis.conf"
+    owner: "{{ redis_uid }}"
+    group: "{{ redis_gid }}"
+    mode: "0400"
   notify: Restart redis
-  with_items:
-    - src: redis.conf.j2
-      dest: "redis.conf"
-    - src: docker-compose.yml.j2
-      dest: "docker-compose.yml"
+
+- name: Copy docker compose file
+  become: true
+  template:
+    src: docker-compose.yml.j2
+    dest: "{{ redis_working_directory }}/docker-compose.yml"
+    owner: root
+    group: root
+    mode: "0640"
+  notify: Restart redis
+
+- name: Ensure redis is running
+  become: true
+  community.docker.docker_compose_v2:
+    project_src: "{{ redis_working_directory }}"
+    state: present
+    pull: missing
