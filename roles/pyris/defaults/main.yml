@@ -2,6 +2,20 @@
 pyris_build_version: "latest"
 pyris_working_directory: "/opt/pyris"
 pyris_weaviate_directory: "{{ pyris_working_directory }}/weaviate"
+pyris_transcription_data_directory: "{{ pyris_working_directory }}/transcription-data"
+pyris_repository_url: "https://github.com/ls1intum/edutelligence.git"
+pyris_repository_directory: "{{ pyris_working_directory }}/edutelligence"
+pyris_compose_file: "pyris-production-external-weaviate.yml"
+pyris_stable_env_file: "{{ pyris_working_directory }}/docker.env"
+pyris_runtime_env_file: "{{ pyris_working_directory }}/runtime.env"
+pyris_apply_runtime: false
+pyris_bootstrap_runtime: true
+pyris_bootstrap_branch: "main"
+pyris_bootstrap_state_directory: "/var/lib/artemis-ansible/pyris"
+pyris_bootstrap_pending_file: "{{ pyris_bootstrap_state_directory }}/pending"
+pyris_bootstrap_complete_file: "{{ pyris_bootstrap_state_directory }}/complete"
+pyris_bootstrap_state_owner: "root"
+pyris_bootstrap_state_group: "root"
 
 ##############################################################################
 # Pyris Linux Users
@@ -15,7 +29,8 @@ pyris_user_gid: "1337"
 pyris_create_deployment_user: false
 pyris_deployment_user_name: deployment
 pyris_deployment_user_uid: 1338
-pyris_deployment_user_public_key: ""
+pyris_deployment_user_public_keys: []
+pyris_deployment_user_authorized_keys_exclusive: false
 pyris_deployment_user_comment: "User to deploy pyris to this host"
 
 ##############################################################################
@@ -31,3 +46,6 @@ pyris_llm_config: # FIXME
 
 proxy_ssl_certificate_path: # FIXME
 proxy_ssl_certificate_key_path: # FIXME
+proxy_ssl_certificate_source_path: # FIXME
+proxy_ssl_certificate_key_source_path: # FIXME
+pyris_nginx_container_name: "pyris-nginx"
