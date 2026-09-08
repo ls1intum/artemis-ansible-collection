@@ -1,0 +1,64 @@
+{{ ansible_managed | comment }}
+
+[Unit]
+Description=Valkey key-value store
+Documentation=https://valkey.io/docs/
+After=network.target {{ valkey_after_units }}
+# `bind` lists the WireGuard address without the optional "-" prefix, so
+# valkey-server exits when wg0 is not up yet. Ordering after the interface avoids
+# the common case; the start rate limit is disabled so that a slow or flapping
+# wg0 cannot put the unit into a permanent failed state (systemd gives up after 5
+# restarts in 10s by default, and nothing brings Valkey back after that).
+StartLimitIntervalSec=0
+
+[Service]
+Type=notify
+ExecStart={{ valkey_bin_directory }}/valkey-server {{ valkey_config_file }} --supervised systemd --daemonize no
+PIDFile={{ valkey_pid_file }}
+User={{ valkey_user }}
+Group={{ valkey_group }}
+RuntimeDirectory={{ valkey_pid_file | dirname | basename }}
+RuntimeDirectoryMode=2755
+# No timeout on stop: Valkey has to be allowed to finish its final snapshot. The
+# flip side is that a Valkey which cannot save at all (data directory gone, disk
+# full) refuses to exit, and `systemctl stop` then waits for it - kill it by hand.
+TimeoutStopSec=0
+Restart=always
+RestartSec={{ valkey_restart_sec }}
+# Must stay above maxclients ({{ valkey_maxclients }}); every client connection is
+# a file descriptor.
+LimitNOFILE={{ valkey_nofile_limit }}
+
+# Sandboxing, same set the Debian/Ubuntu package applies to its unit. The
+# configuration directory is deliberately not writable: this role owns
+# valkey.conf and cluster mode - the one feature that rewrites it - is not used.
+UMask=007
+PrivateTmp=true
+PrivateDevices=true
+PrivateUsers=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=-{{ valkey_data_directory }}
+ReadWritePaths=-{{ valkey_log_directory }}
+CapabilityBoundingSet=
+LockPersonality=true
+MemoryDenyWriteExecute=true
+NoNewPrivileges=true
+ProtectClock=true
+ProtectControlGroups=true
+ProtectHostname=true
+ProtectKernelLogs=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+ProtectProc=invisible
+RemoveIPC=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~ @privileged @resources
+
+[Install]
+WantedBy=multi-user.target

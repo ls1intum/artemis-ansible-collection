@@ -1,0 +1,134 @@
+---
+- name: Fail on the removed redis variables
+  fail:
+    msg: |
+      This role replaced the `redis` role and renamed its variables. Rename the
+      `redis:` dictionary in your group_vars/host_vars to `valkey:` (same keys)
+      and any flat `redis_*` variable to `valkey_*`. The artemis role reads
+      `valkey.host` too, so it has to be renamed there as well. The Spring
+      property and environment variable names stay SPRING_DATA_REDIS_* - those
+      are Spring's, not the server's. See README.md for the migration.
+  when: redis is defined
+
+- name: Validate valkey configuration
+  assert:
+    that:
+      - valkey.username is defined and valkey.username | length > 0
+      - valkey.password is defined and valkey.password is not none and valkey.password | length > 0
+      - valkey.admin_username is defined and valkey.admin_username | length > 0
+      - valkey.admin_password is defined and valkey.admin_password is not none and valkey.admin_password | length > 0
+      - valkey.username != valkey.admin_username
+      - valkey.password != valkey.admin_password
+      - valkey_wireguard_address is defined and valkey_wireguard_address | length > 0
+    fail_msg: |
+      Required Valkey variables are missing or invalid. Expected in group_vars/host_vars:
+        valkey:
+          username: artemis
+          password: <application password>
+          admin_username: admin
+          admin_password: <administrative password, different from the above>
+          port: 6379
+      and a WireGuard address for this host (valkey_wireguard_address, defaults
+      to wireguard_interface_address).
+
+# ACL rules are whitespace separated, so a password containing whitespace would
+# silently turn into additional ACL selectors instead of failing.
+- name: Validate that the passwords are usable in an ACL rule
+  assert:
+    that:
+      - valkey.password is not search('\s')
+      - valkey.admin_password is not search('\s')
+      - valkey.password is not search('"')
+      - valkey.admin_password is not search('"')
+    fail_msg: "Valkey passwords must not contain whitespace or double quotes."
+
+- name: Validate the install method
+  assert:
+    that:
+      - valkey_install_method in ["tarball", "package"]
+    fail_msg: >-
+      valkey_install_method must be "tarball" (the official build from
+      download.valkey.io) or "package" (the distribution packages).
+
+# Every client connection is a file descriptor, plus the ones Valkey needs for
+# itself; a maxclients above the limit is silently capped at startup.
+- name: Validate that the file descriptor limit is above maxclients
+  assert:
+    that:
+      - valkey_nofile_limit | int > valkey_maxclients | int
+    fail_msg: >-
+      valkey_nofile_limit ({{ valkey_nofile_limit }}) must be greater than
+      valkey_maxclients ({{ valkey_maxclients }}).
+
+- name: Tune host kernel parameters for valkey
+  become: true
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: true
+  loop:
+    # Without this a BGSAVE fork can fail on a host under memory pressure and
+    # persistence stops working while Valkey keeps serving.
+    - name: vm.overcommit_memory
+      value: "1"
+    - name: net.core.somaxconn
+      value: "{{ valkey_somaxconn }}"
+  when: valkey_tune_host
+
+- name: Install valkey
+  include_tasks: "install_{{ valkey_install_method }}.yml"
+
+# A host on an older distribution silently installing Valkey 7.2 is the failure
+# this catches: the ACL rules and the Artemis clients work there, so nothing
+# else would complain.
+- name: Read the installed valkey version
+  become: true
+  command: "{{ valkey_server_binary }} --version"
+  register: valkey_version_output
+  changed_when: false
+
+- name: Validate the installed valkey version
+  assert:
+    that:
+      - installed_version is version(valkey_minimum_version, ">=")
+    fail_msg: >-
+      Valkey {{ installed_version }} is installed, but valkey_minimum_version is
+      {{ valkey_minimum_version }}. The distribution packages are older than that
+      on most releases - use valkey_install_method: tarball, or lower
+      valkey_minimum_version deliberately.
+  vars:
+    installed_version: "{{ valkey_version_output.stdout | regex_search('v=([0-9]+\\.[0-9]+\\.[0-9]+)', '\\1') | first }}"
+
+# Make sure a restore, a manual chown or a package upgrade has not left this
+# unwritable for the daemon, otherwise every RDB snapshot fails.
+- name: Ensure the data directory is owned by valkey
+  become: true
+  file:
+    path: "{{ valkey_data_directory }}"
+    state: directory
+    owner: "{{ valkey_user }}"
+    group: "{{ valkey_group }}"
+    mode: "0750"
+
+# Readable by the daemon, writable only by root: this file holds the ACL, and
+# nothing but Ansible should change it - CONFIG REWRITE included. With the
+# package method it replaces the shipped valkey.conf, which dpkg then keeps as a
+# modified conffile on upgrades (see README.md).
+- name: Copy valkey configuration file
+  become: true
+  template:
+    src: valkey.conf.j2
+    dest: "{{ valkey_config_file }}"
+    owner: root
+    group: "{{ valkey_group }}"
+    mode: "0640"
+  notify: Restart valkey
+
+- name: Ensure valkey is running and enabled
+  become: true
+  systemd:
+    name: "{{ valkey_service_name }}"
+    state: started
+    enabled: true
+    daemon_reload: true

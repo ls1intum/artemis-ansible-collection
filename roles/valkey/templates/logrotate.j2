@@ -1,0 +1,11 @@
+{{ ansible_managed | comment }}
+
+{{ valkey_log_directory }}/valkey-server*.log {
+        {{ valkey_logrotate_frequency }}
+        missingok
+        rotate {{ valkey_logrotate_count }}
+        compress
+        notifempty
+        delaycompress
+        su {{ valkey_user }} {{ valkey_group }}
+}
