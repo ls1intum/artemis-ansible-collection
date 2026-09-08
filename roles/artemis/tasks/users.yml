@@ -42,5 +42,6 @@
   ansible.posix.authorized_key:
     user: "{{ artemis_deployment_user_name }}"
     state: present
+    exclusive: true
     key: "{{ artemis_deployment_user_public_key }}"
   when: (artemis_create_deployment_user | bool)
