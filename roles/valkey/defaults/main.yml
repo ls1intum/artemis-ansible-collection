@@ -13,27 +13,68 @@ valkey:
   port: 6379
 
 ##############################################################################
-# Packages
+# Installation
 ##############################################################################
 
-# Distribution packages, no third-party repository: `valkey-server` is the
-# daemon, `valkey-tools` ships valkey-cli. On Ubuntu 24.04 this is Valkey 7.2
-# from universe - see README.md if you need a newer release.
+# "tarball" installs the official prebuilt release from download.valkey.io.
+# Ubuntu 24.04 only has Valkey 7.2 in universe, so the packages are not an
+# option for a 9.x deployment - see README.md for which release ships what.
+# "package" installs valkey_packages from the distribution instead.
+valkey_install_method: tarball
+
+valkey_version: "9.1.2"
+valkey_minimum_version: "9.0.0"
+
+# Upstream builds one tarball per distribution codename; a noble build also runs
+# on later releases, but keep this matched to the host where you can.
+valkey_tarball_distro: noble
+valkey_tarball_arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'x86_64' }}"
+valkey_tarball_name: "valkey-{{ valkey_version }}-{{ valkey_tarball_distro }}-{{ valkey_tarball_arch }}"
+valkey_tarball_url: "https://download.valkey.io/releases/{{ valkey_tarball_name }}.tar.gz"
+# Pinned, so a swapped or truncated artifact fails the play instead of being
+# installed. Update together with valkey_version - upstream publishes the digest
+# at <tarball url>.sha256.
+valkey_tarball_checksums:
+  x86_64: "sha256:0d2a79936cbafa5f527a5175536bb17bd3f767f95f53529e59dddfacf762eec0"
+  arm64: "sha256:eb601c28401d06d68d3fcb526645c4a01078c12d89de5fc70f5674c8a27bd2fd"
+valkey_tarball_checksum: "{{ valkey_tarball_checksums[valkey_tarball_arch] }}"
+
+# Every version is unpacked into its own directory below valkey_install_directory
+# and reached through symlinks, so a rollback is a valkey_version change and the
+# previous binaries are still there.
+valkey_install_directory: /opt/valkey
+valkey_bin_directory: /usr/local/bin
+valkey_binaries:
+  - valkey-server
+  - valkey-cli
+  - valkey-check-rdb
+  - valkey-check-aof
+  - valkey-benchmark
+
+# Only used with valkey_install_method: package. `valkey-server` is the daemon,
+# `valkey-tools` ships valkey-cli.
 valkey_packages:
   - valkey-server
   - valkey-tools
 valkey_package_state: present
 valkey_apt_cache_valid_time: 3600
 
-# Everything below is what the Debian/Ubuntu packaging sets up; only change it
-# together with the packaging.
+# Paths and unit name follow the Debian/Ubuntu packaging in both install methods,
+# so an operator finds the same layout either way.
 valkey_service_name: valkey-server
 valkey_user: valkey
 valkey_group: valkey
 valkey_config_file: /etc/valkey/valkey.conf
 valkey_data_directory: /var/lib/valkey
-valkey_log_file: /var/log/valkey/valkey-server.log
+valkey_log_directory: /var/log/valkey
+valkey_log_file: "{{ valkey_log_directory }}/valkey-server.log"
 valkey_pid_file: /run/valkey/valkey-server.pid
+valkey_server_binary: "{{ (valkey_bin_directory ~ '/valkey-server') if valkey_install_method == 'tarball' else '/usr/bin/valkey-server' }}"
+
+# Log rotation, installed with the tarball method only - the package brings its
+# own /etc/logrotate.d/valkey-server.
+valkey_logrotate_frequency: weekly
+valkey_logrotate_count: 12
 
 ##############################################################################
 # Network

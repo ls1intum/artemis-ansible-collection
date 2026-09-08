@@ -1,8 +1,8 @@
 {{ ansible_managed | comment }}
 
-# This file replaces the valkey.conf shipped by the valkey-server package. It is
-# a complete configuration, not an overlay: valkey-server reads exactly one file
-# and does not merge in the packaged defaults.
+# The complete configuration, not an overlay: valkey-server reads exactly one
+# file and merges in no defaults of its own. With the package install method this
+# replaces the valkey.conf shipped by valkey-server.
 
 ################################## NETWORK ####################################
 

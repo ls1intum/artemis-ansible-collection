@@ -1,0 +1,106 @@
+---
+# Installs the official prebuilt release from download.valkey.io. The package
+# repositories are not an option for 9.x on Ubuntu 24.04 (see README.md), so the
+# role owns the user, the directories, the unit and the log rotation that the
+# package would otherwise bring.
+
+- name: Create the valkey system group
+  become: true
+  group:
+    name: "{{ valkey_group }}"
+    system: true
+    state: present
+
+- name: Create the valkey system user
+  become: true
+  user:
+    name: "{{ valkey_user }}"
+    group: "{{ valkey_group }}"
+    system: true
+    shell: /usr/sbin/nologin
+    home: "{{ valkey_data_directory }}"
+    create_home: false
+    comment: Valkey key-value store
+    state: present
+
+- name: Create the installation directory
+  become: true
+  file:
+    path: "{{ valkey_install_directory }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+# The checksum is pinned in defaults/main.yml, so a swapped or truncated artifact
+# fails here instead of being unpacked and started.
+- name: Download the valkey release tarball
+  become: true
+  get_url:
+    url: "{{ valkey_tarball_url }}"
+    dest: "{{ valkey_install_directory }}/{{ valkey_tarball_name }}.tar.gz"
+    checksum: "{{ valkey_tarball_checksum }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Unpack the valkey release tarball
+  become: true
+  unarchive:
+    src: "{{ valkey_install_directory }}/{{ valkey_tarball_name }}.tar.gz"
+    dest: "{{ valkey_install_directory }}"
+    remote_src: true
+    owner: root
+    group: root
+    creates: "{{ valkey_install_directory }}/{{ valkey_tarball_name }}/bin/valkey-server"
+
+# Symlinks rather than copies: the previous version stays unpacked next to this
+# one, so a rollback is a valkey_version change and another run.
+- name: Link the valkey binaries into {{ valkey_bin_directory }}
+  become: true
+  file:
+    src: "{{ valkey_install_directory }}/{{ valkey_tarball_name }}/bin/{{ item }}"
+    dest: "{{ valkey_bin_directory }}/{{ item }}"
+    state: link
+    force: true
+  loop: "{{ valkey_binaries }}"
+  notify: Restart valkey
+
+- name: Create the configuration directory
+  become: true
+  file:
+    path: "{{ valkey_config_file | dirname }}"
+    state: directory
+    owner: root
+    group: "{{ valkey_group }}"
+    mode: "0750"
+
+- name: Create the log directory
+  become: true
+  file:
+    path: "{{ valkey_log_directory }}"
+    state: directory
+    owner: "{{ valkey_user }}"
+    group: "{{ valkey_group }}"
+    mode: "0750"
+
+# Valkey opens the log file per message, so plain rotation is enough - no
+# copytruncate and no signal, same as the package's logrotate config.
+- name: Copy the logrotate configuration
+  become: true
+  template:
+    src: logrotate.j2
+    dest: /etc/logrotate.d/valkey-server
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Copy the systemd unit
+  become: true
+  template:
+    src: valkey-server.service.j2
+    dest: "/etc/systemd/system/{{ valkey_service_name }}.service"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart valkey

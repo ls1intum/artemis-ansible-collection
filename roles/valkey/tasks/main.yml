@@ -42,6 +42,14 @@
       - valkey.admin_password is not search('"')
     fail_msg: "Valkey passwords must not contain whitespace or double quotes."
 
+- name: Validate the install method
+  assert:
+    that:
+      - valkey_install_method in ["tarball", "package"]
+    fail_msg: >-
+      valkey_install_method must be "tarball" (the official build from
+      download.valkey.io) or "package" (the distribution packages).
+
 # Every client connection is a file descriptor, plus the ones Valkey needs for
 # itself; a maxclients above the limit is silently capped at startup.
 - name: Validate that the file descriptor limit is above maxclients
@@ -69,15 +77,31 @@
   when: valkey_tune_host
 
 - name: Install valkey
-  become: true
-  apt:
-    name: "{{ valkey_packages }}"
-    state: "{{ valkey_package_state }}"
-    update_cache: true
-    cache_valid_time: "{{ valkey_apt_cache_valid_time }}"
+  include_tasks: "install_{{ valkey_install_method }}.yml"
 
-# The package creates this; make sure a restore or a manual chown has not left it
-# unwritable, otherwise every RDB snapshot fails.
+# A host on an older distribution silently installing Valkey 7.2 is the failure
+# this catches: the ACL rules and the Artemis clients work there, so nothing
+# else would complain.
+- name: Read the installed valkey version
+  become: true
+  command: "{{ valkey_server_binary }} --version"
+  register: valkey_version_output
+  changed_when: false
+
+- name: Validate the installed valkey version
+  assert:
+    that:
+      - installed_version is version(valkey_minimum_version, ">=")
+    fail_msg: >-
+      Valkey {{ installed_version }} is installed, but valkey_minimum_version is
+      {{ valkey_minimum_version }}. The distribution packages are older than that
+      on most releases - use valkey_install_method: tarball, or lower
+      valkey_minimum_version deliberately.
+  vars:
+    installed_version: "{{ valkey_version_output.stdout | regex_search('v=([0-9]+\\.[0-9]+\\.[0-9]+)', '\\1') | first }}"
+
+# Make sure a restore, a manual chown or a package upgrade has not left this
+# unwritable for the daemon, otherwise every RDB snapshot fails.
 - name: Ensure the data directory is owned by valkey
   become: true
   file:
@@ -87,37 +111,18 @@
     group: "{{ valkey_group }}"
     mode: "0750"
 
-# Replaces the file shipped by the package. dpkg keeps this version on package
-# upgrades (it is a modified conffile), so a Valkey update never silently drops
-# the ACL block - but it can leave the new upstream defaults unapplied, see
-# README.md.
+# Readable by the daemon, writable only by root: this file holds the ACL, and
+# nothing but Ansible should change it - CONFIG REWRITE included. With the
+# package method it replaces the shipped valkey.conf, which dpkg then keeps as a
+# modified conffile on upgrades (see README.md).
 - name: Copy valkey configuration file
   become: true
   template:
     src: valkey.conf.j2
     dest: "{{ valkey_config_file }}"
-    owner: "{{ valkey_user }}"
+    owner: root
     group: "{{ valkey_group }}"
     mode: "0640"
-  notify: Restart valkey
-
-- name: Create the systemd drop-in directory
-  become: true
-  file:
-    path: "/etc/systemd/system/{{ valkey_service_name }}.service.d"
-    state: directory
-    owner: root
-    group: root
-    mode: "0755"
-
-- name: Copy the systemd drop-in
-  become: true
-  template:
-    src: override.conf.j2
-    dest: "/etc/systemd/system/{{ valkey_service_name }}.service.d/override.conf"
-    owner: root
-    group: root
-    mode: "0644"
   notify: Restart valkey
 
 - name: Ensure valkey is running and enabled

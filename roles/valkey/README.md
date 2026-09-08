@@ -1,9 +1,8 @@
 Valkey
 =========
 
-This role installs Valkey from the distribution's package repository and
-configures it for use with Artemis (distributed cache, locks, websocket pub/sub
-and the LocalCI build queue).
+This role installs Valkey 9 and configures it for use with Artemis (distributed
+cache, locks, websocket pub/sub and the LocalCI build queue).
 
 Valkey is a fork of Redis 7.2 and speaks the same protocol, so nothing changes on
 the Artemis side: the Spring properties and environment variables are still
@@ -11,24 +10,49 @@ the Artemis side: the Spring properties and environment variables are still
 still called `Redis` in the Artemis configuration. Only the server and this
 role's variables changed - see "Migrating from the redis role" below.
 
-Requirements
+Installation
 ------------
 
-A Debian or Ubuntu host with `valkey-server` and `valkey-tools` in its package
-sources:
+`valkey_install_method` picks where the binaries come from:
+
+**`tarball` (default)** - the official prebuilt release from
+`download.valkey.io`, pinned by `valkey_version` (9.1.2) and verified against the
+SHA-256 digest in `defaults/main.yml`. This is the only way to run 9.x on Ubuntu
+24.04. Each version is unpacked into its own directory below
+`valkey_install_directory` and reached through symlinks in
+`valkey_bin_directory`, so a rollback is a `valkey_version` change and another
+run; the previous version stays on disk until you remove it. Because no package
+manager is involved, **you own the patching**: watch the Valkey release notes and
+bump `valkey_version` together with `valkey_tarball_checksums`, which upstream
+publishes at `<tarball url>.sha256`.
+
+With this method the role also owns what the package would otherwise bring: the
+`valkey` system user, `/etc/valkey`, `/var/lib/valkey`, `/var/log/valkey`, the
+logrotate config and the systemd unit. The unit applies the same sandboxing set
+as the Debian/Ubuntu package (`ProtectSystem=strict`, `PrivateUsers`,
+`MemoryDenyWriteExecute`, a `@system-service` syscall filter and the rest), minus
+the packaging's writable `/etc/valkey` - this role owns `valkey.conf`, and
+cluster mode, the one feature that rewrites it, is not used.
+
+**`package`** - `valkey-server` and `valkey-tools` from the distribution. Only
+useful where they are new enough:
 
 | Distribution     | Valkey version | Source                               |
 | ---------------- | -------------- | ------------------------------------ |
 | Ubuntu 24.04 LTS | 7.2            | universe                             |
-| Ubuntu 25.04     | 8.0            | universe                             |
+| Ubuntu 25.10     | 8.1            | universe                             |
+| Ubuntu 26.04 LTS | 9.0            | universe                             |
 | Debian 13        | 8.x            | main                                 |
 | Debian 12        | 8.0            | bookworm-backports (enable it first) |
 
-The role installs whatever the enabled repositories offer; it does not add one.
-If you need a newer Valkey than your distribution ships, add the repository you
-trust (for example Percona's) with your usual repository management and set
-`valkey_packages` accordingly - everything else in this role works unchanged, the
-configuration uses no directive newer than Valkey 7.2.
+The role does not add a repository. With this method the packaged unit stays in
+place and the role adds a drop-in for the restart behaviour the mandatory
+WireGuard bind needs.
+
+Either way the role reads back what got installed and fails the play when it is
+older than `valkey_minimum_version` (9.0.0), so a host that quietly ends up on
+7.2 stops the deploy instead of running an old server nobody notices - the ACL
+rules and the Artemis clients work there too, so nothing else would complain.
 
 Network exposure
 ----------------
@@ -42,13 +66,14 @@ The WireGuard address is bound without the optional `-` prefix on purpose: if
 exists. The alternative would be a Valkey that starts fine and is silently
 unreachable for every Artemis node.
 
-That deliberate failure mode needs one adjustment to the packaged unit, which
-this role installs as a drop-in (`/etc/systemd/system/valkey-server.service.d/`):
-the unit has `Restart=always`, but systemd's default start rate limit gives up
-after five restarts within ten seconds and leaves the unit failed - with nothing
-to bring it back once `wg0` appears. The drop-in disables the rate limit, sets a
-`RestartSec` backoff, orders the unit after `wg-quick@wg0.service`, and raises
-`LimitNOFILE` to `valkey_nofile_limit`.
+That deliberate failure mode needs `Restart=always` to keep retrying, and
+systemd's default start rate limit works against it: it gives up after five
+restarts within ten seconds and leaves the unit failed, with nothing to bring it
+back once `wg0` appears. The unit this role writes (tarball method) disables the
+rate limit, sets a `RestartSec` backoff, orders itself after
+`wg-quick@wg0.service` and raises `LimitNOFILE` to `valkey_nofile_limit`; with
+the package method the same settings go into a drop-in
+(`/etc/systemd/system/valkey-server.service.d/`) over the packaged unit.
 
 Users
 -----
@@ -138,10 +163,11 @@ The role templates the whole of `/etc/valkey/valkey.conf`; `valkey-server` reads
 exactly one file and does not merge in the packaged defaults, so an overlay is
 not an option. Two consequences:
 
-* On a package upgrade dpkg sees a modified conffile and keeps this version, so a
-  Valkey update never silently drops the ACL block. It also means new upstream
-  defaults are not picked up - review `/etc/valkey/valkey.conf.dpkg-dist` after a
-  major version upgrade.
+* It is owned by `root` and only readable by the `valkey` group, so the ACL block
+  cannot be rewritten by the running server. With the package method dpkg sees a
+  modified conffile on upgrades and keeps this version, which also means new
+  upstream defaults are not picked up - review `/etc/valkey/valkey.conf.dpkg-dist`
+  after a major version upgrade.
 * `CONFIG SET` changes are lost on the next Ansible run or restart. Change the
   variable, not the running server.
 
@@ -200,8 +226,9 @@ unchanged; the packaging is not.
    "Redis"` value stay as they are - those name Spring's client and Artemis'
    enum, not the server.
 
-2. **Do not migrate the RDB file.** Valkey 7.2 refuses to load a snapshot written
-   by Redis 7.4 (newer RDB version), and everything in there is coordination
+2. **Do not migrate the RDB file.** Valkey refuses to load a snapshot written by
+   Redis 7.4 - it exits with `Can't handle RDB format version 12`, verified with
+   9.1.2 - and everything in there is coordination
    state - Redisson locks, the build queue, websocket bookkeeping - that is
    rebuilt on startup. Plan a maintenance window with the Artemis nodes down and
    start with an empty dataset. Queued builds are lost; drain them first if that
@@ -215,8 +242,8 @@ unchanged; the packaging is not.
    ```
 
    The data directory moves from `/opt/redis/redis-data` to `/var/lib/valkey`,
-   owned by the `valkey` system user the package creates (no fixed UID, unlike
-   the container's 999).
+   owned by the `valkey` system user this role creates (no fixed UID, unlike the
+   container's 999).
 
 4. **Ports and firewall are unchanged** - still 6379 on loopback and wg0. Docker
    is no longer involved on this host for Valkey, which also removes the reason

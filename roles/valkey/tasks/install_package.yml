@@ -1,0 +1,33 @@
+---
+# Installs the distribution packages. Only useful where they are new enough -
+# Ubuntu 24.04 has Valkey 7.2, which valkey_minimum_version rejects by default.
+# See README.md for the versions per release.
+
+- name: Install valkey
+  become: true
+  apt:
+    name: "{{ valkey_packages }}"
+    state: "{{ valkey_package_state }}"
+    update_cache: true
+    cache_valid_time: "{{ valkey_apt_cache_valid_time }}"
+
+- name: Create the systemd drop-in directory
+  become: true
+  file:
+    path: "/etc/systemd/system/{{ valkey_service_name }}.service.d"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+# The packaged unit stays in place; this only adds what the mandatory WireGuard
+# bind needs from it. The tarball method ships a full unit instead.
+- name: Copy the systemd drop-in
+  become: true
+  template:
+    src: override.conf.j2
+    dest: "/etc/systemd/system/{{ valkey_service_name }}.service.d/override.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart valkey
