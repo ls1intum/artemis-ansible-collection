@@ -104,3 +104,13 @@
     group: root
     mode: "0644"
   notify: Restart valkey
+
+# Left behind when a host switches over from the package method. It would still
+# apply on top of the unit above - with the same settings, so harmless, but
+# nothing should have to work that out.
+- name: Remove the package method's systemd drop-in
+  become: true
+  file:
+    path: "/etc/systemd/system/{{ valkey_service_name }}.service.d/override.conf"
+    state: absent
+  notify: Restart valkey

@@ -19,7 +19,9 @@ User={{ valkey_user }}
 Group={{ valkey_group }}
 RuntimeDirectory={{ valkey_pid_file | dirname | basename }}
 RuntimeDirectoryMode=2755
-# No timeout on stop: Valkey needs to finish writing its snapshot.
+# No timeout on stop: Valkey has to be allowed to finish its final snapshot. The
+# flip side is that a Valkey which cannot save at all (data directory gone, disk
+# full) refuses to exit, and `systemctl stop` then waits for it - kill it by hand.
 TimeoutStopSec=0
 Restart=always
 RestartSec={{ valkey_restart_sec }}

@@ -54,6 +54,30 @@ older than `valkey_minimum_version` (9.0.0), so a host that quietly ends up on
 7.2 stops the deploy instead of running an old server nobody notices - the ACL
 rules and the Artemis clients work there too, so nothing else would complain.
 
+### Switching a host from the package to the tarball
+
+Just run the role; the package does not have to be removed first. The unit
+written to `/etc/systemd/system` shadows the packaged one, the service comes back
+on 9.x from `valkey_bin_directory`, the package method's drop-in is removed, and
+the existing `dump.rdb` is loaded - Valkey reads its own older snapshots, it is
+only *Redis* 7.4 RDBs that it refuses. The package then sits there unused. It
+still receives security updates, and dpkg restarts `valkey-server.service` when
+it does, which now restarts the 9.x server: a short blip, nothing worse.
+
+To get rid of it anyway, purge it **before** the first tarball run:
+
+```bash
+systemctl stop valkey-server
+apt-get purge valkey-server valkey-tools
+```
+
+Purging deletes `/etc/valkey`, `/var/lib/valkey` and `/var/log/valkey`, so doing
+it afterwards removes the running server's configuration and data directory from
+under it. The role recreates all of them on the next run, but stop the service
+first: a Valkey whose data directory has disappeared refuses to exit on SIGTERM
+because its final snapshot fails, and `systemctl stop` then waits for it
+indefinitely.
+
 Network exposure
 ----------------
 

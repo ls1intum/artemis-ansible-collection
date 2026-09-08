@@ -31,3 +31,13 @@
     group: root
     mode: "0644"
   notify: Restart valkey
+
+# Left behind when a host switches back from the tarball method. A unit in
+# /etc/systemd/system shadows the packaged one entirely, so the service would
+# keep running the tarball binary.
+- name: Remove the tarball method's systemd unit
+  become: true
+  file:
+    path: "/etc/systemd/system/{{ valkey_service_name }}.service"
+    state: absent
+  notify: Restart valkey
