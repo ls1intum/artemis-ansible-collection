@@ -1,0 +1,16 @@
+{{ ansible_managed | comment }}
+
+[Unit]
+# `bind` lists the WireGuard address without the optional "-" prefix, so
+# valkey-server exits when wg0 is not up yet. Ordering after the interface avoids
+# the common case; the rate limit is disabled so that a slow or flapping wg0
+# cannot put the unit into a permanent failed state (systemd gives up after 5
+# restarts in 10s by default, and nothing brings Valkey back after that).
+After={{ valkey_after_units }}
+StartLimitIntervalSec=0
+
+[Service]
+RestartSec={{ valkey_restart_sec }}
+# Must stay above maxclients ({{ valkey_maxclients }}); every client connection is
+# a file descriptor. The packaged unit sets 65535.
+LimitNOFILE={{ valkey_nofile_limit }}

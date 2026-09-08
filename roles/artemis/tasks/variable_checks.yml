@@ -85,3 +85,33 @@
     - version_control.localvc.build_agent_git_credentials is defined
     - continuous_integration.localci is defined and continuous_integration.localci is not none
     - artemis_computed_is_core_node
+
+##############################################################################
+# Check Valkey Variables
+##############################################################################
+
+# The redis role was replaced by the valkey role and its variables were renamed.
+# Caught here rather than through a rendered config: with `redis:` set and
+# `valkey:` unset, every template block below is simply skipped and the nodes come
+# up without a cache, without locks and without a build queue.
+- name: Check that the renamed valkey variables are used
+  fail:
+    msg: >-
+      The `redis` dictionary was renamed to `valkey` (same keys) when the redis
+      role was replaced by the valkey role. Rename it in your group_vars/host_vars,
+      and `artemis_redis_client_name` to `artemis_valkey_client_name`. The Spring
+      property and environment variable names stay SPRING_DATA_REDIS_* - those are
+      Spring's, not the server's.
+  when: redis is defined
+
+- name: Check that the valkey connection is complete
+  fail:
+    msg: >-
+      valkey is defined but incomplete - host, port, username and password are all
+      required. host is the WireGuard address of the host running the valkey role.
+  when:
+    - valkey is defined and valkey is not none
+    - valkey.host is not defined or valkey.host is none
+      or valkey.port is not defined or valkey.port is none
+      or valkey.username is not defined or valkey.username is none
+      or valkey.password is not defined or valkey.password is none

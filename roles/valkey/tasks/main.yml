@@ -1,0 +1,129 @@
+---
+- name: Fail on the removed redis variables
+  fail:
+    msg: |
+      This role replaced the `redis` role and renamed its variables. Rename the
+      `redis:` dictionary in your group_vars/host_vars to `valkey:` (same keys)
+      and any flat `redis_*` variable to `valkey_*`. The artemis role reads
+      `valkey.host` too, so it has to be renamed there as well. The Spring
+      property and environment variable names stay SPRING_DATA_REDIS_* - those
+      are Spring's, not the server's. See README.md for the migration.
+  when: redis is defined
+
+- name: Validate valkey configuration
+  assert:
+    that:
+      - valkey.username is defined and valkey.username | length > 0
+      - valkey.password is defined and valkey.password is not none and valkey.password | length > 0
+      - valkey.admin_username is defined and valkey.admin_username | length > 0
+      - valkey.admin_password is defined and valkey.admin_password is not none and valkey.admin_password | length > 0
+      - valkey.username != valkey.admin_username
+      - valkey.password != valkey.admin_password
+      - valkey_wireguard_address is defined and valkey_wireguard_address | length > 0
+    fail_msg: |
+      Required Valkey variables are missing or invalid. Expected in group_vars/host_vars:
+        valkey:
+          username: artemis
+          password: <application password>
+          admin_username: admin
+          admin_password: <administrative password, different from the above>
+          port: 6379
+      and a WireGuard address for this host (valkey_wireguard_address, defaults
+      to wireguard_interface_address).
+
+# ACL rules are whitespace separated, so a password containing whitespace would
+# silently turn into additional ACL selectors instead of failing.
+- name: Validate that the passwords are usable in an ACL rule
+  assert:
+    that:
+      - valkey.password is not search('\s')
+      - valkey.admin_password is not search('\s')
+      - valkey.password is not search('"')
+      - valkey.admin_password is not search('"')
+    fail_msg: "Valkey passwords must not contain whitespace or double quotes."
+
+# Every client connection is a file descriptor, plus the ones Valkey needs for
+# itself; a maxclients above the limit is silently capped at startup.
+- name: Validate that the file descriptor limit is above maxclients
+  assert:
+    that:
+      - valkey_nofile_limit | int > valkey_maxclients | int
+    fail_msg: >-
+      valkey_nofile_limit ({{ valkey_nofile_limit }}) must be greater than
+      valkey_maxclients ({{ valkey_maxclients }}).
+
+- name: Tune host kernel parameters for valkey
+  become: true
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: true
+  loop:
+    # Without this a BGSAVE fork can fail on a host under memory pressure and
+    # persistence stops working while Valkey keeps serving.
+    - name: vm.overcommit_memory
+      value: "1"
+    - name: net.core.somaxconn
+      value: "{{ valkey_somaxconn }}"
+  when: valkey_tune_host
+
+- name: Install valkey
+  become: true
+  apt:
+    name: "{{ valkey_packages }}"
+    state: "{{ valkey_package_state }}"
+    update_cache: true
+    cache_valid_time: "{{ valkey_apt_cache_valid_time }}"
+
+# The package creates this; make sure a restore or a manual chown has not left it
+# unwritable, otherwise every RDB snapshot fails.
+- name: Ensure the data directory is owned by valkey
+  become: true
+  file:
+    path: "{{ valkey_data_directory }}"
+    state: directory
+    owner: "{{ valkey_user }}"
+    group: "{{ valkey_group }}"
+    mode: "0750"
+
+# Replaces the file shipped by the package. dpkg keeps this version on package
+# upgrades (it is a modified conffile), so a Valkey update never silently drops
+# the ACL block - but it can leave the new upstream defaults unapplied, see
+# README.md.
+- name: Copy valkey configuration file
+  become: true
+  template:
+    src: valkey.conf.j2
+    dest: "{{ valkey_config_file }}"
+    owner: "{{ valkey_user }}"
+    group: "{{ valkey_group }}"
+    mode: "0640"
+  notify: Restart valkey
+
+- name: Create the systemd drop-in directory
+  become: true
+  file:
+    path: "/etc/systemd/system/{{ valkey_service_name }}.service.d"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Copy the systemd drop-in
+  become: true
+  template:
+    src: override.conf.j2
+    dest: "/etc/systemd/system/{{ valkey_service_name }}.service.d/override.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart valkey
+
+- name: Ensure valkey is running and enabled
+  become: true
+  systemd:
+    name: "{{ valkey_service_name }}"
+    state: started
+    enabled: true
+    daemon_reload: true

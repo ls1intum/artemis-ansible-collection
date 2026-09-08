@@ -1,0 +1,121 @@
+---
+ansible_managed: "Ansible managed: Do not make changes here - they will be overwritten."
+
+# Connection contract shared with the artemis role. Ansible replaces dictionaries
+# wholesale, so anything defined here is lost as soon as `valkey:` is set in group_vars.
+# Only the keys the artemis role also reads live in this dict - every operational
+# setting is a flat `valkey_*` variable so it keeps its default.
+valkey:
+  username: artemis
+  password: #FIXME
+  admin_username: admin
+  admin_password: #FIXME
+  port: 6379
+
+##############################################################################
+# Packages
+##############################################################################
+
+# Distribution packages, no third-party repository: `valkey-server` is the
+# daemon, `valkey-tools` ships valkey-cli. On Ubuntu 24.04 this is Valkey 7.2
+# from universe - see README.md if you need a newer release.
+valkey_packages:
+  - valkey-server
+  - valkey-tools
+valkey_package_state: present
+valkey_apt_cache_valid_time: 3600
+
+# Everything below is what the Debian/Ubuntu packaging sets up; only change it
+# together with the packaging.
+valkey_service_name: valkey-server
+valkey_user: valkey
+valkey_group: valkey
+valkey_config_file: /etc/valkey/valkey.conf
+valkey_data_directory: /var/lib/valkey
+valkey_log_file: /var/log/valkey/valkey-server.log
+valkey_pid_file: /run/valkey/valkey-server.pid
+
+##############################################################################
+# Network
+##############################################################################
+
+# Address Valkey listens on in addition to loopback. Deliberately not optional
+# (no "-" prefix): if wg0 is not up yet the service fails and systemd retries
+# until the interface exists, instead of silently coming up unreachable for the
+# whole cluster.
+valkey_wireguard_address: "{{ wireguard_interface_address }}"
+
+valkey_tcp_backlog: 511
+# 24 nodes x Redisson connection pools add up quickly; keep well above the
+# expected peak and make sure valkey_nofile_limit stays above this value.
+valkey_maxclients: 10000
+valkey_nofile_limit: 65535
+
+# Restart backoff for the systemd drop-in. The mandatory WireGuard bind means
+# the service legitimately fails while wg0 is down, so the unit must keep
+# retrying instead of hitting systemd's default start rate limit.
+valkey_restart_sec: 5
+# Ordering only, no dependency: if the unit does not exist on this host systemd
+# ignores it, and the bind fails loudly either way.
+valkey_after_units: wg-quick@wg0.service
+
+##############################################################################
+# Memory
+##############################################################################
+
+# Hard cap so Valkey fails loudly instead of being OOM-killed. Set to roughly
+# 60-70% of the RAM available to Valkey on this host.
+valkey_maxmemory: 4gb
+# "noeviction" on purpose: Redisson locks, the LocalCI build queue and the
+# websocket bookkeeping are not disposable cache entries - evicting them
+# corrupts cluster coordination silently. Hitting the limit must be an error.
+valkey_maxmemory_policy: noeviction
+
+##############################################################################
+# Persistence
+##############################################################################
+
+valkey_persistence_enabled: true
+valkey_save: "900 1 300 10 60 10000"
+valkey_appendonly: false
+# "no" keeps Valkey writable when a snapshot fails (full disk, bad permissions).
+# With the default "yes" a failed BGSAVE puts every write into MISCONF and takes
+# the whole Artemis cluster down until an operator intervenes.
+valkey_stop_writes_on_bgsave_error: false
+
+##############################################################################
+# ACL
+##############################################################################
+
+# Application user: all keys and pub/sub channels, minus the administrative and
+# destructive commands. The additions are the read-only bits Lettuce and Redisson
+# need on connect, plus the whole CLIENT container except the subcommands that can
+# disrupt other clients - Redisson uses CLIENT LIST, and CLIENT TRACKING if local
+# cached maps are enabled, so allowing subcommands one at a time just defers the
+# next NOPERM. Verify a change with:
+#   ACL DRYRUN artemis <command> [args]
+# and check `ACL LOG` on the server when something breaks in production.
+valkey_artemis_acl_rules: >-
+  ~* &* +@all -@admin -@dangerous
+  +info +config|get +sort_ro +role +module|list
+  +client -client|kill -client|pause -client|unpause
+  -client|unblock -client|no-evict -client|no-touch
+
+# Administrative user: everything. Valkey has no source-address ACL, so this is a
+# privilege boundary, not a network boundary - see README.md.
+valkey_admin_acl_rules: "~* &* +@all"
+
+##############################################################################
+# Keyspace notifications
+##############################################################################
+
+valkey_notify_keyspace_events: lshKE
+
+##############################################################################
+# Host tuning
+##############################################################################
+
+# vm.overcommit_memory=1 is required for BGSAVE: without it the fork can fail on
+# a host with little free memory and persistence stops working silently.
+valkey_tune_host: true
+valkey_somaxconn: 1024

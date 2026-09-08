@@ -1,0 +1,10 @@
+---
+# Both the configuration and the systemd drop-in are handled here: a config-only
+# change does not need the daemon-reload, but running it unconditionally is
+# cheap and keeps the two from racing when they change in the same play.
+- name: Restart valkey
+  become: true
+  systemd:
+    name: "{{ valkey_service_name }}"
+    state: restarted
+    daemon_reload: true

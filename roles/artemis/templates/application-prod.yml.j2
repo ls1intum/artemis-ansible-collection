@@ -72,14 +72,14 @@ spring:
 {% endif %}
 {% endif %}
 
-{% if redis is defined and redis is not none %}
+{% if valkey is defined and valkey is not none %}
   data:
     redis:
-      host: {{ redis.host }}
-      port: {{ redis.port }}
-      username: {{ redis.username }}
-      password: {{ redis.password }}
-      client-name: {{ artemis_redis_client_name }}
+      host: {{ valkey.host }}
+      port: {{ valkey.port }}
+      username: {{ valkey.username }}
+      password: {{ valkey.password }}
+      client-name: {{ artemis_valkey_client_name }}
 {% endif %}
 
 {% if is_multinode_install and hazelcast_address is defined %}
@@ -320,7 +320,7 @@ artemis:
 {% endif %}
 {% endif %}
     specify-concurrent-builds: {{ (continuous_integration.localci.concurrent_build_size is defined) | lower }}
-{% if redis is defined and redis is not none %}
+{% if valkey is defined and valkey is not none %}
     data-store: "Redis"
 {% endif %}
 {% if continuous_integration.localci.concurrent_build_size is defined %}

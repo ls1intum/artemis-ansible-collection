@@ -1,0 +1,92 @@
+{{ ansible_managed | comment }}
+
+# This file replaces the valkey.conf shipped by the valkey-server package. It is
+# a complete configuration, not an overlay: valkey-server reads exactly one file
+# and does not merge in the packaged defaults.
+
+################################## NETWORK ####################################
+
+# Loopback plus the WireGuard overlay only. The WireGuard address is mandatory
+# (no "-" prefix) so the service fails to start while wg0 is missing and systemd
+# retries, instead of coming up unreachable for the cluster.
+bind 127.0.0.1 -::1 {{ valkey_wireguard_address }}
+port {{ valkey.port }}
+protected-mode yes
+
+tcp-backlog {{ valkey_tcp_backlog }}
+tcp-keepalive 300
+timeout 0
+
+maxclients {{ valkey_maxclients }}
+
+################################## GENERAL ####################################
+
+# `daemonize` and `supervised` are deliberately absent: valkey-server.service
+# passes "--supervised systemd --daemonize no" on the command line, which
+# overrides the config file, and Type=notify needs both.
+pidfile {{ valkey_pid_file }}
+logfile {{ valkey_log_file }}
+loglevel notice
+databases 16
+
+# Transparent huge pages cause multi-second latency spikes during background
+# saves. This turns them off for the valkey process itself, which is all this
+# role can do from inside the config - see README.md for the host-wide setting.
+disable-thp yes
+
+#################################### USERS ####################################
+
+# No `requirepass` here: it only configures the "default" user, which is
+# disabled right below, so the directive would be dead weight and misleading.
+
+# Nobody gets in without an explicit user.
+#
+# The password matters even though the user is disabled: `protected-mode` refuses
+# every non-loopback connection while the default user carries the `nopass` flag,
+# regardless of `bind` and regardless of the other users having passwords. That is
+# what rejects the Artemis nodes with "DENIED ... running in protected mode".
+# Setting a password clears `nopass` and satisfies protected mode, while `off`
+# still rejects every AUTH attempt for this user - including one with the correct
+# password, from any interface. It is given as a SHA-256 digest derived from the
+# admin password, so it is deterministic across Ansible runs (no needless
+# restarts), has no plaintext on disk, and is not a constant anyone can look up.
+# Keeping protected-mode enabled means Valkey still fails safe if this ACL block
+# is ever lost or mangled.
+user default off #{{ (valkey.admin_password ~ '/default-user') | hash('sha256') }} nocommands
+
+# Artemis application user - no administrative or destructive commands.
+user {{ valkey.username }} on >{{ valkey.password }} {{ valkey_artemis_acl_rules }}
+
+# Administrative user. Valkey cannot restrict a user to a source address, so this
+# limits privileges, not reachability - the network side is handled by `bind`
+# above plus the host firewall.
+user {{ valkey.admin_username }} on >{{ valkey.admin_password }} {{ valkey_admin_acl_rules }}
+
+#################################### MEMORY ###################################
+
+maxmemory {{ valkey_maxmemory }}
+maxmemory-policy {{ valkey_maxmemory_policy }}
+
+################################## PERSISTENCE ################################
+
+dir {{ valkey_data_directory }}
+dbfilename dump.rdb
+{% if valkey_persistence_enabled %}
+save {{ valkey_save }}
+{% else %}
+save ""
+{% endif %}
+stop-writes-on-bgsave-error {{ 'yes' if valkey_stop_writes_on_bgsave_error else 'no' }}
+rdbcompression yes
+rdbchecksum yes
+appendonly {{ 'yes' if valkey_appendonly else 'no' }}
+
+################################ NOTIFICATIONS ################################
+
+notify-keyspace-events {{ valkey_notify_keyspace_events }}
+
+################################## DIAGNOSTICS ################################
+
+slowlog-log-slower-than 10000
+slowlog-max-len 256
+latency-monitor-threshold 100

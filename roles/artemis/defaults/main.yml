@@ -272,12 +272,14 @@ artemis_eureka_urls: "{% if registry.url is defined and registry.url is not none
   %}"
 artemis_eureka_instance_id: "{{ node_id }}"
 
-artemis_redis_client_name: "{{ artemis_eureka_instance_id }}"
+artemis_valkey_client_name: "{{ artemis_eureka_instance_id }}"
 
 node_short_name: unnamed-artemis-node
 node_display_name: Unnamed Artemis Node
 
-#redis:
+# Connection details of the host running the `valkey` role. `host` is that
+# host's WireGuard address, unbracketed - Spring adds the brackets itself.
+#valkey:
 #  host:
 #  port:
 #  username:
