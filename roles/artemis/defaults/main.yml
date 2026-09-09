@@ -404,6 +404,14 @@ artemis_internal_ip_allowlist: []
 #artemis_rate_limit:
 #  account_management_rpm: 5
 #  authentication_rpm: 30
+#  # Addresses that consume no tokens at all, rather than getting a larger budget. Single addresses or
+#  # CIDR ranges, in either family. Intended for a load generator, which drives a whole cohort of logins
+#  # from one host and would otherwise be throttled within seconds -- the run would then measure the
+#  # limiter rather than Artemis. List both families for a dual-stack host: the exemption matches the
+#  # address Artemis actually sees.
+#  exempt_addresses:
+#    - "131.159.89.112"
+#    - "2a09:80c0:89::112"
 
 ##############################################################################
 # Helios Configuration
