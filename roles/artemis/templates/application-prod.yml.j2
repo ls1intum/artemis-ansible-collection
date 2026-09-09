@@ -180,8 +180,22 @@ artemis:
 {% if artemis_rate_limit is defined and artemis_rate_limit is not none %}
   rate-limiting:
     enabled: true
-    account-management-rpm: {{ artemis_rate_limit.account_management_rpm }}
-    authentication-rpm: {{ artemis_rate_limit.authentication_rpm }}
+    # Artemis binds these as RateLimitingProperties.accountManagementRequestsPerMinute and
+    # .authenticationRequestsPerMinute. The short "-rpm" spellings used here before bound to nothing at
+    # all, in Artemis 10 and in 9.9.1 alike, so a server silently ran on the built-in defaults whatever
+    # these were set to.
+    account-management-requests-per-minute: {{ artemis_rate_limit.account_management_rpm }}
+    authentication-requests-per-minute: {{ artemis_rate_limit.authentication_rpm }}
+{% if artemis_rate_limit.exempt_addresses is defined and artemis_rate_limit.exempt_addresses %}
+    # Addresses that consume no tokens at all, rather than getting a larger budget. The limits are per
+    # client address, which is the right shape for one abusive client and the wrong shape for a load
+    # generator: it drives a whole cohort of logins from a single host and would be throttled within
+    # seconds, so the run would measure the limiter instead of Artemis. Single addresses or CIDR ranges.
+    exempt-addresses:
+{% for address in artemis_rate_limit.exempt_addresses %}
+      - "{{ address }}"
+{% endfor %}
+{% endif %}
 {% endif %}
   user-management:
 {% if ldap.url is defined and ldap.url is not none%}
