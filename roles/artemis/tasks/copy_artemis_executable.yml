@@ -47,3 +47,29 @@
     mode: "644"
     force: true
   when: is_release | bool
+
+# Pre-extract the freshly staged WAR into an exploded layout while the currently running instance
+# keeps serving. Running from the exploded layout (java -jar app/artemis.war) avoids Spring Boot's
+# nested-jar classloader, which dominates cold start (~38s -> ~25s). Doing the extraction here, before
+# restart_artemis.yml stops the service, keeps the ~9s extraction out of the downtime window; only the
+# fast swap into place happens while the service is down. Spring Boot's `extract` rejects a `.war.new`
+# source name, so the staged file is first copied to a real `.war` name. Runs as root and hands the
+# result to the service user so the artemis unit can read it.
+- name: Pre-extract new WAR into an exploded layout (old instance keeps running)
+  become: true
+  ansible.builtin.shell: |
+    set -euo pipefail
+    src="{{ artemis_working_directory }}/artemis-extract-src.war"
+    dest="{{ artemis_extracted_app_directory }}.new"
+    rm -rf "$dest" "$src"
+    cp "{{ artemis_working_directory }}/artemis.war.new" "$src"
+    /usr/bin/java -Djarmode=tools -jar "$src" extract --destination "$dest"
+    mv "$dest/artemis-extract-src.war" "$dest/artemis.war"
+    rm -f "$src"
+    chown -R {{ artemis_user_name }}:{{ artemis_user_group }} "$dest"
+  args:
+    executable: /bin/bash
+  when:
+    - download_artemis_application | bool
+    - artemis_extract_war | bool
+    - not ansible_check_mode

@@ -62,6 +62,17 @@ artemis_telemetry_destination: "https://telemetry.artemis.cit.tum.de"
 artemis_working_directory: "/opt/artemis"
 artemis_repo_basepath: "."
 
+# When enabled, the deployed WAR is extracted (exploded) into an on-disk layout that Artemis
+# runs from directly (java -jar app/artemis.war with a flat lib/), instead of the packed WAR.
+# This avoids Spring Boot's nested-jar classloader, which dominates cold start, cutting startup
+# from ~38s to ~25s. The extraction runs once per deploy while the OLD instance is still serving
+# (see copy_artemis_executable.yml), so the ~13s saving comes off the downtime window, not just
+# total deploy time. Opt-in per environment (enable in group_vars) so it can be validated on a
+# staging cluster before production.
+artemis_extract_war: false
+# Directory the exploded layout is activated into (staged as "<dir>.new" before the swap).
+artemis_extracted_app_directory: "{{ artemis_working_directory }}/app"
+
 artemis_legal_path: /opt/artemis/legal
 artemis_data_export_path: /opt/artemis/data-exports
 artemis_tmp_directory: # Defaults to system tmp dir
