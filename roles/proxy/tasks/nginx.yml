@@ -157,6 +157,19 @@
     mode: "644"
   notify: Restart nginx
 
+- name: Ensure the client bundle cache directory exists
+  become: true
+  file:
+    path: "{{ proxy_cache_client_bundle_path }}"
+    state: directory
+    # nginx creates a proxy_cache_path itself, but only under a parent it can write to. Creating it here
+    # means the cache can be pointed at a dedicated disk without a manual step first, and makes the
+    # ownership explicit rather than whatever the master process happened to leave behind.
+    owner: nginx
+    group: nginx
+    mode: "700"
+  when: proxy_cache_client_bundle
+
 - name: Copy proxy.conf
   become: true
   template:
