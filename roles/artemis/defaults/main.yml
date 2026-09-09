@@ -81,7 +81,29 @@ artemis_war_url: "https://github.com/ls1intum/Artemis/releases/download/{{ artem
 
 artemis_branch: develop
 
-artemis_system_ram_proportion: 0.8 # How much % of the system RAM to allocate to the Artemis service (Default here: 80%)
+# Ceiling on the Java heap as a share of system RAM. Applies on hosts with enough memory that the fixed reserve below
+# is not the binding constraint, which is everything above roughly 6.4 GB.
+artemis_system_ram_proportion: 0.8
+
+# Memory the heap must leave for everything else on the host, in MB.
+#
+# A proportion alone is the wrong model, because most of what the heap has to leave room for does not scale with the
+# machine. Measured on an idle Artemis 10 node: 840 MB resident outside the heap - 277 MB metaspace, 35 MB compressed
+# class space, plus code cache, 164 thread stacks, GC structures and netty's direct buffers. On top of that the host
+# needs page cache, which for a node serving git repositories off NFS is not optional.
+#
+# Getting this wrong is not a slow degradation, it is swapping. On a 3867 MB staging node the 80% proportion asked for
+# a 3093 MB heap; 3093 + 840 exceeds the machine before the OS has anything at all, and all three nodes sat on about
+# 1 GB of swap each, one of them down to 63 MB available memory during an exam. That shows up as iowait, not as a
+# memory error, so it is easy to misread as slow storage.
+#
+# 1280 MB is the measured 840 plus room for the OS and some page cache.
+artemis_heap_reserve_mb: 1280
+
+# netty samples buffer allocations to detect leaks, and each sample allocates a Throwable to capture where the buffer
+# came from. On a node under exam load that is pure overhead: one 2000-student benchmark run recorded 179,032 of these
+# records. Set to "simple" (netty's own default) or "paranoid" when actually hunting a buffer leak.
+artemis_netty_leak_detection_level: disabled
 artemis_database_max_pool_size: 30
 
 artemis_database_host: localhost
