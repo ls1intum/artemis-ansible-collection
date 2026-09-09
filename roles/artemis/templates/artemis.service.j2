@@ -14,7 +14,8 @@ ExecStart=/usr/bin/java \
     -Dsun.jnu.encoding=UTF-8 \
     -Djava.security.egd=file:/dev/./urandom \
     -Dhazelcast.slow.operation.detector.stacktrace.logging.enabled=true \
-    -Xmx{{ (artemis_system_ram_proportion * ansible_facts.memory_mb.real.total) | int }}m \
+    -Xmx{{ [(artemis_system_ram_proportion * ansible_facts.memory_mb.real.total) | int, (ansible_facts.memory_mb.real.total - artemis_heap_reserve_mb) | int] | min }}m \
+    -Dio.netty.leakDetection.level={{ artemis_netty_leak_detection_level }} \
     -XX:+ShowCodeDetailsInExceptionMessages \
     -XX:+HeapDumpOnOutOfMemoryError \
     --add-modules java.se \
