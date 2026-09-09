@@ -71,8 +71,9 @@ proxy_cache_path {{ proxy_cache_client_bundle_path }} levels=1:2 keys_zone=artem
 # the two representations Artemis can actually return. Both the upstream request and the cache key use
 # this, so the cache holds two entries per file rather than one per browser variant.
 map $http_accept_encoding $artemis_asset_encoding {
-    default   "identity";
-    "~*gzip"  "gzip";
+    default                                 "identity";
+    "~*gzip\s*;\s*q=0(\.0+)?(\s|,|$)"      "identity";
+    "~*gzip"                                "gzip";
 }
 {% endif %}
 
@@ -146,7 +147,7 @@ server {
     # The regex deliberately anchors the file name to the first path segment. It must not grow into
     # something that also matches /api/..., because a regex location beats a prefix location: it would
     # take the rate-limited endpoints below out of their zones with no other sign that it had happened.
-    location ~* ^/(?:[^/]+\.(?:js|css)|media/|i18n/) {
+    location ~* ^/(?:[^/]+\.(?:js|css)|media/) {
         proxy_pass {{ proxy_node_protocol }}://app;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
@@ -157,12 +158,12 @@ server {
 
         proxy_cache artemis_assets;
         # The encoding is in the key because Vary is ignored below.
-        proxy_cache_key "$scheme$request_method$host$request_uri$artemis_asset_encoding";
+        proxy_cache_key "$scheme$request_method$host$uri$artemis_asset_encoding";
         # Artemis answers these with Vary: Accept-Encoding, and nginx would then key the entry on the
         # client's raw Accept-Encoding rather than the normalised one set above, which is what the
         # normalisation exists to avoid. Safe to ignore only because encoding is the sole dimension
         # these responses vary on, and the key already covers it.
-        proxy_ignore_headers Vary;
+        proxy_ignore_headers Vary Cache-Control Expires;
 
         # One request fills an entry and the rest wait for it. This is the line that matters at the
         # start of a lecture: without it a cold cache still sends the whole cohort upstream at once.
@@ -174,9 +175,6 @@ server {
         proxy_cache_revalidate on;
 
         proxy_cache_valid 200 {{ proxy_cache_client_bundle_valid }};
-        # A 404 here means a build no longer ships that file. Cached briefly so a stale client asking
-        # repeatedly cannot become load, but not so long that a deploy race is remembered.
-        proxy_cache_valid 404 1m;
 
         # add_header does not accumulate across levels: naming one here drops those set on the server,
         # so both are repeated to keep HSTS and the HTTP/3 advertisement on these responses.
