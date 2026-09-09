@@ -58,6 +58,34 @@ proxy_read_timeout: "900s"
 fastcgi_send_timeout: "900s"
 fastcgi_read_timeout: "900s"
 
+# Answer the client bundle from nginx's own cache instead of proxying every request to a node.
+#
+# Everything cached is versioned in its URL - Angular emits content-hashed names for JavaScript, CSS and
+# the media they reference, and the translation loader appends the build's I18N_HASH as a query
+# parameter - so a cached copy cannot go stale: a new build is a new URL, and the entries the old build
+# left behind are never asked for again.
+#
+# Worth having because nothing else absorbs that load. Artemis serves its own static content, and
+# compresses it (server.compression), so without a cache every chunk request costs a node a read out of
+# the WAR and a gzip. Measured against a cohort of 2000 simulated students that is roughly 1.2 million
+# application requests in a few minutes for a few hundred distinct files.
+proxy_cache_client_bundle: true
+# Put this on a disk with room to spare; it is read on every cache hit. A build's bundle is tens of
+# megabytes, so the ceiling below is generous rather than tight and exists only to bound the disk.
+proxy_cache_client_bundle_path: /var/cache/nginx/artemis-assets
+proxy_cache_client_bundle_max_size: 2g
+# How long an entry survives without being asked for. Long enough to still be warm between lectures.
+proxy_cache_client_bundle_inactive: 30d
+# Shared memory for the keys, not the bodies. Far more than the few hundred entries a build needs.
+proxy_cache_client_bundle_keys_zone_size: 20m
+# Only applies to responses that arrive without caching directives of their own; Artemis sends
+# Cache-Control on these paths and stays authoritative. This is the floor, not the policy.
+proxy_cache_client_bundle_valid: 30d
+# How long a request waits for another request to finish filling the same entry before giving up and
+# going to a node itself. Generous, because the alternative at the start of a lecture is the whole
+# cohort going upstream at once, which is the thing the cache exists to prevent.
+proxy_cache_client_bundle_lock_timeout: 30s
+
 # IPs exempt from the git and login rate limits (e.g., benchmark servers). Add both address families
 # for a dual-stack host: the exemption matches the address nginx actually sees, so listing only the IPv4
 # silently leaves an IPv6 client throttled. Account recovery and registration stay limited for everyone.
