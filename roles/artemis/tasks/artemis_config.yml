@@ -8,6 +8,18 @@
     group: "{{ artemis_user_group }}"
     mode: "600"
 
+# Before the unit that names it: a config update rewrites artemis.service without touching the rest of the host,
+# and a -Djava.io.tmpdir the JVM cannot create keeps Tomcat from starting at all.
+- name: Create the JVM temp directory
+  become: true
+  file:
+    path: "{{ artemis_jvm_temp_directory }}"
+    state: directory
+    mode: "750"
+    owner: "{{ artemis_user_name }}"
+    group: "{{ artemis_user_group }}"
+  when: artemis_jvm_temp_directory is defined and artemis_jvm_temp_directory is not none and artemis_jvm_temp_directory not in ["", "/tmp"]
+
 - name: Copy artemis.service systemd configuration
   become: true
   template:
