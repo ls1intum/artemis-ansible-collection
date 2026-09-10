@@ -7,7 +7,11 @@ After=syslog.target
 [Service]
 User={{ artemis_user_name }}
 WorkingDirectory={{ artemis_working_directory }}
+# Tomcat can only remove its work directory on a graceful shutdown, so every kill leaves ~330 MB of unpacked jars
+# behind. Sweep what no running Artemis owns before starting a new one.
+ExecStartPre=/bin/sh -c 'rm -rf "{{ artemis_jvm_temp_directory }}"/tomcat.{{ artemis_server_port }}.*'
 ExecStart=/usr/bin/java \
+    -Djava.io.tmpdir={{ artemis_jvm_temp_directory }} \
     -Djdk.tls.ephemeralDHKeySize=2048 \
     -DLC_CTYPE=UTF-8 \
     -Dfile.encoding=UTF-8 \

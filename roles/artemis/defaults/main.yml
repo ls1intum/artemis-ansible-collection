@@ -66,6 +66,20 @@ artemis_legal_path: /opt/artemis/legal
 artemis_data_export_path: /opt/artemis/data-exports
 artemis_tmp_directory: # Defaults to system tmp dir
 
+# Where the JVM writes its temporary files, passed as -Djava.io.tmpdir. Deliberately a plain directory on disk rather
+# than one of the tmpfs mounts, because the largest thing written here is not small and does not go away.
+#
+# Starting Artemis unpacks the WAR's WEB-INF/lib into {{ artemis_jvm_temp_directory }}/tomcat.<port>.<random>: about
+# 330 MB across 480 files, every start. Tomcat removes that directory on a graceful shutdown and cannot remove it when
+# the process is killed, so every hard stop leaves a copy behind. On a staging node with /tmp as a 2 GB tmpfs that had
+# accumulated five copies, 1.7 GB of a 3867 MB machine was duplicated jar files held in memory. The kernel pushed them
+# into swap, swap filled completely, and the OOM killer took the JVM - twice. Deleting the stale directories returned
+# 1.6 GB of swap and 500 MB of available memory immediately.
+#
+# On disk the same files cost page cache, which the kernel can reclaim. Set to "/tmp" to restore the previous
+# behaviour on hosts where that is wanted.
+artemis_jvm_temp_directory: "{{ artemis_working_directory }}/jvm-tmp"
+
 # the following two values must be cron expressions
 artemis_scheduling_data_export_creation_time: 0 0 4 * * * # every day at 4 am
 artemis_scheduling_programming_exercises_cleanup_time: 0 0 3 * * * # every day at 3 am
