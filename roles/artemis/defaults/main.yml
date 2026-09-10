@@ -66,6 +66,20 @@ artemis_legal_path: /opt/artemis/legal
 artemis_data_export_path: /opt/artemis/data-exports
 artemis_tmp_directory: # Defaults to system tmp dir
 
+# Where the JVM writes its temporary files, passed as -Djava.io.tmpdir. Deliberately a plain directory on disk rather
+# than one of the tmpfs mounts, because the largest thing written here is not small and does not go away.
+#
+# Starting Artemis unpacks the WAR's WEB-INF/lib into {{ artemis_jvm_temp_directory }}/tomcat.<port>.<random>: about
+# 330 MB across 480 files, every start. Tomcat removes that directory on a graceful shutdown and cannot remove it when
+# the process is killed, so every hard stop leaves a copy behind. On a staging node with /tmp as a 2 GB tmpfs that had
+# accumulated five copies, 1.7 GB of a 3867 MB machine was duplicated jar files held in memory. The kernel pushed them
+# into swap, swap filled completely, and the OOM killer took the JVM - twice. Deleting the stale directories returned
+# 1.6 GB of swap and 500 MB of available memory immediately.
+#
+# On disk the same files cost page cache, which the kernel can reclaim. Set to "/tmp" to restore the previous
+# behaviour on hosts where that is wanted.
+artemis_jvm_temp_directory: "{{ artemis_working_directory }}/jvm-tmp"
+
 # the following two values must be cron expressions
 artemis_scheduling_data_export_creation_time: 0 0 4 * * * # every day at 4 am
 artemis_scheduling_programming_exercises_cleanup_time: 0 0 3 * * * # every day at 3 am
@@ -82,7 +96,7 @@ artemis_war_url: "https://github.com/ls1intum/Artemis/releases/download/{{ artem
 artemis_branch: develop
 
 # Ceiling on the Java heap as a share of system RAM. Applies on hosts with enough memory that the fixed reserve below
-# is not the binding constraint, which is everything above roughly 6.4 GB.
+# is not the binding constraint, which is everything above roughly 9 GB.
 artemis_system_ram_proportion: 0.8
 
 # Memory the heap must leave for everything else on the host, in MB.
@@ -92,13 +106,27 @@ artemis_system_ram_proportion: 0.8
 # class space, plus code cache, 164 thread stacks, GC structures and netty's direct buffers. On top of that the host
 # needs page cache, which for a node serving git repositories off NFS is not optional.
 #
-# Getting this wrong is not a slow degradation, it is swapping. On a 3867 MB staging node the 80% proportion asked for
-# a 3093 MB heap; 3093 + 840 exceeds the machine before the OS has anything at all, and all three nodes sat on about
-# 1 GB of swap each, one of them down to 63 MB available memory during an exam. That shows up as iowait, not as a
+# Getting this wrong is not a slow degradation, it is swapping and then the OOM killer. On a 3867 MB staging node the
+# 80% proportion asked for a 3093 MB heap; 3093 + 840 exceeds the machine before the OS has anything at all, and all
+# three nodes sat on about 1 GB of swap each. A 1280 MB reserve left a 2587 MB heap, which is still too much: once the
+# heap actually fills - which it does during an exam - the process is at 2587 + 840 = 3427 MB of the 3867 MB machine,
+# and the kernel killed it twice in one evening at 3349 MB resident with 1683 MB already in swap. The page cache a node
+# serving git repositories off NFS needs was what got squeezed out first, which shows up as iowait rather than as a
 # memory error, so it is easy to misread as slow storage.
 #
-# 1280 MB is the measured 840 plus room for the OS and some page cache.
-artemis_heap_reserve_mb: 1280
+# 1800 MB is the measured 840 MB of non-heap, plus the OS, plus enough page cache to keep the git working set warm.
+artemis_heap_reserve_mb: 1800
+
+# Ceiling on direct (off-heap) buffers, in MB. Not a tuning knob so much as a missing bound: the JDK defaults
+# MaxDirectMemorySize to MaxHeapSize, so on a node that does not set it netty and the valkey client are entitled to a
+# second copy of the heap in native memory, and nothing in the JVM stops them before the kernel does. Artemis peaks in
+# the low hundreds of MB here, so this is headroom rather than a limit; an OutOfMemoryError naming direct buffer memory
+# is the signal to raise it, and to find out what asked for that much.
+artemis_max_direct_memory_mb: 512
+
+# Ceiling on metaspace, in MB. Measured at 277 MB once the application is warm. Uncapped metaspace is the other way a
+# JVM outgrows its machine without ever reporting a heap problem.
+artemis_max_metaspace_mb: 512
 
 # netty samples buffer allocations to detect leaks, and each sample allocates a Throwable to capture where the buffer
 # came from. On a node under exam load that is pure overhead: one 2000-student benchmark run recorded 179,032 of these

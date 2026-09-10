@@ -76,6 +76,16 @@
     group: "{{ artemis_user_group }}"
   when: artemis_data_export_path is not none and artemis_data_export_path != "" and artemis_computed_is_core_node
 
+- name: Create the JVM temp directory
+  become: true
+  file:
+    path: "{{ artemis_jvm_temp_directory }}"
+    state: directory
+    mode: "750"
+    owner: "{{ artemis_user_name }}"
+    group: "{{ artemis_user_group }}"
+  when: artemis_jvm_temp_directory is defined and artemis_jvm_temp_directory is not none and artemis_jvm_temp_directory not in ["", "/tmp"]
+
 - name: Create tmp directory
   become: true
   file:
