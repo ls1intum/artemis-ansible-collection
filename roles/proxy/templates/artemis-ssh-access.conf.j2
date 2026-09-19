@@ -1,0 +1,14 @@
+{{ ansible_managed | comment }}
+
+# Who may open a git ssh connection to the Artemis nodes through this proxy.
+#
+# Empty unless proxy_allowed_ranges is set, in which case ssh is restricted to the same ranges as HTTP -
+# otherwise restricted access mode would still leave clones, pushes and fetches open to everyone on 7921.
+# A raw TCP connection has nowhere to show a maintenance page, so a client outside the ranges simply has
+# its connection closed.
+{% for allowed_range in proxy_allowed_ranges %}
+allow {{ allowed_range }};
+{% endfor %}
+{% if proxy_allowed_ranges | length > 0 %}
+deny all;
+{% endif %}

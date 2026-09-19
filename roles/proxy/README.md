@@ -23,6 +23,7 @@ To configure the role, you need to set the required variables in your Ansible pl
 - `proxy_read_timeout`: The read timeout for nginx.
 - `fastcgi_send_timeout`: The send timeout for FastCGI.
 - `fastcgi_read_timeout`: The read timeout for FastCGI.
+- `proxy_allowed_ranges`: Restricts Artemis to clients from the listed IP ranges; everyone else gets the maintenance page. Empty by default, which serves everyone. See [Restricting access to an IP range](#restricting-access-to-an-ip-range).
 
 Default variables can be found in the `defaults/main.yml` file.
 
@@ -80,6 +81,11 @@ proxy_send_timeout: "900s"
 proxy_read_timeout: "900s"
 fastcgi_send_timeout: "900s"
 fastcgi_read_timeout: "900s"
+
+# Restrict Artemis to clients from these ranges; empty serves everyone.
+proxy_allowed_ranges: []
+#   - "172.24.152.0/24"
+#   - "2a09:80c0:ac18:9800::/64"
 ```
 
 ## Example Usage
@@ -119,6 +125,41 @@ Here is an example playbook:
         fastcgi_send_timeout: "900s"
         fastcgi_read_timeout: "900s"
 ```
+
+## Restricting access to an IP range
+
+Setting `proxy_allowed_ranges` puts the proxy into restricted access mode: only clients whose address falls into one
+of the listed ranges reach the Artemis nodes, and every other request is answered with the maintenance page that this
+role already serves for a failed upstream. Leaving the list empty - the default - serves everyone and changes nothing.
+
+```yaml
+proxy_allowed_ranges:
+  - "172.24.152.0/24"            # VPN pool
+  - "2a09:80c0:ac18:9800::/64"   # VPN pool (IPv6)
+  - "131.159.0.0/16"             # campus network
+```
+
+Useful to keep an instance up but out of reach while an exam is being prepared, or to hold students out during a
+migration without taking the deployment down. Flip it back to `[]` and re-run the role to open the instance again.
+
+A few things worth knowing:
+
+- **List both address families.** The check matches the address nginx actually sees. A dual-stack client that happens
+  to prefer IPv6 is locked out when only the IPv4 range is listed, which looks like an intermittent failure rather
+  than a configuration mistake.
+- **Blocked requests are answered `503`**, with the same page as an upstream outage. That is deliberate: it reads as
+  "unavailable right now" rather than "forbidden", and search engines will not index it.
+- **Git over SSH is restricted too.** Port 7921 is limited to the same ranges, otherwise clones, pushes and fetches
+  would continue to work for everyone while the web interface was closed. There is no maintenance page for a raw TCP
+  connection, so an SSH client outside the ranges just has its connection closed.
+- **Do not forget the build agents.** They clone through `version_control.localvc.url` / `ssh_url`, which normally
+  points at this proxy, so an agent outside the listed ranges gets the maintenance page instead of the repository
+  and its builds fail. Include their addresses, or point them at the nodes directly.
+- **The match is on the real TCP peer, not `X-Forwarded-For`.** A client cannot talk its way in with a header, but
+  the restriction also stops working as intended if another proxy or CDN sits in front of this one - every request
+  would then carry that proxy's address.
+- The redirect-only server blocks from `redirects` are not restricted; they send the client to the main hostname,
+  where the restriction applies.
 
 ## SSH behind a load balancer
 
