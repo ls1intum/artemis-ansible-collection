@@ -94,3 +94,17 @@ proxy_rate_limit_exempt_ips: []
 #     comment: "Benchmark server"
 #   - ip: "2a09:80c0:89::112"
 #     comment: "Benchmark server (IPv6)"
+
+# Restrict Artemis to clients coming from these ranges. Empty (the default) serves everyone.
+# As soon as at least one entry is listed, only requests whose source address falls into one of the
+# ranges reach the Artemis nodes; every other request is answered with the maintenance page, and the
+# git ssh forward on port 7921 drops the connection. Useful to keep an instance reachable from the
+# university VPN only, e.g. while an exam is being prepared.
+# Accepts CIDR blocks and single addresses, IPv4 and IPv6. List both families for a dual-stack VPN:
+# the check matches the address nginx actually sees, so a client that happens to connect over IPv6 is
+# locked out when only the IPv4 range is listed.
+# NOTE: this matches the real TCP peer, not X-Forwarded-For, so it only works while clients reach this
+# nginx directly. Another proxy or CDN in front makes every request look like it comes from that proxy.
+proxy_allowed_ranges: []
+#   - "172.24.152.0/24"
+#   - "2a09:80c0:ac18:9800::/64"

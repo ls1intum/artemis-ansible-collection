@@ -24,6 +24,32 @@ map $http_upgrade $connection_upgrade {
 # Remove nginx version from HTTP response
 server_tokens off;
 
+{% if proxy_allowed_ranges | length > 0 %}
+# Restricted access mode (1 = may use Artemis, 0 = gets the maintenance page). Set proxy_allowed_ranges
+# to keep an instance reachable from the university VPN or a campus range only, e.g. while an exam is
+# being prepared. An empty proxy_allowed_ranges omits this block entirely and serves everyone.
+# Matches on the real TCP peer, so a client cannot claim an address with X-Forwarded-For - but equally,
+# this only works while clients reach this nginx directly rather than through a further proxy or CDN.
+geo $artemis_access_allowed {
+    default 0;
+{% for allowed_range in proxy_allowed_ranges %}
+    {{ allowed_range }} 1;
+{% endfor %}
+}
+
+# 1 = answer with the maintenance page instead of reaching Artemis.
+# `volatile` matters: without it nginx evaluates a map once per request and caches the result, and the
+# internal redirect to /503.html below - which re-runs the rewrite phase - would be judged by the URI of
+# the original request, decide to return 503 again, and leave the client with nginx's own bare 503 page.
+# Re-evaluating lets the second pass see $uri = /503.html and fall through to the maintenance page.
+map $artemis_access_allowed:$uri $artemis_maintenance {
+    volatile;
+    default             1;
+    "~^1:"              0;  # client inside one of proxy_allowed_ranges
+    "~^0:/503\.html$"   0;  # the maintenance page itself, on the internal redirect
+}
+
+{% endif %}
 {% if proxy_rate_limit_exempt_ips | length > 0 %}
 # Geo block to identify exempt IPs (1 = exempt, 0 = not exempt). An address listed here is exempt from
 # the git and login zones below, which is what a load generator needs: it drives thousands of logins and
@@ -130,6 +156,19 @@ server {
     client_max_body_size 10m;
     client_body_buffer_size 1m;
 
+{% if proxy_allowed_ranges | length > 0 %}
+    # Restricted access mode: only clients from proxy_allowed_ranges reach the Artemis nodes, everyone
+    # else is answered with the maintenance page below.
+    #
+    # Deliberately not `allow`/`deny`: those run in the access phase, which comes after the rewrite phase,
+    # so every location that answers with `return` (/mailto, /favicon.ico) would reply before the check
+    # ever ran. This `if` sits in the server rewrite phase, ahead of location selection, so it covers the
+    # whole server block including locations added later.
+    if ($artemis_maintenance) {
+        return 503;
+    }
+
+{% endif %}
     location / {
         proxy_pass {{ proxy_node_protocol }}://app;
         proxy_http_version 1.1;
@@ -357,6 +396,13 @@ server {
     }
 
     error_page 502 =503 /503.html;
+{% if proxy_allowed_ranges | length > 0 %}
+    # Send the restricted-access 503 above to the same maintenance page. A URI rather than a named
+    # location on purpose: nginx rewrites the method to GET only on this branch, and the page is served
+    # by the static file handler, which answers a POST with 405. Without this a login form submitted
+    # from outside the allowed ranges would produce a bare 405 instead of the maintenance page.
+    error_page 503 /503.html;
+{% endif %}
     location /503.html {
         root /usr/share/nginx/html;
         internal;

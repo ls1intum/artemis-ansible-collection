@@ -135,6 +135,9 @@
           # Requires artemis.version-control.ssh-proxy-protocol.trusted-sources to list this proxy on the nodes,
           # which is why it is off by default: enabling only one of the two halves breaks ssh.
           proxy_protocol {{ 'on' if proxy_ssh_proxy_protocol else 'off' }};
+          # Restricted access mode, empty unless proxy_allowed_ranges is set. Kept in a file of its own
+          # because this block is written by blockinfile, which has no room for a loop over the ranges.
+          include artemis-ssh-access.conf;
         }
       }
   when: proxy_forward_ssh
@@ -148,6 +151,15 @@
     mode: "644"
   when: proxy_forward_ssh
   notify: Restart nginx
+
+- name: Copy artemis-ssh-access.conf
+  become: true
+  template:
+    src: artemis-ssh-access.conf.j2
+    dest: /etc/nginx/artemis-ssh-access.conf
+    mode: "644"
+  when: proxy_forward_ssh
+  notify: Reload nginx
 
 - name: Copy timeouts.conf
   become: true
