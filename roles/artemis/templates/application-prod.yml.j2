@@ -124,23 +124,25 @@ spring:
         enable: {{ mail.smtp_starttls_enable | default(true) | to_json }}
 {% endif %}
 {% else %}
-  liquibase:
-      enabled: false #not needed for build agents
-  # Hibernate, DataSource and the related metrics auto-configurations are excluded for build agents by
-  # the WAR-bundled config/application-buildagent.yml (active whenever the "buildagent" profile is set).
-  # Do NOT repeat spring.autoconfigure.exclude here: this external file outranks the bundled config and
-  # the exclude list replaces rather than merges, so a stale copy silently overrides the WAR list. That
-  # is exactly what broke every prod build agent when the Spring Boot 4 upgrade relocated these classes
-  # but this template kept the old package names.
+  # Nothing is written for a build agent. Liquibase, Hibernate, the DataSource and the related metrics
+  # auto-configurations are all turned off by the WAR-bundled config/application-buildagent.yml, which is
+  # active whenever the "buildagent" profile is set.
+  #
+  # Do NOT repeat spring.autoconfigure.exclude here: this external file outranks the bundled config and the
+  # exclude list replaces rather than merges, so a stale copy silently overrides the WAR list. That is exactly
+  # what broke every prod build agent when the Spring Boot 4 upgrade relocated these classes but this template
+  # kept the old package names.
 {% endif %}
 
 
 server:
   port: {{ artemis_server_port }}
+{% if artemis_computed_is_core_node %}
   url: {{ artemis_server_url }}
   tomcat:
     remoteip:
       internal-proxies: 10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|169\.254\.\d{1,3}\.\d{1,3}|127\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.1[6-9]{1}\.\d{1,3}\.\d{1,3}|172\.2[0-9]{1}\.\d{1,3}\.\d{1,3}|172\.3[0-1]{1}\.\d{1,3}\.\d{1,3}|0:0:0:0:0:0:0:1|::1|fcfe::f:1|fcfe:0:0:0:0:0:f:1
+{% endif %}
 
 artemis:
 {% if valkey is defined and valkey is not none %}
@@ -259,7 +261,9 @@ artemis:
 {% if version_control.localvc is defined %}
   version-control:
     url: {{ version_control.localvc.url }}
+{% if artemis_computed_is_core_node %}
     local-vcs-repo-path: {{ version_control.localvc.repo_storage_base_path }}
+{% endif %}
     default-branch: {{ artemis_version_control_default_branch_name }}
 {% if version_control.localvc.build_agent_git_credentials is defined %}
     build-agent-git-username: {{ version_control.localvc.build_agent_git_credentials.user }}
@@ -271,20 +275,22 @@ artemis:
     ssh-private-key-folder-path: {{ artemis_ssh_key_path }}
 {% endif %}
 {% endif %}
-{% if version_control.localvc.ssh_key_path is defined and version_control.localvc.ssh_key_path|length > 0 %}
+{% if artemis_computed_is_core_node and version_control.localvc.ssh_key_path is defined and version_control.localvc.ssh_key_path|length > 0 %}
     ssh-host-key-path: {{ version_control.localvc.ssh_key_path }}
 {% endif %}
-{% if version_control.localvc.ssh_url is defined %}
+{% if artemis_computed_is_build_agent | bool and version_control.localvc.ssh_url is defined %}
     ssh-template-clone-url: {{ version_control.localvc.ssh_url }}
 {% endif %}
-{% if version_control.localvc.ssh_proxy_protocol_trusted_sources | default([], true) | length > 0 %}
+{% if artemis_computed_is_core_node and version_control.localvc.ssh_proxy_protocol_trusted_sources | default([], true) | length > 0 %}
     ssh-proxy-protocol:
       trusted-sources:
 {% for trusted_source in version_control.localvc.ssh_proxy_protocol_trusted_sources %}
         - "{{ trusted_source }}"
 {% endfor %}
 {% endif %}
+{% if artemis_computed_is_core_node %}
     repository-authentication-mechanisms: {{ version_control.localvc.repository_authentication_mechanisms | default("token,ssh,password") }}
+{% endif %}
 {% endif %}
 
 {% if continuous_integration.jenkins is defined %}
@@ -354,9 +360,11 @@ artemis:
 {% endif %}
 {% endif %}
 
+{% if artemis_computed_is_core_node %}
   git:
     name: artemis
     email: {{ artemis_email }}
+{% endif %}
 
 {% if artemis_computed_is_core_node %}
 
@@ -503,9 +511,10 @@ artemis:
 {% endif %}
 {% endif %}
 
+{% if artemis_computed_is_core_node or (artemis_computed_uses_hazelcast | bool and artemis_jhipster_registry_password is not none) or (artemis_CORS_allowed_origins is defined and artemis_CORS_allowed_origins is not none) %}
 jhipster:
 
-{% if artemis_jhipster_jwt is not none %}
+{% if artemis_computed_is_core_node and artemis_jhipster_jwt is not none %}
   security:
     authentication:
       jwt:
@@ -524,9 +533,12 @@ jhipster:
     password: {{ artemis_jhipster_registry_password }}
 {% endif %}
 
+{% if artemis_computed_is_core_node %}
   mail:
     base-url: {{ artemis_server_url }}
     from: '{{artemis_notification_from}} <{{ artemis_notification_email | default([artemis_email.split("@")[0], "+notification@", artemis_email.split("@")[1]]|join()) }}>'
+{% endif %}
+{% endif %}
 
 {% if sentry.dsn | default('') | length %}
 sentry:
@@ -580,10 +592,11 @@ helios:
 {% endif %}
 
 {% set uses_eureka_discovery = artemis_computed_uses_hazelcast | bool and artemis_eureka_urls is defined and hazelcast_address is defined and hazelcast_address is not none and hazelcast_address != "" %}
-{% if uses_eureka_discovery or (is_multinode_install and artemis_eureka_instance_id is defined and artemis_eureka_instance_id != "") %}
-# Eureka exists here for one purpose: finding Hazelcast members. A Redis deployment discovers nothing through it,
-# and Artemis turns the client off at startup anyway (RedisDiscoveryEnvironmentPostProcessor), so only instanceId
-# is written there - NodeRegistryService and PyrisJobService read it as the node's identity either way.
+{% if uses_eureka_discovery or (is_multinode_install and artemis_computed_is_core_node and artemis_eureka_instance_id is defined and artemis_eureka_instance_id != "") %}
+# Eureka exists here for one purpose: finding Hazelcast members. A Redis deployment discovers nothing through it
+# and Artemis turns the client off at startup anyway (RedisDiscoveryEnvironmentPostProcessor), so a Redis core node
+# keeps only instanceId - NodeRegistryService and PyrisJobService read it as the node's identity - and a Redis
+# build agent, which runs neither, gets no block at all.
 eureka:
 {% if uses_eureka_discovery %}
   client:
