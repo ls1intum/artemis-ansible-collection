@@ -246,9 +246,10 @@ unchanged; the packaging is not.
    rename it in the Artemis groups too, and `artemis_redis_client_name` becomes
    `artemis_valkey_client_name`. Both roles fail with an explicit message if
    `redis` is still defined. The Spring property and environment variable names
-   (`spring.data.redis`, `SPRING_DATA_REDIS_*`) and the LocalCI `data-store:
-   "Redis"` value stay as they are - those name Spring's client and Artemis'
-   enum, not the server.
+   (`spring.data.redis`, `SPRING_DATA_REDIS_*`) and the provider name Artemis is
+   given (`artemis.distributed-data.provider: redis`, which supersedes the LocalCI
+   `data-store: "Redis"`) stay as they are - those name Spring's client and
+   Artemis' own provider, not the server.
 
 2. **Do not migrate the RDB file.** Valkey refuses to load a snapshot written by
    Redis 7.4 - it exits with `Can't handle RDB format version 12`, verified with
