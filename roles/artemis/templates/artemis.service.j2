@@ -20,6 +20,7 @@ ExecStart=/usr/bin/java \
     -Dhazelcast.slow.operation.detector.stacktrace.logging.enabled=true \
     -Xmx{{ [(artemis_system_ram_proportion * ansible_facts.memory_mb.real.total) | int, (ansible_facts.memory_mb.real.total - artemis_heap_reserve_mb) | int] | min }}m \
     -Dio.netty.leakDetection.level={{ artemis_netty_leak_detection_level }} \
+    -Djdk.virtualThreadScheduler.parallelism={{ artemis_virtual_thread_parallelism }} \
     -XX:MaxDirectMemorySize={{ artemis_max_direct_memory_mb }}m \
     -XX:MaxMetaspaceSize={{ artemis_max_metaspace_mb }}m \
     -XX:+ShowCodeDetailsInExceptionMessages \
