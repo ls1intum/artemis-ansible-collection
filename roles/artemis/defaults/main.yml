@@ -156,6 +156,9 @@ artemis_netty_leak_detection_level: disabled
 artemis_virtual_thread_parallelism: "{{ ansible_facts.processor_vcpus * 4 }}"
 
 artemis_database_max_pool_size: 30
+# Statements pgjdbc keeps parsed per connection. Artemis issues 368 distinct ones, so the driver's default of 256
+# evicts constantly and it re-parses on every miss.
+artemis_database_prep_stmt_cache_size: 400
 
 artemis_database_host: localhost
 artemis_database_port: 5432 # The port that the database is reachable on (Postgres default: 5432)
@@ -237,7 +240,6 @@ artemis_passkey_require_for_administrator_features: false
 # localvc:
 #   url:
 #   repo_storage_base_path:
-#   use_version_control_access_token: false
 #   ssh_key_path: /opt/artemis/ssh-keys # Key path for the SSH host keys
 # # Build agent authentication: how a build agent proves itself when it clones. Pick the first that applies to you;
 # # neither of the first two needs a secret from you, because the agents establish their own credentials.
@@ -263,7 +265,6 @@ artemis_passkey_require_for_administrator_features: false
 #    url:
 #    user:
 #    password:
-#    secret_push_token:
 #    vcs_credentials:
 #    artemis_auth_token_key:
 #    artemis_auth_token_value:
@@ -278,7 +279,6 @@ artemis_passkey_require_for_administrator_features: false
 #    is_core_node: true
 #    is_build_agent: true
 #    concurrent_build_size: 2
-#    thread_pool_size: 2
 # #  Optional. Bounds which hosts may act as a build agent at all, and which reverse proxies may be believed when
 # #  resolving the client of a git request. An empty allowed_ranges means no restriction, which is the default so
 # #  that adding this role to an existing installation does not stop its agents. Both accept CIDR blocks and single
@@ -314,7 +314,6 @@ artemis_passkey_require_for_administrator_features: false
 #  password:
 #  protocol:
 #  ssl_trust:
-#  tls: true
 #  smtp_auth: true
 #  smtp_ssl_enable: false
 #  smtp_starttls_enable: true
@@ -368,11 +367,8 @@ node_display_name: Unnamed Artemis Node
 artemis_local_llm_deployment_enabled: false
 
 ##############################################################################
-# Nebula Configuration
+# TUM Live Configuration
 ##############################################################################
-#nebula:
-#  url:
-#  secret:
 #tum_live_base_url: "https://tum.live/api/v2"
 
 ##############################################################################
@@ -511,6 +507,16 @@ artemis_internal_ip_allowlist: []
 
 artemis_computed_is_core_node: "{{ not (continuous_integration.localci is defined and continuous_integration.localci is not none) or (continuous_integration.localci.is_core_node
   is defined and continuous_integration.localci.is_core_node) }}"
+
+# Whether this node runs the buildagent profile. The build agent settings (concurrent builds, agent names) are
+# only read by beans in that profile, so a core node gets none of them.
+artemis_computed_is_build_agent: "{{ continuous_integration.localci is defined and continuous_integration.localci is not none and continuous_integration.localci.is_build_agent
+  | default(false) }}"
+
+# Whether Hazelcast is the distributed data provider. A valkey host means Redis carries the cross-node state
+# instead, and Artemis then creates no Hazelcast configuration and forces the Eureka client off at startup - so
+# the Hazelcast interface, the Eureka discovery settings and the registry password have no reader on such a node.
+artemis_computed_uses_hazelcast: "{{ is_multinode_install | bool and (valkey is not defined or valkey is none) }}"
 
 # Compute Spring Profiles from set variables.
 # LDAP, Athena, Apollon, and Atlas have moved from Spring profiles to module-feature

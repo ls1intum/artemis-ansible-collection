@@ -68,7 +68,6 @@ LocalVC configuration:
 localvc:
   url: "https://artemis.example.com"
   repo_storage_base_path: "/path/to/repo_storage"
-  use_version_control_access_token: false
   ssh_key_path: "/opt/artemis/ssh-keys" # Key path for the SSH host keys
   build_agent_use_ssh: true # Setting whether SSH should be used.
   ssh_url: "ssh://git@artemis.example.com:7921/" # URL template for SSH clone operations.
@@ -105,7 +104,6 @@ continuous_integration:
     is_core_node: true
     is_build_agent: true
     concurrent_build_size: 2
-    thread_pool_size: 2
     proxy:
       http_proxy: "http://proxy:8080"
       https_proxy: "http://proxy:8080"
@@ -127,7 +125,6 @@ continuous_integration:
     url: "https://jenkins.example.com"
     user: "jenkins_user"
     password: "jenkins_password"
-    secret_push_token: "jenkins_secret_push_token"
     vcs_credentials: "jenkins_vcs_credentials"
     artemis_auth_token_key: "jenkins_artemis_auth_token_key"
     artemis_auth_token_value: "jenkins_artemis_auth_token_value"
@@ -189,13 +186,6 @@ iris:
   secret: "iris_secret"
 ```
 
-Nebula configuration:
-```
-nebula:
-  url: "https://nebula.example.com"
-  secret: "nebula-secret"
-```
-
 Mail configuration:
 ```
 mail:
@@ -205,7 +195,6 @@ mail:
   password: "smtp_password"
   protocol: "smtp"
   ssl_trust: "smtp.example.com"
-  tls: true
   smtp_auth: true
   smtp_ssl_enable: false
   smtp_starttls_enable: true
@@ -224,11 +213,15 @@ lti:
 
 ### Additional Variables for multi node installations
 
-Registry Configuration:
+Registry Configuration (Hazelcast clusters only):
 ```
 artemis_jhipster_registry_password: "your_registry_password" # Set this to the password for the JHipster registry in a multi-node setup
 ```
 The Token can be generated with: `openssl rand -base64 64`
+
+Eureka, and with it the JHipster registry, exists only so that Hazelcast members can find each other. A cluster
+with `valkey` configured runs on Redis instead: Artemis turns the Eureka client off at startup there, so neither
+the registry password nor the Eureka and Hazelcast addresses are written into the node configuration at all.
 
 Active MQ configuration:
 ```

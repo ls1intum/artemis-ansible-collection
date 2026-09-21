@@ -33,36 +33,28 @@ spring:
 {% endif %}
 {% endif %}
   datasource:
-    type: com.zaxxer.hikari.HikariDataSource
+    # Not repeated here, because the WAR's own config/application-prod.yml already sets them and this file only
+    # layers on top of it: the Hikari data source type, the pool name, auto-commit false (which Hibernate's
+    # provider_disables_autocommit needs), and spring.jpa.database: POSTGRESQL.
     url: jdbc:postgresql://{{ artemis_database_host }}:{{ artemis_database_port }}/{{ artemis_database_dbname }}?sslmode=disable
     username: {{ artemis_database_username }}
     password: {{ artemis_database_password }}
     hikari:
-      poolName: Hikari
-      auto-commit: false
       # 100 per node against a database with a handful of cores is far more than it can serve at once. Three nodes
       # held 301 connections open on staging, where the database has 4 CPUs, so most of them could only queue. A pool
       # is a queue either way; keeping it at the database rather than in front of it just adds context switching and,
       # as below, multiplies the prepared statement footprint.
       maximumPoolSize: {{ artemis_database_max_pool_size | default(30) }}
       data-source-properties:
-        cachePrepStmts: true
-        # The cache is per connection and holds this many statements. Artemis issues 368 distinct statements, so a
-        # 250 entry cache evicts constantly and the driver re-parses on every miss: profiling found 16.8% of node CPU
-        # in the driver's SQL string parser, and the server saw one prepare for every 8.7 executes. 400 covers the
-        # whole set with room to grow.
-        prepStmtCacheSize: {{ artemis_database_prep_stmt_cache_size | default(400) }}
-        # The longest statement Artemis generates is 1751 characters, so this bound is not reached.
-        prepStmtCacheSqlLimit: 2048
-        useServerPrepStmts: true
-  jpa:
-    # Hibernate auto-detects the dialect from JDBC DatabaseMetaData by default. Artemis disables that probe in
-    # production (hibernate.boot.allow_jdbc_metadata_access=false) to speed up startup, so the dialect must be set
-    # explicitly.
-    database: postgresql
-    hibernate:
-      connection:
-        useUnicode: true
+        # pgjdbc parses every statement to find its placeholders and caches the result per connection, this many
+        # of them. Artemis issues 368 distinct statements, so the 256 entry default evicts constantly and the
+        # driver re-parses on every miss: profiling found 16.8% of node CPU in the driver's SQL string parser, and
+        # the server saw one prepare for every 8.7 executes. 400 covers the whole set with room to grow.
+        #
+        # Spelled the way pgjdbc spells it. The MySQL Connector/J names that stood here before - cachePrepStmts,
+        # prepStmtCacheSize, prepStmtCacheSqlLimit, useServerPrepStmts - are not properties this driver knows, so
+        # it ignored all four and the cache ran at its default the whole time.
+        preparedStatementCacheQueries: {{ artemis_database_prep_stmt_cache_size | default(400) }}
 {% if is_multinode_install and broker is defined %}
   websocket:
     broker:
@@ -82,7 +74,7 @@ spring:
       client-name: {{ artemis_valkey_client_name }}
 {% endif %}
 
-{% if is_multinode_install and hazelcast_address is defined %}
+{% if artemis_computed_uses_hazelcast | bool and hazelcast_address is defined %}
   hazelcast:
     interface: "{{ hazelcast_address }}"
 {% endif %}
@@ -123,7 +115,6 @@ spring:
     password: {{ mail.password }}
 {% endif %}
     protocol: {{ mail.protocol }}
-    tls: {{ mail.tls | default(true) | to_json }}
     properties.mail.smtp:
       auth: {{ mail.smtp_auth | default(true) | to_json }}
       ssl:
@@ -133,26 +124,34 @@ spring:
         enable: {{ mail.smtp_starttls_enable | default(true) | to_json }}
 {% endif %}
 {% else %}
-  liquibase:
-      enabled: false #not needed for build agents
-  # Hibernate, DataSource and the related metrics auto-configurations are excluded for build agents by
-  # the WAR-bundled config/application-buildagent.yml (active whenever the "buildagent" profile is set).
-  # Do NOT repeat spring.autoconfigure.exclude here: this external file outranks the bundled config and
-  # the exclude list replaces rather than merges, so a stale copy silently overrides the WAR list. That
-  # is exactly what broke every prod build agent when the Spring Boot 4 upgrade relocated these classes
-  # but this template kept the old package names.
+  # Nothing is written for a build agent. Liquibase, Hibernate, the DataSource and the related metrics
+  # auto-configurations are all turned off by the WAR-bundled config/application-buildagent.yml, which is
+  # active whenever the "buildagent" profile is set.
+  #
+  # Do NOT repeat spring.autoconfigure.exclude here: this external file outranks the bundled config and the
+  # exclude list replaces rather than merges, so a stale copy silently overrides the WAR list. That is exactly
+  # what broke every prod build agent when the Spring Boot 4 upgrade relocated these classes but this template
+  # kept the old package names.
 {% endif %}
 
 
 server:
   port: {{ artemis_server_port }}
+{% if artemis_computed_is_core_node %}
   url: {{ artemis_server_url }}
-  use-forward-headers: true
   tomcat:
     remoteip:
       internal-proxies: 10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|169\.254\.\d{1,3}\.\d{1,3}|127\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.1[6-9]{1}\.\d{1,3}\.\d{1,3}|172\.2[0-9]{1}\.\d{1,3}\.\d{1,3}|172\.3[0-1]{1}\.\d{1,3}\.\d{1,3}|0:0:0:0:0:0:0:1|::1|fcfe::f:1|fcfe:0:0:0:0:0:f:1
+{% endif %}
 
 artemis:
+{% if valkey is defined and valkey is not none %}
+  # Redis (valkey) carries every kind of cross-node state, not just the build job queue, which is why the
+  # provider is named here rather than under continuous-integration. Supersedes
+  # artemis.continuous-integration.data-store, which Artemis still honours but has marked for removal.
+  distributed-data:
+    provider: redis
+{% endif %}
 {% if artemis_tmp_directory is defined and artemis_tmp_directory is not none and artemis_tmp_directory != "" %}
   temp-path: {{ artemis_tmp_directory }}
 {% endif %}
@@ -262,11 +261,10 @@ artemis:
 {% if version_control.localvc is defined %}
   version-control:
     url: {{ version_control.localvc.url }}
+{% if artemis_computed_is_core_node %}
     local-vcs-repo-path: {{ version_control.localvc.repo_storage_base_path }}
-    default-branch: {{ artemis_version_control_default_branch_name }}
-{% if version_control.localvc.use_version_control_access_token is defined %}
-    use-version-control-access-token: {{ version_control.localvc.use_version_control_access_token | lower }}
 {% endif %}
+    default-branch: {{ artemis_version_control_default_branch_name }}
 {% if version_control.localvc.build_agent_git_credentials is defined %}
     build-agent-git-username: {{ version_control.localvc.build_agent_git_credentials.user }}
     build-agent-git-password: {{ version_control.localvc.build_agent_git_credentials.password }}
@@ -277,20 +275,22 @@ artemis:
     ssh-private-key-folder-path: {{ artemis_ssh_key_path }}
 {% endif %}
 {% endif %}
-{% if version_control.localvc.ssh_key_path is defined and version_control.localvc.ssh_key_path|length > 0 %}
+{% if artemis_computed_is_core_node and version_control.localvc.ssh_key_path is defined and version_control.localvc.ssh_key_path|length > 0 %}
     ssh-host-key-path: {{ version_control.localvc.ssh_key_path }}
 {% endif %}
-{% if version_control.localvc.ssh_url is defined %}
+{% if artemis_computed_is_build_agent | bool and version_control.localvc.ssh_url is defined %}
     ssh-template-clone-url: {{ version_control.localvc.ssh_url }}
 {% endif %}
-{% if version_control.localvc.ssh_proxy_protocol_trusted_sources | default([], true) | length > 0 %}
+{% if artemis_computed_is_core_node and version_control.localvc.ssh_proxy_protocol_trusted_sources | default([], true) | length > 0 %}
     ssh-proxy-protocol:
       trusted-sources:
 {% for trusted_source in version_control.localvc.ssh_proxy_protocol_trusted_sources %}
         - "{{ trusted_source }}"
 {% endfor %}
 {% endif %}
+{% if artemis_computed_is_core_node %}
     repository-authentication-mechanisms: {{ version_control.localvc.repository_authentication_mechanisms | default("token,ssh,password") }}
+{% endif %}
 {% endif %}
 
 {% if continuous_integration.jenkins is defined %}
@@ -298,8 +298,6 @@ artemis:
     url: {{ continuous_integration.jenkins.url }}
     user: {{ continuous_integration.jenkins.user }}
     password: {{ continuous_integration.jenkins.password }}
-    empty-commit-necessary: false
-    secret-push-token: {{ continuous_integration.jenkins.secret_push_token }}
     vcs-credentials: {{ continuous_integration.jenkins.vcs_credentials }}
     artemis-authentication-token-key: {{ continuous_integration.jenkins.artemis_auth_token_key }}
     artemis-authentication-token-value: {{ continuous_integration.jenkins.artemis_auth_token_value }}
@@ -316,33 +314,29 @@ artemis:
 {% endif %}
 
 {% if continuous_integration.localci is defined %}
+{% set localci_network = continuous_integration.localci.build_agent_network | default(none) %}
+{% if artemis_computed_is_build_agent | bool or localci_network is not none or continuous_integration.localci.proxy is defined or continuous_integration.localci.image_cleanup is defined %}
   continuous-integration:
-    artemis-authentication-token-value: "demo"
-{% if continuous_integration.localci.build_agent_network is defined and continuous_integration.localci.build_agent_network is not none %}
+{% if localci_network is not none %}
     build-agent-network:
-{% if continuous_integration.localci.build_agent_network.allowed_ranges is defined and continuous_integration.localci.build_agent_network.allowed_ranges | length > 0 %}
+{% if localci_network.allowed_ranges | default([], true) | length > 0 %}
       allowed-ranges:
-{% for allowed_range in continuous_integration.localci.build_agent_network.allowed_ranges %}
+{% for allowed_range in localci_network.allowed_ranges %}
         - "{{ allowed_range }}"
 {% endfor %}
 {% endif %}
-{% if continuous_integration.localci.build_agent_network.trusted_proxies is defined and continuous_integration.localci.build_agent_network.trusted_proxies | length > 0 %}
+{% if localci_network.trusted_proxies | default([], true) | length > 0 %}
       trusted-proxies:
-{% for trusted_proxy in continuous_integration.localci.build_agent_network.trusted_proxies %}
+{% for trusted_proxy in localci_network.trusted_proxies %}
         - "{{ trusted_proxy }}"
 {% endfor %}
 {% endif %}
 {% endif %}
+{% if artemis_computed_is_build_agent %}
     specify-concurrent-builds: {{ (continuous_integration.localci.concurrent_build_size is defined) | lower }}
-{% if valkey is defined and valkey is not none %}
-    data-store: "Redis"
-{% endif %}
 {% if continuous_integration.localci.concurrent_build_size is defined %}
     concurrent-build-size: {{ continuous_integration.localci.concurrent_build_size }}
 {% endif %}
-    specify-thread-pool-size: {{ (continuous_integration.localci.thread_pool_size is defined) | lower }}
-{% if continuous_integration.localci.thread_pool_size is defined %}
-    thread-pool-size: {{ continuous_integration.localci.thread_pool_size }}
 {% endif %}
 {% if continuous_integration.localci.proxy is defined %}
     proxies:
@@ -358,14 +352,19 @@ artemis:
       expiry-days: {{ continuous_integration.localci.image_cleanup.expiry_days }}
       cleanup-schedule-time: {{ continuous_integration.localci.image_cleanup.schedule_time }}
 {% endif %}
+{% if artemis_computed_is_build_agent %}
     build-agent:
         short-name: {{ node_short_name }}
         display-name: {{ node_display_name }}
 {% endif %}
+{% endif %}
+{% endif %}
 
+{% if artemis_computed_is_core_node %}
   git:
     name: artemis
     email: {{ artemis_email }}
+{% endif %}
 
 {% if artemis_computed_is_core_node %}
 
@@ -419,13 +418,6 @@ artemis:
     enabled: true
     url: {{ iris.url }}
     secret-token: {{ iris.secret }}
-{% endif %}
-
-{% if nebula is defined and nebula is not none %}
-  nebula:
-    enabled: true
-    url: {{ nebula.url }}
-    secret-token: {{ nebula.secret }}
 {% endif %}
 
 {% if weaviate is defined and weaviate is not none %}
@@ -519,9 +511,10 @@ artemis:
 {% endif %}
 {% endif %}
 
+{% if artemis_computed_is_core_node or (artemis_computed_uses_hazelcast | bool and artemis_jhipster_registry_password is not none) or (artemis_CORS_allowed_origins is defined and artemis_CORS_allowed_origins is not none) %}
 jhipster:
 
-{% if artemis_jhipster_jwt is not none %}
+{% if artemis_computed_is_core_node and artemis_jhipster_jwt is not none %}
   security:
     authentication:
       jwt:
@@ -535,24 +528,23 @@ jhipster:
     allowed-origins: {{ artemis_CORS_allowed_origins }}
 {% endif %}
 
-{% if is_multinode_install|bool == true and artemis_jhipster_registry_password is not none %}
+{% if artemis_computed_uses_hazelcast | bool and artemis_jhipster_registry_password is not none %}
   registry:
     password: {{ artemis_jhipster_registry_password }}
 {% endif %}
 
+{% if artemis_computed_is_core_node %}
   mail:
     base-url: {{ artemis_server_url }}
     from: '{{artemis_notification_from}} <{{ artemis_notification_email | default([artemis_email.split("@")[0], "+notification@", artemis_email.split("@")[1]]|join()) }}>'
+{% endif %}
+{% endif %}
 
 {% if sentry.dsn | default('') | length %}
 sentry:
   dsn: {{ sentry.dsn | quote }}
   send-default-pii: {{ sentry.send_default_pii | default(false)}}
   traces-sample-rate: {{ sentry.traces_sample_rate | default(0.0) }}
-  logging:
-    enabled: true
-    minimum-breadcrumb-level: error
-    minimum-event-level: error
 {% if sentry.environment is defined and sentry.environment|length %}
   environment: {{ sentry.environment }}
 {% elif is_testserver is defined and is_testserver is sameas true %}
@@ -585,12 +577,6 @@ info:
   oidc:
     buttonLabel: {{ artemis_oidc.button_label | default('TUM Login') | quote }}
 {% endif %}
-  sentry:
-{% if sentry.dsn | default('') | length %}
-    dsn: {{ sentry.dsn | quote }}
-{% else %}
-    dsn:
-{% endif %}
 
 {% if helios is defined %}
 helios:
@@ -605,26 +591,28 @@ helios:
 {% endif %}
 {% endif %}
 
-{% if is_multinode_install and artemis_eureka_urls is defined and hazelcast_address is defined and hazelcast_address is not none and hazelcast_address != "" %}
-# Eureka configuration
+{% set uses_eureka_discovery = artemis_computed_uses_hazelcast | bool and artemis_eureka_urls is defined and hazelcast_address is defined and hazelcast_address is not none and hazelcast_address != "" %}
+{% if uses_eureka_discovery or (is_multinode_install and artemis_computed_is_core_node and artemis_eureka_instance_id is defined and artemis_eureka_instance_id != "") %}
+# Eureka exists here for one purpose: finding Hazelcast members. A Redis deployment discovers nothing through it
+# and Artemis turns the client off at startup anyway (RedisDiscoveryEnvironmentPostProcessor), so a Redis core node
+# keeps only instanceId - NodeRegistryService and PyrisJobService read it as the node's identity - and a Redis
+# build agent, which runs neither, gets no block at all.
 eureka:
+{% if uses_eureka_discovery %}
   client:
     enabled: true
     service-url:
       defaultZone: {{ artemis_eureka_urls }}
+{% endif %}
   instance:
+{% if uses_eureka_discovery %}
     prefer-ip-address: true
     ip-address: "{{ hazelcast_address }}"
     appname: Artemis
+{% endif %}
     instanceId: Artemis:{{ artemis_eureka_instance_id }}
 {% endif %}
 
 logging:
   file:
     name: '{{ artemis_working_directory }}/artemis.log'
-
-management:
-  prometheus:
-    metrics:
-      export:
-        enabled: true
