@@ -1,6 +1,6 @@
 # DB Backup
 
-This role adds a cron job to the db host which creates regular DB backups.
+This role adds a cron job to the db host which creates regular PostgreSQL DB backups using `pg_dump`, run as the `postgres` OS user via `sudo`.
 
 ## Configuration
 
