@@ -1,0 +1,35 @@
+---
+- name: Validate the isolated worker configuration
+  ansible.builtin.assert:
+    that:
+      - hyperion_worker_dedicated_host | bool
+      - hyperion_worker_id is match('^[a-zA-Z0-9_-]{1,64}$')
+      - hyperion_worker_image is match('^\S+@sha256:[a-f0-9]{64}$')
+      - hyperion_worker_sandbox_image is match('^\S+@sha256:[a-f0-9]{64}$')
+      - hyperion_worker_toolchain is match('^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$')
+      - hyperion_worker_toolchain | length <= 64
+      - hyperion_worker_slots is integer
+      - hyperion_worker_slots | int >= 1
+      - hyperion_worker_slots | int <= 16
+      - hyperion_worker_sandbox_memory_bytes | int > 0
+      - hyperion_worker_sandbox_cpu_quota | int > 0
+      - hyperion_worker_sandbox_pids | int > 0
+      - hyperion_worker_cpus | float > 0
+      - hyperion_worker_runtime | length > 0
+      - hyperion_worker_directory is match('^/[a-zA-Z0-9/_-]+$')
+      - hyperion_worker_broker_url is match('^tcp://')
+      - hyperion_worker_broker_url is search('[?&;]sslEnabled=true(?:[&;]|$)')
+      - "'trustAll=true' not in hyperion_worker_broker_url"
+      - "'verifyHost=false' not in hyperion_worker_broker_url"
+      - hyperion_worker_model_base_url is match('^https://')
+      - hyperion_worker_model | length > 0
+    fail_msg: Configure an isolated worker host, digest-pinned images, verified TLS broker and HTTPS model provider.
+
+- name: Validate worker secrets without logging their values
+  ansible.builtin.assert:
+    that:
+      - hyperion_worker_broker_user | length > 0
+      - hyperion_worker_broker_password | length > 0
+      - hyperion_worker_model_api_key | length > 0
+    fail_msg: Supply separate worker broker and model credentials through Ansible Vault.
+  no_log: true

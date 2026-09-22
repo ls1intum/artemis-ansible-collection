@@ -19,3 +19,15 @@ jobs:
         uses: ansible/ansible-lint@v26.8.0
         with:
           requirements_file: "requirements.yml"
+
+  hyperion-configuration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install configuration-test dependencies
+        run: pip install ansible-core==2.19.13 PyYAML==6.0.3
+      - name: Validate Hyperion role configuration
+        run: python -m unittest discover -s tests -p 'test_hyperion_worker.py' -v

@@ -424,6 +424,10 @@ artemis_local_llm_deployment_enabled: false
 #    temperature: 1.0
 
 artemis_hyperion_enabled: false
+artemis_hyperion_exercise_generation_enabled: false
+# Separate TLS CORE broker, not the browser STOMP broker. Set only on eligible core nodes.
+# broker_url, user, password and ids are required when generation is enabled.
+artemis_hyperion_workers: {}
 
 # LLM model costs for usage tracking, EUR per million tokens (OpenAI list price USD x 0.92).
 # Override or add entries in your inventory as needed.

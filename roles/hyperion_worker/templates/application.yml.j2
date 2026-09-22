@@ -1,0 +1,36 @@
+# {{ ansible_managed }}
+spring:
+  main:
+    web-application-type: none
+  artemis:
+    mode: native
+    broker-url: {{ hyperion_worker_broker_url | to_json }}
+    user: {{ hyperion_worker_broker_user | to_json }}
+    password: {{ hyperion_worker_broker_password | to_json }}
+  ai:
+    model:
+      chat: openai
+    openai:
+      api-key: {{ hyperion_worker_model_api_key | to_json }}
+      base-url: {{ hyperion_worker_model_base_url | to_json }}
+      microsoft-foundry: {{ hyperion_worker_microsoft_foundry | bool | lower }}
+      max-retries: 0
+      timeout: {{ hyperion_worker_model_timeout | to_json }}
+      chat:
+        options:
+          model: {{ hyperion_worker_model | to_json }}
+artemis:
+  hyperion:
+    worker:
+      id: {{ hyperion_worker_id | to_json }}
+      image: {{ hyperion_worker_sandbox_image | to_json }}
+      toolchain: {{ hyperion_worker_toolchain | to_json }}
+      runtime: {{ hyperion_worker_runtime | to_json }}
+      max-concurrent-generations: {{ hyperion_worker_slots | int }}
+      memory-bytes: {{ hyperion_worker_sandbox_memory_bytes | int }}
+      cpu-quota: {{ hyperion_worker_sandbox_cpu_quota | int }}
+      pids: {{ hyperion_worker_sandbox_pids | int }}
+      shutdown-timeout: PT2M
+  telemetry:
+    gen-ai:
+      capture-content: false

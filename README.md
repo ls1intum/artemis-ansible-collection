@@ -49,6 +49,13 @@ Each role includes a readme and default configuration. Consult these for more in
 Our Ansible configuration for the TUM Artemis Production, Staging and Test environments are public at [github.com/ls1intum/artemis-ansible](https://github.com/ls1intum/artemis-ansible).
 Use them as examples for how to use this collection and as a reference for deploying Artemis.
 
+## Isolated Hyperion workers
+
+The optional [`hyperion_worker` role](roles/hyperion_worker/README.md) deploys the
+standalone authoring supervisor on a dedicated generation host or VM. It is not
+an Artemis core profile or a LocalCI build agent. Generation remains disabled in
+the core role unless explicitly enabled; existing inventories are unaffected.
+
 # Deployment Strategies
 
 Artemis can be deployed in different ways. Depending on the use case the ansible configuration differs.
