@@ -137,8 +137,9 @@ and coordinate rollback of both sides. The role does not wipe application data.
 
 ## Verification
 
-Check **Administration → AI Workers** for the exact worker identity, workload/profile,
-last contact and slot count. Use **Hyperion Generations** for authoring runs and cancellation.
+Check **Administration → AI Generation** for worker state, free/total slots, last contact
+and running jobs, including authoring review and cancellation. The final application uses
+a single page with authenticated live updates rather than browser polling.
 Ansible container startup is not application readiness.
 Run one controlled unreleased Java/Gradle exercise through generation, verify
 solution/starter grading and saved artifacts, cancel another run, and test undo.
@@ -179,3 +180,19 @@ Upgrade core, worker and broker ACLs together after draining: protocol 4 uses
 and generic workload/schema/profile capabilities. Older Hyperion-only workers
 are incompatible. Reconcile old containers before changing ownership labels;
 never flush an active coordination store to accomplish the migration.
+
+### Choose the workload distribution
+
+For `hyperion-generation`, pin an image built from Artemis's
+`docker/hyperion/worker.Dockerfile` after `./gradlew :hyperion:worker:bootJar -x webapp`.
+The generic `docker/aiworker/worker.Dockerfile` packages only the supervisor and does
+not contain Hyperion, a model provider or Java teaching templates. Selecting a
+workload name cannot install the missing adapter. Other workloads must provide their
+own distribution, composing the same supervisor and neutral execution API.
+
+Both distributions use protocol 4 and the existing `artemis.aiworker` configuration.
+The final Hyperion integration adds no database schema changes. Activity and automatic
+undo references expire in distributed storage; saved exercise versions use existing
+storage. A complete loss of coordination state requires stopping writers and manual
+reconciliation, not an automatic SQL recovery. Retain the documented Redis durability
+settings and do not flush the store while writers are running.
