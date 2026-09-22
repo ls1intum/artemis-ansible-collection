@@ -23,8 +23,8 @@
       - ai_worker_directory is match('^/[a-zA-Z0-9/_-]+$')
       - ai_worker_broker_url is match('^tcp://')
       - ai_worker_broker_url is search('[?&;]sslEnabled=true(?:[&;]|$)')
-      - "'trustAll=true' not in ai_worker_broker_url"
-      - "'verifyHost=false' not in ai_worker_broker_url"
+      - "'trustall=true' not in (ai_worker_broker_url | lower)"
+      - "'verifyhost=false' not in (ai_worker_broker_url | lower)"
       - ai_worker_workload != "hyperion-generation" or ai_worker_model_base_url is match('^https://')
       - ai_worker_workload != "hyperion-generation" or ai_worker_model | length > 0
     fail_msg: Configure an isolated worker host, digest-pinned images, verified TLS broker and HTTPS model provider.

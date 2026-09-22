@@ -89,6 +89,8 @@ class AiWorkerTest(unittest.TestCase):
             {'ai_worker_broker_url': 'tcp://broker.example:61616'},
             {'ai_worker_broker_url': 'tcp://broker.example:61617?sslEnabled=true&trustAll=true'},
             {'ai_worker_broker_url': 'tcp://broker.example:61617?sslEnabled=true&verifyHost=false'},
+            {'ai_worker_broker_url': 'tcp://broker.example:61617?sslEnabled=true&trustAll=TrUe'},
+            {'ai_worker_broker_url': 'tcp://broker.example:61617?sslEnabled=true&verifyHost=FaLsE'},
             {'ai_worker_model_base_url': 'http://model.example'},
             {'ai_worker_model_api_key': ''},
         ]:
@@ -121,6 +123,9 @@ class AiWorkerTest(unittest.TestCase):
                  ({'artemis_aiworker': dict(valid['artemis_aiworker'], ids=['worker', 'worker'])}, False),
                  ({'artemis_aiworker_enabled': False, 'artemis_hyperion_exercise_generation_enabled': False,
                    'artemis_aiworker': {}, 'valkey': {'host': 'valkey.example'}}, True)]
+        for option in ['trustAll=TRUE', 'verifyHost=FALSE', 'trustAll=TrUe', 'verifyHost=FaLsE']:
+            cases.append(({'artemis_aiworker': dict(valid['artemis_aiworker'],
+                          broker_url='tcp://broker.example:61617?sslEnabled=true&' + option)}, False))
         for overrides, expected in cases:
             with self.subTest(overrides=list(overrides)), tempfile.TemporaryDirectory() as tmp:
                 play = [{'name': 'Validate core authoring opt-in', 'hosts': 'localhost', 'gather_facts': False,
@@ -155,6 +160,24 @@ class AiWorkerTest(unittest.TestCase):
             for setting in ['appendonly yes', 'appendfsync always', 'no-appendfsync-on-rewrite no',
                             'maxmemory-policy noeviction']:
                 self.assertIn(setting, config)
+
+    def test_string_false_omits_worker_configuration(self):
+        values = yaml.safe_load((ROOT / 'roles/artemis/defaults/main.yml').read_text())
+        values.update({'artemis_aiworker_enabled': 'false', 'artemis_aiworker': {},
+                       'artemis_computed_is_core_node': True})
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp) / 'application.yml'
+            play = [{'name': 'Render production configuration with string false', 'hosts': 'localhost',
+                     'gather_facts': False, 'vars': values, 'tasks': [{
+                         'name': 'Render actual application template', 'ansible.builtin.template': {
+                             'src': str(ROOT / 'roles/artemis/templates/application-prod.yml.j2'),
+                             'dest': str(output), 'mode': '0600'}}]}]
+            path = Path(tmp) / 'render.yml'
+            path.write_text(yaml.safe_dump(play))
+            result = subprocess.run(['ansible-playbook', '-i', 'localhost,', '-c', 'local', str(path)],
+                                    capture_output=True, text=True, timeout=60)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertNotIn('aiworker', yaml.safe_load(output.read_text())['artemis'])
 
     def test_container_has_no_network_listener_or_privileged_mode(self):
         tasks = yaml.safe_load((ROOT / 'roles/ai_worker/tasks/main.yml').read_text())

@@ -465,7 +465,7 @@ artemis:
       enable: {{ enable_science_event_logging | lower }}
 {% endif %}
 
-{% if artemis_aiworker_enabled %}
+{% if artemis_aiworker_enabled | bool %}
   aiworker:
     enabled: true
     broker-url: {{ artemis_aiworker.broker_url | to_json }}

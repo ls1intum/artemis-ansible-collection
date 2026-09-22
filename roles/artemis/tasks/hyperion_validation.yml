@@ -34,8 +34,8 @@
       - artemis_computed_is_core_node | bool
       - artemis_aiworker.broker_url | default('') is match('^tcp://')
       - artemis_aiworker.broker_url | default('') is search('[?&;]sslEnabled=true(?:[&;]|$)')
-      - "'trustAll=true' not in artemis_aiworker.broker_url | default('')"
-      - "'verifyHost=false' not in artemis_aiworker.broker_url | default('')"
+      - "'trustall=true' not in (artemis_aiworker.broker_url | default('') | lower)"
+      - "'verifyhost=false' not in (artemis_aiworker.broker_url | default('') | lower)"
       - artemis_aiworker.user | default('') | length > 0
       - artemis_aiworker.password | default('') | length > 0
       - artemis_aiworker.ids | default([]) is sequence
