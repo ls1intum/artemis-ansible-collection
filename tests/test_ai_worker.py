@@ -11,28 +11,30 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 
 
-class HyperionWorkerTest(unittest.TestCase):
+class AiWorkerTest(unittest.TestCase):
     def run_role(self, overrides=None, render=False):
         values = {
-            'hyperion_worker_dedicated_host': True,
-            'hyperion_worker_id': 'staging-worker-1',
-            'hyperion_worker_image': 'registry.example/worker@sha256:' + 'a' * 64,
-            'hyperion_worker_sandbox_image': 'registry.example/sandbox@sha256:' + 'b' * 64,
-            'hyperion_worker_broker_url': 'tcp://broker.example:61617?sslEnabled=true&verifyHost=true',
-            'hyperion_worker_broker_user': 'worker-user',
-            'hyperion_worker_broker_password': 'unit-test-placeholder',
-            'hyperion_worker_model_base_url': 'https://model.example',
-            'hyperion_worker_model': 'qualified-model',
-            'hyperion_worker_model_api_key': 'unit-test-placeholder',
+            'ai_worker_dedicated_host': True,
+            'ai_worker_workload': 'hyperion-generation',
+            'ai_worker_profile': 'java-gradle',
+            'ai_worker_id': 'staging-worker-1',
+            'ai_worker_image': 'registry.example/worker@sha256:' + 'a' * 64,
+            'ai_worker_sandbox_image': 'registry.example/sandbox@sha256:' + 'b' * 64,
+            'ai_worker_broker_url': 'tcp://broker.example:61617?sslEnabled=true&verifyHost=true',
+            'ai_worker_broker_user': 'worker-user',
+            'ai_worker_broker_password': 'unit-test-placeholder',
+            'ai_worker_model_base_url': 'https://model.example',
+            'ai_worker_model': 'qualified-model',
+            'ai_worker_model_api_key': 'unit-test-placeholder',
         }
         values.update(overrides or {})
         with tempfile.TemporaryDirectory() as tmp:
             output = Path(tmp) / 'application.yml'
             tasks = [{'name': 'Validate the real role', 'ansible.builtin.include_role': {
-                'name': 'hyperion_worker', 'tasks_from': 'validate', 'public': True}}]
+                'name': 'ai_worker', 'tasks_from': 'validate', 'public': True}}]
             if render:
                 tasks.append({'name': 'Render worker configuration', 'ansible.builtin.template': {
-                    'src': str(ROOT / 'roles/hyperion_worker/templates/application.yml.j2'),
+                    'src': str(ROOT / 'roles/ai_worker/templates/application.yml.j2'),
                     'dest': str(output), 'mode': '0600'}, 'no_log': True})
             play = [{'name': 'Verify worker configuration locally', 'hosts': 'localhost',
                      'gather_facts': False, 'vars': values, 'tasks': tasks}]
@@ -46,30 +48,49 @@ class HyperionWorkerTest(unittest.TestCase):
 
     def test_valid_configuration_and_quoted_secrets(self):
         secret = 'test-only: "quoted"\\path\nsecond-line'
-        result, config = self.run_role({'hyperion_worker_model_api_key': secret, 'hyperion_worker_slots': 4}, render=True)
+        result, config = self.run_role({'ai_worker_model_api_key': secret, 'ai_worker_slots': 4}, render=True)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual(config['spring']['ai']['openai']['api-key'], secret)
         self.assertEqual(config['spring']['ai']['openai']['chat']['options']['model'], 'qualified-model')
         self.assertEqual(config['spring']['ai']['openai']['max-retries'], 0)
-        self.assertEqual(config['artemis']['hyperion']['worker']['max-concurrent-generations'], 4)
+        self.assertEqual(config['artemis']['aiworker']['max-concurrent-executions'], 4)
         self.assertFalse(config['artemis']['telemetry']['gen-ai']['capture-content'])
         self.assertNotIn('datasource', config['spring'])
 
+    def test_other_workload_does_not_require_model_credentials(self):
+        result, config = self.run_role({'ai_worker_workload': 'document-check', 'ai_worker_profile': 'text',
+                                        'ai_worker_model_api_key': '', 'ai_worker_model': '', 'ai_worker_model_base_url': ''}, render=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(config['spring']['ai']['model']['chat'], 'none')
+        self.assertEqual(config['artemis']['aiworker']['workload'], 'document-check')
+
+    def test_colocated_installation_requires_an_explicit_separate_daemon(self):
+        result, _ = self.run_role({'ai_worker_dedicated_host': False, 'ai_worker_isolated_daemon': True})
+        self.assertNotEqual(result.returncode, 0)
+        result, _ = self.run_role({'ai_worker_dedicated_host': False, 'ai_worker_isolated_daemon': True,
+                                   'ai_worker_docker_socket': '/run/isolated-worker/docker.sock'})
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        tasks = yaml.safe_load((ROOT / 'roles/ai_worker/tasks/main.yml').read_text())
+        for task in tasks:
+            for module, arguments in task.items():
+                if module.startswith('community.docker.'):
+                    self.assertEqual(arguments['docker_host'], 'unix://{{ ai_worker_docker_socket }}')
+
     def test_rejects_unsafe_configuration(self):
         for override in [
-            {'hyperion_worker_dedicated_host': False},
-            {'hyperion_worker_image': 'registry.example/worker:latest'},
-            {'hyperion_worker_sandbox_image': 'registry.example/sandbox:latest'},
-            {'hyperion_worker_id': '../worker'},
-            {'hyperion_worker_toolchain': '../toolchain'},
-            {'hyperion_worker_slots': 0},
-            {'hyperion_worker_slots': 17},
-            {'hyperion_worker_slots': 1.5},
-            {'hyperion_worker_broker_url': 'tcp://broker.example:61616'},
-            {'hyperion_worker_broker_url': 'tcp://broker.example:61617?sslEnabled=true&trustAll=true'},
-            {'hyperion_worker_broker_url': 'tcp://broker.example:61617?sslEnabled=true&verifyHost=false'},
-            {'hyperion_worker_model_base_url': 'http://model.example'},
-            {'hyperion_worker_model_api_key': ''},
+            {'ai_worker_dedicated_host': False},
+            {'ai_worker_image': 'registry.example/worker:latest'},
+            {'ai_worker_sandbox_image': 'registry.example/sandbox:latest'},
+            {'ai_worker_id': '../worker'},
+            {'ai_worker_profile': '../toolchain'},
+            {'ai_worker_slots': 0},
+            {'ai_worker_slots': 17},
+            {'ai_worker_slots': 1.5},
+            {'ai_worker_broker_url': 'tcp://broker.example:61616'},
+            {'ai_worker_broker_url': 'tcp://broker.example:61617?sslEnabled=true&trustAll=true'},
+            {'ai_worker_broker_url': 'tcp://broker.example:61617?sslEnabled=true&verifyHost=false'},
+            {'ai_worker_model_base_url': 'http://model.example'},
+            {'ai_worker_model_api_key': ''},
         ]:
             with self.subTest(override=list(override)):
                 result, _ = self.run_role(override)
@@ -77,12 +98,13 @@ class HyperionWorkerTest(unittest.TestCase):
 
     def test_core_admission_configuration_fails_closed(self):
         valid = {
+            'artemis_aiworker_enabled': True,
             'artemis_hyperion_enabled': True,
             'artemis_hyperion_exercise_generation_enabled': True,
             'artemis_computed_is_core_node': True,
             'version_control': {'localvc': {}},
             'continuous_integration': {'localci': {}},
-            'artemis_hyperion_workers': {
+            'artemis_aiworker': {
                 'broker_url': 'tcp://broker.example:61617?sslEnabled=true&verifyHost=true',
                 'user': 'core-only', 'password': 'unit-test-only', 'ids': ['worker-1']},
         }
@@ -94,11 +116,11 @@ class HyperionWorkerTest(unittest.TestCase):
                  ({'valkey': {'host': 'valkey.example'}, 'valkey_appendonly': False, 'valkey_appendfsync': 'always'}, False),
                  ({'valkey': {'host': 'valkey.example'}, 'valkey_appendonly': True, 'valkey_appendfsync': 'always',
                    'valkey_maxmemory_policy': 'allkeys-lru'}, False),
-                 ({'artemis_hyperion_workers': {}}, False),
-                 ({'artemis_hyperion_workers': dict(valid['artemis_hyperion_workers'], ids='abc')}, False),
-                 ({'artemis_hyperion_workers': dict(valid['artemis_hyperion_workers'], ids=['worker', 'worker'])}, False),
-                 ({'artemis_hyperion_exercise_generation_enabled': False,
-                   'artemis_hyperion_workers': {}, 'valkey': {'host': 'valkey.example'}}, True)]
+                 ({'artemis_aiworker': {}}, False),
+                 ({'artemis_aiworker': dict(valid['artemis_aiworker'], ids='abc')}, False),
+                 ({'artemis_aiworker': dict(valid['artemis_aiworker'], ids=['worker', 'worker'])}, False),
+                 ({'artemis_aiworker_enabled': False, 'artemis_hyperion_exercise_generation_enabled': False,
+                   'artemis_aiworker': {}, 'valkey': {'host': 'valkey.example'}}, True)]
         for overrides, expected in cases:
             with self.subTest(overrides=list(overrides)), tempfile.TemporaryDirectory() as tmp:
                 play = [{'name': 'Validate core authoring opt-in', 'hosts': 'localhost', 'gather_facts': False,
@@ -135,7 +157,7 @@ class HyperionWorkerTest(unittest.TestCase):
                 self.assertIn(setting, config)
 
     def test_container_has_no_network_listener_or_privileged_mode(self):
-        tasks = yaml.safe_load((ROOT / 'roles/hyperion_worker/tasks/main.yml').read_text())
+        tasks = yaml.safe_load((ROOT / 'roles/ai_worker/tasks/main.yml').read_text())
         container = next(task['community.docker.docker_container'] for task in tasks if 'community.docker.docker_container' in task)
         self.assertNotIn('published_ports', container)
         self.assertNotIn('privileged', container)

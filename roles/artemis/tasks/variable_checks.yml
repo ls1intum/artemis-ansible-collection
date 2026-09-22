@@ -120,5 +120,5 @@
       or valkey.username is not defined or valkey.username is none
       or valkey.password is not defined or valkey.password is none
 
-- name: Validate the Hyperion worker connection
+- name: Validate the AI worker connection
   ansible.builtin.import_tasks: hyperion_validation.yml

@@ -1,8 +1,7 @@
-# Isolated Hyperion generation worker
+# AI Worker
 
-Deploy the standalone Hyperion supervisor, not an Artemis server or LocalCI build
-agent. This role requires a compatible Artemis core/worker release using explicit
-toolchain identity (protocol 3). The shipped adapter supports Java/Gradle only.
+Deploy the standalone AI Worker supervisor, not an Artemis server or LocalCI build
+agent. This role requires a compatible Artemis core/worker release using the neutral execution envelope (protocol 4). The shipped adapter supports Java/Gradle only.
 The core role leaves whole-exercise generation disabled by default.
 
 ## Infrastructure prerequisites
@@ -16,12 +15,12 @@ share that machine's Docker socket with core. The role's `dedicated_host` assert
 records the operator's decision; it cannot attest VM or network isolation.
 
 This role does not provision the broker, certificates, firewall, Docker runtime
-or VM. Use the matching Artemis release's `docker/hyperion/broker.xml` as the
+or VM. Use the matching Artemis release's `docker/aiworker/broker.xml` as the
 broker authorization contract: private TLS CORE listener (61617), pre-created
 per-worker command/event queues, separate core and per-worker accounts, and no
 worker permissions to create/delete queues or manage the broker. The collection's
 ordinary `broker` role is a browser messaging service with different permissions;
-it is **not** an isolated Hyperion broker. Do not reuse its shared credentials.
+it is **not** an isolated AI Worker broker. Do not reuse its shared credentials.
 
 Use a certificate trusted by the worker JVM and core JVM. For a private CA,
 provision that CA in the pinned application images' JVM truststores before
@@ -43,26 +42,28 @@ Docker first, then use a separate host group, for example `hyperion_staging`:
 
 ```yaml
 # host_vars/generation.staging.example.yml
-hyperion_worker_dedicated_host: true
-hyperion_worker_id: staging-worker-1
+ai_worker_dedicated_host: true
+ai_worker_id: staging-worker-1
 # Replace these with qualified registry references containing 64 hex digest digits.
-hyperion_worker_image: "registry.example/hyperion-worker@sha256:<digest>"
-hyperion_worker_sandbox_image: "registry.example/hyperion-java-gradle@sha256:<digest>"
-hyperion_worker_toolchain: java-gradle
-hyperion_worker_slots: 1
-hyperion_worker_broker_url: "tcp://generation-broker.staging.example:61617?sslEnabled=true&verifyHost=true&callTimeout=5000&callFailoverTimeout=5000"
-hyperion_worker_broker_user: staging-worker-1
-hyperion_worker_broker_password: "{{ vault_hyperion_worker_broker_password }}"
-hyperion_worker_model_base_url: "https://approved-provider.example/v1"
-hyperion_worker_model: qualified-model
-hyperion_worker_model_api_key: "{{ vault_hyperion_worker_model_api_key }}"
+ai_worker_image: "registry.example/ai-worker@sha256:<digest>"
+ai_worker_sandbox_image: "registry.example/hyperion-java-gradle@sha256:<digest>"
+ai_worker_workload: hyperion-generation
+ai_worker_workload_version: 1
+ai_worker_profile: java-gradle
+ai_worker_slots: 1
+ai_worker_broker_url: "tcp://generation-broker.staging.example:61617?sslEnabled=true&verifyHost=true&callTimeout=5000&callFailoverTimeout=5000"
+ai_worker_broker_user: staging-worker-1
+ai_worker_broker_password: "{{ vault_ai_worker_broker_password }}"
+ai_worker_model_base_url: "https://approved-provider.example/v1"
+ai_worker_model: qualified-model
+ai_worker_model_api_key: "{{ vault_ai_worker_model_api_key }}"
 ```
 
 ```yaml
 - name: Deploy isolated staging authoring workers
   hosts: hyperion_staging
   roles:
-    - ls1intum.artemis.hyperion_worker
+    - ls1intum.artemis.ai_worker
 ```
 
 The provider must implement the OpenAI-compatible chat API. Use its documented
@@ -76,9 +77,10 @@ data provider (Hazelcast or Redis/Valkey with the provider-neutral coordination
 implementation; older Artemis revisions that reject Redis are not compatible):
 
 ```yaml
+artemis_aiworker_enabled: true
 artemis_hyperion_enabled: true
 artemis_hyperion_exercise_generation_enabled: true
-artemis_hyperion_workers:
+artemis_aiworker:
   broker_url: "tcp://generation-broker.staging.example:61617?sslEnabled=true&verifyHost=true&callTimeout=5000&callFailoverTimeout=5000"
   user: staging-hyperion-core
   password: "{{ vault_hyperion_core_broker_password }}"
@@ -121,7 +123,7 @@ sandbox image; no job can request an image pull. `runtime` defaults to `runc`;
 install and qualify an alternative such as `runsc` before selecting it.
 
 The role refuses to touch an already-running supervisor unless
-`hyperion_worker_maintenance_confirmed: true` is explicitly supplied. This is
+`ai_worker_maintenance_confirmed: true` is explicitly supplied. This is
 conservative: even a normal rerun requires the maintenance check. Before setting
 it, prevent new authoring requests and verify all runs, including saving phases,
 have finished. The flag does not drain automatically. The worker has a two-minute
@@ -135,8 +137,9 @@ and coordinate rollback of both sides. The role does not wipe application data.
 
 ## Verification
 
-Check **Administration → AI generations** for the exact worker identity, toolchain,
-heartbeat and slot count. Ansible container startup is not application readiness.
+Check **Administration → AI Workers** for the exact worker identity, workload/profile,
+last contact and slot count. Use **Hyperion Generations** for authoring runs and cancellation.
+Ansible container startup is not application readiness.
 Run one controlled unreleased Java/Gradle exercise through generation, verify
 solution/starter grading and saved artifacts, cancel another run, and test undo.
 In staging, test worker interruption, reconnect and guarded recovery before
@@ -145,9 +148,34 @@ production rollout. Confirm ordinary LocalCI builds remain independent.
 Local role checks require no infrastructure credentials or model calls:
 
 ```sh
-python -m unittest discover -s tests -p 'test_hyperion_worker.py' -v
-ansible-lint roles/hyperion_worker
+python -m unittest discover -s tests -p 'test_ai_worker.py' -v
+ansible-lint roles/ai_worker
 ```
 
 These tests validate configuration, secret quoting and container restrictions;
 they do not certify TLS connectivity, host isolation or live generation.
+
+## Other workloads and small test installations
+
+The role requires explicit `ai_worker_workload` and `ai_worker_profile` values. It
+never installs an implementation from a job. Only capabilities built into the
+pinned worker image are usable. Model credentials are required for
+`hyperion-generation`; another workload can run with model chat disabled.
+
+A test installation may use a dedicated VM on the same physical host, applying
+this role normally with `ai_worker_dedicated_host: true`. No separate physical
+machine is required. Do not share the core or build agent's Docker daemon.
+
+An advanced test deployment with an independently isolated daemon can explicitly
+set `ai_worker_dedicated_host: false`, `ai_worker_isolated_daemon: true`, and
+`ai_worker_docker_socket` to its non-default Unix socket. All image, inspection
+and container operations target that daemon, and only that socket is mounted.
+The role cannot verify the underlying isolation: another rootful daemon on the
+same core host is not a VM security boundary. Use dedicated VMs for staging and
+production. Neither option enables generation in any inventory automatically.
+
+Upgrade core, worker and broker ACLs together after draining: protocol 4 uses
+`aiworker.<id>.commands/events`, the `artemis.aiworker` configuration namespace,
+and generic workload/schema/profile capabilities. Older Hyperion-only workers
+are incompatible. Reconcile old containers before changing ownership labels;
+never flush an active coordination store to accomplish the migration.

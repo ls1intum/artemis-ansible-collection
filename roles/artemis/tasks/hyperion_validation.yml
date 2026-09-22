@@ -6,19 +6,7 @@
       - artemis_computed_is_core_node | bool
       - version_control.localvc is defined and version_control.localvc is not none
       - continuous_integration.localci is defined and continuous_integration.localci is not none
-      - artemis_hyperion_workers.broker_url | default('') is match('^tcp://')
-      - artemis_hyperion_workers.broker_url | default('') is search('[?&;]sslEnabled=true(?:[&;]|$)')
-      - "'trustAll=true' not in artemis_hyperion_workers.broker_url | default('')"
-      - "'verifyHost=false' not in artemis_hyperion_workers.broker_url | default('')"
-      - artemis_hyperion_workers.user | default('') | length > 0
-      - artemis_hyperion_workers.password | default('') | length > 0
-      - artemis_hyperion_workers.ids | default([]) is sequence
-      - artemis_hyperion_workers.ids | default([]) is not string
-      - artemis_hyperion_workers.ids | default([]) is not mapping
-      - artemis_hyperion_workers.ids | default([]) | length > 0
-      - artemis_hyperion_workers.ids | length <= 64
-      - artemis_hyperion_workers.ids | unique | length == artemis_hyperion_workers.ids | length
-      - artemis_hyperion_workers.ids | select('match', '^[a-zA-Z0-9_-]{1,64}$') | list | length == artemis_hyperion_workers.ids | length
+      - artemis_aiworker_enabled | bool
     fail_msg: Whole-exercise authoring requires an eligible core node and separate verified TLS broker credentials with explicit worker IDs.
   when: artemis_hyperion_exercise_generation_enabled | bool
   no_log: true
@@ -37,5 +25,26 @@
       before enabling generation. Snapshot-only or everysec persistence can
       lose acknowledged slots. Automatic asynchronous failover is not qualified.
   when:
-    - artemis_hyperion_exercise_generation_enabled | bool
+    - (artemis_hyperion_exercise_generation_enabled | bool) or (artemis_aiworker_enabled | bool)
     - valkey is defined and valkey is not none
+
+- name: Validate AI Worker coordinator transport
+  ansible.builtin.assert:
+    that:
+      - artemis_computed_is_core_node | bool
+      - artemis_aiworker.broker_url | default('') is match('^tcp://')
+      - artemis_aiworker.broker_url | default('') is search('[?&;]sslEnabled=true(?:[&;]|$)')
+      - "'trustAll=true' not in artemis_aiworker.broker_url | default('')"
+      - "'verifyHost=false' not in artemis_aiworker.broker_url | default('')"
+      - artemis_aiworker.user | default('') | length > 0
+      - artemis_aiworker.password | default('') | length > 0
+      - artemis_aiworker.ids | default([]) is sequence
+      - artemis_aiworker.ids | default([]) is not string
+      - artemis_aiworker.ids | default([]) is not mapping
+      - artemis_aiworker.ids | default([]) | length > 0
+      - artemis_aiworker.ids | length <= 64
+      - artemis_aiworker.ids | unique | length == artemis_aiworker.ids | length
+      - artemis_aiworker.ids | select('match', '^[a-zA-Z0-9_-]{1,64}$') | list | length == artemis_aiworker.ids | length
+    fail_msg: AI Worker coordination requires a core node, verified TLS broker credentials and explicit worker IDs.
+  when: artemis_aiworker_enabled | bool
+  no_log: true
