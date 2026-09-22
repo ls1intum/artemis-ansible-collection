@@ -88,7 +88,7 @@ class HyperionWorkerTest(unittest.TestCase):
         }
         cases = [({}, True), ({'artemis_hyperion_enabled': False}, False),
                  ({'artemis_computed_is_core_node': False}, False),
-                 ({'valkey': {'host': 'valkey.example'}}, False),
+                 ({'valkey': {'host': 'valkey.example'}}, True),
                  ({'artemis_hyperion_workers': {}}, False),
                  ({'artemis_hyperion_workers': dict(valid['artemis_hyperion_workers'], ids='abc')}, False),
                  ({'artemis_hyperion_workers': dict(valid['artemis_hyperion_workers'], ids=['worker', 'worker'])}, False),

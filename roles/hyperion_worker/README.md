@@ -72,7 +72,8 @@ usage. Prompt/tool content capture is disabled. Provider access is worker-local:
 the core's model configuration is not inherited.
 
 Configure only eligible core nodes with LocalVC, LocalCI and a supported distributed
-data provider (Hazelcast for generation; Redis cannot attest the required topology):
+data provider (Hazelcast or Redis/Valkey with the provider-neutral coordination
+implementation; older Artemis revisions that reject Redis are not compatible):
 
 ```yaml
 artemis_hyperion_enabled: true
@@ -83,6 +84,23 @@ artemis_hyperion_workers:
   password: "{{ vault_hyperion_core_broker_password }}"
   ids: [staging-worker-1]
 ```
+
+The worker itself has no Hazelcast/Redis, database, or repository credentials.
+Only core/LocalVC writers participate in the application coordination store:
+
+- With Hazelcast, use data-member writer nodes and configure the expected member
+  count consistently; admission requires all members and recovery a strict majority.
+- With Redis/Valkey, use the same authoritative, persistent, non-evicting store on
+  every writer. Permit `CLIENT LIST`: Artemis verifies unique process incarnations
+  independently of human-readable client names and fails closed if the view is
+  incomplete. There is no Hazelcast member-count requirement for Redis clients.
+- Never flush/replace the coordination store under running writers. Asynchronous
+  Redis failover can lose acknowledged writes; this role does not certify automatic
+  failover safety. Drain and stop writers before store recovery, reconcile interrupted
+  saves, and verify a canary before reopening authoring.
+- A disconnected writer can still be writing Git or the database. Non-cancellable
+  slots require the existing audited, exact-token recovery after the owning JVM is
+  confirmed stopped; they are not released automatically on connection loss.
 
 Core and worker accounts must differ. All writer nodes must run the compatible
 exercise-mutation guard. Use distinct accounts, hosts, queues and model budgets
