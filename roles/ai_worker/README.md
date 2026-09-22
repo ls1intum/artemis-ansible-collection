@@ -87,6 +87,16 @@ artemis_aiworker:
   ids: [staging-worker-1]
 ```
 
+Set `artemis_hyperion_exercise_generation_enabled: true` on **all core/LocalVC
+writer nodes** in this deployment. Writer-only nodes may keep
+`artemis_hyperion_enabled: false` and `artemis_aiworker_enabled: false`; they need
+mutation protection, not model or broker credentials. Validation checks generation
+prerequisites on authoring nodes and storage durability on every opted-in writer.
+When the generation flag is absent or false throughout a deployment, ordinary
+writes do not load the generation mutation service. Drain runs and stop all writers
+before changing this flag, then restart with consistent values. Do not disable it
+to bypass an interrupted save or mix guarded and unguarded writer nodes.
+
 The worker itself has no Hazelcast/Redis, database, or repository credentials.
 Only core/LocalVC writers participate in the application coordination store:
 

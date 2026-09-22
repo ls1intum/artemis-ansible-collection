@@ -8,7 +8,9 @@
       - continuous_integration.localci is defined and continuous_integration.localci is not none
       - artemis_aiworker_enabled | bool
     fail_msg: Whole-exercise authoring requires an eligible core node and separate verified TLS broker credentials with explicit worker IDs.
-  when: artemis_hyperion_exercise_generation_enabled | bool
+  when:
+    - artemis_hyperion_exercise_generation_enabled | bool
+    - artemis_hyperion_enabled | bool
   no_log: true
 
 - name: Validate durable Redis coordination before enabling Hyperion

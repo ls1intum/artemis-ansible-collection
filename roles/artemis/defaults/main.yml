@@ -424,6 +424,7 @@ artemis_local_llm_deployment_enabled: false
 #    temperature: 1.0
 
 artemis_hyperion_enabled: false
+# Deployment-wide: enable on every core/LocalVC writer, including writer-only nodes.
 artemis_hyperion_exercise_generation_enabled: false
 # Separate TLS CORE broker, not the browser STOMP broker. Set only on eligible core nodes.
 # broker_url, user, password and ids are required when generation is enabled.

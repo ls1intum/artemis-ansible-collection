@@ -110,7 +110,11 @@ class AiWorkerTest(unittest.TestCase):
                 'broker_url': 'tcp://broker.example:61617?sslEnabled=true&verifyHost=true',
                 'user': 'core-only', 'password': 'unit-test-only', 'ids': ['worker-1']},
         }
-        cases = [({}, True), ({'artemis_hyperion_enabled': False}, False),
+        cases = [({}, True), ({'artemis_hyperion_enabled': False}, True),
+                 ({'artemis_hyperion_enabled': False, 'artemis_aiworker_enabled': False,
+                   'artemis_computed_is_core_node': False, 'artemis_aiworker': {}}, True),
+                 ({'artemis_hyperion_enabled': False, 'artemis_aiworker_enabled': False,
+                   'valkey': {'host': 'valkey.example'}}, False),
                  ({'artemis_computed_is_core_node': False}, False),
                  ({'valkey': {'host': 'valkey.example'}}, False),
                  ({'valkey': {'host': 'valkey.example'}, 'valkey_appendonly': True, 'valkey_appendfsync': 'always'}, True),
@@ -161,10 +165,11 @@ class AiWorkerTest(unittest.TestCase):
                             'maxmemory-policy noeviction']:
                 self.assertIn(setting, config)
 
-    def test_string_false_omits_worker_configuration(self):
+    def render_writer_configuration(self, core_node):
         values = yaml.safe_load((ROOT / 'roles/artemis/defaults/main.yml').read_text())
         values.update({'artemis_aiworker_enabled': 'false', 'artemis_aiworker': {},
-                       'artemis_computed_is_core_node': True})
+                       'artemis_computed_is_core_node': core_node,
+                       'artemis_hyperion_enabled': False, 'artemis_hyperion_exercise_generation_enabled': True})
         with tempfile.TemporaryDirectory() as tmp:
             output = Path(tmp) / 'application.yml'
             play = [{'name': 'Render production configuration with string false', 'hosts': 'localhost',
@@ -177,7 +182,16 @@ class AiWorkerTest(unittest.TestCase):
             result = subprocess.run(['ansible-playbook', '-i', 'localhost,', '-c', 'local', str(path)],
                                     capture_output=True, text=True, timeout=60)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-            self.assertNotIn('aiworker', yaml.safe_load(output.read_text())['artemis'])
+            config = yaml.safe_load(output.read_text())['artemis']
+            self.assertNotIn('aiworker', config)
+            self.assertFalse(config['hyperion']['enabled'])
+            self.assertTrue(config['hyperion']['exercise-generation']['enabled'])
+
+    def test_string_false_omits_worker_configuration(self):
+        self.render_writer_configuration(True)
+
+    def test_writer_only_node_renders_generation_guard_without_model_or_broker(self):
+        self.render_writer_configuration(False)
 
     def test_container_has_no_network_listener_or_privileged_mode(self):
         tasks = yaml.safe_load((ROOT / 'roles/ai_worker/tasks/main.yml').read_text())

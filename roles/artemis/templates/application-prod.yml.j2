@@ -366,6 +366,11 @@ artemis:
     email: {{ artemis_email }}
 {% endif %}
 
+  hyperion:
+    enabled: {{ artemis_hyperion_enabled | bool | lower }}
+    exercise-generation:
+      enabled: {{ artemis_hyperion_exercise_generation_enabled | bool | lower }}
+
 {% if artemis_computed_is_core_node %}
 
   programming:
@@ -472,12 +477,6 @@ artemis:
     user: {{ artemis_aiworker.user | to_json }}
     password: {{ artemis_aiworker.password | to_json }}
     ids: {{ artemis_aiworker.ids | to_json }}
-{% endif %}
-  hyperion:
-    enabled: {{ artemis_hyperion_enabled | lower }}
-    exercise-generation:
-      enabled: {{ artemis_hyperion_exercise_generation_enabled | bool | lower }}
-{% if artemis_hyperion_exercise_generation_enabled | bool %}
 {% endif %}
 
 {% if artemis_llm_cost is defined %}
