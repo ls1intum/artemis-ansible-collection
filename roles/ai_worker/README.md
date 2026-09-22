@@ -77,7 +77,6 @@ data provider (Hazelcast or Redis/Valkey with the provider-neutral coordination
 implementation; older Artemis revisions that reject Redis are not compatible):
 
 ```yaml
-artemis_aiworker_enabled: true
 artemis_hyperion_enabled: true
 artemis_hyperion_exercise_generation_enabled: true
 artemis_aiworker:
@@ -92,6 +91,9 @@ writer nodes** in this deployment. Writer-only nodes may keep
 `artemis_hyperion_enabled: false` and `artemis_aiworker_enabled: false`; they need
 mutation protection, not model or broker credentials. Validation checks generation
 prerequisites on authoring nodes and storage durability on every opted-in writer.
+The two Hyperion settings start AI Worker coordination on eligible core nodes;
+`artemis_aiworker_enabled` is not a third requirement. Set it only to coordinate
+other worker workloads while Hyperion generation is off.
 When the generation flag is absent or false throughout a deployment, ordinary
 writes do not load the generation mutation service. Drain runs and stop all writers
 before changing this flag, then restart with consistent values. Do not disable it

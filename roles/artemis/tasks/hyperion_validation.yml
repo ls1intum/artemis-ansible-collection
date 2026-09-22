@@ -6,7 +6,6 @@
       - artemis_computed_is_core_node | bool
       - version_control.localvc is defined and version_control.localvc is not none
       - continuous_integration.localci is defined and continuous_integration.localci is not none
-      - artemis_aiworker_enabled | bool
     fail_msg: Whole-exercise authoring requires an eligible core node and separate verified TLS broker credentials with explicit worker IDs.
   when:
     - artemis_hyperion_exercise_generation_enabled | bool
@@ -48,5 +47,7 @@
       - artemis_aiworker.ids | unique | length == artemis_aiworker.ids | length
       - artemis_aiworker.ids | select('match', '^[a-zA-Z0-9_-]{1,64}$') | list | length == artemis_aiworker.ids | length
     fail_msg: AI Worker coordination requires a core node, verified TLS broker credentials and explicit worker IDs.
-  when: artemis_aiworker_enabled | bool
+  when: >-
+    (artemis_aiworker_enabled | bool) or
+    ((artemis_hyperion_enabled | bool) and (artemis_hyperion_exercise_generation_enabled | bool))
   no_log: true

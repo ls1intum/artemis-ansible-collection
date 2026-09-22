@@ -428,6 +428,7 @@ artemis_hyperion_enabled: false
 artemis_hyperion_exercise_generation_enabled: false
 # Separate TLS CORE broker, not the browser STOMP broker. Set only on eligible core nodes.
 # broker_url, user, password and ids are required when generation is enabled.
+# Optional standalone AI Worker coordination. Eligible Hyperion generation cores enable it automatically.
 artemis_aiworker_enabled: false
 artemis_aiworker: {}
 

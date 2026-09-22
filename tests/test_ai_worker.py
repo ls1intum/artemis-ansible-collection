@@ -100,7 +100,7 @@ class AiWorkerTest(unittest.TestCase):
 
     def test_core_admission_configuration_fails_closed(self):
         valid = {
-            'artemis_aiworker_enabled': True,
+            'artemis_aiworker_enabled': False,
             'artemis_hyperion_enabled': True,
             'artemis_hyperion_exercise_generation_enabled': True,
             'artemis_computed_is_core_node': True,
@@ -127,6 +127,10 @@ class AiWorkerTest(unittest.TestCase):
                  ({'artemis_aiworker': dict(valid['artemis_aiworker'], ids=['worker', 'worker'])}, False),
                  ({'artemis_aiworker_enabled': False, 'artemis_hyperion_exercise_generation_enabled': False,
                    'artemis_aiworker': {}, 'valkey': {'host': 'valkey.example'}}, True)]
+        cases.extend([({'artemis_aiworker_enabled': True, 'artemis_hyperion_enabled': False,
+                        'artemis_hyperion_exercise_generation_enabled': False}, True),
+                      ({'artemis_aiworker_enabled': True, 'artemis_hyperion_enabled': False,
+                        'artemis_hyperion_exercise_generation_enabled': False, 'artemis_aiworker': {}}, False)])
         for option in ['trustAll=TRUE', 'verifyHost=FALSE', 'trustAll=TrUe', 'verifyHost=FaLsE']:
             cases.append(({'artemis_aiworker': dict(valid['artemis_aiworker'],
                           broker_url='tcp://broker.example:61617?sslEnabled=true&' + option)}, False))
@@ -165,11 +169,14 @@ class AiWorkerTest(unittest.TestCase):
                             'maxmemory-policy noeviction']:
                 self.assertIn(setting, config)
 
-    def render_writer_configuration(self, core_node):
+    def render_writer_configuration(self, core_node, generation_core=False):
         values = yaml.safe_load((ROOT / 'roles/artemis/defaults/main.yml').read_text())
         values.update({'artemis_aiworker_enabled': 'false', 'artemis_aiworker': {},
                        'artemis_computed_is_core_node': core_node,
-                       'artemis_hyperion_enabled': False, 'artemis_hyperion_exercise_generation_enabled': True})
+                       'artemis_hyperion_enabled': generation_core, 'artemis_hyperion_exercise_generation_enabled': True})
+        if generation_core:
+            values['artemis_aiworker'] = {'broker_url': 'tcp://broker.example:61617?sslEnabled=true&verifyHost=true',
+                                          'user': 'core-only', 'password': 'unit-test-only', 'ids': ['worker-1']}
         with tempfile.TemporaryDirectory() as tmp:
             output = Path(tmp) / 'application.yml'
             play = [{'name': 'Render production configuration with string false', 'hosts': 'localhost',
@@ -183,8 +190,12 @@ class AiWorkerTest(unittest.TestCase):
                                     capture_output=True, text=True, timeout=60)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             config = yaml.safe_load(output.read_text())['artemis']
-            self.assertNotIn('aiworker', config)
-            self.assertFalse(config['hyperion']['enabled'])
+            if generation_core:
+                self.assertTrue(config['aiworker']['enabled'])
+                self.assertEqual(config['aiworker']['ids'], ['worker-1'])
+            else:
+                self.assertNotIn('aiworker', config)
+            self.assertEqual(config['hyperion']['enabled'], generation_core)
             self.assertTrue(config['hyperion']['exercise-generation']['enabled'])
 
     def test_string_false_omits_worker_configuration(self):
@@ -192,6 +203,9 @@ class AiWorkerTest(unittest.TestCase):
 
     def test_writer_only_node_renders_generation_guard_without_model_or_broker(self):
         self.render_writer_configuration(False)
+
+    def test_generation_core_renders_worker_without_standalone_flag(self):
+        self.render_writer_configuration(True, generation_core=True)
 
     def test_container_has_no_network_listener_or_privileged_mode(self):
         tasks = yaml.safe_load((ROOT / 'roles/ai_worker/tasks/main.yml').read_text())
