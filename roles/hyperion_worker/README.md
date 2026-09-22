@@ -91,7 +91,11 @@ Only core/LocalVC writers participate in the application coordination store:
 - With Hazelcast, use data-member writer nodes and configure the expected member
   count consistently; admission requires all members and recovery a strict majority.
 - With Redis/Valkey, use the same authoritative, persistent, non-evicting store on
-  every writer. Permit `CLIENT LIST`: Artemis verifies unique process incarnations
+  every writer, with `valkey_appendonly: true`, `valkey_appendfsync: always`, and
+  `valkey_maxmemory_policy: noeviction`. Define these in shared inventory variables
+  for both the Valkey host and Artemis writer hosts; core admission validation
+  rejects the snapshot-only defaults. Apply and verify them on the store before
+  enabling generation. Permit `CLIENT LIST`: Artemis verifies unique process incarnations
   independently of human-readable client names and fails closed if the view is
   incomplete. There is no Hazelcast member-count requirement for Redis clients.
 - Never flush/replace the coordination store under running writers. Asynchronous

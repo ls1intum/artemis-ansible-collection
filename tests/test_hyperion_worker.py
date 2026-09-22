@@ -88,7 +88,12 @@ class HyperionWorkerTest(unittest.TestCase):
         }
         cases = [({}, True), ({'artemis_hyperion_enabled': False}, False),
                  ({'artemis_computed_is_core_node': False}, False),
-                 ({'valkey': {'host': 'valkey.example'}}, True),
+                 ({'valkey': {'host': 'valkey.example'}}, False),
+                 ({'valkey': {'host': 'valkey.example'}, 'valkey_appendonly': True, 'valkey_appendfsync': 'always'}, True),
+                 ({'valkey': {'host': 'valkey.example'}, 'valkey_appendonly': True, 'valkey_appendfsync': 'everysec'}, False),
+                 ({'valkey': {'host': 'valkey.example'}, 'valkey_appendonly': False, 'valkey_appendfsync': 'always'}, False),
+                 ({'valkey': {'host': 'valkey.example'}, 'valkey_appendonly': True, 'valkey_appendfsync': 'always',
+                   'valkey_maxmemory_policy': 'allkeys-lru'}, False),
                  ({'artemis_hyperion_workers': {}}, False),
                  ({'artemis_hyperion_workers': dict(valid['artemis_hyperion_workers'], ids='abc')}, False),
                  ({'artemis_hyperion_workers': dict(valid['artemis_hyperion_workers'], ids=['worker', 'worker'])}, False),
@@ -105,6 +110,29 @@ class HyperionWorkerTest(unittest.TestCase):
                 result = subprocess.run(['ansible-playbook', '-i', 'localhost,', '-c', 'local', str(path)],
                                         capture_output=True, text=True, timeout=60)
                 self.assertEqual(result.returncode == 0, expected, result.stdout + result.stderr)
+
+    def test_valkey_renders_synchronous_appendonly_persistence(self):
+        values = yaml.safe_load((ROOT / 'roles/valkey/defaults/main.yml').read_text())
+        values.update({'valkey_wireguard_address': '10.0.0.1', 'valkey_appendonly': True,
+                       'valkey_appendfsync': 'always',
+                       'valkey': {'port': 6379, 'username': 'artemis', 'password': 'test-only-app',
+                                  'admin_username': 'admin', 'admin_password': 'test-only-admin'}})
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp) / 'valkey.conf'
+            play = [{'name': 'Render the real Valkey configuration', 'hosts': 'localhost',
+                     'gather_facts': False, 'vars': values, 'tasks': [{
+                         'name': 'Render synchronous coordination storage', 'ansible.builtin.template': {
+                             'src': str(ROOT / 'roles/valkey/templates/valkey.conf.j2'),
+                             'dest': str(output), 'mode': '0600'}, 'no_log': True}]}]
+            path = Path(tmp) / 'test.yml'
+            path.write_text(yaml.safe_dump(play))
+            result = subprocess.run(['ansible-playbook', '-i', 'localhost,', '-c', 'local', str(path)],
+                                    capture_output=True, text=True, timeout=60)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            config = output.read_text().splitlines()
+            for setting in ['appendonly yes', 'appendfsync always', 'no-appendfsync-on-rewrite no',
+                            'maxmemory-policy noeviction']:
+                self.assertIn(setting, config)
 
     def test_container_has_no_network_listener_or_privileged_mode(self):
         tasks = yaml.safe_load((ROOT / 'roles/hyperion_worker/tasks/main.yml').read_text())

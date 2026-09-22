@@ -22,3 +22,20 @@
     fail_msg: Whole-exercise authoring requires an eligible core node and separate verified TLS broker credentials with explicit worker IDs.
   when: artemis_hyperion_exercise_generation_enabled | bool
   no_log: true
+
+- name: Validate durable Redis coordination before enabling Hyperion
+  ansible.builtin.assert:
+    that:
+      - valkey_appendonly | default(false) | bool
+      - valkey_appendfsync | default('everysec') == 'always'
+      - valkey_maxmemory_policy | default('noeviction') == 'noeviction'
+    fail_msg: >-
+      Redis-backed Hyperion requires appendonly=true, appendfsync=always and
+      maxmemory-policy=noeviction on the authoritative store. Put these shared
+      valkey_* settings on both the store and Artemis writer hosts, apply them
+      to the store while writers are stopped, and verify the effective settings
+      before enabling generation. Snapshot-only or everysec persistence can
+      lose acknowledged slots. Automatic asynchronous failover is not qualified.
+  when:
+    - artemis_hyperion_exercise_generation_enabled | bool
+    - valkey is defined and valkey is not none

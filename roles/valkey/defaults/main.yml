@@ -119,6 +119,8 @@ valkey_maxmemory_policy: noeviction
 valkey_persistence_enabled: true
 valkey_save: "900 1 300 10 60 10000"
 valkey_appendonly: false
+# Use always for acknowledged Hyperion coordination writes; everysec can lose the latest second.
+valkey_appendfsync: everysec
 # "no" keeps Valkey writable when a snapshot fails (full disk, bad permissions).
 # With the default "yes" a failed BGSAVE puts every write into MISCONF and takes
 # the whole Artemis cluster down until an operator intervenes.
