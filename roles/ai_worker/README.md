@@ -35,6 +35,27 @@ covered by the host's Docker-aware firewall. Generated-code sandboxes have no
 network, credentials, host mounts or Docker socket. The supervisor publishes no
 ports and runs read-only as UID 1000 with the dedicated socket's group.
 
+## Placement with existing Build Agents
+
+The `artemis` role runs LocalCI Build Agents from the normal Artemis WAR. The
+inventory assigns them with `continuous_integration.localci.is_build_agent`.
+The AI Worker uses that same WAR but starts a different process on an isolated
+host or VM. Do not add this role to an existing Build Agent group or give a core
+container its Docker socket.
+
+| Environment | Current Build Agent inventory | AI Worker placement |
+| --- | --- | --- |
+| Test servers | `artemistests_local_vc_ci` runs core and Build Agent together | Add an opt-in worker VM group; the VM can share the physical test host. |
+| Staging | `artemis_staging1_agents` and `artemis_staging2_agents` | Add separate worker hosts and credentials for each staging environment. |
+| Production | `artemis_production_buildagent` | Add separate production worker hosts, credentials and qualified image digests. |
+
+These are inventory changes in [artemis-ansible](https://github.com/ls1intum/artemis-ansible),
+not automatic effects of this collection role. No test, staging or production AI Worker host is
+configured by this PR. Keep generation disabled until its worker, dedicated TLS
+broker and all core/LocalVC writer settings are deployed together. Put the
+generation flag on writer groups, not a shared group that also contains Build
+Agents.
+
 ## Example inventory and playbook
 
 Install `community.docker` from the collection's `requirements.yml`. Provision
@@ -195,11 +216,20 @@ never flush an active coordination store to accomplish the migration.
 
 ### Choose the worker image
 
-Artemis builds one WAR. For `hyperion-generation`, build the production WAR with
-`./gradlew -Pprod -Pwar bootWar` and use `docker/aiworker/worker.Dockerfile`
-with that exact WAR. The image starts the separate AI Worker entry point, not the
-Artemis HTTP server. The selected workload activates Hyperion services; the
-standalone profile excludes server database and distributed-store configuration.
+Artemis builds one WAR. For `hyperion-generation`, build the production WAR
+and the worker image from the same checkout as the core image:
+
+```sh
+./gradlew -Pprod -Pwar bootWar
+docker build --build-arg ARTEMIS_WAR=build/libs/Artemis-<version>.war \
+  -f docker/aiworker/worker.Dockerfile .
+```
+
+Replace `<version>` with the WAR that the build produced. Publish the image,
+then set `ai_worker_image` to its registry digest. The image starts the separate
+AI Worker entry point, not the Artemis HTTP server. The selected workload
+activates Hyperion services; the standalone profile excludes server database
+and distributed-store configuration.
 The isolated host must still block database and private network access. Do not
 mount its Docker socket into the core server.
 

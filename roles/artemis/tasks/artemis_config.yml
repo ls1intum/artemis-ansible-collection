@@ -7,6 +7,8 @@
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
     mode: "600"
+  no_log: true
+  diff: false
 
 # Before the unit that names it: a config update rewrites artemis.service without touching the rest of the host,
 # and a -Djava.io.tmpdir the JVM cannot create keeps Tomcat from starting at all.

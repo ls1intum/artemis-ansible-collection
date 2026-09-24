@@ -176,27 +176,39 @@ class AiWorkerTest(unittest.TestCase):
                        'artemis_hyperion_enabled': generation_core, 'artemis_hyperion_exercise_generation_enabled': True})
         if generation_core:
             values['artemis_aiworker'] = {'broker_url': 'tcp://broker.example:61617?sslEnabled=true&verifyHost=true',
-                                          'user': 'core-only', 'password': 'unit-test-only', 'ids': ['worker-1']}
+                                          'user': 'core-only', 'password': "unit'test$only", 'ids': ['worker-1']}
         with tempfile.TemporaryDirectory() as tmp:
             output = Path(tmp) / 'application.yml'
-            play = [{'name': 'Render production configuration with string false', 'hosts': 'localhost',
-                     'gather_facts': False, 'vars': values, 'tasks': [{
-                         'name': 'Render actual application template', 'ansible.builtin.template': {
-                             'src': str(ROOT / 'roles/artemis/templates/application-prod.yml.j2'),
-                             'dest': str(output), 'mode': '0600'}}]}]
+            docker_output = Path(tmp) / 'artemis.env'
+            tasks = []
+            for source, target in [('application-prod.yml.j2', output), ('artemis.env.j2', docker_output)]:
+                tasks.append({'name': 'Render ' + source, 'ansible.builtin.template': {
+                    'src': str(ROOT / 'roles/artemis/templates' / source),
+                    'dest': str(target), 'mode': '0600'}})
+            play = [{'name': 'Render native and Docker configuration', 'hosts': 'localhost',
+                     'gather_facts': False, 'vars': values, 'tasks': tasks}]
             path = Path(tmp) / 'render.yml'
             path.write_text(yaml.safe_dump(play))
             result = subprocess.run(['ansible-playbook', '-i', 'localhost,', '-c', 'local', str(path)],
                                     capture_output=True, text=True, timeout=60)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             config = yaml.safe_load(output.read_text())['artemis']
+            docker_env = dict(line.split('=', 1) for line in docker_output.read_text().splitlines()
+                              if line.startswith(('ARTEMIS_AIWORKER_', 'ARTEMIS_HYPERION_')))
             if generation_core:
                 self.assertTrue(config['aiworker']['enabled'])
                 self.assertEqual(config['aiworker']['ids'], ['worker-1'])
+                self.assertEqual(docker_env['ARTEMIS_AIWORKER_ENABLED'], "'true'")
+                self.assertEqual(docker_env['ARTEMIS_AIWORKER_IDS_0'], "'worker-1'")
+                self.assertEqual(docker_env['ARTEMIS_AIWORKER_PASSWORD'], r"'unit\'test$only'")
+                self.assertEqual(docker_env['ARTEMIS_AIWORKER_BROKERURL'], "'tcp://broker.example:61617?sslEnabled=true&verifyHost=true'")
             else:
                 self.assertNotIn('aiworker', config)
+                self.assertFalse(any(key.startswith('ARTEMIS_AIWORKER_') for key in docker_env))
             self.assertEqual(config['hyperion']['enabled'], generation_core)
             self.assertTrue(config['hyperion']['exercise-generation']['enabled'])
+            self.assertEqual(docker_env['ARTEMIS_HYPERION_ENABLED'], "'true'" if generation_core else "'false'")
+            self.assertEqual(docker_env['ARTEMIS_HYPERION_EXERCISEGENERATION_ENABLED'], "'true'")
 
     def test_string_false_omits_worker_configuration(self):
         self.render_writer_configuration(True)
@@ -206,6 +218,16 @@ class AiWorkerTest(unittest.TestCase):
 
     def test_generation_core_renders_worker_without_standalone_flag(self):
         self.render_writer_configuration(True, generation_core=True)
+
+    def test_core_configuration_templates_do_not_log_secrets(self):
+        for task_file in ('artemis_config.yml', 'docker_deploy_artemis.yml'):
+            tasks = yaml.safe_load((ROOT / 'roles/artemis/tasks' / task_file).read_text())
+            secret_templates = {'application-prod.yml.j2', 'artemis.env.j2', 'docker.env.j2',
+                                'database.env.j2', 'node.env.j2'}
+            for task in tasks:
+                if task.get('template', {}).get('src', '').split('/')[-1] in secret_templates:
+                    self.assertTrue(task.get('no_log'), task['name'])
+                    self.assertFalse(task.get('diff', True), task['name'])
 
     def test_container_has_no_network_listener_or_privileged_mode(self):
         tasks = yaml.safe_load((ROOT / 'roles/ai_worker/tasks/main.yml').read_text())
