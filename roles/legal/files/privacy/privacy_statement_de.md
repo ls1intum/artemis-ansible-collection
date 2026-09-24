@@ -116,6 +116,7 @@ Die Verarbeitung der Daten in dieser Logdatei kann wie folgt geschehen:
 
 * Die Logeinträge können kontinuierlich und automatisch ausgewertet werden, um Angriffe auf die Webserver erkennen und entsprechend reagieren zu können.
 * In Einzelfällen, d.h. bei gemeldeten Störungen, Fehlern und Sicherheitsvorfällen, kann eine manuelle Analyse erfolgen.
+* Die Protokolle der Artemis-Server, die auch die Kennung angemeldeter Personen enthalten können, werden täglich automatisiert auf technische Fehler ausgewertet, um die Stabilität und Verfügbarkeit der Plattform sicherzustellen. Vor jeder weiteren Verarbeitung werden dabei alle personenbezogenen Angaben (z. B. Kennungen, IP-Adressen, E-Mail-Adressen und IDs) entfernt, und es werden nur zusammengefasste Fehlertypen und deren Häufigkeit ausgewertet. Die Ergebnisse enthalten keine personenbezogenen Daten und sind nur dem Entwicklungsteam von Artemis zugänglich. Soweit für die Auswertung externe Dienste eingesetzt werden, erhalten diese ausschließlich die bereinigten Ergebnisse.
 
 **Speicherdauer:** Logdateien werden nach 90 Tagen automatisch gelöscht, sofern sie nicht zur Aufklärung eines konkreten Sicherheitsvorfalls benötigt werden.
 
