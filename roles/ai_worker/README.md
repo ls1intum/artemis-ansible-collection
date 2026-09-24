@@ -193,16 +193,20 @@ and generic workload/schema/profile capabilities. Older Hyperion-only workers
 are incompatible. Reconcile old containers before changing ownership labels;
 never flush an active coordination store to accomplish the migration.
 
-### Choose the workload distribution
+### Choose the worker image
 
-For `hyperion-generation`, pin an image built from Artemis's
-`docker/hyperion/worker.Dockerfile` after `./gradlew :hyperion:worker:bootJar -x webapp`.
-The generic `docker/aiworker/worker.Dockerfile` packages only the supervisor and does
-not contain Hyperion, a model provider or Java teaching templates. Selecting a
-workload name cannot install the missing adapter. Other workloads must provide their
-own distribution, composing the same supervisor and neutral execution API.
+Artemis builds one WAR. For `hyperion-generation`, build the production WAR with
+`./gradlew -Pprod -Pwar bootWar` and use `docker/aiworker/worker.Dockerfile`
+with that exact WAR. The image starts the separate AI Worker entry point, not the
+Artemis HTTP server. The selected workload activates Hyperion services; the
+standalone profile excludes server database and distributed-store configuration.
+The isolated host must still block database and private network access. Do not
+mount its Docker socket into the core server.
 
-Both distributions use protocol 4 and the existing `artemis.aiworker` configuration.
+Pin the worker and sandbox images by digest. Use the same Artemis revision for
+core and worker because both speak protocol 4. No separate generic-supervisor or
+Hyperion worker JAR is built.
+
 The final Hyperion integration adds no database schema changes. Activity and automatic
 undo references expire in distributed storage; saved exercise versions use existing
 storage. A complete loss of coordination state requires stopping writers and manual
