@@ -6,3 +6,6 @@
   args:
     chdir: "{{ weaviate_working_directory }}"
   listen: "restart docker weaviate"
+  when:
+    - weaviate_apply_runtime | bool
+    - not ansible_check_mode
