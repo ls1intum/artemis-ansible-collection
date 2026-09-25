@@ -559,13 +559,12 @@ sentry:
   dsn:
 {% endif %}
 
+{% if artemis_computed_is_core_node %}
 # Properties to be exposed on the /info management endpoint
 info:
-  # Installation metadata: every core node and build agent refuses to start without it
   operatorName: {{ artemis_operator_name }}
   operatorAdminName: {{ artemis_operator_admin_name }}
   universityName: {{ artemis_university_name }}
-{% if artemis_computed_is_core_node %}
   contact: {{ artemis_email }}
 {% if is_testserver is defined and is_testserver is sameas true %}
   testServer: true
@@ -579,9 +578,8 @@ info:
   oidc:
     buttonLabel: {{ artemis_oidc.button_label | default('TUM Login') | quote }}
 {% endif %}
-{% endif %}
 
-{% if artemis_computed_is_core_node and helios is defined %}
+{% if helios is defined %}
 helios:
   status:
     enabled: true
@@ -591,6 +589,7 @@ helios:
       - url: {{ endpoint.url }}
         secret-key: {{ endpoint.secret_key }}
 {% endfor %}
+{% endif %}
 {% endif %}
 
 {% set uses_eureka_discovery = artemis_computed_uses_hazelcast | bool and artemis_eureka_urls is defined and hazelcast_address is defined and hazelcast_address is not none and hazelcast_address != "" %}

@@ -36,8 +36,8 @@ artemis_university_name: "Technical University of Munich"
 
 The JWT secret can be generated with: `openssl rand -base64 64 | tr -d '\n'`.
 
-The three installation metadata variables are required on every host, core nodes and build agents alike. Artemis
-refuses to start without meaningful values, even with telemetry disabled, and rejects template values such as
+The three installation metadata variables are required on core nodes; build agents do not receive them. Artemis
+refuses to start a core node without meaningful values, even with telemetry disabled, and rejects template values such as
 `Admin` or `Your University`. `artemis_operator_name` is the organization operating Artemis,
 `artemis_operator_admin_name` its administrator, and `artemis_university_name` the university or institution using
 it. All three are shown on the About page; `artemis_send_admin_details: false` keeps the administrator's name and the

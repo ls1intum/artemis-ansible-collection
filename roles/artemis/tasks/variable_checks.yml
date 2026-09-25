@@ -36,20 +36,23 @@
 # Check Installation Metadata
 ##############################################################################
 
-# Artemis refuses to start a core node or a build agent without these, independently of telemetry. Caught here
-# rather than at boot, so the play stops with the variable named instead of the service failing to come up after a
-# deploy. Artemis also rejects template values such as "Admin" or "Your University"; only emptiness is checked here.
+# Artemis refuses to start a core node without these, independently of telemetry; a build agent neither reads nor
+# receives them. Caught here rather than at boot, so the play stops with the variable named instead of the service
+# failing to come up after a deploy. Artemis also rejects template values such as "Admin" or "Your University"; only
+# emptiness is checked here.
 - name: Check that the installation metadata is set
   fail:
     msg: >-
-      No {{ item }} is configured! Artemis refuses to start any core node or build agent without
-      artemis_operator_name (the organization operating Artemis), artemis_operator_admin_name (the administrator)
-      and artemis_university_name (the university or institution), even with telemetry disabled.
+      No {{ item }} is configured! Artemis refuses to start a core node without artemis_operator_name (the
+      organization operating Artemis), artemis_operator_admin_name (the administrator) and artemis_university_name
+      (the university or institution), even with telemetry disabled.
   loop:
     - artemis_operator_name
     - artemis_operator_admin_name
     - artemis_university_name
-  when: lookup('ansible.builtin.vars', item, default='') | default('', true) | string | trim | length == 0
+  when:
+    - artemis_computed_is_core_node | bool
+    - lookup('ansible.builtin.vars', item, default='') | default('', true) | string | trim | length == 0
 
 - name: Check Spring AI Azure OpenAI configuration completeness (optional)
   fail:
