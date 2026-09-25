@@ -50,8 +50,11 @@ artemis_jhipster_jwt: #FIXME
 artemis_jhipster_registry_password: #FIXME Multinode
 
 artemis_email: artemis.in@tum.de
-artemis_operator_name: "Anonymous University"
-artemis_operator_admin_name: "Anonymous University Admin"
+# Installation metadata, required on every node. Artemis refuses to start a core node or build agent without
+# meaningful values, even with telemetry disabled, and shows all three on the About page.
+artemis_operator_name: #FIXME The organization operating Artemis, e.g. "Research group of Applied Education Technologies"
+artemis_operator_admin_name: #FIXME The administrator's name
+artemis_university_name: #FIXME The university or institution using Artemis, e.g. "Technical University of Munich"
 artemis_notification_from: "Artemis Notification"
 # artemis_notification_email: noreply@example.com  # defaults to <local-part>+notification@<domain> derived from artemis_email
 
