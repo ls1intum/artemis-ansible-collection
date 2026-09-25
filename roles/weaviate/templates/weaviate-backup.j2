@@ -1,0 +1,225 @@
+#!/bin/bash
+#
+# Weaviate backup + retention.
+#
+# Managed by Ansible (ls1intum.artemis "weaviate" role) — DO NOT EDIT BY HAND.
+#
+# Runs as root from root's crontab. Triggers a filesystem backup via the
+# Weaviate API, waits for it to finish, verifies the native backup directory,
+# then prunes old backups (age-based with a minimum-count floor).
+#
+# Why root: the Weaviate container runs as root (UID 0) and writes the backup
+# files into the bind-mounted backup directory as root:root. A non-root user
+# can read those files (so it could tar them) but cannot delete them, which is
+# why the previous weaviate-user script leaked one undeletable backup directory
+# every night. Retention must therefore run as root.
+#
+# Usage:
+#   weaviate-backup                 # prune, back up, verify, prune, write metrics
+#   weaviate-backup --cleanup-only  # prune only (used during Ansible convergence)
+#
+set -Eeuo pipefail
+umask 077
+
+ENV_FILE="{{ weaviate_backup_env_file }}"
+BACKUP_DIR="{{ weaviate_backup_directory }}"
+API_URL="{{ weaviate_backup_api_url }}"
+RETENTION_DAYS="{{ weaviate_backup_retention_days }}"
+RETENTION_MIN_COUNT="{{ weaviate_backup_retention_min_count }}"
+LOCK_FILE="{{ weaviate_backup_lock_file }}"
+METRICS_FILE="{{ weaviate_backup_metrics_file }}"
+
+# Exact backup-id patterns (anchored, posix-extended). Used everywhere so we
+# never touch anything that is not a Weaviate backup artifact.
+DIR_REGEX='.*/backup-[0-9]{8}-[0-9]{6}'
+TGZ_REGEX='.*/backup-[0-9]{8}-[0-9]{6}\.tar\.gz'
+
+log() { echo "[weaviate-backup] $(date -Is) $*"; }
+
+# --- single-instance lock (covers cron + manual + Ansible cleanup) -----------
+# Use a root-only runtime directory so an unprivileged user cannot pre-create
+# the lock file and hold it to stall backups. Open non-truncating (>>).
+LOCK_DIR="$(dirname "$LOCK_FILE")"
+mkdir -p "$LOCK_DIR"
+chmod 700 "$LOCK_DIR"
+exec 9>>"$LOCK_FILE"
+if ! flock -n 9; then
+    log "another backup/cleanup run holds the lock; exiting"
+    exit 0
+fi
+
+# --- retention ---------------------------------------------------------------
+# Delete backup artifacts (native dirs and legacy .tar.gz) older than
+# RETENTION_DAYS, but always keep the newest RETENTION_MIN_COUNT regardless of
+# age so a prolonged backup outage cannot erase every restore point.
+# Returns non-zero if any deletion failed (callers must not rely on errexit
+# here: bash disables errexit inside a function used in an `if`/`||` list).
+prune() {
+    local rc=0 path base id
+    local -a paths=() ids=()
+
+    # Collect backup artifacts newest-first by mtime. maxdepth 1, exact
+    # patterns only, so nothing outside real backup ids is ever considered.
+    while IFS= read -r path; do
+        [ -n "$path" ] || continue
+        base="$(basename "$path")"
+        id="${base%.tar.gz}"   # group a native dir and its legacy tarball
+        paths+=("$path")
+        ids+=("$id")
+    done < <(find "$BACKUP_DIR" -maxdepth 1 -regextype posix-extended \
+                  \( -type d -regex "$DIR_REGEX" -o -type f -regex "$TGZ_REGEX" \) \
+                  -printf '%T@\t%p\n' 2>/dev/null | sort -rn | cut -f2-)
+
+    # Determine the newest RETENTION_MIN_COUNT *distinct* backup ids to always
+    # keep, so a dir+tarball pair for one id does not consume two floor slots.
+    local -A keep=()
+    local kept=0 i
+    for ((i = 0; i < ${#ids[@]}; i++)); do
+        id="${ids[$i]}"
+        if [ -z "${keep[$id]:-}" ] && [ "$kept" -lt "$RETENTION_MIN_COUNT" ]; then
+            keep[$id]=1
+            kept=$((kept + 1))
+        fi
+    done
+
+    for ((i = 0; i < ${#paths[@]}; i++)); do
+        path="${paths[$i]}"
+        id="${ids[$i]}"
+        # Never delete an id within the min-count floor.
+        [ -n "${keep[$id]:-}" ] && continue
+        # Delete only if older than the retention window.
+        if [ -n "$(find "$path" -maxdepth 0 -mtime +"$RETENTION_DAYS" 2>/dev/null)" ]; then
+            log "pruning $(basename "$path")"
+            if ! rm -rf -- "$path"; then
+                log "ERROR: failed to prune ${path}"
+                rc=1
+            fi
+        fi
+    done
+    return "$rc"
+}
+
+# --- metrics (node_exporter textfile collector) ------------------------------
+read_last_success() {
+    if [ -n "$METRICS_FILE" ] && [ -f "$METRICS_FILE" ]; then
+        awk '/^weaviate_backup_last_success_timestamp_seconds /{print $2; exit}' "$METRICS_FILE"
+    fi
+}
+
+write_metrics() {
+    local status="$1" last_success="$2"
+    [ -n "$METRICS_FILE" ] || return 0
+    # Skip silently if the collector directory does not exist on this host.
+    local dir
+    dir="$(dirname "$METRICS_FILE")"
+    [ -d "$dir" ] || return 0
+
+    local count
+    count="$(find "$BACKUP_DIR" -maxdepth 1 -regextype posix-extended \
+                  -type d -regex "$DIR_REGEX" 2>/dev/null | wc -l)"
+
+    local tmp="${METRICS_FILE}.$$.tmp"
+    {
+        echo "# HELP weaviate_backup_last_success_timestamp_seconds Unix time of the last successful Weaviate backup."
+        echo "# TYPE weaviate_backup_last_success_timestamp_seconds gauge"
+        echo "weaviate_backup_last_success_timestamp_seconds ${last_success:-0}"
+        echo "# HELP weaviate_backup_last_status Result of the last Weaviate backup run (1=success, 0=failure)."
+        echo "# TYPE weaviate_backup_last_status gauge"
+        echo "weaviate_backup_last_status ${status}"
+        echo "# HELP weaviate_backup_count Number of retained native Weaviate backups on disk."
+        echo "# TYPE weaviate_backup_count gauge"
+        echo "weaviate_backup_count ${count}"
+    } > "$tmp"
+    chmod 0644 "$tmp"
+    mv -f "$tmp" "$METRICS_FILE"
+}
+
+# --- backup ------------------------------------------------------------------
+do_backup() {
+    local backup_id body status i
+    backup_id="backup-$(date +%Y%m%d-%H%M%S)"
+    log "starting backup ${backup_id}"
+
+    if ! body="$(curl --fail-with-body -sS --connect-timeout 10 --max-time 120 \
+            -X POST "${API_URL}/v1/backups/filesystem" \
+            -H "Authorization: Bearer ${WEAVIATE_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "{\"id\": \"${backup_id}\"}")"; then
+        log "ERROR: failed to initiate backup: ${body}"
+        return 1
+    fi
+
+    status=""
+    for ((i = 1; i <= 60; i++)); do
+        sleep 5
+        if ! body="$(curl --fail-with-body -sS --connect-timeout 10 --max-time 60 \
+                "${API_URL}/v1/backups/filesystem/${backup_id}" \
+                -H "Authorization: Bearer ${WEAVIATE_API_KEY}")"; then
+            log "WARN: status poll ${i} failed; retrying"
+            continue
+        fi
+        status="$(jq -r '.status // empty' <<<"$body")"
+        case "$status" in
+            SUCCESS) break ;;
+            FAILED)  log "ERROR: backup FAILED: ${body}"; return 1 ;;
+        esac
+        log "backup in progress... (${i}/60, status=${status:-unknown})"
+    done
+
+    if [ "$status" != "SUCCESS" ]; then
+        log "ERROR: backup timed out after waiting for completion"
+        return 1
+    fi
+
+    # Verify the native backup directory exists and is non-empty.
+    if [ ! -d "${BACKUP_DIR}/${backup_id}" ] || [ -z "$(ls -A "${BACKUP_DIR}/${backup_id}" 2>/dev/null)" ]; then
+        log "ERROR: backup reported SUCCESS but ${BACKUP_DIR}/${backup_id} is missing or empty"
+        return 1
+    fi
+
+    log "backup completed and verified: ${BACKUP_DIR}/${backup_id}"
+}
+
+# --- main --------------------------------------------------------------------
+main() {
+    mkdir -p "$BACKUP_DIR"
+
+    if [ "${1:-}" = "--cleanup-only" ]; then
+        log "cleanup-only run"
+        prune   # propagate prune's rc so Ansible surfaces deletion failures
+        return
+    fi
+
+    # Load secrets (only the API key lives here).
+    if [ ! -r "$ENV_FILE" ]; then
+        log "ERROR: env file ${ENV_FILE} not readable"
+        exit 1
+    fi
+    set -a
+    # shellcheck disable=SC1090
+    source "$ENV_FILE"
+    set +a
+    : "${WEAVIATE_API_KEY:?WEAVIATE_API_KEY missing in ${ENV_FILE}}"
+
+    local prev_success status_val ts
+    prev_success="$(read_last_success)"
+
+    # Free space first (honours the min-count floor), then back up, then prune.
+    if ! prune; then log "WARN: pre-backup prune reported an error"; fi
+
+    if do_backup; then
+        ts="$(date +%s)"
+        status_val=1
+    else
+        ts="${prev_success:-0}"
+        status_val=0
+    fi
+
+    if ! prune; then log "WARN: post-backup prune reported an error"; fi
+    write_metrics "$status_val" "$ts"
+
+    # Exit non-zero on failure so cron and monitoring notice.
+    [ "$status_val" -eq 1 ]
+}
+
+main "$@"
