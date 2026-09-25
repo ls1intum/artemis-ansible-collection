@@ -19,9 +19,11 @@ ai_worker_sandbox_cpu_quota: 200000
 ai_worker_sandbox_pids: 256
 ai_worker_memory: 2g
 ai_worker_cpus: 2
-ai_worker_broker_url: ""
-ai_worker_broker_user: ""
-ai_worker_broker_password: ""
+# Match the core nodes' DistributedDataProvider; the worker never hosts a data member.
+ai_worker_provider: hazelcast
+ai_worker_eureka_url: ""
+ai_worker_valkey: {}
+
 ai_worker_model_base_url: ""
 ai_worker_model: ""
 ai_worker_model_api_key: ""

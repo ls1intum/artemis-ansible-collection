@@ -424,13 +424,11 @@ artemis_local_llm_deployment_enabled: false
 #    temperature: 1.0
 
 artemis_hyperion_enabled: false
-# Deployment-wide: enable on every core/LocalVC writer, including writer-only nodes.
+# All exercise-writing nodes need the generation mutation guard when this is true.
 artemis_hyperion_exercise_generation_enabled: false
-# Separate TLS CORE broker, not the browser STOMP broker. Set only on eligible core nodes.
-# broker_url, user, password and ids are required when generation is enabled.
-# Optional standalone AI Worker coordination. Eligible Hyperion generation cores enable it automatically.
+# Set the same worker IDs on each eligible core coordinator.
 artemis_aiworker_enabled: false
-artemis_aiworker: {}
+artemis_aiworker_ids: []
 
 # LLM model costs for usage tracking, EUR per million tokens (OpenAI list price USD x 0.92).
 # Override or add entries in your inventory as needed.

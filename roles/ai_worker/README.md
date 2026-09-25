@@ -1,244 +1,87 @@
-# AI Worker
+# AI Worker node
 
-Deploy the standalone AI Worker supervisor, not an Artemis server or LocalCI build
-agent. This role requires a compatible Artemis core/worker release using the neutral execution envelope (protocol 4). The shipped adapter supports Java/Gradle only.
-The core role leaves whole-exercise generation disabled by default.
+Deploy the normal Artemis WAR as a **worker-only node**. The worker image runs
+`ArtemisApp` with `prod,aiworker`. It has no HTTP listener, database access or
+repository credentials. It connects to the same Artemis `DistributedDataProvider`
+as core: as a Hazelcast client discovered through Eureka, or as a Redis/Valkey
+client. No Artemis message broker or worker-specific queues are required.
 
-## Infrastructure prerequisites
+Use a dedicated VM or host. The supervisor's Docker socket grants host-level
+control. Do not share the core, database or Build Agent Docker daemon. This role
+does not install Docker, the provider, Eureka or firewall rules. Allow outbound
+access only to the selected provider, the approved model endpoint, the image
+registry and approved telemetry. Generated-code containers have no network.
 
-Provision a **dedicated generation host or VM** with Docker and outbound access to
-an approved image registry, model provider and dedicated TLS Apache Artemis
-broker. The Docker socket grants the supervisor host-level authority; do not use
-the Docker daemon of an Artemis core, database, repository server or build agent.
-A test server may use a separate VM on the same physical machine, but must not
-share that machine's Docker socket with core. The role's `dedicated_host` assertion
-records the operator's decision; it cannot attest VM or network isolation.
-
-This role does not provision the broker, certificates, firewall, Docker runtime
-or VM. Use the matching Artemis release's `docker/aiworker/broker.xml` as the
-broker authorization contract: private TLS CORE listener (61617), pre-created
-per-worker command/event queues, separate core and per-worker accounts, and no
-worker permissions to create/delete queues or manage the broker. The collection's
-ordinary `broker` role is a browser messaging service with different permissions;
-it is **not** an isolated AI Worker broker. Do not reuse its shared credentials.
-
-Use a certificate trusted by the worker JVM and core JVM. For a private CA,
-provision that CA in the pinned application images' JVM truststores before
-publishing them. Do not disable hostname verification or enable `trustAll`.
-Keep passwords out of broker URLs. Store credentials in Ansible Vault or the
-inventory's existing secret-manager lookups, never in an image or git.
-
-Enforce host-level egress restrictions: permit approved broker/model/registry
-endpoints, deny database, repository/NFS, core management and cloud metadata
-endpoints. This role does not install firewall rules; container egress must be
-covered by the host's Docker-aware firewall. Generated-code sandboxes have no
-network, credentials, host mounts or Docker socket. The supervisor publishes no
-ports and runs read-only as UID 1000 with the dedicated socket's group.
-
-## Placement with existing Build Agents
-
-The `artemis` role runs LocalCI Build Agents from the normal Artemis WAR. The
-inventory assigns them with `continuous_integration.localci.is_build_agent`.
-The AI Worker uses that same WAR but starts a different process on an isolated
-host or VM. Do not add this role to an existing Build Agent group or give a core
-container its Docker socket.
-
-| Environment | Current Build Agent inventory | AI Worker placement |
-| --- | --- | --- |
-| Test servers | `artemistests_local_vc_ci` runs core and Build Agent together | Add an opt-in worker VM group; the VM can share the physical test host. |
-| Staging | `artemis_staging1_agents` and `artemis_staging2_agents` | Add separate worker hosts and credentials for each staging environment. |
-| Production | `artemis_production_buildagent` | Add separate production worker hosts, credentials and qualified image digests. |
-
-These are inventory changes in [artemis-ansible](https://github.com/ls1intum/artemis-ansible),
-not automatic effects of this collection role. No test, staging or production AI Worker host is
-configured by this PR. Keep generation disabled until its worker, dedicated TLS
-broker and all core/LocalVC writer settings are deployed together. Put the
-generation flag on writer groups, not a shared group that also contains Build
-Agents.
-
-## Example inventory and playbook
-
-Install `community.docker` from the collection's `requirements.yml`. Provision
-Docker first, then use a separate host group, for example `hyperion_staging`:
+## Example: Hazelcast
 
 ```yaml
-# host_vars/generation.staging.example.yml
+# Dedicated worker inventory; supply secrets through Ansible Vault.
 ai_worker_dedicated_host: true
-ai_worker_id: staging-worker-1
-# Replace these with qualified registry references containing 64 hex digest digits.
-ai_worker_image: "registry.example/ai-worker@sha256:<digest>"
-ai_worker_sandbox_image: "registry.example/hyperion-java-gradle@sha256:<digest>"
+ai_worker_id: generation-1
+ai_worker_image: "registry.example/artemis-aiworker@sha256:<64 hex digits>"
+ai_worker_sandbox_image: "registry.example/hyperion-sandbox@sha256:<64 hex digits>"
 ai_worker_workload: hyperion-generation
-ai_worker_workload_version: 1
 ai_worker_profile: java-gradle
-ai_worker_slots: 1
-ai_worker_broker_url: "tcp://generation-broker.staging.example:61617?sslEnabled=true&verifyHost=true&callTimeout=5000&callFailoverTimeout=5000"
-ai_worker_broker_user: staging-worker-1
-ai_worker_broker_password: "{{ vault_ai_worker_broker_password }}"
-ai_worker_model_base_url: "https://approved-provider.example/v1"
+ai_worker_provider: hazelcast
+ai_worker_eureka_url: "https://admin:{{ vault_registry_password }}@registry.example/eureka/"
+ai_worker_model_base_url: "https://approved-model.example/v1"
 ai_worker_model: qualified-model
 ai_worker_model_api_key: "{{ vault_ai_worker_model_api_key }}"
 ```
 
+The worker uses `spring.hazelcast.localInstances=false`, so its Hazelcast client
+joins the same named cluster as production core nodes. Eureka must advertise
+core members on addresses the worker host can reach. The worker does not
+register itself as a Eureka service or become a Hazelcast data member.
+
+## Example: Redis/Valkey
+
+Replace the provider settings above with:
+
 ```yaml
-- name: Deploy isolated staging authoring workers
-  hosts: hyperion_staging
-  roles:
-    - ls1intum.artemis.ai_worker
+ai_worker_provider: redis
+ai_worker_valkey:
+  host: valkey.internal
+  port: 6379
+  username: generation-worker
+  password: "{{ vault_generation_worker_valkey_password }}"
 ```
 
-The provider must implement the OpenAI-compatible chat API. Use its documented
-Spring AI base URL; the exact URL path depends on the provider. The model is bound
-to `spring.ai.openai.chat.options.model`, with retries disabled for attributable
-usage. Prompt/tool content capture is disabled. Provider access is worker-local:
-the core's model configuration is not inherited.
+Use the same authoritative Redis/Valkey deployment and distributed-data
+namespace as core. Give the worker a separate restricted account if your
+provider policy supports it. The worker must read and write its command,
+event, heartbeat and lease data. Eureka is disabled for this provider.
 
-Configure only eligible core nodes with LocalVC, LocalCI and a supported distributed
-data provider (Hazelcast or Redis/Valkey with the provider-neutral coordination
-implementation; older Artemis revisions that reject Redis are not compatible):
+## Core and writer settings
+
+On every eligible core coordinator, use the collection's `artemis` role with:
 
 ```yaml
 artemis_hyperion_enabled: true
 artemis_hyperion_exercise_generation_enabled: true
-artemis_aiworker:
-  broker_url: "tcp://generation-broker.staging.example:61617?sslEnabled=true&verifyHost=true&callTimeout=5000&callFailoverTimeout=5000"
-  user: staging-hyperion-core
-  password: "{{ vault_hyperion_core_broker_password }}"
-  ids: [staging-worker-1]
+artemis_aiworker_ids: [generation-1]
+# Set artemis_aiworker_enabled: true only for worker coordination without Hyperion generation.
 ```
 
-Set `artemis_hyperion_exercise_generation_enabled: true` on **all core/LocalVC
-writer nodes** in this deployment. Writer-only nodes may keep
-`artemis_hyperion_enabled: false` and `artemis_aiworker_enabled: false`; they need
-mutation protection, not model or broker credentials. Validation checks generation
-prerequisites on authoring nodes and storage durability on every opted-in writer.
-The two Hyperion settings start AI Worker coordination on eligible core nodes;
-`artemis_aiworker_enabled` is not a third requirement. Set it only to coordinate
-other worker workloads while Hyperion generation is off.
-When the generation flag is absent or false throughout a deployment, ordinary
-writes do not load the generation mutation service. Drain runs and stop all writers
-before changing this flag, then restart with consistent values. Do not disable it
-to bypass an interrupted save or mix guarded and unguarded writer nodes.
+Keep `artemis_hyperion_exercise_generation_enabled: true` on every exercise
+writer, even a writer that does not run Hyperion. This enables the mutation
+guard on those nodes. A generation coordinator also needs `core`, `localci`
+and `localvc` profiles. The core and worker must use the same provider.
 
-The worker itself has no Hazelcast/Redis, database, or repository credentials.
-Only core/LocalVC writers participate in the application coordination store:
-
-- With Hazelcast, use data-member writer nodes and configure the expected member
-  count consistently; admission requires all members and recovery a strict majority.
-- With Redis/Valkey, use the same authoritative, persistent, non-evicting store on
-  every writer, with `valkey_appendonly: true`, `valkey_appendfsync: always`, and
-  `valkey_maxmemory_policy: noeviction`. Define these in shared inventory variables
-  for both the Valkey host and Artemis writer hosts; core admission validation
-  rejects the snapshot-only defaults. Apply and verify them on the store before
-  enabling generation. Permit `CLIENT LIST`: Artemis verifies unique process incarnations
-  independently of human-readable client names and fails closed if the view is
-  incomplete. There is no Hazelcast member-count requirement for Redis clients.
-- Never flush/replace the coordination store under running writers. Asynchronous
-  Redis failover can lose acknowledged writes; this role does not certify automatic
-  failover safety. Drain and stop writers before store recovery, reconcile interrupted
-  saves, and verify a canary before reopening authoring.
-- A disconnected writer can still be writing Git or the database. Non-cancellable
-  slots require the existing audited, exact-token recovery after the owning JVM is
-  confirmed stopped; they are not released automatically on connection loss.
-
-Core and worker accounts must differ. All writer nodes must run the compatible
-exercise-mutation guard. Use distinct accounts, hosts, queues and model budgets
-for staging, production and test servers. Do not add test workers to a production
-core's ID list. No inventory is enabled automatically by installing this role.
-
-## Capacity and maintenance
-
-Defaults: one slot (range 1–16), 2 GiB and two CPU equivalents per generated-code
-sandbox, 256 sandbox PIDs, plus a 2 GiB/two-CPU supervisor. Host memory must cover
-all concurrent sandboxes, supervisor JVM, Docker and the OS; these are limits,
-not a sizing guarantee. Start small and measure. The role preloads the digest-pinned
-sandbox image; no job can request an image pull. `runtime` defaults to `runc`;
-install and qualify an alternative such as `runsc` before selecting it.
-
-The role refuses to touch an already-running supervisor unless
-`ai_worker_maintenance_confirmed: true` is explicitly supplied. This is
-conservative: even a normal rerun requires the maintenance check. Before setting
-it, prevent new authoring requests and verify all runs, including saving phases,
-have finished. The flag does not drain automatically. The worker has a two-minute
-shutdown bound; Docker allows 150 seconds before forced termination. Neither is
-a substitute for draining persistence on core.
-
-Promote immutable worker and sandbox digests after qualification in staging.
-Drain and upgrade core writers and workers together; do not mix protocol versions.
-Back up database, repositories and deployment configuration, retain prior digests,
-and coordinate rollback of both sides. The role does not wipe application data.
-
-## Verification
-
-Check **Administration → AI Generation** for worker state, free/total slots, last contact
-and running jobs, including authoring review and cancellation. The final application uses
-a single page with authenticated live updates rather than browser polling.
-Ansible container startup is not application readiness.
-Run one controlled unreleased Java/Gradle exercise through generation, verify
-solution/starter grading and saved artifacts, cancel another run, and test undo.
-In staging, test worker interruption, reconnect and guarded recovery before
-production rollout. Confirm ordinary LocalCI builds remain independent.
-
-Local role checks require no infrastructure credentials or model calls:
-
-```sh
-python -m unittest discover -s tests -p 'test_ai_worker.py' -v
-ansible-lint roles/ai_worker
+```yaml
+- name: Deploy isolated generation workers
+  hosts: generation_workers
+  roles:
+    - ls1intum.artemis.ai_worker
 ```
 
-These tests validate configuration, secret quoting and container restrictions;
-they do not certify TLS connectivity, host isolation or live generation.
+Pin both images by SHA-256 digest. Set `ai_worker_maintenance_confirmed: true`
+only after new work is stopped and active assignments and core persistence have
+drained. The role checks for a running worker before replacement, protects the
+rendered configuration, preloads the sandbox image and starts the worker with
+no published ports. The model key stays on the worker; generation model calls
+go from the worker directly to the model provider, not through core.
 
-## Other workloads and small test installations
-
-The role requires explicit `ai_worker_workload` and `ai_worker_profile` values. It
-never installs an implementation from a job. Only capabilities built into the
-pinned worker image are usable. Model credentials are required for
-`hyperion-generation`; another workload can run with model chat disabled.
-
-A test installation may use a dedicated VM on the same physical host, applying
-this role normally with `ai_worker_dedicated_host: true`. No separate physical
-machine is required. Do not share the core or build agent's Docker daemon.
-
-An advanced test deployment with an independently isolated daemon can explicitly
-set `ai_worker_dedicated_host: false`, `ai_worker_isolated_daemon: true`, and
-`ai_worker_docker_socket` to its non-default Unix socket. All image, inspection
-and container operations target that daemon, and only that socket is mounted.
-The role cannot verify the underlying isolation: another rootful daemon on the
-same core host is not a VM security boundary. Use dedicated VMs for staging and
-production. Neither option enables generation in any inventory automatically.
-
-Upgrade core, worker and broker ACLs together after draining: protocol 4 uses
-`aiworker.<id>.commands/events`, the `artemis.aiworker` configuration namespace,
-and generic workload/schema/profile capabilities. Older Hyperion-only workers
-are incompatible. Reconcile old containers before changing ownership labels;
-never flush an active coordination store to accomplish the migration.
-
-### Choose the worker image
-
-Artemis builds one WAR. For `hyperion-generation`, build the production WAR
-and the worker image from the same checkout as the core image:
-
-```sh
-./gradlew -Pprod -Pwar bootWar
-docker build --build-arg ARTEMIS_WAR=build/libs/Artemis-<version>.war \
-  -f docker/aiworker/worker.Dockerfile .
-```
-
-Replace `<version>` with the WAR that the build produced. Publish the image,
-then set `ai_worker_image` to its registry digest. The image starts the separate
-AI Worker entry point, not the Artemis HTTP server. The selected workload
-activates Hyperion services; the standalone profile excludes server database
-and distributed-store configuration.
-The isolated host must still block database and private network access. Do not
-mount its Docker socket into the core server.
-
-Pin the worker and sandbox images by digest. Use the same Artemis revision for
-core and worker because both speak protocol 4. No separate generic-supervisor or
-Hyperion worker JAR is built.
-
-The final Hyperion integration adds no database schema changes. Activity and automatic
-undo references expire in distributed storage; saved exercise versions use existing
-storage. A complete loss of coordination state requires stopping writers and manual
-reconciliation, not an automatic SQL recovery. Retain the documented Redis durability
-settings and do not flush the store while writers are running.
+After deployment, check worker capacity in Artemis Administration and run a
+small generation, cancellation and undo test. A green container status alone
+does not prove the provider or sandbox is ready.

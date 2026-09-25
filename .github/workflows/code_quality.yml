@@ -37,4 +37,6 @@ jobs:
       - name: Install configuration-test dependencies
         run: pip install ansible-core==2.19.13 PyYAML==6.0.3
       - name: Validate AI Worker and Hyperion configuration
-        run: python -m unittest discover -s tests -p 'test_ai_worker.py' -v
+        run: |
+          ansible-playbook -i localhost, tests/ai_worker_configuration.yml
+          python -m unittest discover -s tests -p 'test_ai_worker.py' -v

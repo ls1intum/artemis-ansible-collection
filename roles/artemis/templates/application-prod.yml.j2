@@ -366,11 +366,6 @@ artemis:
     email: {{ artemis_email }}
 {% endif %}
 
-  hyperion:
-    enabled: {{ artemis_hyperion_enabled | bool | lower }}
-    exercise-generation:
-      enabled: {{ artemis_hyperion_exercise_generation_enabled | bool | lower }}
-
 {% if artemis_computed_is_core_node %}
 
   programming:
@@ -470,15 +465,6 @@ artemis:
       enable: {{ enable_science_event_logging | lower }}
 {% endif %}
 
-{% if (artemis_aiworker_enabled | bool) or ((artemis_hyperion_enabled | bool) and (artemis_hyperion_exercise_generation_enabled | bool) and (artemis_computed_is_core_node | bool)) %}
-  aiworker:
-    enabled: true
-    broker-url: {{ artemis_aiworker.broker_url | to_json }}
-    user: {{ artemis_aiworker.user | to_json }}
-    password: {{ artemis_aiworker.password | to_json }}
-    ids: {{ artemis_aiworker.ids | to_json }}
-{% endif %}
-
 {% if artemis_llm_cost is defined %}
   llm:
     model-costs:
@@ -495,6 +481,16 @@ artemis:
     enabled: {{ artemis_telemetry_enabled | lower }}
     sendAdminDetails: {{ artemis_send_admin_details | lower }}
     destination: {{ artemis_telemetry_destination }}
+{% endif %}
+
+  hyperion:
+    enabled: {{ artemis_hyperion_enabled | lower }}
+    exercise-generation:
+      enabled: {{ artemis_hyperion_exercise_generation_enabled | lower }}
+{% if artemis_computed_is_core_node %}
+  aiworker:
+    enabled: {{ artemis_aiworker_enabled | lower }}
+    ids: {{ artemis_aiworker_ids | to_json }}
 {% endif %}
 
 {% if licenses is defined and licenses is not none %}
