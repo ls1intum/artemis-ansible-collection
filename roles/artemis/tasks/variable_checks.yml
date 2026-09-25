@@ -119,3 +119,25 @@
       or valkey.port is not defined or valkey.port is none
       or valkey.username is not defined or valkey.username is none
       or valkey.password is not defined or valkey.password is none
+
+- name: Require Hyperion when exercise generation is enabled
+  ansible.builtin.assert:
+    that:
+      - artemis_hyperion_enabled | bool
+    fail_msg: Enable Hyperion before enabling whole-exercise generation.
+  when: artemis_hyperion_exercise_generation_enabled | bool
+
+- name: Check AI Worker destinations on generation coordinators
+  ansible.builtin.assert:
+    that:
+      - artemis_aiworker_ids | length > 0
+      - artemis_aiworker_ids | unique | list | length == artemis_aiworker_ids | length
+      - artemis_aiworker_ids | select('match', '^[a-zA-Z0-9_-]{1,64}$') | list | length == artemis_aiworker_ids | length
+    fail_msg: Configure distinct AI Worker IDs on every generation coordinator.
+  when:
+    - artemis_computed_is_core_node | bool
+    - >-
+      artemis_aiworker_enabled | bool or
+      (artemis_hyperion_exercise_generation_enabled | bool and
+      continuous_integration.localci is defined and continuous_integration.localci is not none and
+      version_control.localvc is defined and version_control.localvc is not none)

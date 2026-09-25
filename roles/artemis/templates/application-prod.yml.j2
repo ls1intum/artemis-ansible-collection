@@ -467,6 +467,13 @@ artemis:
 
   hyperion:
     enabled: {{ artemis_hyperion_enabled | lower }}
+    exercise-generation:
+      enabled: {{ artemis_hyperion_exercise_generation_enabled | lower }}
+{% if artemis_computed_is_core_node %}
+  aiworker:
+    enabled: {{ artemis_aiworker_enabled | lower }}
+    ids: {{ artemis_aiworker_ids | to_json }}
+{% endif %}
 
 {% if artemis_llm_cost is defined %}
   llm:
