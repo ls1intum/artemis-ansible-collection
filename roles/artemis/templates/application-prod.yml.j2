@@ -562,8 +562,10 @@ sentry:
 {% if artemis_computed_is_core_node %}
 # Properties to be exposed on the /info management endpoint
 info:
-  operatorName: {{ artemis_operator_name }}
-  operatorAdminName: {{ artemis_operator_admin_name }}
+  # Written as JSON strings, which YAML reads as double-quoted scalars, so that names with ': ', '#', quotes or a leading '*' stay text
+  operatorName: {{ artemis_operator_name | to_json(ensure_ascii=False) }}
+  operatorAdminName: {{ artemis_operator_admin_name | to_json(ensure_ascii=False) }}
+  universityName: {{ artemis_university_name | to_json(ensure_ascii=False) }}
   contact: {{ artemis_email }}
 {% if is_testserver is defined and is_testserver is sameas true %}
   testServer: true
