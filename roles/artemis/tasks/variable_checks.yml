@@ -38,8 +38,8 @@
 
 # Artemis refuses to start a core node without these, independently of telemetry; a build agent neither reads nor
 # receives them. Caught here rather than at boot, so the play stops with the variable named instead of the service
-# failing to come up after a deploy. Artemis also rejects template values such as "Admin" or "Your University"; only
-# emptiness is checked here.
+# failing to come up after a deploy. Artemis also rejects further template values such as "Admin" or "Your University";
+# here only emptiness, the defaults this collection used to ship, and angle-bracket examples are checked.
 - name: Check that the installation metadata is set
   fail:
     msg: >-
@@ -53,6 +53,21 @@
   when:
     - artemis_computed_is_core_node | bool
     - lookup('ansible.builtin.vars', item, default='') | default('', true) | string | trim | length == 0
+
+- name: Check that the installation metadata is not a template value
+  fail:
+    msg: >-
+      {{ item }} is set to the template value "{{ lookup('ansible.builtin.vars', item) }}", which Artemis rejects at
+      startup. Set it to the installation's actual operator, administrator or university.
+  loop:
+    - artemis_operator_name
+    - artemis_operator_admin_name
+    - artemis_university_name
+  vars:
+    metadata_value: "{{ lookup('ansible.builtin.vars', item, default='') | default('', true) | string | trim }}"
+  when:
+    - artemis_computed_is_core_node | bool
+    - metadata_value | lower in ['anonymous university', 'anonymous university admin'] or metadata_value is match('^<.*>$')
 
 - name: Check Spring AI Azure OpenAI configuration completeness (optional)
   fail:
