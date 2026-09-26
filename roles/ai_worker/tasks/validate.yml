@@ -1,0 +1,39 @@
+---
+- name: Validate the isolated worker configuration
+  ansible.builtin.assert:
+    that:
+      - ai_worker_dedicated_host | bool or (ai_worker_isolated_daemon | bool and ai_worker_docker_socket != "/var/run/docker.sock")
+      - ai_worker_docker_socket is match('^/[a-zA-Z0-9/_.-]+$')
+      - ai_worker_workload is match('^[a-z][a-z0-9-]{0,63}$')
+      - ai_worker_workload_version is integer
+      - ai_worker_workload_version > 0
+      - ai_worker_id is match('^[a-zA-Z0-9_-]{1,64}$')
+      - ai_worker_image is match('^\S+@sha256:[a-f0-9]{64}$')
+      - ai_worker_sandbox_image is match('^\S+@sha256:[a-f0-9]{64}$')
+      - ai_worker_profile is match('^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$')
+      - ai_worker_profile | length <= 64
+      - ai_worker_slots is integer
+      - ai_worker_slots | int >= 1
+      - ai_worker_slots | int <= 16
+      - ai_worker_sandbox_memory_bytes | int > 0
+      - ai_worker_sandbox_cpu_quota | int > 0
+      - ai_worker_sandbox_pids | int > 0
+      - ai_worker_cpus | float > 0
+      - ai_worker_runtime | length > 0
+      - ai_worker_directory is match('^/[a-zA-Z0-9/_-]+$')
+      - ai_worker_provider in ['hazelcast', 'redis']
+      - ai_worker_provider != 'hazelcast' or ai_worker_eureka_url is match('^https?://')
+      - ai_worker_provider != 'redis' or ai_worker_valkey.host | default('') | length > 0
+      - ai_worker_provider != 'redis' or ai_worker_valkey.port | default(0) | int > 0
+      - ai_worker_provider != 'redis' or ai_worker_valkey.username | default('') | length > 0
+      - ai_worker_workload != "hyperion-generation" or ai_worker_model_base_url is match('^https://')
+      - ai_worker_workload != "hyperion-generation" or ai_worker_model | length > 0
+    fail_msg: Configure an isolated worker host, digest-pinned images, shared Hazelcast/Eureka or Redis access and HTTPS model provider.
+
+- name: Validate worker secrets without logging their values
+  ansible.builtin.assert:
+    that:
+      - ai_worker_provider != 'redis' or ai_worker_valkey.password | default('') | length > 0
+      - ai_worker_workload != "hyperion-generation" or ai_worker_model_api_key | length > 0
+    fail_msg: Supply worker provider and model credentials through Ansible Vault.
+  no_log: true

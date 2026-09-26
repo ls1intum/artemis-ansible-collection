@@ -424,6 +424,11 @@ artemis_local_llm_deployment_enabled: false
 #    temperature: 1.0
 
 artemis_hyperion_enabled: false
+# All exercise-writing nodes need the generation mutation guard when this is true.
+artemis_hyperion_exercise_generation_enabled: false
+# Set the same worker IDs on each eligible core coordinator.
+artemis_aiworker_enabled: false
+artemis_aiworker_ids: []
 
 # LLM model costs for usage tracking, EUR per million tokens (OpenAI list price USD x 0.92).
 # Override or add entries in your inventory as needed.

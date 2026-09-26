@@ -1,0 +1,31 @@
+---
+# The supervisor controls Docker. This must be an isolated generation host/VM,
+# never the Docker daemon of an Artemis core, database or ordinary build agent.
+ai_worker_dedicated_host: false
+ai_worker_maintenance_confirmed: false
+ai_worker_id: ""
+ai_worker_image: ""
+ai_worker_sandbox_image: ""
+ai_worker_workload: ""
+ai_worker_workload_version: 1
+ai_worker_profile: ""
+ai_worker_isolated_daemon: false
+ai_worker_docker_socket: /var/run/docker.sock
+ai_worker_directory: /opt/ai-worker
+ai_worker_slots: 1
+ai_worker_runtime: runc
+ai_worker_sandbox_memory_bytes: 2147483648
+ai_worker_sandbox_cpu_quota: 200000
+ai_worker_sandbox_pids: 256
+ai_worker_memory: 2g
+ai_worker_cpus: 2
+# Match the core nodes' DistributedDataProvider; the worker never hosts a data member.
+ai_worker_provider: hazelcast
+ai_worker_eureka_url: ""
+ai_worker_valkey: {}
+
+ai_worker_model_base_url: ""
+ai_worker_model: ""
+ai_worker_model_api_key: ""
+ai_worker_model_timeout: 5m
+ai_worker_microsoft_foundry: false
