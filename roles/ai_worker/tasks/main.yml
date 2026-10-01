@@ -1,0 +1,88 @@
+---
+- name: Validate AI worker inputs
+  ansible.builtin.import_tasks: validate.yml
+  tags: [validation]
+
+- name: Inspect an existing worker before maintenance
+  community.docker.docker_container_info:
+    docker_host: "unix://{{ ai_worker_docker_socket }}"
+    name: ai-worker
+  register: ai_worker_existing
+  become: true
+
+- name: Require a drained maintenance window before touching a running worker
+  ansible.builtin.assert:
+    that:
+      - ai_worker_maintenance_confirmed | bool or not (ai_worker_existing.exists and ai_worker_existing.container.State.Running)
+    fail_msg: Drain authoring, verify no active assignments, and set ai_worker_maintenance_confirmed for this deployment.
+
+- name: Inspect the dedicated Docker socket
+  ansible.builtin.stat:
+    path: "{{ ai_worker_docker_socket }}"
+  register: ai_worker_socket
+  become: true
+
+- name: Require a local Docker daemon
+  ansible.builtin.assert:
+    that:
+      - ai_worker_socket.stat.exists
+      - ai_worker_socket.stat.issock
+    fail_msg: Provision Docker on this isolated host before deploying the worker.
+
+- name: Preload the immutable sandbox image
+  community.docker.docker_image:
+    docker_host: "unix://{{ ai_worker_docker_socket }}"
+    name: "{{ ai_worker_sandbox_image }}"
+    source: pull
+  become: true
+
+- name: Create the private worker configuration directory
+  ansible.builtin.file:
+    path: "{{ ai_worker_directory }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+  become: true
+
+- name: Render worker-only configuration and credentials
+  ansible.builtin.template:
+    src: application.yml.j2
+    dest: "{{ ai_worker_directory }}/application.yml"
+    owner: "1000"
+    group: "1000"
+    mode: "0400"
+  register: ai_worker_configuration
+  become: true
+  no_log: true
+  diff: false
+
+- name: Run the isolated worker supervisor
+  community.docker.docker_container:
+    docker_host: "unix://{{ ai_worker_docker_socket }}"
+    name: ai-worker
+    image: "{{ ai_worker_image }}"
+    state: started
+    restart_policy: unless-stopped
+    restart: "{{ ai_worker_configuration.changed }}"
+    user: "1000:1000"
+    groups: ["{{ ai_worker_socket.stat.gid | string }}"]
+    read_only: true
+    cap_drop: [ALL]
+    security_opts: [no-new-privileges:true]
+    memory: "{{ ai_worker_memory }}"
+    cpus: "{{ ai_worker_cpus }}"
+    pids_limit: 512
+    stop_timeout: 150
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,size=128m,mode=1777
+    volumes:
+      - "{{ ai_worker_docker_socket }}:/var/run/docker.sock"
+      - "{{ ai_worker_directory }}/application.yml:/config/application.yml:ro"
+    env:
+      SPRING_CONFIG_ADDITIONAL_LOCATION: file:/config/application.yml
+    log_driver: json-file
+    log_options:
+      max-size: 10m
+      max-file: "3"
+  become: true

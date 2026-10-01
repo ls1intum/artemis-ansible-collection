@@ -48,6 +48,8 @@
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
     mode: "660"
+  no_log: true
+  diff: false
   notify: restart docker artemis
 
 - name: Copy artemis.env to artemis directory
@@ -58,6 +60,8 @@
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
     mode: "660"
+  no_log: true
+  diff: false
   notify: restart docker artemis
 
 - name: Copy database.env to artemis directory
@@ -68,6 +72,8 @@
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
     mode: "660"
+  no_log: true
+  diff: false
   notify: restart docker artemis
 
 - name: Copy node env files
@@ -82,6 +88,8 @@
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
     mode: "660"
+  no_log: true
+  diff: false
   notify: restart docker artemis
 
 - include_tasks: generate_ssh_keys.yml
