@@ -34,8 +34,8 @@ spring:
 {% endif %}
   datasource:
     # Not repeated here, because the WAR's own config/application-prod.yml already sets them and this file only
-    # layers on top of it: the Hikari data source type, the pool name, auto-commit false (which Hibernate's
-    # provider_disables_autocommit needs), and spring.jpa.database: POSTGRESQL.
+    # layers on top of it: the Hikari data source type, the pool name and auto-commit false (which Hibernate's
+    # provider_disables_autocommit needs).
     url: jdbc:postgresql://{{ artemis_database_host }}:{{ artemis_database_port }}/{{ artemis_database_dbname }}?sslmode=disable
     username: {{ artemis_database_username }}
     password: {{ artemis_database_password }}
@@ -55,6 +55,13 @@ spring:
         # prepStmtCacheSize, prepStmtCacheSqlLimit, useServerPrepStmts - are not properties this driver knows, so
         # it ignored all four and the cache ran at its default the whole time.
         preparedStatementCacheQueries: {{ artemis_database_prep_stmt_cache_size | default(400) }}
+  jpa:
+    # The dialect must be named, because the prod profile turns off hibernate.boot.allow_jdbc_metadata_access and
+    # Hibernate therefore never asks the database what it is talking to. The WAR's config/application-prod.yml sets
+    # POSTGRESQL, but a node that also runs the buildagent profile loads config/application-buildagent.yml after it,
+    # and that file resets the key to `default` - a pure build agent has no database to build a dialect for. This
+    # file is read after both, so saying it here restores it for a node that is a core node and an agent at once.
+    database: postgresql
 {% if is_multinode_install and broker is defined %}
   websocket:
     broker:
