@@ -1,0 +1,77 @@
+---
+- name: Check if the exporter database password is set
+  assert:
+    that:
+      - postgres_exporter_db_password | length > 0
+    fail_msg: "You must set the postgres_exporter_db_password variable"
+
+# The exporter owns nothing and writes nothing, so it gets a plain login role instead of the
+# superuser a psql session would use. pg_monitor is the read-only monitoring role PostgreSQL
+# ships for exactly this: it carries pg_read_all_stats, pg_read_all_settings and
+# pg_stat_scan_tables, which together cover every collector without granting access to any
+# table data.
+- name: Create the exporter database role
+  become: true
+  become_user: "{{ postgres_exporter_login_user }}"
+  community.postgresql.postgresql_user:
+    name: "{{ postgres_exporter_db_user }}"
+    password: "{{ postgres_exporter_db_password }}"
+    role_attr_flags: "LOGIN,NOSUPERUSER,NOCREATEDB,NOCREATEROLE"
+    login_unix_socket: "{{ postgres_exporter_login_unix_socket }}"
+    login_port: "{{ postgres_exporter_db_port }}"
+    state: present
+  environment:
+    PGOPTIONS: "-c password_encryption={{ postgres_exporter_password_encryption }}"
+  no_log: "{{ not lookup('env', 'ANSIBLE_DEBUG') | bool }}"
+  # Becoming an unprivileged user needs either pipelining or world readable temp files.
+  # See: https://github.com/ansible/ansible/issues/16048#issuecomment-229012509
+  vars:
+    ansible_ssh_pipelining: true
+
+# granted_by_any so an existing membership counts no matter which superuser granted it -
+# without it PostgreSQL 16 and later record one grant per granting role, and a membership
+# granted by hand would be duplicated here on every run.
+- name: Grant pg_monitor to the exporter database role
+  become: true
+  become_user: "{{ postgres_exporter_login_user }}"
+  community.postgresql.postgresql_membership:
+    target_roles: "{{ postgres_exporter_db_user }}"
+    memberships:
+      - groups: pg_monitor
+    granted_by_any: true
+    login_unix_socket: "{{ postgres_exporter_login_unix_socket }}"
+    login_port: "{{ postgres_exporter_db_port }}"
+    state: present
+  vars:
+    ansible_ssh_pipelining: true
+
+# pg_monitor covers reading the view, but the view only exists in a database where the
+# extension was created, and CREATE EXTENSION is a one-off nobody remembers after a restore.
+- name: Create the pg_stat_statements extension
+  become: true
+  become_user: "{{ postgres_exporter_login_user }}"
+  community.postgresql.postgresql_ext:
+    name: pg_stat_statements
+    login_db: "{{ postgres_exporter_db_name }}"
+    login_unix_socket: "{{ postgres_exporter_login_unix_socket }}"
+    login_port: "{{ postgres_exporter_db_port }}"
+    state: present
+  when: postgres_exporter_pg_stat_statements
+  vars:
+    ansible_ssh_pipelining: true
+
+# postgres_exporter_name has to be emptied explicitly: the upstream role prefers it over the
+# URI, and its default is a unix socket connection as the exporter's own system user, which
+# peer authentication rejects.
+- name: Install postgres exporter
+  include_role:
+    name: prometheus.prometheus.postgres_exporter
+  vars:
+    postgres_exporter_version: "{{ postgres_exporter_release }}"
+    postgres_exporter_web_listen_address: "{{ postgres_exporter_listen_address }}"
+    postgres_exporter_name: ""
+    postgres_exporter_uri: "{{ postgres_exporter_data_source_uri }}"
+    postgres_exporter_username: "{{ postgres_exporter_db_user }}"
+    postgres_exporter_password: "{{ postgres_exporter_db_password }}"
+    postgres_exporter_enabled_collectors: "{{ postgres_exporter_collectors }}"
+    postgres_exporter_disabled_collectors: "{{ postgres_exporter_no_collectors }}"
