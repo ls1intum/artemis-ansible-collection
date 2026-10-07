@@ -4,13 +4,20 @@
   assert:
     that:
       - weaviate_domain is defined and weaviate_domain != ""
-      - weaviate_api_key is defined and weaviate_api_key != ""
+      - weaviate_primary_api_key is defined
+      - weaviate_primary_api_key | length > 0
+      - weaviate_accepted_api_keys is sequence
+      - weaviate_accepted_api_keys | length > 0
+      - weaviate_primary_api_key in weaviate_accepted_api_keys
+      - weaviate_accepted_api_keys | select('string') | list | length == weaviate_accepted_api_keys | length
+      - weaviate_accepted_api_keys | reject('equalto', '') | list | length == weaviate_accepted_api_keys | length
       - letsencrypt_email is defined and letsencrypt_email != ""
     fail_msg: |
       Required variables are missing!
       Please ensure the following are set:
         - weaviate_domain (e.g., weaviate.example.com)
-        - weaviate_api_key (generate with: openssl rand -base64 32)
+        - weaviate_primary_api_key (generate with: openssl rand -base64 32)
+        - weaviate_accepted_api_keys (must contain the primary key)
         - letsencrypt_email (e.g., your-email@example.com)
 
 - name: Ensure weaviate group {{ weaviate_user_group }} exists
@@ -46,7 +53,6 @@
   file:
     path: "{{ item }}"
     state: directory
-    recurse: true
     owner: "{{ weaviate_user_name }}"
     group: "{{ weaviate_user_group }}"
   loop:
@@ -56,7 +62,7 @@
     - "{{ weaviate_data_directory }}"
   notify: restart docker weaviate
 
-- name: Copy configuration templates that trigger restart
+- name: Copy non-secret configuration templates that trigger restart
   become: true
   template:
     src: "{{ item.src }}"
@@ -67,10 +73,20 @@
   loop:
     - src: docker-compose.yml.j2
       dest: "{{ weaviate_working_directory }}/docker-compose.yml"
-    - src: docker.env.j2
-      dest: "{{ weaviate_working_directory }}/.env"
     - src: traefik.yml.j2
       dest: "{{ weaviate_traefik_directory }}/traefik.yml"
+  notify: restart docker weaviate
+
+- name: Copy secret-bearing Weaviate environment
+  become: true
+  ansible.builtin.template:
+    src: docker.env.j2
+    dest: "{{ weaviate_working_directory }}/.env"
+    owner: "{{ weaviate_user_name }}"
+    group: "{{ weaviate_user_group }}"
+    mode: "0600"
+  diff: false
+  no_log: true
   notify: restart docker weaviate
 
 - name: Generate Traefik config.yml from template
@@ -142,3 +158,6 @@
     chdir: "{{ weaviate_working_directory }}"
   register: weaviate_start_result
   changed_when: "'Starting' in weaviate_start_result.stdout"
+  when:
+    - weaviate_apply_runtime | bool
+    - not ansible_check_mode

@@ -24,7 +24,11 @@ weaviate_domain: # FIXME - e.g., weaviate.example.com
 # API Authentication (REQUIRED)
 # Generate a strong API key using: openssl rand -base64 32
 weaviate_api_key: # FIXME
+weaviate_primary_api_key: "{{ weaviate_api_key }}"
+weaviate_accepted_api_keys:
+  - "{{ weaviate_primary_api_key }}"
 weaviate_api_user: "admin"
+weaviate_apply_runtime: false
 
 # Logging
 # Options: trace, debug, info, warning, error, fatal, panic

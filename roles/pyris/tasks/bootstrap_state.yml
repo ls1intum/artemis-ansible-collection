@@ -1,0 +1,51 @@
+---
+- name: Check whether the Pyris working directory predates this run
+  ansible.builtin.stat:
+    path: "{{ pyris_working_directory }}"
+  register: pyris_working_directory_before
+
+- name: Check for an incomplete automatic bootstrap
+  ansible.builtin.stat:
+    path: "{{ pyris_bootstrap_pending_file }}"
+  register: pyris_bootstrap_pending
+
+- name: Check for a completed automatic bootstrap
+  ansible.builtin.stat:
+    path: "{{ pyris_bootstrap_complete_file }}"
+  register: pyris_bootstrap_complete
+
+- name: Decide whether this run must bootstrap a fresh Pyris host
+  ansible.builtin.set_fact:
+    pyris_bootstrap_required: >-
+      {{
+        (pyris_bootstrap_runtime | bool)
+        and not pyris_bootstrap_complete.stat.exists
+        and
+        (
+          not pyris_working_directory_before.stat.exists
+          or pyris_bootstrap_pending.stat.exists
+        )
+      }}
+
+- name: Create durable Pyris bootstrap state directory
+  ansible.builtin.file:
+    path: "{{ pyris_bootstrap_state_directory }}"
+    state: directory
+    owner: "{{ pyris_bootstrap_state_owner }}"
+    group: "{{ pyris_bootstrap_state_group }}"
+    mode: "0755"
+  when:
+    - pyris_bootstrap_required | bool
+    - not ansible_check_mode
+
+- name: Mark an automatic Pyris bootstrap as pending
+  ansible.builtin.copy:
+    content: "Ansible must retry Pyris bootstrap until the completion marker exists.\n"
+    dest: "{{ pyris_bootstrap_pending_file }}"
+    owner: "{{ pyris_bootstrap_state_owner }}"
+    group: "{{ pyris_bootstrap_state_group }}"
+    mode: "0644"
+    force: false
+  when:
+    - pyris_bootstrap_required | bool
+    - not ansible_check_mode

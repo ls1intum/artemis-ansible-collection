@@ -1,0 +1,96 @@
+---
+- name: Test Pyris automatic-bootstrap state transitions
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Create isolated test root
+      ansible.builtin.tempfile:
+        state: directory
+        prefix: pyris-bootstrap-test.
+      register: pyris_test_root
+
+    - name: Set test paths
+      ansible.builtin.set_fact:
+        pyris_working_directory: "{{ pyris_test_root.path }}/opt/pyris"
+        pyris_bootstrap_state_directory: "{{ pyris_test_root.path }}/var/lib/artemis-ansible/pyris"
+        pyris_bootstrap_pending_file: "{{ pyris_test_root.path }}/var/lib/artemis-ansible/pyris/pending"
+        pyris_bootstrap_complete_file: "{{ pyris_test_root.path }}/var/lib/artemis-ansible/pyris/complete"
+        pyris_bootstrap_runtime: true
+        pyris_bootstrap_state_owner: "{{ lookup('env', 'USER') }}"
+        pyris_bootstrap_state_group: "{{ lookup('pipe', 'id -gn') }}"
+
+    - name: Initialize state for a fresh host
+      ansible.builtin.include_tasks: ../tasks/bootstrap_state.yml
+
+    - name: Verify fresh host is pending bootstrap
+      ansible.builtin.assert:
+        that:
+          - pyris_bootstrap_required | bool
+          - pyris_bootstrap_pending_file is file
+
+    - name: Simulate provisioning before a runtime failure
+      ansible.builtin.file:
+        path: "{{ pyris_working_directory }}"
+        state: directory
+        mode: "0755"
+
+    - name: Reinitialize state after the simulated failure
+      ansible.builtin.include_tasks: ../tasks/bootstrap_state.yml
+
+    - name: Verify failed provisioning remains retryable
+      ansible.builtin.assert:
+        that:
+          - pyris_working_directory_before.stat.exists
+          - pyris_bootstrap_pending.stat.exists
+          - pyris_bootstrap_required | bool
+
+    - name: Simulate a successful bootstrap
+      ansible.builtin.copy:
+        content: "complete\n"
+        dest: "{{ pyris_bootstrap_complete_file }}"
+        mode: "0644"
+
+    - name: Clear simulated pending marker
+      ansible.builtin.file:
+        path: "{{ pyris_bootstrap_pending_file }}"
+        state: absent
+
+    - name: Reinitialize successfully completed state
+      ansible.builtin.include_tasks: ../tasks/bootstrap_state.yml
+
+    - name: Verify completed bootstrap is idempotent
+      ansible.builtin.assert:
+        that:
+          - not pyris_bootstrap_required | bool
+          - pyris_bootstrap_complete.stat.exists
+          - not pyris_bootstrap_pending.stat.exists
+
+    - name: Create isolated legacy installation
+      ansible.builtin.tempfile:
+        state: directory
+        prefix: pyris-legacy-test.
+      register: pyris_legacy_root
+
+    - name: Set legacy installation paths
+      ansible.builtin.set_fact:
+        pyris_working_directory: "{{ pyris_legacy_root.path }}/opt/pyris"
+        pyris_bootstrap_state_directory: "{{ pyris_legacy_root.path }}/var/lib/artemis-ansible/pyris"
+        pyris_bootstrap_pending_file: "{{ pyris_legacy_root.path }}/var/lib/artemis-ansible/pyris/pending"
+        pyris_bootstrap_complete_file: "{{ pyris_legacy_root.path }}/var/lib/artemis-ansible/pyris/complete"
+
+    - name: Create preexisting legacy working directory
+      ansible.builtin.file:
+        path: "{{ pyris_working_directory }}"
+        state: directory
+        mode: "0755"
+
+    - name: Initialize legacy installation state
+      ansible.builtin.include_tasks: ../tasks/bootstrap_state.yml
+
+    - name: Verify legacy installation never auto-starts
+      ansible.builtin.assert:
+        that:
+          - pyris_working_directory_before.stat.exists
+          - not pyris_bootstrap_pending.stat.exists
+          - not pyris_bootstrap_complete.stat.exists
+          - not pyris_bootstrap_required | bool

@@ -1,8 +1,13 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-PROJECT_DIR="{{ pyris_working_directory }}/Pyris/docker"
-COMPOSE_FILE="pyris-production.yml"
-ENV_FILE="{{ pyris_working_directory }}/docker.env"
+REPOSITORY_URL="{{ pyris_repository_url }}"
+REPOSITORY_DIR="{{ pyris_repository_directory }}"
+STAGED_REPOSITORY_DIR="${REPOSITORY_DIR}.new"
+PROJECT_DIR="${REPOSITORY_DIR}/iris/docker"
+COMPOSE_FILE="{{ pyris_compose_file }}"
+STABLE_ENV_FILE="{{ pyris_stable_env_file }}"
+RUNTIME_ENV_FILE="{{ pyris_runtime_env_file }}"
 
 # Function: Print general usage information
 function general_help {
@@ -18,39 +23,95 @@ Commands:
 HELP
 }
 
+function prepare_checkout {
+  local pr_branch=${1:?Git branch is required}
+
+  rm -rf "$STAGED_REPOSITORY_DIR"
+  git clone --branch "$pr_branch" --single-branch \
+    "$REPOSITORY_URL" "$STAGED_REPOSITORY_DIR"
+  if [ ! -f "$STAGED_REPOSITORY_DIR/iris/docker/$COMPOSE_FILE" ]; then
+    echo "The requested branch does not contain $COMPOSE_FILE" >&2
+    rm -rf "$STAGED_REPOSITORY_DIR"
+    return 1
+  fi
+}
+
+function activate_checkout {
+  rm -rf "$REPOSITORY_DIR"
+  mv "$STAGED_REPOSITORY_DIR" "$REPOSITORY_DIR"
+}
+
+function set_runtime_tag {
+  local pr_tag=${1:?Docker tag is required}
+  local runtime_tmp
+
+  if grep -q '^PYRIS_DOCKER_TAG=' "$RUNTIME_ENV_FILE"; then
+    runtime_tmp=$(mktemp "${RUNTIME_ENV_FILE}.XXXXXX")
+    sed "s/^PYRIS_DOCKER_TAG=.*/PYRIS_DOCKER_TAG='$pr_tag'/" \
+      "$RUNTIME_ENV_FILE" > "$runtime_tmp"
+    # Preserve the deployment user's ownership and mode on runtime.env.
+    cat "$runtime_tmp" > "$RUNTIME_ENV_FILE"
+    rm -f "$runtime_tmp"
+  else
+    printf "PYRIS_DOCKER_TAG='%s'\n" "$pr_tag" >> "$RUNTIME_ENV_FILE"
+  fi
+}
+
+function start_prepared {
+  local pr_tag=${1:?Docker tag is required}
+
+  set_runtime_tag "$pr_tag"
+  docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" \
+    --env-file "$STABLE_ENV_FILE" --env-file "$RUNTIME_ENV_FILE" \
+    up -d --pull always --no-build
+}
+
 function start {
-  local pr_tag=$1
-  local pr_branch=$2
+  local pr_tag=${1:?Docker tag is required}
+  local pr_branch=${2:?Git branch is required}
 
   echo "Starting Pyris with PR tag: $pr_tag and branch: $pr_branch"
-  rm -rf Pyris
-  git clone https://github.com/ls1intum/Pyris.git -b "$pr_branch" Pyris
-  sed -i "s/PYRIS_DOCKER_TAG=.*/PYRIS_DOCKER_TAG='$pr_tag'/g" $ENV_FILE
-  docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --pull always --no-build
+  prepare_checkout "$pr_branch"
+  activate_checkout
+  start_prepared "$pr_tag"
 }
 
 function stop {
-  # TODO: In the future extract pr_tag and pr_branch from env
-
   echo "Stopping Pyris"
-  docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" stop pyris-app
+  if [ ! -f "$PROJECT_DIR/$COMPOSE_FILE" ]; then
+    echo "No active Pyris checkout found; skipping stop"
+    return 0
+  fi
+  docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" \
+    --env-file "$STABLE_ENV_FILE" --env-file "$RUNTIME_ENV_FILE" stop pyris-app
 }
 
 function restart {
-    stop "$@"
-    start "$@"
+  local pr_tag=${1:?Docker tag is required}
+  local pr_branch=${2:?Git branch is required}
+
+  echo "Restarting Pyris with PR tag: $pr_tag and branch: $pr_branch"
+  # Clone and validate before stopping the current container. A missing or
+  # invalid branch therefore cannot interrupt the running deployment.
+  prepare_checkout "$pr_branch"
+  stop
+  activate_checkout
+  start_prepared "$pr_tag"
 }
 
 function pyris_logs {
-   docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" logs -f pyris-app
+   docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" \
+     --env-file "$STABLE_ENV_FILE" --env-file "$RUNTIME_ENV_FILE" logs -f pyris-app
 }
 
 function all_logs {
-   docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" logs -f
+   docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" \
+     --env-file "$STABLE_ENV_FILE" --env-file "$RUNTIME_ENV_FILE" logs -f
 }
 
 function run_docker_compose_cmd {
-   docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$ENV_FILE" "$@"
+   docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" \
+     --env-file "$STABLE_ENV_FILE" --env-file "$RUNTIME_ENV_FILE" "$@"
 }
 
 # read subcommand `pyris-docker subcommand server` in variable and remove base command from argument list
@@ -82,7 +143,7 @@ case "$subcommand" in
         run_docker_compose_cmd "$@"
         ;;
     *)
-        printf "Invalid Command: $subcommand\n\n" 1>&2
+        printf "Invalid Command: %s\n\n" "$subcommand" 1>&2
         general_help
         exit 1
         ;;
