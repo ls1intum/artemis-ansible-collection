@@ -101,6 +101,14 @@ weaviate_backup_schedule: "0 2 * * *"
 
 # Backup retention in days
 weaviate_backup_retention_days: 7
+
+# Always keep at least this many recent backups, even if older than the
+# retention window (prevents losing all restore points after an outage)
+weaviate_backup_retention_min_count: 2
+
+# Optional: node_exporter textfile metric for backup monitoring/alerting
+# (set to "" to disable)
+weaviate_backup_metrics_file: "/var/lib/node_exporter/weaviate_backup.prom"
 ```
 
 #### Resource Limits
@@ -211,14 +219,20 @@ The role installs a helper script at `/opt/weaviate/weaviate-docker.sh` with the
 
 ### Manual Backup
 
-Create a manual backup:
+Create a manual backup (must run as root — the backup files are written by the
+root container and the job also performs retention):
 
 ```bash
-cd /opt/weaviate
-./backup.sh
+sudo /usr/local/sbin/weaviate-backup
+# or, equivalently:
+sudo /opt/weaviate/weaviate-docker.sh backup
 ```
 
-Backups are stored in `/opt/weaviate/backups/` as compressed tar.gz files.
+Backups are stored in `/opt/weaviate/backups/` as native Weaviate backup
+directories (`backup-YYYYMMDD-HHMMSS`). They are not compressed: Weaviate
+backups consist of HNSW indexes and quantized vectors that are already
+high-entropy, so gzip provided no meaningful size reduction while adding CPU,
+transient disk usage, and a failure surface.
 
 ### Restore from Backup
 
@@ -239,12 +253,27 @@ Restore a specific backup:
 
 ### Automated Backups
 
-If `weaviate_enable_automated_backups` is enabled (default), backups run automatically according to `weaviate_backup_schedule`. Old backups are automatically deleted after `weaviate_backup_retention_days`.
+If `weaviate_enable_automated_backups` is enabled (default), a single
+root-owned job (`/usr/local/sbin/weaviate-backup`) runs from root's crontab
+according to `weaviate_backup_schedule`. Each run triggers the backup, waits
+for it to complete, verifies the result, and prunes backups older than
+`weaviate_backup_retention_days` while always keeping at least
+`weaviate_backup_retention_min_count` of the most recent ones.
+
+The job runs as root because the Weaviate container writes backup files as
+`root:root`; a non-root user can read them but cannot delete them, which is why
+earlier versions leaked one undeletable backup directory per night.
+
+If `weaviate_backup_metrics_file` is set and its directory exists (e.g. a
+node_exporter textfile collector), the job writes
+`weaviate_backup_last_success_timestamp_seconds`, `weaviate_backup_last_status`
+and `weaviate_backup_count` for alerting (e.g. alert when
+`time() - weaviate_backup_last_success_timestamp_seconds > 36*3600`).
 
 View backup logs:
 
 ```bash
-tail -f /opt/weaviate/backup.log
+tail -f /var/log/weaviate-backup.log
 ```
 
 ## Updating Weaviate
@@ -345,10 +374,10 @@ weaviate_memory_limit: "8G"
 
 If automated backups fail:
 
-1. Check backup logs: `cat /opt/weaviate/backup.log`
+1. Check backup logs: `cat /var/log/weaviate-backup.log`
 2. Verify disk space: `df -h /opt/weaviate`
-3. Test manual backup: `./backup.sh`
-4. Check API key is correct in `.env`
+3. Test manual backup: `sudo /usr/local/sbin/weaviate-backup`
+4. Check API key is correct in `/etc/weaviate/backup.env`
 
 ## Files and Directories
 
@@ -359,18 +388,19 @@ After deployment, the following structure exists:
 ├── docker-compose.yml       # Docker Compose configuration
 ├── .env                     # Environment variables
 ├── weaviate-docker.sh       # Helper script
-├── setup.sh                 # Setup script
-├── backup.sh                # Backup script
-├── restore.sh               # Restore script
-├── generate-traefik-config.sh  # Traefik config generator
-├── backup.log               # Backup logs
+├── restore.sh               # Restore script (run manually)
 ├── traefik/
 │   ├── traefik.yml         # Traefik static configuration
 │   ├── config.yml          # Traefik dynamic configuration
 │   ├── config.yml.template # Template for config generation
 │   └── acme.json           # Let's Encrypt certificates
 └── backups/                 # Backup storage directory
-    └── backup-*.tar.gz
+    └── backup-YYYYMMDD-HHMMSS/   # Native (uncompressed) backup directories
+
+# Backup job (root-owned, outside /opt/weaviate):
+/usr/local/sbin/weaviate-backup   # Backup + retention script (root cron)
+/etc/weaviate/backup.env          # Backup API key (root, mode 0600)
+/var/log/weaviate-backup.log      # Backup logs
 ```
 
 ## Related Documentation
