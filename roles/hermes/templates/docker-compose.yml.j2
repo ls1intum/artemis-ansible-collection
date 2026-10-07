@@ -8,6 +8,9 @@ services:
       - APNS_TEAM_ID={{ hermes_apns_team_id }}
       - APNS_KEY_ID={{ hermes_apns_key_id }}
       - APNS_PROD_ENVIRONMENT={{ hermes_apns_prod_environment }}
+{% if hermes_apns_fallback_environment_enabled | bool %}
+      - APNS_FALLBACK_ENVIRONMENT_ENABLED=true
+{% endif %}
       - APNS_TOKEN_KEY_PATH=/key/artemis-apns.p8
       - GOOGLE_APPLICATION_CREDENTIALS=/firebase.json
     volumes:
