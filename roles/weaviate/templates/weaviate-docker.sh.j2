@@ -11,7 +11,7 @@ Usage:
   ./$(basename "$0") <command> [options]
 
 Commands:
-  start                           Start Weaviate, Traefik and multi2vec-clip
+  start                           Start Weaviate, Traefik{% if weaviate_embedder == 'clip' %} and multi2vec-clip{% endif %}
   stop                            Stop all Weaviate services
   restart                         Restart all Weaviate services
   logs [service]                  Show logs (optionally for specific service)
