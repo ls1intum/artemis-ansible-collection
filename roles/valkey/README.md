@@ -221,6 +221,34 @@ snapshot (full disk, wrong permissions) puts every write into `MISCONF` and take
 the whole Artemis cluster down until an operator intervenes. Alert on
 `rdb_last_bgsave_status` from `INFO persistence` instead.
 
+Hyperion coordination durability
+--------------------------------
+
+The default snapshot schedule is not sufficient for Hyperion's non-expiring
+exercise ownership slots. For that workload, set these shared variables on the
+Valkey host **and** Artemis writer hosts before enabling generation:
+
+```yaml
+valkey_appendonly: true
+valkey_appendfsync: always
+valkey_maxmemory_policy: noeviction
+```
+
+`valkey_appendfsync` defaults to `everysec` to preserve existing installations;
+only `always` is accepted by the Hyperion opt-in validation. The template keeps
+`no-appendfsync-on-rewrite no`, so rewriting the AOF does not suspend fsync.
+Synchronous writes cost latency and I/O: benchmark the staging workload and alert
+on storage errors/latency, rather than silently weakening durability.
+
+Drain and stop Artemis writers while establishing or restoring the store. Verify
+`CONFIG GET appendonly appendfsync no-appendfsync-on-rewrite maxmemory-policy`
+and `INFO persistence` on the actual server before reopening authoring. Inventory
+validation cannot detect an unapplied or manually altered server configuration.
+Do not use automatic promotion of asynchronous replicas for this workload:
+persistence on a primary does not guarantee replication of acknowledged slots.
+Recover a lost/corrupt store only with writers stopped and interrupted saves
+reconciled. Never flush coordination maps under running writers.
+
 Host tuning
 -----------
 

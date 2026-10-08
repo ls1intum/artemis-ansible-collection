@@ -80,6 +80,9 @@ stop-writes-on-bgsave-error {{ 'yes' if valkey_stop_writes_on_bgsave_error else 
 rdbcompression yes
 rdbchecksum yes
 appendonly {{ 'yes' if valkey_appendonly else 'no' }}
+appendfsync {{ valkey_appendfsync }}
+# Never suspend an explicitly selected synchronous durability policy during AOF rewrite.
+no-appendfsync-on-rewrite no
 
 ################################ NOTIFICATIONS ################################
 
