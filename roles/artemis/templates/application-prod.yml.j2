@@ -10,10 +10,7 @@ spring:
           oidc:
             client-id: {{ artemis_oidc.client_id | quote }}
             client-secret: {{ artemis_oidc.client_secret | quote }}
-            scope:
-              - openid
-              - profile
-              - email
+            scope: {{ (artemis_oidc.scopes | default(['openid', 'profile', 'email'])) | join(',') | quote }}
         provider:
           oidc:
 {% if artemis_oidc.issuer_uri | default('') | length > 0 %}

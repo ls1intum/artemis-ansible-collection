@@ -65,6 +65,15 @@ artemis_oidc:
 ```
 You can provide `authorization_uri`, `token_uri`, `user_info_uri`, and `jwk_set_uri` individually. Claim mappings default to standard OIDC claims and can be overridden via `mappings.*`.
 
+Artemis requests the scopes `openid`, `profile` and `email` by default. Set `scopes` to request more, for example the client-specific scope of TUM Login that releases the matriculation number, and map the claim of the same name:
+```
+artemis_oidc:
+  scopes: ["openid", "profile", "email", "imMatrikelNr"]
+  mappings:
+    matriculation_number: "imMatrikelNr"
+```
+The scopes are rendered as one comma-separated value. The identity provider has to know the scope for your client; TUM Login registers client-specific scopes on request.
+
 To allow internal user registration:
 ```
 user_management:
