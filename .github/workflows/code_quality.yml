@@ -3,6 +3,9 @@ name: Code Quality
 
 on: [push]
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
@@ -14,8 +17,26 @@ jobs:
 
     steps:
     # Important: This sets up your GITHUB_WORKSPACE environment variable
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
       - name: Run ansible-lint
-        uses: ansible/ansible-lint@v26.8.0
+        uses: ansible/ansible-lint@665d9e07a1943254d2910faffc106adaf7ea7294 # v26.8.0
         with:
           requirements_file: "requirements.yml"
+
+  ai-worker-configuration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+      - name: Install configuration-test dependencies
+        run: pip install ansible-core==2.19.13 PyYAML==6.0.3
+      - name: Validate AI Worker and Hyperion configuration
+        run: |
+          ansible-playbook -i localhost, tests/ai_worker_configuration.yml
+          python -m unittest discover -s tests -p 'test_ai_worker.py' -v

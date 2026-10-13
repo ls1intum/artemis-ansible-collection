@@ -1,0 +1,83 @@
+---
+- name: Check Hazelcast worker configuration
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    ai_worker_dedicated_host: true
+    ai_worker_isolated_daemon: false
+    ai_worker_docker_socket: /var/run/docker.sock
+    ai_worker_cpus: 2
+    ai_worker_directory: /opt/ai-worker
+    ai_worker_microsoft_foundry: false
+    ai_worker_model_timeout: 5m
+    ai_worker_runtime: runc
+    ai_worker_workload_version: 1
+    ai_worker_slots: 1
+    ai_worker_sandbox_memory_bytes: 2147483648
+    ai_worker_sandbox_cpu_quota: 200000
+    ai_worker_sandbox_pids: 256
+    ai_worker_id: worker-1
+    ai_worker_image: "registry.example/worker@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    ai_worker_sandbox_image: "registry.example/sandbox@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    ai_worker_workload: hyperion-generation
+    ai_worker_profile: java-gradle
+    ai_worker_provider: hazelcast
+    ai_worker_eureka_url: "https://admin:password@registry.example/eureka/"
+    ai_worker_model_base_url: "https://model.example/v1"
+    ai_worker_model: test-model
+    ai_worker_model_api_key: test-key
+  tasks:
+    - ansible.builtin.import_tasks: ../roles/ai_worker/tasks/validate.yml
+    - ansible.builtin.set_fact:
+        rendered: "{{ lookup('ansible.builtin.template', playbook_dir ~ '/../roles/ai_worker/templates/application.yml.j2') | from_yaml }}"
+    - ansible.builtin.assert:
+        that:
+          - rendered.artemis['distributed-data'].provider == 'hazelcast'
+          - rendered.spring.hazelcast.localInstances == false
+          - rendered.eureka.client.enabled == true
+          - rendered.spring.ai.openai['api-key'] == 'test-key'
+          - rendered.spring.main['web-application-type'] == 'none'
+- name: Check Redis worker configuration
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    ai_worker_dedicated_host: true
+    ai_worker_isolated_daemon: false
+    ai_worker_docker_socket: /var/run/docker.sock
+    ai_worker_cpus: 2
+    ai_worker_directory: /opt/ai-worker
+    ai_worker_microsoft_foundry: false
+    ai_worker_model_timeout: 5m
+    ai_worker_runtime: runc
+    ai_worker_workload_version: 1
+    ai_worker_slots: 1
+    ai_worker_sandbox_memory_bytes: 2147483648
+    ai_worker_sandbox_cpu_quota: 200000
+    ai_worker_sandbox_pids: 256
+    ai_worker_id: worker-2
+    ai_worker_image: "registry.example/worker@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    ai_worker_sandbox_image: "registry.example/sandbox@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    ai_worker_workload: hyperion-generation
+    ai_worker_profile: java-gradle
+    ai_worker_provider: redis
+    ai_worker_valkey:
+      host: valkey.example
+      port: 6379
+      username: worker
+      password: secret
+    ai_worker_model_base_url: "https://model.example/v1"
+    ai_worker_model: test-model
+    ai_worker_model_api_key: test-key
+  tasks:
+    - ansible.builtin.import_tasks: ../roles/ai_worker/tasks/validate.yml
+    - ansible.builtin.set_fact:
+        rendered: "{{ lookup('ansible.builtin.template', playbook_dir ~ '/../roles/ai_worker/templates/application.yml.j2') | from_yaml }}"
+    - ansible.builtin.assert:
+        that:
+          - rendered.artemis['distributed-data'].provider == 'redis'
+          - rendered.spring.data.redis.host == 'valkey.example'
+          - rendered.spring.data.redis['client-name'] == 'worker-2'
+          - rendered.eureka.client.enabled == false
+          - rendered.spring.main['web-application-type'] == 'none'

@@ -1,0 +1,58 @@
+# {{ ansible_managed }}
+spring:
+  main:
+    web-application-type: none
+{% if ai_worker_provider == 'hazelcast' %}
+  hazelcast:
+    localInstances: false
+{% else %}
+  data:
+    redis:
+      host: {{ ai_worker_valkey.host | to_json }}
+      port: {{ ai_worker_valkey.port | int }}
+      username: {{ ai_worker_valkey.username | to_json }}
+      password: {{ ai_worker_valkey.password | to_json }}
+      client-name: {{ ai_worker_id | to_json }}
+{% endif %}
+  ai:
+    model:
+      chat: {{ 'openai' if ai_worker_model_api_key | length > 0 else 'none' }}
+    openai:
+      api-key: {{ ai_worker_model_api_key | to_json }}
+      base-url: {{ ai_worker_model_base_url | to_json }}
+      microsoft-foundry: {{ ai_worker_microsoft_foundry | bool | lower }}
+      max-retries: 0
+      timeout: {{ ai_worker_model_timeout | to_json }}
+      chat:
+        options:
+          model: {{ ai_worker_model | to_json }}
+artemis:
+  distributed-data:
+    provider: {{ ai_worker_provider | to_json }}
+  aiworker:
+    workload: {{ ai_worker_workload | to_json }}
+    workload-version: {{ ai_worker_workload_version | int }}
+    id: {{ ai_worker_id | to_json }}
+    image: {{ ai_worker_sandbox_image | to_json }}
+    profile: {{ ai_worker_profile | to_json }}
+    runtime: {{ ai_worker_runtime | to_json }}
+    max-concurrent-executions: {{ ai_worker_slots | int }}
+    memory-bytes: {{ ai_worker_sandbox_memory_bytes | int }}
+    cpu-quota: {{ ai_worker_sandbox_cpu_quota | int }}
+    pids: {{ ai_worker_sandbox_pids | int }}
+    shutdown-timeout: PT2M
+  telemetry:
+    gen-ai:
+      capture-content: false
+{% if ai_worker_provider == 'hazelcast' %}
+eureka:
+  client:
+    enabled: true
+    register-with-eureka: false
+    service-url:
+      defaultZone: {{ ai_worker_eureka_url | to_json }}
+{% else %}
+eureka:
+  client:
+    enabled: false
+{% endif %}
