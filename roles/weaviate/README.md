@@ -1,18 +1,30 @@
 # Weaviate
 
-This role deploys a shared Weaviate vector database instance with Traefik reverse proxy and automatic HTTPS via Let's Encrypt. The role supports single node installations via Docker Compose.
+This role deploys a shared Weaviate vector database instance with Traefik reverse proxy and automatic HTTPS via Let's Encrypt. The role supports single-node installations via Docker Compose.
+
+This is the **Ansible provisioning path** referenced from the Artemis admin guide for global search:
+[https://docs.artemis.cit.tum.de/admin/global-search-weaviate](https://docs.artemis.cit.tum.de/admin/global-search-weaviate)
 
 ## Description
 
 This role sets up a production-ready Weaviate deployment that includes:
 
-- **Weaviate**: Vector database for AI/ML applications
+- **Weaviate**: Vector database for AI/ML applications (pinned to `1.37.9`)
 - **Traefik**: Reverse proxy with automatic SSL/TLS certificate management
-- **Multi2vec-CLIP**: Vector embedding module for multimodal search
-- **Automated Backups**: Configurable scheduled backups with retention policies
+- **Server-side vectorization** (configurable via `weaviate_embedder`; see below)
+- **Automated Backups**: Always-enabled `backup-filesystem` module with configurable schedule and retention
 - **Security Features**: API key authentication, IP whitelisting, rate limiting, HTTPS enforcement
 
 The setup is based on the [edutelligence repository](https://github.com/ls1intum/edutelligence) shared Weaviate infrastructure.
+
+### Relationship to Artemis and Pyris/Atlas
+
+This role serves two distinct usage patterns:
+
+| Consumer | Pattern | `weaviate_embedder` |
+|---|---|---|
+| **Artemis global search** | Server-side vectorization: Artemis sends plain text; Weaviate embeds it using `text2vec-openai` (cloud OpenAI or a self-hosted OpenAI-compatible endpoint, e.g. Qwen). | `openai` (default) |
+| **Pyris / AtlasML** | Client-side (self-provided) vectors: Pyris or Atlas embeds content itself and uploads pre-computed vectors. Weaviate stores and indexes them but performs no vectorization. | `none` |
 
 ## Prerequisites
 
@@ -24,7 +36,7 @@ Before using this role, ensure the following requirements are met:
 - **Docker Engine**: 20.10 or later
 - **Docker Compose**: v2.0 or later
 - **Ports**: 80, 443, and 50051 must be accessible from the internet
-- **Resources**: Minimum 8GB RAM, 4 CPU cores recommended
+- **Resources**: Minimum 8 GB RAM, 4 CPU cores recommended
 
 ### DNS Configuration
 
@@ -42,7 +54,7 @@ This role **does not** install Docker. You must install Docker and Docker Compos
 
 ## Configuration
 
-To configure the role, you need to set the required variables in your Ansible playbook or inventory.
+To configure the role, set the required variables in your Ansible playbook or inventory.
 
 ### Required Variables
 
@@ -66,8 +78,28 @@ Default variables can be found in the [defaults/main.yml](defaults/main.yml) fil
 #### Version and Paths
 
 ```yaml
-weaviate_build_version: "1.30.0"
+# Weaviate version pin — do not change unless you have tested the migration
+weaviate_build_version: "1.37.9"
 weaviate_working_directory: "/opt/weaviate"
+```
+
+#### Embedder / Vectorizer Selection
+
+```yaml
+# Controls which server-side vectorizer (ENABLE_MODULES) Weaviate loads.
+#
+# Supported values:
+#   openai       — text2vec-openai (default). Use for Artemis global search with cloud
+#                  OpenAI or a self-hosted OpenAI-compatible endpoint (e.g. Qwen).
+#   none         — No server vectorizer. Consumers such as Pyris and AtlasML supply
+#                  pre-computed vectors themselves.
+#   clip         — multi2vec-clip (opt-in only; legacy multimodal use cases).
+#                  Starts an additional inference sidecar container. Not needed for
+#                  Artemis text search or Pyris/Atlas.
+#
+# Note: local CPU embedding via transformers (embeddinggemma) is planned but is
+#       NOT yet supported by this role.
+weaviate_embedder: "openai"
 ```
 
 #### User Management
@@ -92,8 +124,10 @@ weaviate_allowed_ips: ""
 
 #### Automated Backups
 
+The `backup-filesystem` Weaviate module is **always enabled** by this role. The variables below control the cron-driven automated backup job:
+
 ```yaml
-# Enable automated backups
+# Enable automated backups via cron
 weaviate_enable_automated_backups: true
 
 # Backup schedule (cron format) - default: daily at 2 AM
@@ -107,23 +141,23 @@ weaviate_backup_retention_days: 7
 
 ```yaml
 # Weaviate container resources
-weaviate_cpu_limit: "8"
-weaviate_memory_limit: "16G"
+weaviate_cpu_limit: "2"
+weaviate_memory_limit: "4G"
 
 # Traefik resources
 weaviate_traefik_cpu_limit: "1"
-weaviate_traefik_memory_limit: "1G"
+weaviate_traefik_memory_limit: "512M"
 
-# Multi2vec-CLIP resources
-weaviate_multi2vec_cpu_limit: "4"
-weaviate_multi2vec_memory_limit: "8G"
+# Multi2vec-CLIP resources (opt-in only; only used when weaviate_embedder: clip)
+weaviate_multi2vec_cpu_limit: "1"   # opt-in only
+weaviate_multi2vec_memory_limit: "2G"  # opt-in only
 ```
 
 ## Example Usage
 
-### Basic Single Node Installation
+### Artemis Global Search (default — OpenAI vectorizer)
 
-Here is an example playbook for a single node installation:
+Standard deployment for Artemis server-side text vectorization:
 
 ```yaml
 - hosts: weaviate
@@ -133,6 +167,22 @@ Here is an example playbook for a single node installation:
         weaviate_domain: "weaviate.example.com"
         weaviate_api_key: "your-secure-api-key-here"
         letsencrypt_email: "admin@example.com"
+        # weaviate_embedder defaults to "openai" — no need to set it explicitly
+```
+
+### Pyris / AtlasML (client-provided vectors — no server vectorizer)
+
+Use this when Pyris or AtlasML will supply pre-computed vectors:
+
+```yaml
+- hosts: weaviate
+  roles:
+    - role: ls1intum.artemis.weaviate
+      vars:
+        weaviate_domain: "weaviate.example.com"
+        weaviate_api_key: "your-secure-api-key-here"
+        letsencrypt_email: "admin@example.com"
+        weaviate_embedder: "none"
 ```
 
 ### Advanced Configuration with IP Whitelisting
@@ -209,6 +259,8 @@ The role installs a helper script at `/opt/weaviate/weaviate-docker.sh` with the
 
 ## Backup and Restore
 
+The `backup-filesystem` Weaviate module is always enabled; it allows Weaviate-native backups to the local filesystem.
+
 ### Manual Backup
 
 Create a manual backup:
@@ -254,7 +306,7 @@ To update Weaviate to a new version:
 1. **Update the version variable** in your playbook or inventory:
 
    ```yaml
-   weaviate_build_version: "1.31.0"  # New version
+   weaviate_build_version: "1.38.0"  # New version
    ```
 
 2. **Re-run the Ansible playbook**:
@@ -335,10 +387,10 @@ If unable to connect to Weaviate:
 
 ### High Memory Usage
 
-Weaviate is configured with 16GB memory limit by default. If this is too high for your system:
+Weaviate is configured with 4 GB memory limit by default. If this is too high for your system:
 
 ```yaml
-weaviate_memory_limit: "8G"
+weaviate_memory_limit: "2G"
 ```
 
 ### Backup Failures
@@ -375,9 +427,10 @@ After deployment, the following structure exists:
 
 ## Related Documentation
 
+- [Artemis Admin Guide — Global Search / Weaviate](https://docs.artemis.cit.tum.de/admin/global-search-weaviate)
 - [Weaviate Documentation](https://weaviate.io/developers/weaviate)
 - [Traefik Documentation](https://doc.traefik.io/traefik/)
-- [edutelligence Repository](https://github.com/ls1intum/edutelligence) - Source of Weaviate setup
+- [edutelligence Repository](https://github.com/ls1intum/edutelligence) — Source of Weaviate setup
 - [Let's Encrypt Documentation](https://letsencrypt.org/docs/)
 
 ## License
