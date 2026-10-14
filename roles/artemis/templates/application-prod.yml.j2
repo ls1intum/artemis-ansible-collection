@@ -10,10 +10,7 @@ spring:
           oidc:
             client-id: {{ artemis_oidc.client_id | quote }}
             client-secret: {{ artemis_oidc.client_secret | quote }}
-            scope:
-              - openid
-              - profile
-              - email
+            scope: {{ (artemis_oidc.scopes | default(['openid', 'profile', 'email'])) | join(',') | quote }}
         provider:
           oidc:
 {% if artemis_oidc.issuer_uri | default('') | length > 0 %}
@@ -204,9 +201,6 @@ artemis:
 {% endif %}
 {% endif %}
   user-management:
-{% if ldap.url is defined and ldap.url is not none%}
-    use-external: true
-{% else %}
 {% if artemis_oidc is defined and artemis_oidc.enabled | default(false) %}
     oidc:
       enabled: true
@@ -217,6 +211,9 @@ artemis:
         last-name: {{ (artemis_oidc.mappings | default({})).last_name | default('family_name') | to_json }}
         email: {{ (artemis_oidc.mappings | default({})).email | default('email') | to_json }}
 {% endif %}
+{% if ldap.url is defined and ldap.url is not none %}
+    use-external: true
+{% else %}
     use-external: false
 {% endif %}
 {% if artemis_passkey_enabled %}

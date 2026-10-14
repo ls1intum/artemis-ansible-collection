@@ -225,6 +225,7 @@ artemis_passkey_require_for_administrator_features: false
 #  token_uri: ""
 #  user_info_uri: ""
 #  jwk_set_uri: ""
+#  scopes: ["openid", "profile", "email"]
 #  mappings:
 #    username: "preferred_username"
 #    matriculation_number: "matriculation_number"
