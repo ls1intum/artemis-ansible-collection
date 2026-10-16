@@ -60,10 +60,11 @@ fastcgi_read_timeout: "900s"
 
 # Answer the client bundle from nginx's own cache instead of proxying every request to a node.
 #
-# Everything cached is versioned in its URL - Angular emits content-hashed names for JavaScript, CSS and
-# the media they reference, and the translation loader appends the build's I18N_HASH as a query
-# parameter - so a cached copy cannot go stale: a new build is a new URL, and the entries the old build
-# left behind are never asked for again.
+# Nearly everything cached is versioned in its URL - Angular emits content-hashed names for JavaScript,
+# CSS and the media they reference - so a cached copy cannot go stale: a new build is a new URL, and the
+# entries the old build left behind are never asked for again. The exceptions are the theme override
+# (theme-dark.css) and the service worker files (ngsw.json, ngsw-worker.js), which Angular does not hash;
+# they are cached for proxy_cache_client_bundle_unversioned_valid instead.
 #
 # Worth having because nothing else absorbs that load. Artemis serves its own static content, and
 # compresses it (server.compression), so without a cache every chunk request costs a node a read out of
@@ -78,9 +79,14 @@ proxy_cache_client_bundle_max_size: 2g
 proxy_cache_client_bundle_inactive: 30d
 # Shared memory for the keys, not the bodies. Far more than the few hundred entries a build needs.
 proxy_cache_client_bundle_keys_zone_size: 20m
-# Only applies to responses that arrive without caching directives of their own; Artemis sends
-# Cache-Control on these paths and stays authoritative. This is the floor, not the policy.
+# How long a content-hashed file is served from the cache. The proxy ignores the Cache-Control and
+# Expires headers of the node, so this is the lifetime, not a floor.
 proxy_cache_client_bundle_valid: 30d
+# How long the files whose names do not change between releases (theme-dark.css, ngsw.json,
+# ngsw-worker.js) are served without asking a node. After that the entry is revalidated, which costs a
+# conditional request answered with 304 while the file is unchanged. This is also the longest a release
+# can be served as the previous one, so keep it short.
+proxy_cache_client_bundle_unversioned_valid: 5m
 # How long a request waits for another request to finish filling the same entry before giving up and
 # going to a node itself. Generous, because the alternative at the start of a lecture is the whole
 # cohort going upstream at once, which is the thing the cache exists to prevent.

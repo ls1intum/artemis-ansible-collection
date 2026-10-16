@@ -195,10 +195,29 @@ server {
 {% if proxy_cache_client_bundle %}
     # The client bundle, answered from nginx's own cache instead of from an Artemis node.
     #
-    # The regex deliberately anchors the file name to the first path segment. It must not grow into
+    # Two locations share everything but the pattern and the lifetime, so they are rendered from one block.
+    # Regex locations are tried in order and the first match wins, so the unversioned files come first.
+    #
+    # Hashed files (versioned): Angular puts a content hash into every JavaScript and CSS file name, so a
+    # new build is a new URL and a cached copy cannot go stale. They are kept for
+    # proxy_cache_client_bundle_valid.
+    #
+    # Unversioned files: the theme override (theme-dark.css) is built as a bundle that is not injected
+    # into index.html, which Angular never hashes, and the service worker files (ngsw.json,
+    # ngsw-worker.js) must keep their names to be found at all. The cache key leaves out the query string
+    # on purpose, so a client's cache-busting parameter cannot reach them, and without a short lifetime a
+    # release would be served as the previous one for the whole of proxy_cache_client_bundle_valid. That
+    # happened on 2026-10-15: gzip clients got the dark theme and the service worker manifest of releases
+    # 10.0 and 9.9.3 for weeks. They are kept for proxy_cache_client_bundle_unversioned_valid and
+    # revalidated against the node afterwards, which answers 304 while the file is unchanged.
+    #
+    # The regexes deliberately anchor the file name to the first path segment. They must not grow into
     # something that also matches /api/..., because a regex location beats a prefix location: it would
     # take the rate-limited endpoints below out of their zones with no other sign that it had happened.
-    location ~* ^/(?:[^/]+\.(?:js|css)|media/) {
+{% set proxy_cache_unversioned_match %}^/(?:theme-[a-z]+\.css|ngsw[^/]*\.js(?:on)?)(?:\.map)?${% endset %}
+{% set proxy_cache_versioned_match %}^/(?:[^/]+\.(?:js|css)|media/){% endset %}
+{% for cached in [{'match': proxy_cache_unversioned_match, 'valid': proxy_cache_client_bundle_unversioned_valid}, {'match': proxy_cache_versioned_match, 'valid': proxy_cache_client_bundle_valid}] %}
+    location ~* {{ cached.match }} {
         proxy_pass {{ proxy_node_protocol }}://app;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
@@ -215,6 +234,9 @@ server {
         # client's raw Accept-Encoding rather than the normalised one set above, which is what the
         # normalisation exists to avoid. Safe to ignore only because encoding is the sole dimension
         # these responses vary on, and the key already covers it.
+        #
+        # Cache-Control and Expires are ignored as well, so the lifetime below is the only one that
+        # applies, whatever the node sends. That is why the unversioned files need their own location.
         proxy_ignore_headers Vary Cache-Control Expires;
 
         # One request fills an entry and the rest wait for it. This is the line that matters at the
@@ -226,7 +248,7 @@ server {
         proxy_cache_background_update on;
         proxy_cache_revalidate on;
 
-        proxy_cache_valid 200 {{ proxy_cache_client_bundle_valid }};
+        proxy_cache_valid 200 {{ cached.valid }};
 
         # add_header does not accumulate across levels: naming one here drops those set on the server,
         # so both are repeated to keep HSTS and the HTTP/3 advertisement on these responses.
@@ -235,6 +257,7 @@ server {
         add_header X-Cache-Status $upstream_cache_status always;
     }
 
+{% endfor %}
 {% endif %}
 {% if proxy_mailto is not none %}
     location /mailto {
