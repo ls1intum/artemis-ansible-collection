@@ -134,8 +134,9 @@ memory, so leave room above the vector index for it.
 
 #### Vectors
 
-The role runs no vectorizer container. Clients send their own vectors with
-every object and query.
+The role runs no vectorizer container. Clients compute their own vectors and
+send them with the objects and vector queries. The `text2vec-openai` module
+stays enabled for collections that older Artemis versions created with it.
 
 ## Example Usage
 
