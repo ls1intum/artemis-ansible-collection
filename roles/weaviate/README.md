@@ -8,7 +8,6 @@ This role sets up a production-ready Weaviate deployment that includes:
 
 - **Weaviate**: Vector database for AI/ML applications
 - **Traefik**: Reverse proxy with automatic SSL/TLS certificate management
-- **Multi2vec-CLIP** (optional): Vector embedding module for multimodal search
 - **Automated Backups**: Configurable scheduled backups with retention policies
 - **Security Features**: API key authentication, IP whitelisting, rate limiting, HTTPS enforcement
 
@@ -113,10 +112,6 @@ weaviate_memory_limit: "16G"
 # Traefik resources
 weaviate_traefik_cpu_limit: "1"
 weaviate_traefik_memory_limit: "1G"
-
-# Multi2vec-CLIP resources
-weaviate_multi2vec_cpu_limit: "4"
-weaviate_multi2vec_memory_limit: "8G"
 ```
 
 #### Memory and Swap
@@ -137,15 +132,10 @@ weaviate_gomemlimit: ""
 The memory limit also covers the page cache of the files Weaviate maps into
 memory, so leave room above the vector index for it.
 
-#### Multi2vec-CLIP
+#### Vectors
 
-```yaml
-# Set to false when every client sends its own vectors. The role then removes
-# the multi2vec-clip container and the module.
-weaviate_enable_multi2vec: true
-```
-
-Only disable it when no collection uses the `multi2vec-clip` vectorizer.
+The role runs no vectorizer container. Clients send their own vectors with
+every object and query.
 
 ## Example Usage
 

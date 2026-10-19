@@ -46,17 +46,6 @@ weaviate_rate_limit_average: 1000
 weaviate_rate_limit_burst: 2000
 
 ##############################################################################
-# Multi2vec-CLIP Configuration
-##############################################################################
-
-# Run the multi2vec-clip container and enable its Weaviate module.
-# Set to false when every client sends its own vectors.
-weaviate_enable_multi2vec: true
-
-weaviate_multi2vec_image: "cr.weaviate.io/semitechnologies/multi2vec-clip:sentence-transformers-clip-ViT-B-32-multilingual-v1"
-weaviate_enable_cuda: "0"
-
-##############################################################################
 # Resource Limits
 ##############################################################################
 
@@ -77,10 +66,6 @@ weaviate_memswap_limit: "{{ weaviate_memory_limit }}"
 # Go runtime memory limit (GOMEMLIMIT), e.g. "3276MiB". Weaviate recommends
 # 80-90% of the memory available to Weaviate. Empty: not set.
 weaviate_gomemlimit: ""
-
-# Multi2vec-CLIP Resources
-weaviate_multi2vec_cpu_limit: "1"
-weaviate_multi2vec_memory_limit: "2G"
 
 ##############################################################################
 # Backup Configuration
