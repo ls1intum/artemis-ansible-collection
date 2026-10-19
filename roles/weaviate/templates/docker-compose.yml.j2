@@ -59,13 +59,22 @@ services:
       AUTHENTICATION_APIKEY_ALLOWED_KEYS: '${WEAVIATE_API_KEY}'
       AUTHENTICATION_APIKEY_USERS: '${WEAVIATE_API_USER:-{{ weaviate_api_user }}}'
       PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
+{% if weaviate_enable_multi2vec | bool %}
       ENABLE_MODULES: 'multi2vec-clip,text2vec-openai,backup-filesystem'
+{% else %}
+      ENABLE_MODULES: 'text2vec-openai,backup-filesystem'
+{% endif %}
       ENABLE_API_BASED_MODULES: 'true'
+{% if weaviate_enable_multi2vec | bool %}
       CLIP_INFERENCE_API: 'http://multi2vec-clip:8080'
+{% endif %}
       CLUSTER_HOSTNAME: 'node1'
       LOG_LEVEL: '${WEAVIATE_LOG_LEVEL:-{{ weaviate_log_level }}}'
       LOG_FORMAT: 'json'
       BACKUP_FILESYSTEM_PATH: '/var/lib/weaviate/backups'
+{% if weaviate_gomemlimit | length > 0 %}
+      GOMEMLIMIT: '{{ weaviate_gomemlimit }}'
+{% endif %}
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/v1/.well-known/ready"]
       interval: 30s
@@ -104,6 +113,8 @@ services:
         reservations:
           cpus: '{{ weaviate_cpu_limit }}'
           memory: {{ weaviate_memory_limit }}
+    memswap_limit: {{ weaviate_memswap_limit }}
+{% if weaviate_enable_multi2vec | bool %}
     depends_on:
       multi2vec-clip:
         condition: service_started
@@ -126,6 +137,7 @@ services:
         reservations:
           cpus: '{{ weaviate_multi2vec_cpu_limit }}'
           memory: {{ weaviate_multi2vec_memory_limit }}
+{% endif %}
 
 networks:
   weaviate_network:

@@ -8,7 +8,7 @@ This role sets up a production-ready Weaviate deployment that includes:
 
 - **Weaviate**: Vector database for AI/ML applications
 - **Traefik**: Reverse proxy with automatic SSL/TLS certificate management
-- **Multi2vec-CLIP**: Vector embedding module for multimodal search
+- **Multi2vec-CLIP** (optional): Vector embedding module for multimodal search
 - **Automated Backups**: Configurable scheduled backups with retention policies
 - **Security Features**: API key authentication, IP whitelisting, rate limiting, HTTPS enforcement
 
@@ -118,6 +118,34 @@ weaviate_traefik_memory_limit: "1G"
 weaviate_multi2vec_cpu_limit: "4"
 weaviate_multi2vec_memory_limit: "8G"
 ```
+
+#### Memory and Swap
+
+Weaviate keeps its vector index in memory. Queries that touch parts of it that
+the kernel moved to swap become slow, so the container gets no swap by default.
+
+```yaml
+# Memory plus swap for the Weaviate container. The same value as
+# weaviate_memory_limit (the default) means no swap.
+weaviate_memswap_limit: "{{ weaviate_memory_limit }}"
+
+# Go runtime memory limit. Weaviate recommends 80-90% of the memory available
+# to Weaviate, e.g. "13GiB" for weaviate_memory_limit "16G". Empty: not set.
+weaviate_gomemlimit: ""
+```
+
+The memory limit also covers the page cache of the files Weaviate maps into
+memory, so leave room above the vector index for it.
+
+#### Multi2vec-CLIP
+
+```yaml
+# Set to false when every client sends its own vectors. The role then removes
+# the multi2vec-clip container and the module.
+weaviate_enable_multi2vec: true
+```
+
+Only disable it when no collection uses the `multi2vec-clip` vectorizer.
 
 ## Example Usage
 
@@ -340,6 +368,10 @@ Weaviate is configured with 16GB memory limit by default. If this is too high fo
 ```yaml
 weaviate_memory_limit: "8G"
 ```
+
+If queries get slow while the host has free memory, check whether the
+container reaches its limit: `cat /sys/fs/cgroup/system.slice/docker-<id>.scope/memory.events`
+shows how often (`max`). Raise `weaviate_memory_limit` and keep swap off.
 
 ### Backup Failures
 
