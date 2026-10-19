@@ -46,13 +46,6 @@ weaviate_rate_limit_average: 1000
 weaviate_rate_limit_burst: 2000
 
 ##############################################################################
-# Multi2vec-CLIP Configuration
-##############################################################################
-
-weaviate_multi2vec_image: "cr.weaviate.io/semitechnologies/multi2vec-clip:sentence-transformers-clip-ViT-B-32-multilingual-v1"
-weaviate_enable_cuda: "0"
-
-##############################################################################
 # Resource Limits
 ##############################################################################
 
@@ -65,9 +58,14 @@ weaviate_traefik_memory_limit: "512M"
 weaviate_cpu_limit: "2"
 weaviate_memory_limit: "4G"
 
-# Multi2vec-CLIP Resources
-weaviate_multi2vec_cpu_limit: "1"
-weaviate_multi2vec_memory_limit: "2G"
+# Memory plus swap the Weaviate container may use. The same value as
+# weaviate_memory_limit gives the container no swap. Weaviate keeps its vector
+# index in memory, and queries that touch swapped-out parts of it are slow.
+weaviate_memswap_limit: "{{ weaviate_memory_limit }}"
+
+# Go runtime memory limit (GOMEMLIMIT), e.g. "3276MiB". Weaviate recommends
+# 80-90% of the memory available to Weaviate. Empty: not set.
+weaviate_gomemlimit: ""
 
 ##############################################################################
 # Backup Configuration
