@@ -96,10 +96,9 @@ profile to a deployment available through that environment's worker endpoint.
 Prices are operator-supplied: the examples use `artemis_llm_cost: {}` so stale
 collection price defaults are not presented as measured generation costs.
 
-The worker disables SDK retries for generation accounting. Core retry settings
-are left unchanged: the current runtime also checks core retries and can report
-usage as incomplete even when worker retries are disabled. That runtime accounting
-check must not be worked around by removing retries from unrelated core features.
+The worker disables SDK retries for generation accounting. Accounting follows the
+worker's retry policy and delivered usage evidence. Core retry settings remain
+unchanged, so unrelated core AI features keep their configured retry policy.
 
 ## Provider isolation
 
