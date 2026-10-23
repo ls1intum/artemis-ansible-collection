@@ -121,6 +121,7 @@ The processing of the data in this log file can be done as follows:
 
 * The log entries can be continuously and automatically evaluated in order to detect attacks on the web servers and react accordingly.
 * In individual cases, i.e. in the event of reported malfunctions, errors and security incidents, a manual analysis may be carried out.
+* The logs of the Artemis servers, which may also contain the login of signed-in users, are evaluated automatically once a day for technical errors in order to ensure the stability and availability of the platform. Before any further processing, all personal information (e.g. logins, IP addresses, email addresses and IDs) is removed, and only aggregated error types and their frequency are evaluated. The results contain no personal data and are only accessible to the Artemis development team. Where external services are used for the evaluation, they only receive the cleaned results.
 
 **Retention period:** Log files are automatically deleted after 90 days, unless they are needed to investigate a specific security incident.
 

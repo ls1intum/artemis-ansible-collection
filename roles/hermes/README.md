@@ -81,6 +81,7 @@ hermes_google_application_credentials_content: |
 | `hermes_apns_key_id` | Key ID of the APNs signing key |
 | `hermes_apns_token_key_content` | Base64-encoded content of the APNs `.p8` signing key |
 | `hermes_apns_prod_environment` | Set to `true` for production APNs, `false` for sandbox |
+| `hermes_apns_fallback_environment_enabled` | Optional, default `false`. If `true`, Hermes retries a notification that APNs rejects as `BadDeviceToken` on the other APNs environment, so one relay serves production (TestFlight/App Store) and sandbox (Xcode) builds. Needs a signing key that Apple allows for both Sandbox and Production. Leave it off for a production-only relay. |
 | `hermes_google_application_credentials_json_path` | Filename for the Firebase credentials JSON on disk |
 | `hermes_google_application_credentials_content` | Content of the Firebase service account JSON file |
 

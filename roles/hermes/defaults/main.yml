@@ -11,6 +11,8 @@ hermes_apns_token_key_content:
 
 hermes_apns_prod_environment:
 
+hermes_apns_fallback_environment_enabled: false
+
 hermes_google_application_credentials_json_path:
 
 hermes_google_application_credentials_content:

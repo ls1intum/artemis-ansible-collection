@@ -70,3 +70,19 @@
     group: root
     mode: "644"
   notify: Restart nfs-server
+
+# The nightly plocate/mlocate run walks every local file system, and the export holds millions of small git
+# objects. Crawling it takes hours of random reads on the volume nfsd serves, for an index nobody queries.
+- name: Check whether updatedb is configured
+  become: true
+  stat:
+    path: /etc/updatedb.conf
+  register: storage_updatedb_conf
+
+- name: Keep the export out of the locate index
+  become: true
+  replace:
+    path: /etc/updatedb.conf
+    regexp: '^PRUNEPATHS="(?!(?:[^"]*\s)?{{ storage_export | regex_escape }}[\s"])([^"]*)"'
+    replace: 'PRUNEPATHS="\g<1> {{ storage_export }}"'
+  when: storage_updatedb_conf.stat.exists

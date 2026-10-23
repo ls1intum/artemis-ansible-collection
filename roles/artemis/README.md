@@ -28,9 +28,20 @@ proxy_ssl_certificate_path: "/path/to/ssl_certificate"
 proxy_ssl_certificate_key_path: "/path/to/ssl_certificate_key"
 
 artemis_jhipster_jwt: "your_jwt_secret"
+
+artemis_operator_name: "<organization operating Artemis>"
+artemis_operator_admin_name: "<name of its administrator>"
+artemis_university_name: "<university or institution>"
 ```
 
 The JWT secret can be generated with: `openssl rand -base64 64 | tr -d '\n'`.
+
+The three installation metadata variables are required on core nodes; build agents do not receive them. Artemis
+refuses to start a core node without meaningful values, even with telemetry disabled, and rejects template values such as
+`Admin`, `Your University` or the angle-bracket examples above. `artemis_operator_name` is the organization operating Artemis,
+`artemis_operator_admin_name` its administrator, and `artemis_university_name` the university or institution using
+it. All three are shown on the About page; `artemis_send_admin_details: false` keeps the administrator's name and the
+contact address out of telemetry, not off the About page.
 
 ### Additional Variables for external systems
 
@@ -53,6 +64,15 @@ artemis_oidc:
   issuer_uri: "https://login.example.com"
 ```
 You can provide `authorization_uri`, `token_uri`, `user_info_uri`, and `jwk_set_uri` individually. Claim mappings default to standard OIDC claims and can be overridden via `mappings.*`.
+
+Artemis requests the scopes `openid`, `profile` and `email` by default. Set `scopes` to request more, for example the client-specific scope of TUM Login that releases the matriculation number, and map the claim of the same name:
+```
+artemis_oidc:
+  scopes: ["openid", "profile", "email", "imMatrikelNr"]
+  mappings:
+    matriculation_number: "imMatrikelNr"
+```
+The scopes are rendered as one comma-separated value. The identity provider has to know the scope for your client; TUM Login registers client-specific scopes on request.
 
 To allow internal user registration:
 ```

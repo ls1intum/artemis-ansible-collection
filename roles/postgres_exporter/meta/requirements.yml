@@ -1,0 +1,8 @@
+---
+collections:
+  # 5.0.0 for the `memberships` parameter of postgresql_membership - the flat `groups`
+  # parameter it replaced is deprecated and goes away in 6.0.0.
+  - name: community.postgresql
+    version: ">=5.0.0"
+
+  - name: prometheus.prometheus

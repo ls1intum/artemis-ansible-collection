@@ -1,0 +1,65 @@
+---
+# Login role the exporter authenticates as. It is created by this role.
+postgres_exporter_db_user: "exporter"
+postgres_exporter_db_password: ""
+
+# Pinned rather than "latest" so a play does not silently install a different binary on
+# every run. Upstream publishes releases at
+# https://github.com/prometheus-community/postgres_exporter/releases.
+postgres_exporter_release: "0.20.1"
+
+##############################################################################
+# Connection used by the exporter
+##############################################################################
+# Over TCP on the loopback address, not the unix socket: the exporter runs as its own
+# unprivileged system user (postgres-exp), so peer authentication on the socket would try to
+# match that operating system user to a database role of the same name and fail. The
+# loopback pg_hba entries this collection ships already cover a password login.
+postgres_exporter_db_host: "localhost"
+postgres_exporter_db_port: 5432
+
+# Database the exporter connects to. Cluster-wide statistics (pg_stat_database,
+# pg_stat_bgwriter, replication, locks) are the same whichever database that is, but the
+# per-relation collectors and pg_stat_statements only ever see the database of the
+# connection - so point this at the Artemis database rather than at "postgres" if you want
+# table and query level metrics.
+postgres_exporter_db_name: "postgres"
+
+# The connection never leaves the host, and the loopback interface is not something TLS
+# protects against here.
+postgres_exporter_db_sslmode: "disable"
+
+postgres_exporter_data_source_uri: >-
+  {{ postgres_exporter_db_host }}:{{ postgres_exporter_db_port }}/{{ postgres_exporter_db_name }}?sslmode={{ postgres_exporter_db_sslmode }}
+
+##############################################################################
+# Exporter process
+##############################################################################
+# Bound on all interfaces because Prometheus scrapes it from another host; the firewall
+# role is what restricts port 9187 to the monitoring host.
+postgres_exporter_listen_address: "0.0.0.0:9187"
+
+# Collectors beyond the defaults. "stat_statements" is the interesting one: it needs the
+# pg_stat_statements extension in postgres_exporter_db_name (see the flag below) and
+# pg_stat_statements in the server's shared_preload_libraries.
+postgres_exporter_collectors: []
+postgres_exporter_no_collectors: []
+
+# Creates the extension in postgres_exporter_db_name. Off by default because it changes the
+# application's database rather than the exporter's own state, and because it is useless
+# unless the server preloads the library.
+postgres_exporter_pg_stat_statements: false
+
+##############################################################################
+# Connection used by Ansible to create the role
+##############################################################################
+# Peer authentication over the unix socket as the postgres operating system user, which is
+# how geerlingguy.postgresql manages its own users - so this needs no password anywhere.
+postgres_exporter_login_user: "postgres"
+postgres_exporter_login_unix_socket: "/var/run/postgresql"
+
+# How the server stores the password. The server default decides this, and a role whose
+# password was stored as md5 cannot authenticate against a pg_hba line demanding
+# scram-sha-256 - which is what the hosts in this collection use. Pinning it here keeps the
+# stored hash and the hba entry in agreement regardless of the server default.
+postgres_exporter_password_encryption: "scram-sha-256"

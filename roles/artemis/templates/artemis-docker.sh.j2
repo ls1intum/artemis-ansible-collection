@@ -1,6 +1,8 @@
 #!/bin/bash
 
 ARTEMIS_REPO_DIR="{{ artemis_working_directory }}/Artemis"
+# The compose files moved from docker/ to deployment/docker/ with Artemis PR #14054. Branches created before that still use docker/,
+# so the directory is resolved against the checked-out branch (see resolve_project_dir) instead of being fixed here.
 PROJECT_DIR="$ARTEMIS_REPO_DIR/docker"
 {% set default_compose_file = "test-server-postgresql.yml" %}
 {% set localci_compose_file = "test-server-postgresql-localci.yml" %}
@@ -25,6 +27,17 @@ Commands:
   restart <pr_tag> <pr_branch>    Restart the Artemis server. Nginx and database are unaffected
   run <docker compose cmd>        Run any docker compose subcommand of your choice
 HELP
+}
+
+# Function: Point PROJECT_DIR at the directory that holds the compose file in the current checkout.
+# Prefers deployment/docker/ and falls back to docker/. When neither has the compose file, docker/ stays selected so that the
+# docker compose error names the old path.
+function resolve_project_dir {
+    if [ -f "$ARTEMIS_REPO_DIR/deployment/docker/$COMPOSE_FILE" ]; then
+        PROJECT_DIR="$ARTEMIS_REPO_DIR/deployment/docker"
+    else
+        PROJECT_DIR="$ARTEMIS_REPO_DIR/docker"
+    fi
 }
 
 function update_artemis_checkout {
@@ -79,7 +92,9 @@ function get_artemis_services {
     echo "$services" | grep "^artemis-app" || true
 }
 
-function start {
+# Function: Check out the branch, validate its compose configuration and pull the image. Exits on any failure.
+# Nothing is stopped or started here, so a branch that cannot be deployed leaves the running deployment untouched.
+function prepare_start {
     local pr_tag=$1
     local pr_branch=$2
     local artemis_services
@@ -90,6 +105,7 @@ function start {
         echo "update_artemis_checkout failed for branch '$pr_branch'; aborting start deployment" 1>&2
         exit 1
     fi
+    resolve_project_dir
     sed -i "s/ARTEMIS_DOCKER_TAG=.*/ARTEMIS_DOCKER_TAG='$pr_tag'/g" "$ENV_FILE"
 
     artemis_services=$(get_artemis_services)
@@ -107,11 +123,18 @@ function start {
         echo "Failed to pull Artemis services ($artemis_services) using compose file $COMPOSE_FILE" 1>&2
         exit 1
     fi
+}
 
+function start_services {
     docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" up -d --no-build --remove-orphans
-    
+
     # Reload Nginx configuration as Nginx may still be running from a previous start. This is necessary to apply the new configuration.
     docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" exec nginx nginx -s reload || true
+}
+
+function start {
+    prepare_start "$@"
+    start_services
 }
 
 function stop {
@@ -126,9 +149,12 @@ function stop {
     docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" stop $artemis_services
 }
 
+# Function: Replace the running deployment. The new branch is checked out and validated before anything is stopped, so a
+# branch that cannot be deployed no longer takes the running server down.
 function restart {
-    stop "$@"
-    start "$@"
+    prepare_start "$@"
+    stop
+    start_services
 }
 
 function artemis_logs {
@@ -146,6 +172,9 @@ function all_logs {
 function run_docker_compose_cmd {
     docker compose --project-directory "$PROJECT_DIR" -f "$PROJECT_DIR/$COMPOSE_FILE" --env-file "$DOCKER_IMAGE_ENV_FILE" --env-file "$ENV_FILE" "$@"
 }
+
+# Select the compose directory of the current checkout for the commands that act on the running deployment
+resolve_project_dir
 
 # read subcommand `artemis-docker subcommand server` in variable and remove base command from argument list
 subcommand=$1; shift
