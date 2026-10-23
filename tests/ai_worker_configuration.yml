@@ -11,6 +11,7 @@
     ai_worker_directory: /opt/ai-worker
     ai_worker_microsoft_foundry: false
     ai_worker_model_timeout: 5m
+    ai_worker_model_options: {temperature: 0.2}
     ai_worker_runtime: runc
     ai_worker_workload_version: 1
     ai_worker_slots: 1
@@ -37,6 +38,10 @@
           - rendered.spring.hazelcast.localInstances == false
           - rendered.eureka.client.enabled == true
           - rendered.spring.ai.openai['api-key'] == 'test-key'
+          - rendered.spring.ai.openai.chat.temperature == 0.2
+          - rendered.spring.profiles.active == ['prod', 'aiworker']
+          - rendered.spring.ai.openai.chat.model == 'test-model'
+          - "'options' not in rendered.spring.ai.openai.chat"
           - rendered.spring.main['web-application-type'] == 'none'
 - name: Check Redis worker configuration
   hosts: localhost
@@ -50,6 +55,7 @@
     ai_worker_directory: /opt/ai-worker
     ai_worker_microsoft_foundry: false
     ai_worker_model_timeout: 5m
+    ai_worker_model_options: {}
     ai_worker_runtime: runc
     ai_worker_workload_version: 1
     ai_worker_slots: 1

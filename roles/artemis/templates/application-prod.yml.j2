@@ -488,9 +488,15 @@ artemis:
 {% endif %}
 
   hyperion:
-    enabled: {{ artemis_hyperion_enabled | lower }}
+    enabled: {{ artemis_hyperion_enabled | bool | lower }}
     exercise-generation:
-      enabled: {{ artemis_hyperion_exercise_generation_enabled | lower }}
+      enabled: {{ artemis_hyperion_exercise_generation_enabled | bool | lower }}
+{% if artemis_hyperion_agent | length > 0 %}
+    agent: {{ artemis_hyperion_agent | to_json }}
+{% endif %}
+{% if artemis_hyperion_generation | length > 0 %}
+    generation: {{ artemis_hyperion_generation | to_json }}
+{% endif %}
 {% if artemis_computed_is_core_node %}
   aiworker:
     enabled: {{ artemis_aiworker_enabled | lower }}

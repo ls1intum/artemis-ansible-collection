@@ -1,87 +1,123 @@
-# AI Worker node
+# AI Worker
 
-Deploy the normal Artemis WAR as a **worker-only node**. The worker image runs
-`ArtemisApp` with `prod,aiworker`. It has no HTTP listener, database access or
-repository credentials. It connects to the same Artemis `DistributedDataProvider`
-as core: as a Hazelcast client discovered through Eureka, or as a Redis/Valkey
-client. No Artemis message broker or worker-specific queues are required.
+Deploy the current Artemis generation worker, not a broker service or a LocalCI
+Build Agent. Core and worker must be built from the same qualified Artemis WAR.
+The worker image starts `prod,aiworker`. These Spring profiles apply in **all**
+environments; do not replace `prod` with Spring's `test` profile.
 
-Use a dedicated VM or host. The supervisor's Docker socket grants host-level
-control. Do not share the core, database or Build Agent Docker daemon. This role
-does not install Docker, the provider, Eureka or firewall rules. Allow outbound
-access only to the selected provider, the approved model endpoint, the image
-registry and approved telemetry. Generated-code containers have no network.
+The supported Hyperion capability is `hyperion-generation`, version `1`, with
+profile `java-gradle`. A different version or toolchain fails validation.
+Generation stays disabled in the core role by default.
 
-## Example: Hazelcast
+## Test, staging and production
 
-```yaml
-# Dedicated worker inventory; supply secrets through Ansible Vault.
-ai_worker_dedicated_host: true
-ai_worker_id: generation-1
-ai_worker_image: "registry.example/artemis-aiworker@sha256:<64 hex digits>"
-ai_worker_sandbox_image: "registry.example/hyperion-sandbox@sha256:<64 hex digits>"
-ai_worker_workload: hyperion-generation
-ai_worker_profile: java-gradle
-ai_worker_provider: hazelcast
-ai_worker_eureka_url: "https://admin:{{ vault_registry_password }}@registry.example/eureka/"
-ai_worker_model_base_url: "https://approved-model.example/v1"
-ai_worker_model: qualified-model
-ai_worker_model_api_key: "{{ vault_ai_worker_model_api_key }}"
+Use one [inventory](../../examples/ai_worker/inventories) per environment. The
+examples use separate hosts, provider endpoints, worker IDs, model endpoints,
+models and capacity. They contain no credentials or usable image digests.
+Production generation is disabled until an operator enables it.
+
+1. Copy the selected inventory into your deployment repository. Replace every
+   `example.invalid` address. Copy [deploy.yml](../../examples/ai_worker/deploy.yml)
+   into your deployment repository as `ai-worker.yml`. Add these groups and variables to your normal core
+   inventory; the examples are not a complete Artemis installation.
+2. Supply `ai_worker_release_image` and `ai_worker_release_sandbox_image` as full
+   registry image references pinned by `@sha256:`. See
+   [release.example.yml](../../examples/ai_worker/release.example.yml).
+3. Store `vault_valkey_password` and `vault_ai_worker_model_api_key` in a separate
+   encrypted Vault file for that environment. Never reuse production keys in test.
+4. Apply the core variables with your existing Artemis playbook on **every**
+   exercise-writing node. A writer needs the generation guard, not model access:
+   `artemis_hyperion_exercise_generation_enabled: true` and
+   `artemis_hyperion_enabled: false` are valid on a writer-only node. An eligible
+   `core,localci,localvc` coordinator also needs Hyperion and the worker IDs.
+5. Deploy the worker on a dedicated Docker host or VM. Do not use the Docker
+   daemon of core, a database, or an ordinary Build Agent. A separate local daemon
+   is supported only with `ai_worker_isolated_daemon: true` and a non-default
+   `ai_worker_docker_socket`.
+
+Until the role is released, install a reviewed collection commit, not `main` or
+an older published version. Set `COLLECTION_COMMIT` to that commit. `--force`
+replaces an installed copy with the same collection version.
+
+```sh
+ansible-galaxy collection install \
+  "git+https://github.com/ls1intum/artemis-ansible-collection.git,${COLLECTION_COMMIT:?set a reviewed collection commit}" --force
 ```
 
-The worker uses `spring.hazelcast.localInstances=false`, so its Hazelcast client
-joins the same named cluster as production core nodes. Eureka must advertise
-core members on addresses the worker host can reach. The worker does not
-register itself as a Eureka service or become a Hazelcast data member.
+For example, with that collection installed:
 
-## Example: Redis/Valkey
+```sh
+# Use staging or prod in place of test. Select exactly one environment.
+ansible-playbook -i inventories/test/hosts.yml ai-worker.yml \
+  -e @release.yml -e @inventories/test/vault.yml --vault-id test@prompt \
+  --tags validation
 
-Replace the provider settings above with:
-
-```yaml
-ai_worker_provider: redis
-ai_worker_valkey:
-  host: valkey.internal
-  port: 6379
-  username: generation-worker
-  password: "{{ vault_generation_worker_valkey_password }}"
+# After validation, deploy. No services are started by the validation-only run.
+ansible-playbook -i inventories/test/hosts.yml ai-worker.yml \
+  -e @release.yml -e @inventories/test/vault.yml --vault-id test@prompt
 ```
 
-Use the same authoritative Redis/Valkey deployment and distributed-data
-namespace as core. Give the worker a separate restricted account if your
-provider policy supports it. The worker must read and write its command,
-event, heartbeat and lease data. Eureka is disabled for this provider.
+The host needs Docker and Python `requests` for the Ansible Docker modules.
+The role does not provision Docker, VMs, provider services, networks or firewalls.
+Use a private provider network (for example WireGuard); do not expose Redis or
+the Docker API to the public network. Permit supervisor traffic only to its
+provider, approved model endpoint and image registry. The generated-code containers have no network and receive no model key.
+The supervisor has no published HTTP port. Its Docker socket grants host control.
 
-## Core and writer settings
+Before replacing a running worker, stop new authoring and drain active assignments
+and core persistence. Then set `ai_worker_maintenance_confirmed: true` for that
+run. Do not set it permanently in inventory. A coordinated core/worker update is
+required when the distributed-data encoding changes; do not mix runtime versions.
 
-On every eligible core coordinator, use the collection's `artemis` role with:
+## Configuration
 
-```yaml
-artemis_hyperion_enabled: true
-artemis_hyperion_exercise_generation_enabled: true
-artemis_aiworker_ids: [generation-1]
-# Set artemis_aiworker_enabled: true only for worker coordination without Hyperion generation.
-```
+| Variables | Effect |
+| --- | --- |
+| `artemis_hyperion_agent` | Native `artemis.hyperion.agent` settings on core: token/duration budgets and named effort profiles. Core sends the resolved profile to the worker. |
+| `artemis_hyperion_generation` | Native `artemis.hyperion.generation` settings on core: concurrency, retention and shutdown settings. |
+| `artemis_aiworker_ids` | Worker IDs admitted by each coordinator. Match the IDs on worker hosts. |
+| `ai_worker_model_base_url`, `ai_worker_model`, `ai_worker_model_api_key`, `ai_worker_model_timeout` | Worker-local model connection. Use HTTPS. Set `ai_worker_microsoft_foundry` for a Foundry custom domain. |
+| `ai_worker_model_options` | Allowed defaults: `temperature`, `top-p`, `max-tokens`, `max-completion-tokens`, and `reasoning-effort`. Connection settings and retries cannot be overridden here. An explicit core effort profile governs the run's model/options. |
+| `ai_worker_slots`, `ai_worker_memory`, `ai_worker_cpus` | Supervisor capacity and container limits. |
+| `ai_worker_sandbox_memory_bytes`, `ai_worker_sandbox_cpu_quota`, `ai_worker_sandbox_pids`, `ai_worker_runtime` | Per-sandbox limits. The host needs room for the supervisor, concurrent sandboxes and the OS. Example limits are not load-test results. |
 
-Keep `artemis_hyperion_exercise_generation_enabled: true` on every exercise
-writer, even a writer that does not run Hyperion. This enables the mutation
-guard on those nodes. A generation coordinator also needs `core`, `localci`
-and `localvc` profiles. The core and worker must use the same provider.
+The worker uses the current [Spring AI OpenAI properties](https://docs.spring.io/spring-ai/reference/api/chat/openai-chat.html):
+`spring.ai.openai.chat.model`, rather than relying on the legacy `chat.options.model` alias. For an
+OpenAI-compatible endpoint, include `/v1` in the base URL when its API requires
+that prefix; the SDK appends `/chat/completions`. Use the provider root for
+Foundry with `ai_worker_microsoft_foundry: true`.
 
-```yaml
-- name: Deploy isolated generation workers
-  hosts: generation_workers
-  roles:
-    - ls1intum.artemis.ai_worker
-```
+The core role renders the same nested agent/generation settings in its YAML and
+Docker paths. Docker uses `SPRING_APPLICATION_JSON` to preserve profile names;
+do not override that variable separately. Set the model in each core effort
+profile to a deployment available through that environment's worker endpoint.
+Prices are operator-supplied: the examples use `artemis_llm_cost: {}` so stale
+collection price defaults are not presented as measured generation costs.
 
-Pin both images by SHA-256 digest. Set `ai_worker_maintenance_confirmed: true`
-only after new work is stopped and active assignments and core persistence have
-drained. The role checks for a running worker before replacement, protects the
-rendered configuration, preloads the sandbox image and starts the worker with
-no published ports. The model key stays on the worker; generation model calls
-go from the worker directly to the model provider, not through core.
+## Provider isolation
 
-After deployment, check worker capacity in Artemis Administration and run a
-small generation, cancellation and undo test. A green container status alone
-does not prove the provider or sandbox is ready.
+Use `ai_worker_provider: redis` with `ai_worker_valkey` containing the same
+`host`, `port`, `username` and `password` as core. The examples share the `valkey`
+map within one inventory. The authoritative store must use AOF,
+`appendfsync always`, and `maxmemory-policy noeviction`. Inventory validation is
+not a check of the live server's effective settings.
+
+For Hazelcast, set `ai_worker_provider: hazelcast` and
+`ai_worker_eureka_url: "https://admin:{{ vault_registry_password }}@registry.example/eureka/"`.
+The worker is a fetch-only Eureka/Hazelcast client, not a data member. Core
+members must advertise addresses reachable from the worker.
+
+**Do not share an authoritative provider across environments.** Worker IDs alone
+do not isolate all distributed maps and topics. Use separate Redis/Valkey stores,
+or separate Eureka/Hazelcast deployments and networks. All three environments
+use the runtime's production cluster mode; an inventory name is not a namespace.
+
+## Verification
+
+Run the configuration playbook and Python tests in the PR's CI. They test both
+provider modes and all three inventories without contacting their services.
+After a real role deployment and explicit generation opt-in on core and all
+writers, check capacity from core and generate a small exercise,
+confirm solution/template LocalCI scores of 100/0, cancel another run, and undo a
+saved run. Check the effective provider durability settings. Template tests and a
+running container do not establish this live acceptance.

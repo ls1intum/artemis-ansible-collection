@@ -6,9 +6,9 @@ ai_worker_maintenance_confirmed: false
 ai_worker_id: ""
 ai_worker_image: ""
 ai_worker_sandbox_image: ""
-ai_worker_workload: ""
+ai_worker_workload: hyperion-generation
 ai_worker_workload_version: 1
-ai_worker_profile: ""
+ai_worker_profile: java-gradle
 ai_worker_isolated_daemon: false
 ai_worker_docker_socket: /var/run/docker.sock
 ai_worker_directory: /opt/ai-worker
@@ -28,4 +28,5 @@ ai_worker_model_base_url: ""
 ai_worker_model: ""
 ai_worker_model_api_key: ""
 ai_worker_model_timeout: 5m
+ai_worker_model_options: {}
 ai_worker_microsoft_foundry: false
