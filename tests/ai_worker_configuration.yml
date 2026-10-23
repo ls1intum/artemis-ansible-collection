@@ -41,6 +41,7 @@
           - rendered.spring.ai.openai.chat.temperature == 0.2
           - rendered.spring.profiles.active == ['prod', 'aiworker']
           - rendered.spring.ai.openai.chat.model == 'test-model'
+          - rendered.spring.ai.openai.chat['max-retries'] == 0
           - "'options' not in rendered.spring.ai.openai.chat"
           - rendered.spring.main['web-application-type'] == 'none'
 - name: Check Redis worker configuration

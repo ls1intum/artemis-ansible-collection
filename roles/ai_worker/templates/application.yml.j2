@@ -25,7 +25,7 @@ spring:
       microsoft-foundry: {{ ai_worker_microsoft_foundry | bool | lower }}
       max-retries: 0
       timeout: {{ ai_worker_model_timeout | to_json }}
-      chat: {{ ai_worker_model_options | combine({'model': ai_worker_model}) | to_json }}
+      chat: {{ ai_worker_model_options | combine({'model': ai_worker_model, 'max-retries': 0}) | to_json }}
 artemis:
   distributed-data:
     provider: {{ ai_worker_provider | to_json }}

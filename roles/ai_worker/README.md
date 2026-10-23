@@ -28,7 +28,9 @@ Production generation is disabled until an operator enables it.
 4. Apply the core variables with your existing Artemis playbook on **every**
    exercise-writing node. A writer needs the generation guard, not model access:
    `artemis_hyperion_exercise_generation_enabled: true` and
-   `artemis_hyperion_enabled: false` are valid on a writer-only node. An eligible
+   `artemis_hyperion_enabled: false` are valid on a writer-only node. For bare-metal
+   updates, set `update_artemis_config: true` and `restart_artemis: true` after
+   draining authoring. An eligible
    `core,localci,localvc` coordinator also needs Hyperion and the worker IDs.
 5. Deploy the worker on a dedicated Docker host or VM. Do not use the Docker
    daemon of core, a database, or an ordinary Build Agent. A separate local daemon
@@ -75,6 +77,8 @@ required when the distributed-data encoding changes; do not mix runtime versions
 | --- | --- |
 | `artemis_hyperion_agent` | Native `artemis.hyperion.agent` settings on core: token/duration budgets and named effort profiles. Core sends the resolved profile to the worker. |
 | `artemis_hyperion_generation` | Native `artemis.hyperion.generation` settings on core: concurrency, retention and shutdown settings. |
+| `artemis_generation_provider_max_retries` | SDK retry count on generation coordinators; default `0` at both common and chat levels for exact usage accounting. Nonzero values make usage incomplete. This also affects other model calls on that core. |
+| `artemis_hazelcast_expected_data_member_count` | Actual number of Hazelcast data members. Required for multi-node Hazelcast authoring; the YAML and Docker paths set the same count. |
 | `artemis_aiworker_ids` | Worker IDs admitted by each coordinator. Match the IDs on worker hosts. |
 | `ai_worker_model_base_url`, `ai_worker_model`, `ai_worker_model_api_key`, `ai_worker_model_timeout` | Worker-local model connection. Use HTTPS. Set `ai_worker_microsoft_foundry` for a Foundry custom domain. |
 | `ai_worker_model_options` | Allowed defaults: `temperature`, `top-p`, `max-tokens`, `max-completion-tokens`, and `reasoning-effort`. Connection settings and retries cannot be overridden here. An explicit core effort profile governs the run's model/options. |
@@ -104,7 +108,13 @@ not a check of the live server's effective settings.
 
 For Hazelcast, set `ai_worker_provider: hazelcast` and
 `ai_worker_eureka_url: "https://admin:{{ vault_registry_password }}@registry.example/eureka/"`.
-The worker is a fetch-only Eureka/Hazelcast client, not a data member. Core
+On the core inventory, use the collection's multi-node Hazelcast/Eureka setup
+(`is_multinode_install: true`) and set `artemis_hazelcast_expected_data_member_count`
+to the actual data-member count on every member. All data members must use the
+same count and the same exercise-generation flag before authoring starts. An intentional single core
+with a remote worker uses a count of `1`; workers and Build Agents do not count.
+A missing count fails validation before deployment. The worker is a fetch-only
+Eureka/Hazelcast client, not a data member. Core
 members must advertise addresses reachable from the worker.
 
 **Do not share an authoritative provider across environments.** Worker IDs alone

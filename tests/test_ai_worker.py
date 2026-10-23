@@ -189,6 +189,8 @@ class AiWorkerConfigurationTest(unittest.TestCase):
                         f"config.spring.ai.openai['base-url'] == 'https://model-{environment}.example.invalid/v1'",
                         "config.spring.main['web-application-type'] == 'none'",
                         'config.eureka.client.enabled == false',
+                        "config.spring.ai.openai['max-retries'] == 0",
+                        "config.spring.ai.openai.chat['max-retries'] == 0",
                     ]}}]}
                 core = {'name': 'Validate core inventory', 'hosts': 'artemis_cores', 'gather_facts': False,
                         'tasks': [
@@ -201,6 +203,8 @@ class AiWorkerConfigurationTest(unittest.TestCase):
                             "artemis_hyperion_agent['profiles']['standard']['model'] == 'qualified-" + environment + "-model'",
                             f"artemis_hyperion_generation['max-concurrent-jobs-per-core-node'] == {slots}",
                             'artemis_hyperion_enabled == true',
+                            "not artemis_hyperion_exercise_generation_enabled or core_config.spring.ai.openai['max-retries'] == 0",
+                            "not artemis_hyperion_exercise_generation_enabled or core_config.spring.ai.openai.chat['max-retries'] == 0",
                             f"core_config.spring.data.redis.host == 'valkey-{environment}.example.invalid'",
                             f"core_config.artemis.hyperion['exercise-generation'].enabled == {str(enabled).lower()}",
                             f"core_config.artemis.hyperion.agent.profiles.standard.model == 'qualified-{environment}-model'",
@@ -269,6 +273,48 @@ class AiWorkerConfigurationTest(unittest.TestCase):
                                                 capture_output=True, text=True, env=env, check=False, timeout=60)
                         self.assertNotEqual(result.returncode, 0)
                         self.assertIn('YAML mappings', result.stdout)
+
+
+    def test_core_retry_policy_renders_with_and_without_core_model_credentials(self):
+        defaults = yaml.safe_load((ROOT / 'roles/artemis/defaults/main.yml').read_text())
+        for configured in (False, True):
+            for retries in (0, 2):
+                with self.subTest(configured=configured, retries=retries):
+                    values = dict(defaults, artemis_computed_is_core_node=True,
+                                  artemis_computed_is_generation_coordinator=True,
+                                  artemis_generation_provider_max_retries=retries)
+                    if configured:
+                        values['spring_ai'] = {'azure_openai': {
+                            'api_key': 'core-test-key', 'endpoint': 'https://core-model.example.invalid',
+                            'deployment_name': 'core-model', 'temperature': 1.0}}
+                    config, env = self.render(['roles/artemis/templates/application-prod.yml.j2',
+                                              'roles/artemis/templates/artemis.env.j2'], values)
+                    openai = yaml.safe_load(config)['spring']['ai']['openai']
+                    self.assertEqual(openai['max-retries'], retries)
+                    self.assertEqual(openai['chat']['max-retries'], retries)
+                    self.assertIn(f"SPRING_AI_OPENAI_MAXRETRIES='{retries}'", env)
+                    self.assertIn(f"SPRING_AI_OPENAI_CHAT_MAXRETRIES='{retries}'", env)
+                    if configured:
+                        self.assertEqual(openai['api-key'], 'core-test-key')
+                        self.assertEqual(openai['chat']['model'], 'core-model')
+
+    def test_hazelcast_membership_is_explicit_and_matches_both_deployment_paths(self):
+        defaults = yaml.safe_load((ROOT / 'roles/artemis/defaults/main.yml').read_text())
+        values = dict(defaults, artemis_computed_is_core_node=True,
+                      artemis_computed_uses_hazelcast=True,
+                      artemis_hyperion_exercise_generation_enabled=True,
+                      artemis_hazelcast_expected_data_member_count=3)
+        for count, success in [(None, False), (0, False), (3, True)]:
+            with self.subTest(count=count):
+                result = self.validate('roles/artemis/tasks/ai_worker_validation.yml',
+                                       dict(values, artemis_hazelcast_expected_data_member_count=count))
+                self.assertEqual(result.returncode == 0, success, result.stdout + result.stderr)
+                if not success:
+                    self.assertIn('actual Hazelcast data-member count', result.stdout)
+        config, env = self.render(['roles/artemis/templates/application-prod.yml.j2',
+                                  'roles/artemis/templates/artemis.env.j2'], values)
+        self.assertEqual(yaml.safe_load(config)['jhipster']['cache']['hazelcast']['expected-data-member-count'], 3)
+        self.assertIn("JHIPSTER_CACHE_HAZELCAST_EXPECTEDDATAMEMBERCOUNT='3'", env)
 
 
 if __name__ == '__main__':
