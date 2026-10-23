@@ -1,20 +1,6 @@
 ---
 - name: Validate AI worker inputs
   ansible.builtin.import_tasks: validate.yml
-  tags: [validation]
-
-- name: Inspect an existing worker before maintenance
-  community.docker.docker_container_info:
-    docker_host: "unix://{{ ai_worker_docker_socket }}"
-    name: ai-worker
-  register: ai_worker_existing
-  become: true
-
-- name: Require a drained maintenance window before touching a running worker
-  ansible.builtin.assert:
-    that:
-      - ai_worker_maintenance_confirmed | bool or not (ai_worker_existing.exists and ai_worker_existing.container.State.Running)
-    fail_msg: Drain authoring, verify no active assignments, and set ai_worker_maintenance_confirmed for this deployment.
 
 - name: Inspect the dedicated Docker socket
   ansible.builtin.stat:

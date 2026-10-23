@@ -50,7 +50,6 @@
 # Docker deployments also render configuration when setup/update flags are false.
 - name: Validate generation coordination settings before deployment
   ansible.builtin.import_tasks: ai_worker_validation.yml
-  tags: [validation]
 
 # Check if variables are set correctly
 - include_tasks: variable_checks.yml

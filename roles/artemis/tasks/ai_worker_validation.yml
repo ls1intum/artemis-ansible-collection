@@ -35,14 +35,6 @@
     - artemis_computed_is_core_node | bool
     - artemis_aiworker_enabled | bool or artemis_computed_is_generation_coordinator | bool
 
-- name: Validate the core provider retry policy
-  ansible.builtin.assert:
-    that:
-      - artemis_generation_provider_max_retries is integer
-      - artemis_generation_provider_max_retries >= 0
-    fail_msg: Configure a nonnegative SDK retry count; use zero for exact generation usage accounting.
-  when: artemis_computed_is_generation_coordinator | bool
-
 - name: Require an explicit Hazelcast authoring membership
   ansible.builtin.assert:
     that:

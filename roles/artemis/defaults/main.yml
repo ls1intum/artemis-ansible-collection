@@ -437,13 +437,8 @@ artemis_aiworker_ids: []
 # Keep deployment-specific budgets, effort profiles and concurrency in the selected inventory.
 artemis_hyperion_agent: {}
 artemis_hyperion_generation: {}
-# Zero enables exact usage accounting. Nonzero values also affect other core model calls.
-artemis_generation_provider_max_retries: 0
 # Required for multi-node Hazelcast authoring; count data members, not workers/clients.
 artemis_hazelcast_expected_data_member_count: null
-artemis_computed_is_generation_coordinator: "{{ artemis_computed_is_core_node | bool and artemis_hyperion_enabled | bool
-  and artemis_hyperion_exercise_generation_enabled | bool and continuous_integration.localci is defined
-  and continuous_integration.localci is not none and version_control.localvc is defined and version_control.localvc is not none }}"
 
 # LLM model costs for usage tracking, EUR per million tokens (OpenAI list price USD x 0.92).
 # Override or add entries in your inventory as needed.
@@ -524,6 +519,10 @@ artemis_internal_ip_allowlist: []
 ##############################################################################
 # Auto-generated Variables - No not alter!
 ##############################################################################
+
+artemis_computed_is_generation_coordinator: "{{ artemis_computed_is_core_node | bool and artemis_hyperion_enabled | bool
+  and artemis_hyperion_exercise_generation_enabled | bool and continuous_integration.localci is defined
+  and continuous_integration.localci is not none and version_control.localvc is defined and version_control.localvc is not none }}"
 
 artemis_computed_is_core_node: "{{ not (continuous_integration.localci is defined and continuous_integration.localci is not none) or (continuous_integration.localci.is_core_node
   is defined and continuous_integration.localci.is_core_node) }}"

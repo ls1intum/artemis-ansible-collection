@@ -2,7 +2,8 @@
 
 Deploy the current Artemis generation worker, not a broker service or a LocalCI
 Build Agent. Core and worker must be built from the same qualified Artemis WAR.
-The worker image starts `prod,aiworker`. These Spring profiles apply in **all**
+Build the worker image with the Artemis `deployment/docker/aiworker/worker.Dockerfile`,
+not the ordinary core/Build Agent image. The worker image starts `prod,aiworker`. These Spring profiles apply in **all**
 environments; do not replace `prod` with Spring's `test` profile.
 
 The supported Hyperion capability is `hyperion-generation`, version `1`, with
@@ -33,9 +34,11 @@ Production generation is disabled until an operator enables it.
    draining authoring. An eligible
    `core,localci,localvc` coordinator also needs Hyperion and the worker IDs.
 5. Deploy the worker on a dedicated Docker host or VM. Do not use the Docker
-   daemon of core, a database, or an ordinary Build Agent. A separate local daemon
-   is supported only with `ai_worker_isolated_daemon: true` and a non-default
-   `ai_worker_docker_socket`.
+   daemon of core, a database, or an ordinary Build Agent. This role targets a
+   rootful Docker daemon without
+   [user-namespace remapping](https://docs.docker.com/engine/security/rootless/uid-gid-mapping/)
+   on that dedicated host. A different socket path does
+   not establish isolation; shared-host rootless deployment is outside this role.
 
 Until the role is released, install a reviewed collection commit, not `main` or
 an older published version. Set `COLLECTION_COMMIT` to that commit. `--force`
@@ -51,11 +54,6 @@ For example, with that collection installed:
 ```sh
 # Use staging or prod in place of test. Select exactly one environment.
 ansible-playbook -i inventories/test/hosts.yml ai-worker.yml \
-  -e @release.yml -e @inventories/test/vault.yml --vault-id test@prompt \
-  --tags validation
-
-# After validation, deploy. No services are started by the validation-only run.
-ansible-playbook -i inventories/test/hosts.yml ai-worker.yml \
   -e @release.yml -e @inventories/test/vault.yml --vault-id test@prompt
 ```
 
@@ -65,10 +63,11 @@ Use a private provider network (for example WireGuard); do not expose Redis or
 the Docker API to the public network. Permit supervisor traffic only to its
 provider, approved model endpoint and image registry. The generated-code containers have no network and receive no model key.
 The supervisor has no published HTTP port. Its Docker socket grants host control.
+Docker rotates stdout logs. The inherited Spring file log is capped separately
+inside the supervisor's temporary filesystem (8 MB per file, 32 MB of archives).
 
 Before replacing a running worker, stop new authoring and drain active assignments
-and core persistence. Then set `ai_worker_maintenance_confirmed: true` for that
-run. Do not set it permanently in inventory. A coordinated core/worker update is
+and core persistence. The role does not drain jobs or disable admission automatically. A coordinated core/worker update is
 required when the distributed-data encoding changes; do not mix runtime versions.
 
 ## Configuration
@@ -77,7 +76,6 @@ required when the distributed-data encoding changes; do not mix runtime versions
 | --- | --- |
 | `artemis_hyperion_agent` | Native `artemis.hyperion.agent` settings on core: token/duration budgets and named effort profiles. Core sends the resolved profile to the worker. |
 | `artemis_hyperion_generation` | Native `artemis.hyperion.generation` settings on core: concurrency, retention and shutdown settings. |
-| `artemis_generation_provider_max_retries` | SDK retry count on generation coordinators; default `0` at both common and chat levels for exact usage accounting. Nonzero values make usage incomplete. This also affects other model calls on that core. |
 | `artemis_hazelcast_expected_data_member_count` | Actual number of Hazelcast data members. Required for multi-node Hazelcast authoring; the YAML and Docker paths set the same count. |
 | `artemis_aiworker_ids` | Worker IDs admitted by each coordinator. Match the IDs on worker hosts. |
 | `ai_worker_model_base_url`, `ai_worker_model`, `ai_worker_model_api_key`, `ai_worker_model_timeout` | Worker-local model connection. Use HTTPS. Set `ai_worker_microsoft_foundry` for a Foundry custom domain. |
@@ -98,16 +96,24 @@ profile to a deployment available through that environment's worker endpoint.
 Prices are operator-supplied: the examples use `artemis_llm_cost: {}` so stale
 collection price defaults are not presented as measured generation costs.
 
+The worker disables SDK retries for generation accounting. Core retry settings
+are left unchanged: the current runtime also checks core retries and can report
+usage as incomplete even when worker retries are disabled. That runtime accounting
+check must not be worked around by removing retries from unrelated core features.
+
 ## Provider isolation
 
-Use `ai_worker_provider: redis` with `ai_worker_valkey` containing the same
-`host`, `port`, `username` and `password` as core. The examples share the `valkey`
-map within one inventory. The authoritative store must use AOF,
+As with Build Agents, a configured `valkey` map selects Redis. The worker reads
+the same `host`, `port`, `username` and `password` as core. No separate worker
+provider configuration is needed. The authoritative store must use AOF,
 `appendfsync always`, and `maxmemory-policy noeviction`. Inventory validation is
 not a check of the live server's effective settings.
 
-For Hazelcast, set `ai_worker_provider: hazelcast` and
-`ai_worker_eureka_url: "https://admin:{{ vault_registry_password }}@registry.example/eureka/"`.
+For Hazelcast, leave `valkey` unset and use the same `registry.url` and
+`artemis_jhipster_registry_password` as core and Build Agents. Set
+`artemis_eureka_urls` to override the shared discovery URL (for example, for HTTPS
+or a non-default port). The default URL uses the registry password through a
+Spring property reference, not a password embedded in the inventory URL.
 On the core inventory, use the collection's multi-node Hazelcast/Eureka setup
 (`is_multinode_install: true`) and set `artemis_hazelcast_expected_data_member_count`
 to the actual data-member count on every member. All data members must use the
@@ -122,10 +128,8 @@ do not isolate all distributed maps and topics. Use separate Redis/Valkey stores
 or separate Eureka/Hazelcast deployments and networks. All three environments
 use the runtime's production cluster mode; an inventory name is not a namespace.
 
-## Verification
+## After deployment
 
-Run the configuration playbook and Python tests in the PR's CI. They test both
-provider modes and all three inventories without contacting their services.
 After a real role deployment and explicit generation opt-in on core and all
 writers, check capacity from core and generate a small exercise,
 confirm solution/template LocalCI scores of 100/0, cancel another run, and undo a
