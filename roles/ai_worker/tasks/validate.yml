@@ -1,0 +1,58 @@
+---
+- name: Validate the isolated worker configuration
+  ansible.builtin.assert:
+    that:
+      - ai_worker_dedicated_host | bool
+      - ai_worker_docker_socket is match('^/[a-zA-Z0-9/_.-]+$')
+      - ai_worker_workload is match('^[a-z][a-z0-9-]{0,63}$')
+      - ai_worker_workload_version is integer
+      - ai_worker_workload_version > 0
+      - ai_worker_workload != "hyperion-generation" or ai_worker_workload_version == 1
+      - ai_worker_workload != "hyperion-generation" or ai_worker_profile == "java-gradle"
+      - ai_worker_id is match('^[a-zA-Z0-9_-]{1,64}$')
+      - ai_worker_image is match('^\S+@sha256:[a-f0-9]{64}$')
+      - ai_worker_sandbox_image is match('^\S+@sha256:[a-f0-9]{64}$')
+      - ai_worker_profile is match('^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$')
+      - ai_worker_profile | length <= 64
+      - ai_worker_slots is integer
+      - ai_worker_slots | int >= 1
+      - ai_worker_slots | int <= 16
+      - ai_worker_sandbox_memory_bytes | int > 0
+      - ai_worker_sandbox_cpu_quota | int > 0
+      - ai_worker_sandbox_pids | int > 0
+      - ai_worker_cpus | float > 0
+      - ai_worker_model_options is mapping
+      - ai_worker_model_options.keys() | difference(['temperature', 'top-p', 'max-tokens', 'max-completion-tokens', 'reasoning-effort']) | length == 0
+      - ai_worker_runtime | length > 0
+      - ai_worker_directory is match('^/[a-zA-Z0-9/_-]+$')
+      - ai_worker_workload != "hyperion-generation" or ai_worker_model_base_url is match('^https://')
+      - ai_worker_workload != "hyperion-generation" or ai_worker_model | length > 0
+    fail_msg: Configure an isolated worker host, digest-pinned images, shared Hazelcast/Eureka or Redis access and HTTPS model provider.
+
+- name: Validate worker secrets without logging their values
+  ansible.builtin.assert:
+    that:
+      - ai_worker_workload != "hyperion-generation" or ai_worker_model_api_key | length > 0
+    fail_msg: Supply worker provider and model credentials through Ansible Vault.
+  no_log: true
+
+- name: Check the shared Redis connection
+  ansible.builtin.assert:
+    that:
+      - valkey.host | default('') | length > 0
+      - valkey.port | default(0) | int > 0
+      - valkey.port | int <= 65535
+      - valkey.username | default('') | length > 0
+      - valkey.password | default('') | length > 0
+    fail_msg: Supply the same Valkey connection as core through Ansible Vault.
+  when: valkey is defined and valkey is not none
+  no_log: true
+
+- name: Check the shared Eureka connection
+  ansible.builtin.assert:
+    that:
+      - artemis_eureka_urls is match('^https?://')
+      - artemis_jhipster_registry_password | length > 0
+    fail_msg: Supply the same Eureka URL and registry password as core.
+  when: valkey is not defined or valkey is none
+  no_log: true

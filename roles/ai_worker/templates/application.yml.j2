@@ -1,0 +1,69 @@
+# {{ ansible_managed }}
+{% set uses_redis = valkey is defined and valkey is not none %}
+spring:
+  profiles:
+    active: [prod, aiworker]
+  main:
+    web-application-type: none
+{% if not uses_redis %}
+  hazelcast:
+    localInstances: false
+{% else %}
+  data:
+    redis:
+      host: {{ valkey.host | to_json }}
+      port: {{ valkey.port | int }}
+      username: {{ valkey.username | to_json }}
+      password: {{ valkey.password | to_json }}
+      client-name: {{ ('aiworker-' ~ ai_worker_id) | to_json }}
+{% endif %}
+  ai:
+    model:
+      chat: {{ 'openai' if ai_worker_model_api_key | length > 0 else 'none' }}
+    openai:
+      api-key: {{ ai_worker_model_api_key | to_json }}
+      base-url: {{ ai_worker_model_base_url | to_json }}
+      microsoft-foundry: {{ ai_worker_microsoft_foundry | bool | lower }}
+      max-retries: 0
+      timeout: {{ ai_worker_model_timeout | to_json }}
+      chat: {{ ai_worker_model_options | combine({'model': ai_worker_model, 'max-retries': 0}) | to_json }}
+logging:
+  logback:
+    rollingpolicy:
+      max-file-size: 8MB
+      total-size-cap: 32MB
+artemis:
+  distributed-data:
+    provider: {{ ('redis' if uses_redis else 'hazelcast') | to_json }}
+  aiworker:
+    workload: {{ ai_worker_workload | to_json }}
+    workload-version: {{ ai_worker_workload_version | int }}
+    id: {{ ai_worker_id | to_json }}
+    image: {{ ai_worker_sandbox_image | to_json }}
+    profile: {{ ai_worker_profile | to_json }}
+    runtime: {{ ai_worker_runtime | to_json }}
+    max-concurrent-executions: {{ ai_worker_slots | int }}
+    memory-bytes: {{ ai_worker_sandbox_memory_bytes | int }}
+    cpu-quota: {{ ai_worker_sandbox_cpu_quota | int }}
+    pids: {{ ai_worker_sandbox_pids | int }}
+    shutdown-timeout: PT2M
+  telemetry:
+    gen-ai:
+      capture-content: false
+{% if not uses_redis %}
+eureka:
+  client:
+    enabled: true
+    register-with-eureka: false
+    service-url:
+      defaultZone: {{ artemis_eureka_urls | to_json }}
+{% else %}
+eureka:
+  client:
+    enabled: false
+{% endif %}
+{% if not uses_redis %}
+jhipster:
+  registry:
+    password: {{ artemis_jhipster_registry_password | to_json }}
+{% endif %}

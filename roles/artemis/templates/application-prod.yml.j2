@@ -469,9 +469,6 @@ artemis:
       enable: {{ enable_science_event_logging | lower }}
 {% endif %}
 
-  hyperion:
-    enabled: {{ artemis_hyperion_enabled | lower }}
-
 {% if artemis_llm_cost is defined %}
   llm:
     model-costs:
@@ -488,6 +485,22 @@ artemis:
     enabled: {{ artemis_telemetry_enabled | lower }}
     sendAdminDetails: {{ artemis_send_admin_details | lower }}
     destination: {{ artemis_telemetry_destination }}
+{% endif %}
+
+  hyperion:
+    enabled: {{ artemis_hyperion_enabled | bool | lower }}
+    exercise-generation:
+      enabled: {{ artemis_hyperion_exercise_generation_enabled | bool | lower }}
+{% if artemis_hyperion_agent | length > 0 %}
+    agent: {{ artemis_hyperion_agent | to_json }}
+{% endif %}
+{% if artemis_hyperion_generation | length > 0 %}
+    generation: {{ artemis_hyperion_generation | to_json }}
+{% endif %}
+{% if artemis_computed_is_core_node %}
+  aiworker:
+    enabled: {{ artemis_aiworker_enabled | lower }}
+    ids: {{ artemis_aiworker_ids | to_json }}
 {% endif %}
 
 {% if licenses is defined and licenses is not none %}
@@ -517,6 +530,12 @@ artemis:
 
 {% if artemis_computed_is_core_node or (artemis_computed_uses_hazelcast | bool and artemis_jhipster_registry_password is not none) or (artemis_CORS_allowed_origins is defined and artemis_CORS_allowed_origins is not none) %}
 jhipster:
+
+{% if artemis_computed_is_core_node and artemis_computed_uses_hazelcast | bool and artemis_hazelcast_expected_data_member_count is not none %}
+  cache:
+    hazelcast:
+      expected-data-member-count: {{ artemis_hazelcast_expected_data_member_count | int }}
+{% endif %}
 
 {% if artemis_computed_is_core_node and artemis_jhipster_jwt is not none %}
   security:

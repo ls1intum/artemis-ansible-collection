@@ -1,0 +1,4 @@
+---
+# Replace both placeholders with images qualified from the same Artemis WAR as core.
+ai_worker_release_image: "registry.example/artemis-aiworker@sha256:<64 hex digits>"
+ai_worker_release_sandbox_image: "registry.example/hyperion-gradle-sandbox@sha256:<64 hex digits>"
