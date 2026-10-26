@@ -5,7 +5,7 @@
       - ai_worker_dedicated_host | bool
       - ai_worker_docker_socket is match('^/[a-zA-Z0-9/_.-]+$')
       - ai_worker_id is match('^[a-zA-Z0-9_-]{1,64}$')
-      - ai_worker_image is match('^\S+(?::[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}|@sha256:[a-f0-9]{64})$')
+      - ai_worker_image is match('^[^\s@]*[^\s@:](?::[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}|@sha256:[a-f0-9]{64})\Z')
       - ai_worker_sandbox_image is match('^\S+@sha256:[a-f0-9]{64}$')
       - ai_worker_slots is integer
       - ai_worker_slots | int >= 1

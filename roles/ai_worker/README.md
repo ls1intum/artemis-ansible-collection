@@ -4,7 +4,7 @@ Deploy the Artemis generation worker, not a broker service or a LocalCI Build Ag
 Like Build Agents, the worker runs the normal Artemis image of the release
 (`ghcr.io/ls1intum/artemis:{{ artemis_version }}`), so core and worker always run the
 same release. The role starts it with the `prod,aiworker` Spring profiles, disables the
-image's HTTP health check and gives it 6 GB of memory for the image's 5 GB JVM heap.
+image's HTTP health check and gives it 8 GB of memory, because the image fixes a 5 GB JVM heap.
 These profiles apply in **all** environments; do not replace `prod` with Spring's `test` profile.
 
 The worker runs the Hyperion workload `hyperion-generation`, version `1`, profile

@@ -2,7 +2,7 @@
 {% set uses_redis = valkey is defined and valkey is not none %}
 spring:
   profiles:
-    active: [prod, aiworker]
+    active: prod,aiworker
   main:
     web-application-type: none
 {% if not uses_redis %}

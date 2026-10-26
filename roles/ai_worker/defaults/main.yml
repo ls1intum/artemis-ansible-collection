@@ -13,8 +13,8 @@ ai_worker_runtime: runc
 ai_worker_sandbox_memory_bytes: 2147483648
 ai_worker_sandbox_cpu_quota: 200000
 ai_worker_sandbox_pids: 256
-# The Artemis image starts the JVM with a 5 GB maximum heap.
-ai_worker_memory: 6g
+# The Artemis image fixes a 5 GB maximum heap; leave room for metaspace, direct buffers and /tmp.
+ai_worker_memory: 8g
 ai_worker_cpus: 2
 # Match the core nodes' DistributedDataProvider; the worker never hosts a data member.
 artemis_eureka_urls: "{% if registry.url is defined and registry.url is not none %}http://admin:${jhipster.registry.password}@{{ registry.url }}:8761/eureka/{% endif %}"

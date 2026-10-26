@@ -63,6 +63,8 @@
     # The Artemis image checks HTTP readiness; the worker has no HTTP server.
     healthcheck:
       test: ["NONE"]
+    # The Artemis image declares volumes the worker does not use; do not keep them across recreations.
+    keep_volumes: false
     tmpfs:
       - /tmp:rw,nosuid,nodev,size=128m,mode=1777
     volumes:

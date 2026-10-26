@@ -433,7 +433,7 @@ artemis_hyperion_exercise_generation_enabled: false
 # Generation coordinators enable worker coordination themselves; set true only for another workload.
 artemis_aiworker_enabled: false
 # Defaults to the ai_worker_id of every host in the generation_workers group.
-artemis_aiworker_ids: "{{ groups['generation_workers'] | default([]) | map('extract', hostvars, 'ai_worker_id') | list }}"
+artemis_aiworker_ids: "{{ groups['generation_workers'] | default([]) | map('extract', hostvars, 'ai_worker_id') | select('defined') | list }}"
 # Native artemis.hyperion.agent / .generation settings; resolved on core and sent to the worker.
 # Keep deployment-specific budgets, effort profiles and concurrency in the selected inventory.
 artemis_hyperion_agent: {}
