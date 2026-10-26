@@ -36,11 +36,8 @@ artemis:
   distributed-data:
     provider: {{ ('redis' if uses_redis else 'hazelcast') | to_json }}
   aiworker:
-    workload: {{ ai_worker_workload | to_json }}
-    workload-version: {{ ai_worker_workload_version | int }}
     id: {{ ai_worker_id | to_json }}
     image: {{ ai_worker_sandbox_image | to_json }}
-    profile: {{ ai_worker_profile | to_json }}
     runtime: {{ ai_worker_runtime | to_json }}
     max-concurrent-executions: {{ ai_worker_slots | int }}
     memory-bytes: {{ ai_worker_sandbox_memory_bytes | int }}

@@ -60,6 +60,9 @@
     cpus: "{{ ai_worker_cpus }}"
     pids_limit: 512
     stop_timeout: 150
+    # The Artemis image checks HTTP readiness; the worker has no HTTP server.
+    healthcheck:
+      test: ["NONE"]
     tmpfs:
       - /tmp:rw,nosuid,nodev,size=128m,mode=1777
     volumes:

@@ -499,7 +499,7 @@ artemis:
 {% endif %}
 {% if artemis_computed_is_core_node %}
   aiworker:
-    enabled: {{ artemis_aiworker_enabled | lower }}
+    enabled: {{ artemis_computed_aiworker_enabled | lower }}
     ids: {{ artemis_aiworker_ids | to_json }}
 {% endif %}
 

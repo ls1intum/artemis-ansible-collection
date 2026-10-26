@@ -1,4 +1,5 @@
 ---
-# Replace both placeholders with images qualified from the same Artemis WAR as core.
-ai_worker_release_image: "registry.example/artemis-aiworker@sha256:<64 hex digits>"
-ai_worker_release_sandbox_image: "registry.example/hyperion-gradle-sandbox@sha256:<64 hex digits>"
+# Core, Build Agents and AI workers run the same Artemis release image: ghcr.io/ls1intum/artemis:<version>.
+artemis_release_version: "<artemis release tag>"
+# Build with deployment/docker/hyperion/gradle-sandbox.Dockerfile of the same release and pin by digest.
+ai_worker_release_sandbox_image: "registry.example/hyperion-sandbox@sha256:<64 hex digits>"

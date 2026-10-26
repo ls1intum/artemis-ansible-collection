@@ -1,15 +1,15 @@
 # AI Worker
 
-Deploy the current Artemis generation worker, not a broker service or a LocalCI
-Build Agent. Core and worker must be built from the same qualified Artemis WAR.
-Build the worker image with the Artemis `deployment/docker/aiworker/worker.Dockerfile`,
-not the ordinary core/Build Agent image. The worker image starts `prod,aiworker`. These Spring profiles apply in **all**
-environments; do not replace `prod` with Spring's `test` profile.
+Deploy the Artemis generation worker, not a broker service or a LocalCI Build Agent.
+Like Build Agents, the worker runs the normal Artemis image of the release
+(`ghcr.io/ls1intum/artemis:{{ artemis_version }}`), so core and worker always run the
+same release. The role starts it with the `prod,aiworker` Spring profiles, disables the
+image's HTTP health check and gives it 6 GB of memory for the image's 5 GB JVM heap.
+These profiles apply in **all** environments; do not replace `prod` with Spring's `test` profile.
 
-The supported Hyperion capability is `hyperion-generation`, version `1`, with
-profile `java-gradle`. A different version or toolchain fails validation.
-Despite its name, this toolchain verifies Java exercises built with Gradle or
-Maven. Build the sandbox image from `deployment/docker/hyperion/gradle-sandbox.Dockerfile`
+The worker runs the Hyperion workload `hyperion-generation`, version `1`, profile
+`java-gradle`; these are Artemis defaults, not role variables. Despite its name, the
+profile verifies Java exercises built with Gradle or Maven. Build the sandbox image from `deployment/docker/hyperion/gradle-sandbox.Dockerfile`
 of the same Artemis revision: it carries the offline Gradle and Maven
 repositories, so an image from an older revision cannot verify Maven exercises.
 Generation stays disabled in the core role by default.
@@ -25,8 +25,8 @@ Production generation is disabled until an operator enables it.
    `example.invalid` address. Copy [deploy.yml](../../examples/ai_worker/deploy.yml)
    into your deployment repository as `ai-worker.yml`. Add these groups and variables to your normal core
    inventory; the examples are not a complete Artemis installation.
-2. Supply `ai_worker_release_image` and `ai_worker_release_sandbox_image` as full
-   registry image references pinned by `@sha256:`. See
+2. Supply `artemis_release_version` (the Artemis release tag of core) and
+   `ai_worker_release_sandbox_image` as a registry reference pinned by `@sha256:`. See
    [release.example.yml](../../examples/ai_worker/release.example.yml).
 3. Store `vault_valkey_password` and `vault_ai_worker_model_api_key` in a separate
    encrypted Vault file for that environment. Never reuse production keys in test.
@@ -78,12 +78,13 @@ required when the distributed-data encoding changes; do not mix runtime versions
 
 | Variables | Effect |
 | --- | --- |
-| `artemis_hyperion_agent` | Native `artemis.hyperion.agent` settings on core: token/duration budgets and named effort profiles. Core sends the resolved profile to the worker. |
-| `artemis_hyperion_generation` | Native `artemis.hyperion.generation` settings on core: concurrency, retention and shutdown settings. |
+| `artemis_hyperion_agent` | Optional native `artemis.hyperion.agent` settings on core: token/duration budgets and named effort profiles. Artemis defaults apply when unset; core sends the resolved profile to the worker. |
+| `artemis_hyperion_generation` | Optional native `artemis.hyperion.generation` settings on core: concurrency, retention and shutdown settings. Artemis defaults apply when unset. |
 | `artemis_hazelcast_expected_data_member_count` | Actual number of Hazelcast data members. Required for multi-node Hazelcast authoring; the YAML and Docker paths set the same count. |
-| `artemis_aiworker_ids` | Worker IDs admitted by each coordinator. Match the IDs on worker hosts. |
+| `artemis_aiworker_ids` | Worker IDs admitted by each coordinator. Defaults to the `ai_worker_id` of every `generation_workers` host; set it explicitly when the workers are in another inventory. |
 | `ai_worker_model_base_url`, `ai_worker_model`, `ai_worker_model_api_key`, `ai_worker_model_timeout` | Worker-local model connection. Use HTTPS. Set `ai_worker_microsoft_foundry` for a Foundry custom domain. |
 | `ai_worker_model_options` | Allowed defaults: `temperature`, `top-p`, `max-tokens`, `max-completion-tokens`, and `reasoning-effort`. Connection settings and retries cannot be overridden here. An explicit core effort profile governs the run's model/options. |
+| `ai_worker_image` | Defaults to the Artemis release image of `artemis_version`. Override only with the same release, for example pinned by digest. |
 | `ai_worker_slots`, `ai_worker_memory`, `ai_worker_cpus` | Supervisor capacity and container limits. |
 | `ai_worker_sandbox_memory_bytes`, `ai_worker_sandbox_cpu_quota`, `ai_worker_sandbox_pids`, `ai_worker_runtime` | Per-sandbox limits. The host needs room for the supervisor, concurrent sandboxes and the OS. Example limits are not load-test results. |
 
@@ -95,8 +96,9 @@ Foundry with `ai_worker_microsoft_foundry: true`.
 
 The core role renders the same nested agent/generation settings in its YAML and
 Docker paths. Docker uses `SPRING_APPLICATION_JSON` to preserve profile names;
-do not override that variable separately. Set the model in each core effort
-profile to a deployment available through that environment's worker endpoint.
+do not override that variable separately. Without effort profiles, runs use
+`ai_worker_model`; if you define profiles, set each profile's model to a deployment
+available through that environment's worker endpoint.
 Prices are operator-supplied: the examples use `artemis_llm_cost: {}` so stale
 collection price defaults are not presented as measured generation costs.
 

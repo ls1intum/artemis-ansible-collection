@@ -3,11 +3,9 @@
 # never the Docker daemon of an Artemis core, database or ordinary build agent.
 ai_worker_dedicated_host: false
 ai_worker_id: ""
-ai_worker_image: ""
+# The normal Artemis image of the release, as for core and Build Agents.
+ai_worker_image: "ghcr.io/ls1intum/artemis:{{ artemis_version | default('') }}"
 ai_worker_sandbox_image: ""
-ai_worker_workload: hyperion-generation
-ai_worker_workload_version: 1
-ai_worker_profile: java-gradle
 ai_worker_docker_socket: /var/run/docker.sock
 ai_worker_directory: /opt/ai-worker
 ai_worker_slots: 1
@@ -15,7 +13,8 @@ ai_worker_runtime: runc
 ai_worker_sandbox_memory_bytes: 2147483648
 ai_worker_sandbox_cpu_quota: 200000
 ai_worker_sandbox_pids: 256
-ai_worker_memory: 2g
+# The Artemis image starts the JVM with a 5 GB maximum heap.
+ai_worker_memory: 6g
 ai_worker_cpus: 2
 # Match the core nodes' DistributedDataProvider; the worker never hosts a data member.
 artemis_eureka_urls: "{% if registry.url is defined and registry.url is not none %}http://admin:${jhipster.registry.password}@{{ registry.url }}:8761/eureka/{% endif %}"
