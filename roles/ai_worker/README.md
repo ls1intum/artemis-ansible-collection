@@ -8,6 +8,10 @@ environments; do not replace `prod` with Spring's `test` profile.
 
 The supported Hyperion capability is `hyperion-generation`, version `1`, with
 profile `java-gradle`. A different version or toolchain fails validation.
+Despite its name, this toolchain verifies Java exercises built with Gradle or
+Maven. Build the sandbox image from `deployment/docker/hyperion/gradle-sandbox.Dockerfile`
+of the same Artemis revision: it carries the offline Gradle and Maven
+repositories, so an image from an older revision cannot verify Maven exercises.
 Generation stays disabled in the core role by default.
 
 ## Test, staging and production
