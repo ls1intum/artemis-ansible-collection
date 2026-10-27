@@ -5,6 +5,7 @@ ai_worker_dedicated_host: false
 ai_worker_id: ""
 # The normal Artemis image of the release, as for core and Build Agents.
 ai_worker_image: "ghcr.io/ls1intum/artemis:{{ artemis_version | default('') }}"
+# Empty: the worker pulls the sandbox image Artemis CI published for its release. Set a digest-pinned image only for unpublished builds.
 ai_worker_sandbox_image: ""
 ai_worker_docker_socket: /var/run/docker.sock
 ai_worker_directory: /opt/ai-worker

@@ -15,12 +15,13 @@
       - ai_worker_socket.stat.issock
     fail_msg: Provision Docker on this isolated host before deploying the worker.
 
-- name: Preload the immutable sandbox image
+- name: Preload a configured sandbox image
   community.docker.docker_image:
     docker_host: "unix://{{ ai_worker_docker_socket }}"
     name: "{{ ai_worker_sandbox_image }}"
     source: pull
   become: true
+  when: ai_worker_sandbox_image | length > 0
 
 - name: Create the private worker configuration directory
   ansible.builtin.file:

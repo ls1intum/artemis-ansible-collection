@@ -37,7 +37,9 @@ artemis:
     provider: {{ ('redis' if uses_redis else 'hazelcast') | to_json }}
   aiworker:
     id: {{ ai_worker_id | to_json }}
+{% if ai_worker_sandbox_image | length > 0 %}
     image: {{ ai_worker_sandbox_image | to_json }}
+{% endif %}
     runtime: {{ ai_worker_runtime | to_json }}
     max-concurrent-executions: {{ ai_worker_slots | int }}
     memory-bytes: {{ ai_worker_sandbox_memory_bytes | int }}

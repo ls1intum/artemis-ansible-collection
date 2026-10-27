@@ -9,9 +9,9 @@ These profiles apply in **all** environments; do not replace `prod` with Spring'
 
 The worker runs the Hyperion workload `hyperion-generation`, version `1`, profile
 `java-gradle`; these are Artemis defaults, not role variables. Despite its name, the
-profile verifies Java exercises built with Gradle or Maven. Build the sandbox image from `deployment/docker/hyperion/gradle-sandbox.Dockerfile`
-of the same Artemis revision: it carries the offline Gradle and Maven
-repositories, so an image from an older revision cannot verify Maven exercises.
+profile verifies Java exercises built with Gradle or Maven. Like a Build Agent's build images, the
+sandbox image comes with the release: the worker pulls the image Artemis CI published for its own
+commit. Set `ai_worker_sandbox_image` (pinned by `@sha256:`) only for a build without a published image.
 Generation stays disabled in the core role by default.
 
 ## Test, staging and production
@@ -25,8 +25,7 @@ Production generation is disabled until an operator enables it.
    `example.invalid` address. Copy [deploy.yml](../../examples/ai_worker/deploy.yml)
    into your deployment repository as `ai-worker.yml`. Add these groups and variables to your normal core
    inventory; the examples are not a complete Artemis installation.
-2. Supply `artemis_release_version` (the Artemis release tag of core) and
-   `ai_worker_release_sandbox_image` as a registry reference pinned by `@sha256:`. See
+2. Supply `artemis_release_version`, the Artemis release tag of core. See
    [release.example.yml](../../examples/ai_worker/release.example.yml).
 3. Store `vault_valkey_password` and `vault_ai_worker_model_api_key` in a separate
    encrypted Vault file for that environment. Never reuse production keys in test.
