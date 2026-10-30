@@ -254,3 +254,14 @@ broker:
 ## Example Usage
 
 Please refer to https://github.com/ls1intum/artemis-ansible for concrete examples.
+
+## AI Worker coordination
+
+Set `artemis_hyperion_exercise_generation_enabled: true` on every exercise
+writer when whole-exercise generation is enabled. On each eligible core
+coordinator, also set `artemis_hyperion_enabled: true`; the role then enables worker
+coordination and takes `artemis_aiworker_ids` from the `generation_workers` hosts.
+Set `artemis_aiworker_ids` explicitly when the workers are in another inventory, and
+`artemis_aiworker_enabled: true` only for another workload than Hyperion generation. The worker runs on a separate node with the
+[`ai_worker` role](../ai_worker/README.md); it is not a Build Agent or a core
+profile. Core and worker must select the same Hazelcast or Redis provider.

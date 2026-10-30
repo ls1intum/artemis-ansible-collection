@@ -1,0 +1,3 @@
+---
+# Core, Build Agents and AI workers run the same Artemis release image: ghcr.io/ls1intum/artemis:<version>.
+artemis_release_version: "<artemis release tag>"

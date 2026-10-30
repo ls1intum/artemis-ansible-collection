@@ -13,6 +13,7 @@
 - name: Validate valkey configuration
   assert:
     that:
+      - valkey_appendfsync in ["always", "everysec", "no"]
       - valkey.username is defined and valkey.username | length > 0
       - valkey.password is defined and valkey.password is not none and valkey.password | length > 0
       - valkey.admin_username is defined and valkey.admin_username | length > 0
