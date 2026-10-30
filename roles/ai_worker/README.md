@@ -10,8 +10,11 @@ These profiles apply in **all** environments; do not replace `prod` with Spring'
 The worker runs the Hyperion workload `hyperion-generation`, version `1`, profile
 `java-gradle`; these are Artemis defaults, not role variables. Despite its name, the
 profile verifies Java exercises built with Gradle or Maven. Like a Build Agent's build images, the
-sandbox image comes with the release: the worker pulls the image Artemis CI published for its own
-commit. Set `ai_worker_sandbox_image` (pinned by `@sha256:`) only for a build without a published image.
+sandbox has its own toolchain version. Artemis ships the default; the worker reuses its local image
+or pulls it when missing. An Artemis upgrade does not require a new sandbox image.
+Leave `ai_worker_sandbox_image` empty for normal deployments. Override it with a versioned tag or
+registry digest only for a private registry or custom sandbox. Sandbox versions are published
+separately by Artemis maintainers; operators do not build images per Artemis release.
 Generation stays disabled in the core role by default.
 
 ## Test, staging and production
