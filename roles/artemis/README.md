@@ -233,6 +233,15 @@ lti:
 
 ### Additional Variables for multi node installations
 
+For native deployments, set `artemis_repo_basepath` to the same shared filesystem on every core node. Artemis reads and
+writes both log stores directly there: `build-logs` contains downloadable build logs, and `failed-build-logs` contains the
+failed-result logs shown in the build output panel.
+
+For existing installations, copy each core's local `failed-build-logs` directory (under `artemis_working_directory`) into
+the shared directory, preserving the exercise/submission/result hierarchy and file timestamps. Coordinate a final copy
+with each core's restart to capture late writes. Verify the shared copies before deleting the old local files.
+The role configures the storage path; operators perform the file migration.
+
 Registry Configuration (Hazelcast clusters only):
 ```
 artemis_jhipster_registry_password: "your_registry_password" # Set this to the password for the JHipster registry in a multi-node setup

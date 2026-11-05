@@ -86,3 +86,9 @@ virtualenv venv
 . venv/bin/activate.fish
 pip3 install -r requirements.txt
 ```
+
+Run the build log storage template regression test locally without changing any hosts:
+
+```bash
+ansible-playbook -i localhost, tests/artemis-build-log-storage.yml
+```
