@@ -295,6 +295,9 @@ artemis:
 {% endif %}
 {% if artemis_computed_is_core_node %}
     repository-authentication-mechanisms: {{ version_control.localvc.repository_authentication_mechanisms | default("token,ssh,password") }}
+{% if version_control.localvc.password_authentication_end_date | default('', true) | string | length > 0 %}
+    password-authentication-end-date: "{{ version_control.localvc.password_authentication_end_date }}"
+{% endif %}
 {% endif %}
 {% endif %}
 
