@@ -261,7 +261,8 @@ artemis_passkey_require_for_administrator_features: false
 #     password:
 #   user: # An artemis admin user for the local version control system
 #   password: # The password of the artemis admin user for the local version control system
-#   repository_authentication_mechanisms: token,ssh,password
+#   repository_authentication_mechanisms: token,ssh,password # Order of the options in the clone dialog. Leaving out `password` only hides that option, the server still accepts passwords.
+#   password_authentication_end_date: # ISO date (e.g. 2027-01-15) on which password access for Git is planned to end. Only named in the email and push message sent to users who still use a password, passwords are not rejected on that day.
 #
 #continuous_integration:
 #
