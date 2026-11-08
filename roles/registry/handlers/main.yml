@@ -1,6 +1,0 @@
----
-- name: Restart registry
-  become: true
-  service:
-    name: registry
-    state: restarted

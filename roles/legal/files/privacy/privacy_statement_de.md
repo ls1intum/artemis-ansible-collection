@@ -195,27 +195,6 @@ Im Rahmen der Nutzung von Artemis werden folgende Daten verarbeitet, die zur Dur
 
 **Speicherdauer:** Übungsabgaben werden nach Ende des jeweiligen Semesters für bis zu 5 Jahre aufbewahrt, sofern gesetzliche Aufbewahrungsfristen (z. B. für Prüfungsdaten gemäß APSO) dies erfordern.
 
-### Fehleranalyse und Performance-Monitoring (Sentry)
-
-Zur Sicherstellung eines stabilen und leistungsfähigen Betriebs der Plattform kann Artemis das Open-Source-Tool Sentry für folgende Zwecke einsetzen:
-
-* **Fehleranalyse:** Erfassung von JavaScript-Fehlern inkl. Stack Traces im Browser der Nutzer, um technische Probleme zeitnah zu erkennen und zu beheben.
-* **Performance-Monitoring:** Erfassung von Seitenladezeiten und API-Antwortzeiten, um Engpässe zu identifizieren und die Nutzererfahrung zu verbessern. Hierbei wird erfasst, welche Seiten und Module aufgerufen werden und wie die Antwortzeiten der Netzwerkaufrufe sind.
-
-Dabei können folgende Daten erhoben werden:
-
-* IP-Adresse (wird nach Möglichkeit anonymisiert bzw. minimiert)
-* Browser- und Betriebssysteminformationen
-* Aufgerufene URL und Zeitpunkt des Aufrufs
-* Technische Fehlermeldungen und Stack Traces
-* Seitenlade- und Netzwerk-Timings
-
-Es handelt sich **nicht** um Mouse- oder Click-Tracking. Es werden keine individuellen Klicks oder Mausbewegungen aufgezeichnet. Die in HTTP-Requests sichtbaren Sentry-Header (z. B. `sentry-trace`, `baggage`) dienen ausschließlich der Tracing-Korrelation, d.h. der Zuordnung eines Seitenaufrufs zu den zugehörigen Backend-Requests.
-
-**Datenhoheit:** Sentry läuft auf einer eigenen Instanz innerhalb der IT-Infrastruktur der TUM. Es werden **keine Daten an externe oder Cloud-Dienste** übertragen.
-
-**Speicherdauer:** Sentry-Daten werden nach 90 Tagen automatisch gelöscht.
-
 ### Wissenschaftliche Auswertung von Nutzungsverhalten (Science-Endpoint)
 
 **Hinweis: Diese Funktionalität ist derzeit deaktiviert (seit dem 19.02.2026) und wird erst nach Implementierung eines datenschutzkonformen Opt-In-Mechanismus wieder aktiviert.**

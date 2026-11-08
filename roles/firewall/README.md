@@ -10,7 +10,7 @@ To configure the role, you need to set the required variables in your Ansible pl
 - `management_network_ipv6`: The IPv6 management network used to allow SSH / HTTP access to hosts and services.
 - `monitoring_host_ipv4`: The IPv4 address of the monitoring service.
 - `monitoring_host_ipv6`: The IPv6 address of the monitoring service.
-- `firewall_hostgroup`: The firewall rule set to be applied. Can be 'registry', 'nodes', 'proxy' or left blank for default rules.
+- `firewall_hostgroup`: The firewall rule set to be applied. Can be 'nodes', 'proxy' or left blank for default rules.
 
 Default variables can be found in the `defaults/main.yml` file.
 
@@ -29,7 +29,7 @@ monitoring_host_ipv6: "2a09:80c0:89:1::32"
 You have to configure a special variable to select the firewall rule set which is applied:
 
 ```
-firewall_hostgroup:  # Can be 'registry', 'nodes', 'proxy' or left blank for default rules
+firewall_hostgroup:  # Can be 'nodes', 'proxy' or left blank for default rules
 ```
 
 ## Interaction with Docker
@@ -47,12 +47,12 @@ means losing the builds that are currently in flight.
 
 ## Example Usage
 
-Here is an example playbook for a registry:
+Here is an example playbook for the Artemis nodes:
 
 ```yaml
-- hosts: registry
+- hosts: artemis
   roles:
     - role: ls1intum.artemis.firewall
       vars:
-        firewall_hostgroup: registry
+        firewall_hostgroup: nodes
 ```

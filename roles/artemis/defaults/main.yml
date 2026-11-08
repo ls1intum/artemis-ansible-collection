@@ -47,7 +47,6 @@ openjdk_version: 25
 artemis_internal_admin_user: artemis_admin
 artemis_internal_admin_password:
 artemis_jhipster_jwt: #FIXME
-artemis_jhipster_registry_password: #FIXME Multinode
 
 artemis_email: artemis.in@tum.de
 # Installation metadata, required on core nodes and not written to build agents. Artemis refuses to start a core node
@@ -181,12 +180,6 @@ enable_science_event_logging: false
 push_notification_relay: "https://hermes-prod.artemis.cit.tum.de"
 
 artemis_maven_mirror_url: "https://reposilite.aet.cit.tum.de/releases"
-
-sentry:
-  dsn: ""
-# send_default_pii: false
-# traces_sample_rate: 0.0
-# environment: 'local'
 
 #theia:
 #  portal_url: https://theia-yannik.k8s.ase.cit.tum.de
@@ -338,24 +331,16 @@ artemis_passkey_require_for_administrator_features: false
 #  url:
 #  user:
 #  password:
-#
-#registry:  #FIXME Multinode
-#  url:
 
-# Define node local hazelcast_address - Uses wireguard net by default
-hazelcast_address: "{% if is_multinode_install is defined and is_multinode_install | bool == true and not use_docker %}[{{ wireguard_interface_address }}]{% endif %}"
-
-artemis_eureka_urls: "{% if registry.url is defined and registry.url is not none %}http://admin:${jhipster.registry.password}@{{ registry.url }}:8761/eureka/{% endif
-  %}"
-artemis_eureka_instance_id: "{{ node_id }}"
-
-artemis_valkey_client_name: "{{ artemis_eureka_instance_id }}"
+# The node's identity in Redis. Artemis also shows it as the node's name in the admin overview.
+artemis_valkey_client_name: "{{ node_id }}"
 
 node_short_name: unnamed-artemis-node
 node_display_name: Unnamed Artemis Node
 
 # Connection details of the host running the `valkey` role. `host` is that
 # host's WireGuard address, unbracketed - Spring adds the brackets itself.
+# Required for a multi-node install: Redis carries all cross-node state there.
 #valkey:
 #  host:
 #  port:
@@ -517,11 +502,6 @@ artemis_computed_is_core_node: "{{ not (continuous_integration.localci is define
 # only read by beans in that profile, so a core node gets none of them.
 artemis_computed_is_build_agent: "{{ continuous_integration.localci is defined and continuous_integration.localci is not none and continuous_integration.localci.is_build_agent
   | default(false) }}"
-
-# Whether Hazelcast is the distributed data provider. A valkey host means Redis carries the cross-node state
-# instead, and Artemis then creates no Hazelcast configuration and forces the Eureka client off at startup - so
-# the Hazelcast interface, the Eureka discovery settings and the registry password have no reader on such a node.
-artemis_computed_uses_hazelcast: "{{ is_multinode_install | bool and (valkey is not defined or valkey is none) }}"
 
 # Compute Spring Profiles from set variables.
 # LDAP, Athena, Apollon, and Atlas have moved from Spring profiles to module-feature

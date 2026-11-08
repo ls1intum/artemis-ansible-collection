@@ -62,7 +62,7 @@ Artemis components are installed on different hosts. Currently the following com
 - Artemis application servers (1..n - Also referred to as "Artemis node")
 - Reverse Proxy (1)
 - Message Broker (1)
-- JHipster registry (1)
+- Valkey (1)
 - Shared Storage Provider (1)
 - Database (1)
 
