@@ -332,8 +332,9 @@ artemis_passkey_require_for_administrator_features: false
 #  user:
 #  password:
 
-# The node's identity in Redis. Artemis also shows it as the node's name in the admin overview.
-artemis_valkey_client_name: "{{ node_id }}"
+# The node's identity in Redis. Artemis also shows it as the node's name in the admin overview. It must be unique per
+# node and start with `artemis`, because Artemis ignores Redis clients with any other name when it looks for live nodes.
+artemis_valkey_client_name: "artemis-{{ node_id }}"
 
 node_short_name: unnamed-artemis-node
 node_display_name: Unnamed Artemis Node
