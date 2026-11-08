@@ -404,6 +404,21 @@ artemis_local_llm_deployment_enabled: false
 #     temperature: 0.3
 
 ##############################################################################
+# Metis Configuration
+##############################################################################
+# Comprehension checks for programming exercises. Define `metis` to enable it.
+# metis:
+#   llm:
+#     base_url: https://logos.aet.cit.tum.de/v1 # OpenAI-compatible root including the version prefix
+#     api_key:
+#     model: openai/gpt-oss-120b
+#     # LOCAL: the endpoint runs on university-owned hardware, so students with local or cloud AI consent take part.
+#     # CLOUD: only students with cloud AI consent take part.
+#     hosting: LOCAL
+#   generation:
+#     enable_delay_minutes: 10 # Artemis default; 0 makes generated checks available right away
+
+##############################################################################
 # Atlas Configuration
 ##############################################################################
 #atlas:
