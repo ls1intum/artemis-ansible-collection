@@ -462,6 +462,20 @@ artemis:
       temperature: {{ deimos.llm.temperature }}
 {% endif %}
 
+{% if metis is defined %}
+  metis:
+    enabled: true
+    llm:
+      base-url: {{ metis.llm.base_url }}
+      api-key: {{ metis.llm.api_key }}
+      model: {{ metis.llm.model }}
+      hosting: {{ metis.llm.hosting | default('LOCAL') }}
+{% if metis.generation.enable_delay_minutes is defined %}
+    generation:
+      enable-delay-minutes: {{ metis.generation.enable_delay_minutes }}
+{% endif %}
+{% endif %}
+
 {% if tum_live_base_url is defined and tum_live_base_url is not none %}
   tum-live:
     api-base-url: {{ tum_live_base_url }}
