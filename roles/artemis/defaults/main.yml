@@ -119,6 +119,14 @@ artemis_system_ram_proportion: 0.8
 # 1800 MB is the measured 840 MB of non-heap, plus the OS, plus enough page cache to keep the git working set warm.
 artemis_heap_reserve_mb: 1800
 
+# Heap of each Artemis container in a docker install, in MB. The settings above size the heap from the host's memory,
+# which only works for one JVM per host: a docker install also runs the database, the broker, Valkey and the build
+# containers next to it, and a multi-node install runs artemis_node_count JVMs. Each of them needs about 1 GB outside
+# the heap on top of this (measured on an idle docker node: 2 GB resident at a 1 GB heap), so budget roughly
+# artemis_node_count * (artemis_docker_heap_mb + 1024) for Artemis alone.
+artemis_docker_heap_mb: 3072
+artemis_docker_initial_heap_mb: 1024
+
 # Ceiling on direct (off-heap) buffers, in MB. Not a tuning knob so much as a missing bound: the JDK defaults
 # MaxDirectMemorySize to MaxHeapSize, so on a node that does not set it netty and the valkey client are entitled to a
 # second copy of the heap in native memory, and nothing in the JVM stops them before the kernel does. Artemis peaks in

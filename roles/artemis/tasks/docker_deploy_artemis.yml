@@ -18,7 +18,6 @@
     - "data"
     - "data/database"
     - "data/artemis"
-    - "data/redis"
 
 - name: Set permissions for artemis directory
   become: true
@@ -39,6 +38,18 @@
     owner: "70"
     group: "70"
   notify: restart docker artemis
+
+- name: Create valkey data directory
+  become: true
+  file:
+    path: "{{ artemis_working_directory }}/data/redis"
+    state: directory
+    mode: "770"
+    # Must match UID and GID of the valkey user in the valkey/valkey image. Its entrypoint chowns /data to that user on
+    # every start, so any other owner set here would take the write access of the running Valkey away until it restarts.
+    owner: "999"
+    group: "999"
+  when: valkey is defined and valkey is not none
 
 - name: Copy docker.env to artemis directory
   become: true
@@ -70,15 +81,18 @@
     mode: "660"
   notify: restart docker artemis
 
+# The loop variable is node_id itself, so that every variable derived from it - artemis_valkey_client_name and the
+# scheduling profile in artemis_spring_profiles - is evaluated per container rather than with the host's node_id,
+# which would give all containers the same Redis identity and the scheduling profile.
 - name: Copy node env files
   loop: "{{ range(1, artemis_node_count + 1) | list }}"
   loop_control:
-    loop_var: docker_node_id
+    loop_var: node_id
   when: is_multinode_install
   become: true
   template:
     src: "templates/node.env.j2"
-    dest: "{{ artemis_working_directory }}/node{{ docker_node_id }}.env"
+    dest: "{{ artemis_working_directory }}/node{{ node_id }}.env"
     owner: "{{ artemis_user_name }}"
     group: "{{ artemis_user_group }}"
     mode: "660"
