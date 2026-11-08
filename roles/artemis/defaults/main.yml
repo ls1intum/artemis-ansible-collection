@@ -83,6 +83,12 @@ artemis_tmp_directory: # Defaults to system tmp dir
 # behaviour on hosts where that is wanted.
 artemis_jvm_temp_directory: "{{ artemis_working_directory }}/jvm-tmp"
 
+# Units artemis.service is ordered after. systemd stops units in reverse start order, so these also decide what is
+# still there while Artemis shuts down. Without them a reboot unmounts the NFS share (which fails, Artemis still holds
+# it open) and takes down wg0 first, and Artemis then hangs on stop until systemd kills it after 90 seconds.
+# Ordering only, no dependency: a unit that does not exist on this host is ignored.
+artemis_after_units: wg-quick@wg0.service mnt-storage.mount
+
 # the following two values must be cron expressions
 artemis_scheduling_data_export_creation_time: 0 0 4 * * * # every day at 4 am
 artemis_scheduling_programming_exercises_cleanup_time: 0 0 3 * * * # every day at 3 am
