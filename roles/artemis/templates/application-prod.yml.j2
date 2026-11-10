@@ -167,6 +167,7 @@ artemis:
   submission-export-path: {{ artemis_repo_basepath }}/exports
   legal-path: {{ artemis_legal_path }}
   build-logs-path: {{ artemis_repo_basepath }}/build-logs
+  failed-build-logs-path: {{ artemis_repo_basepath }}/failed-build-logs
   data-export-path: {{ artemis_data_export_path }}
   bcrypt-salt-rounds: {{ artemis_bcrypt_salt_rounds }}
 {% if push_notification_relay is defined and push_notification_relay is not none %}
@@ -294,6 +295,9 @@ artemis:
 {% endif %}
 {% if artemis_computed_is_core_node %}
     repository-authentication-mechanisms: {{ version_control.localvc.repository_authentication_mechanisms | default("token,ssh,password") }}
+{% if version_control.localvc.password_authentication_end_date | default('', true) | string | length > 0 %}
+    password-authentication-end-date: "{{ version_control.localvc.password_authentication_end_date }}"
+{% endif %}
 {% endif %}
 {% endif %}
 
@@ -456,6 +460,20 @@ artemis:
       model: {{ deimos.llm.model }}
       completions-path: {{ deimos.llm.completions_path }}
       temperature: {{ deimos.llm.temperature }}
+{% endif %}
+
+{% if metis is defined %}
+  metis:
+    enabled: true
+    llm:
+      base-url: {{ metis.llm.base_url }}
+      api-key: {{ metis.llm.api_key }}
+      model: {{ metis.llm.model }}
+      hosting: {{ metis.llm.hosting | default('LOCAL') }}
+{% if metis.generation.enable_delay_minutes is defined %}
+    generation:
+      enable-delay-minutes: {{ metis.generation.enable_delay_minutes }}
+{% endif %}
 {% endif %}
 
 {% if tum_live_base_url is defined and tum_live_base_url is not none %}
