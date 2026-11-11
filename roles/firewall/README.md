@@ -62,8 +62,8 @@ firewall_container_restricted_host_ports: [5701, 6379]
 Traffic from a container to a service on the Docker host itself does not pass the `DOCKER-USER` chain, which only sees forwarded traffic, but the `INPUT` chain. A rule is therefore generated in `INPUT` for every
 subnet and port in `firewall_container_restricted_host_ports`, so that a later rule that allows more cannot open these ports to containers. The default policy of `INPUT` already drops what is not allowed explicitly.
 
-The rules match new connections only, so replies of a restricted destination to a connection that it opened to a container are not dropped. They apply to the `nodes` host group and to Docker with the iptables backend. A destination that overlaps
-a container subnet also cuts the traffic inside it. `firewall_container_restricted_host_ports` covers services that listen on the host. A port that a container publishes is reached over the forwarded path, so list its address as a destination.
+The rules match everything except packets of established and related connections, so replies of a restricted destination to a connection that it opened to a container are not dropped. They apply to the `nodes` host group and to Docker with the iptables backend. A destination that overlaps
+a container subnet can also cut the traffic inside it, depending on whether the host filters bridged traffic. `firewall_container_restricted_host_ports` covers services that listen on the host. A port that a container publishes is reached over the forwarded path, and `DOCKER-USER` sees the address of the container and not the address of the host, so list the address or the subnet of the container that publishes it.
 The rule files are validated with `iptables-restore --test` before they replace the loaded ones. When the IPv6 subnets are used, a change of the IPv6 rules restarts Docker, which reinstalls its IPv6 chains.
 
 A rule is generated for every subnet and destination pair in the `DOCKER-USER` chain. Nothing is generated while one of the two

@@ -32,7 +32,7 @@
 {% if firewall_container_subnets_ipv6 | length > 0 and firewall_container_restricted_destinations_ipv6 | length > 0 %}
 {% for subnet in firewall_container_subnets_ipv6 %}
 {% for destination in firewall_container_restricted_destinations_ipv6 %}
--A DOCKER-USER -s {{ subnet }} -d {{ destination }} -m conntrack --ctstate NEW -m comment --comment "Restrict container destinations" -j DROP
+-A DOCKER-USER -s {{ subnet }} -d {{ destination }} -m conntrack ! --ctstate ESTABLISHED,RELATED -m comment --comment "Restrict container destinations" -j DROP
 {% endfor %}
 {% endfor %}
 {% endif %}

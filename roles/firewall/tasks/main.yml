@@ -62,18 +62,9 @@
   check_mode: false
   when: "'docker.service' in ansible_facts.services"
 
-- name: Restart docker to reinstall its ip6tables rules
-  become: true
-  service:
-    name: docker
-    state: restarted
-  # Loading the IPv6 rules removes the chains that Docker installed for IPv6, and the check above only looks at IPv4. This applies when the rules for the container subnets
-  # are used, which is when the rules of the role and the chains of Docker have to coexist.
-  when:
-    - copy6.changed
-    - firewall_container_subnets_ipv6 | length > 0
-    - "'docker.service' in ansible_facts.services"
-
+# One restart for both cases, so that a change of both rule files does not restart Docker twice and stop the builds twice. The IPv4 rules are missing when the MASQUERADE rule
+# is gone. Loading the IPv6 rules removes the chains that Docker installed for IPv6, which the check above does not see, so a change of them also restarts Docker when the rules
+# for the IPv6 container subnets are used.
 - name: Restart docker to reinstall its iptables rules
   become: true
   service:
@@ -81,5 +72,6 @@
     state: restarted
   when:
     - "'docker.service' in ansible_facts.services"
-    - docker_nat_rules.stdout is defined
-    - "'MASQUERADE' not in docker_nat_rules.stdout"
+    - >-
+      (docker_nat_rules.stdout is defined and 'MASQUERADE' not in docker_nat_rules.stdout)
+      or (copy6.changed and firewall_container_subnets_ipv6 | length > 0)
