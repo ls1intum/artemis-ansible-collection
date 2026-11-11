@@ -19,3 +19,7 @@ firewall_container_subnets_ipv4: []
 firewall_container_subnets_ipv6: []
 firewall_container_restricted_destinations_ipv4: []
 firewall_container_restricted_destinations_ipv6: []
+
+# TCP ports of services on the host itself that containers must not reach. Traffic from a container to the host does not pass DOCKER-USER but the INPUT chain, so this is
+# separate from the destinations above. The rules apply to the subnets of the same address family and are generated when both are set.
+firewall_container_restricted_host_ports: []

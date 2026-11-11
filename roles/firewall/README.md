@@ -55,6 +55,13 @@ firewall_container_subnets_ipv4: ["192.168.0.0/16"]
 firewall_container_restricted_destinations_ipv4: ["10.0.0.0/24"]
 ```
 
+```yaml
+firewall_container_restricted_host_ports: [5701, 6379]
+```
+
+Traffic from a container to a service on the Docker host itself does not pass the `DOCKER-USER` chain, which only sees forwarded traffic, but the `INPUT` chain. A rule is therefore generated in `INPUT` for every
+subnet and port in `firewall_container_restricted_host_ports`, so that a later rule that allows more cannot open these ports to containers. The default policy of `INPUT` already drops what is not allowed explicitly.
+
 A rule is generated for every subnet and destination pair in the `DOCKER-USER` chain. Nothing is generated while one of the two
 lists of a family is empty, which is the default. The rules do not apply to containers that use the network of the host,
 and applying changed rules restarts Docker as described above, so roll them out one build agent at a time.
