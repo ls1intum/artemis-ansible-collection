@@ -12,7 +12,7 @@
 {% if firewall_container_subnets_ipv6 | length > 0 and firewall_container_restricted_host_ports | length > 0 %}
 {% for subnet in firewall_container_subnets_ipv6 %}
 {% for port in firewall_container_restricted_host_ports %}
--A INPUT -s {{ subnet }} -p tcp --dport {{ port }} -m comment --comment "Restrict container access to host services" -j DROP
+-A INPUT -s {{ subnet }} -p tcp --dport {{ port }} -m conntrack --ctstate NEW -m comment --comment "Restrict container access to host services" -j DROP
 {% endfor %}
 {% endfor %}
 {% endif %}
@@ -32,7 +32,7 @@
 {% if firewall_container_subnets_ipv6 | length > 0 and firewall_container_restricted_destinations_ipv6 | length > 0 %}
 {% for subnet in firewall_container_subnets_ipv6 %}
 {% for destination in firewall_container_restricted_destinations_ipv6 %}
--A DOCKER-USER -s {{ subnet }} -d {{ destination }} -m comment --comment "Restrict container destinations" -j DROP
+-A DOCKER-USER -s {{ subnet }} -d {{ destination }} -m conntrack --ctstate NEW -m comment --comment "Restrict container destinations" -j DROP
 {% endfor %}
 {% endfor %}
 {% endif %}
