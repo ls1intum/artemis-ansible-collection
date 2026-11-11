@@ -368,7 +368,12 @@ artemis_local_llm_deployment_enabled: false
 ##############################################################################
 # TUM Live Configuration
 ##############################################################################
-#tum_live_base_url: "https://tum.live/api/v2"
+# Lecture streams from TUM Live. Define `tum_live` to enable the integration.
+# tum_live:
+#   api_base_url: https://live.rbg.tum.de/api/v2
+#   web_base_url: https://live.rbg.tum.de
+#   api_key:
+#   integration_enabled: true # default when tum_live is defined
 
 ##############################################################################
 # Weaviate Configuration

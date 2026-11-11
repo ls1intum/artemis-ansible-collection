@@ -472,9 +472,12 @@ artemis:
 {% endif %}
 {% endif %}
 
-{% if tum_live_base_url is defined and tum_live_base_url is not none %}
+{% if tum_live is defined and tum_live is not none %}
   tum-live:
-    api-base-url: {{ tum_live_base_url }}
+    integration-enabled: {{ tum_live.integration_enabled | default(true) | lower }}
+    api-base-url: {{ tum_live.api_base_url }}
+    web-base-url: {{ tum_live.web_base_url }}
+    api-key: {{ tum_live.api_key }}
 {% endif %}
 
 {% if enable_science_event_logging is defined %}
