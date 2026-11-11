@@ -45,6 +45,31 @@ whether Docker's `MASQUERADE` rule is still present. If it is missing, Docker is
 can reinstall its rules. Note that this restart stops running containers, which on a build agent
 means losing the builds that are currently in flight.
 
+## Restricting the destinations of containers
+
+The `nodes` rule set can limit where containers on the Docker bridge networks may connect to. Set the subnets Docker
+assigns to its networks and the destinations that are off limits, per address family:
+
+```yaml
+firewall_container_subnets_ipv4: ["192.168.0.0/16"]
+firewall_container_restricted_destinations_ipv4: ["10.0.0.0/24"]
+```
+
+```yaml
+firewall_container_restricted_host_ports: [5701, 6379]
+```
+
+Traffic from a container to a service on the Docker host itself does not pass the `DOCKER-USER` chain, which only sees forwarded traffic, but the `INPUT` chain. A rule is therefore generated in `INPUT` for every
+subnet and port in `firewall_container_restricted_host_ports`, so that a later rule that allows more cannot open these ports to containers. The default policy of `INPUT` already drops what is not allowed explicitly.
+
+The rules match everything except packets of established and related connections, so replies of a restricted destination to a connection that it opened to a container are not dropped. They apply to the `nodes` host group and to Docker with the iptables backend. A destination that overlaps
+a container subnet can also cut the traffic inside it, depending on whether the host filters bridged traffic. `firewall_container_restricted_host_ports` covers services that listen on the host. A port that a container publishes is reached over the forwarded path, and `DOCKER-USER` sees the address of the container and not the address of the host, so list the address or the subnet of the container that publishes it.
+The rule files are validated with `iptables-restore --test` before they replace the loaded ones. When the IPv6 subnets are used, a change of the IPv6 rules restarts Docker, which reinstalls its IPv6 chains.
+
+A rule is generated for every subnet and destination pair in the `DOCKER-USER` chain. Nothing is generated while one of the two
+lists of a family is empty, which is the default. The rules do not apply to containers that use the network of the host,
+and applying changed rules restarts Docker as described above, so roll them out one build agent at a time.
+
 ## Example Usage
 
 Here is an example playbook for the Artemis nodes:

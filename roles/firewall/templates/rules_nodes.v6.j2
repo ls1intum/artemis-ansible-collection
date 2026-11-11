@@ -5,7 +5,17 @@
 :INPUT DROP [0:0]
 :FORWARD DROP [0:0]
 :OUTPUT ACCEPT [0:0]
+{% if firewall_container_subnets_ipv6 | length > 0 and firewall_container_restricted_destinations_ipv6 | length > 0 %}
+:DOCKER-USER - [0:0]
+{% endif %}
 -A INPUT -i lo -m comment --comment "Allow lo interface" -j ACCEPT
+{% if firewall_container_subnets_ipv6 | length > 0 and firewall_container_restricted_host_ports | length > 0 %}
+{% for subnet in firewall_container_subnets_ipv6 %}
+{% for port in firewall_container_restricted_host_ports %}
+-A INPUT -s {{ subnet }} -p tcp --dport {{ port }} -m conntrack --ctstate NEW -m comment --comment "Restrict container access to host services" -j DROP
+{% endfor %}
+{% endfor %}
+{% endif %}
 -A INPUT -i wg0 -m comment --comment "Allow wg0 interface" -j ACCEPT
 -A INPUT -p ipv6-icmp -m comment --comment "Allow icmpv6" -j ACCEPT
 -A INPUT -p udp -d fe80::/64 -m conntrack --ctstate NEW --dport 546 -m comment --comment "Allow DHCPv6" -j ACCEPT
@@ -18,6 +28,13 @@
 -A INPUT -s {{ monitoring_host_ipv6 }} -p udp --dport 161 -m comment --comment "Allow Monitoring" -j ACCEPT
 -A INPUT -s {{ monitoring_host_ipv6 }} -p tcp --dport 9111 -m comment --comment "Allow Monitoring cAdvisor" -j ACCEPT
 -A INPUT -s {{ monitoring_host_ipv6 }} -p tcp --dport 9100 -m comment --comment "Allow Monitoring" -j ACCEPT
+{% endif %}
+{% if firewall_container_subnets_ipv6 | length > 0 and firewall_container_restricted_destinations_ipv6 | length > 0 %}
+{% for subnet in firewall_container_subnets_ipv6 %}
+{% for destination in firewall_container_restricted_destinations_ipv6 %}
+-A DOCKER-USER -s {{ subnet }} -d {{ destination }} -m conntrack ! --ctstate ESTABLISHED,RELATED -m comment --comment "Restrict container destinations" -j DROP
+{% endfor %}
+{% endfor %}
 {% endif %}
 COMMIT
 # Completed on Thu Jun 20 10:00:00 2020
