@@ -2,7 +2,8 @@
 
 [Unit]
 Description=Artemis
-After=syslog.target
+After=syslog.target network-online.target remote-fs.target {{ artemis_after_units }}
+Wants=network-online.target
 
 [Service]
 User={{ artemis_user_name }}
