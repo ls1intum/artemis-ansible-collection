@@ -47,7 +47,6 @@ openjdk_version: 25
 artemis_internal_admin_user: artemis_admin
 artemis_internal_admin_password:
 artemis_jhipster_jwt: #FIXME
-artemis_jhipster_registry_password: #FIXME Multinode
 
 artemis_email: artemis.in@tum.de
 # Installation metadata, required on core nodes and not written to build agents. Artemis refuses to start a core node
@@ -126,6 +125,14 @@ artemis_system_ram_proportion: 0.8
 # 1800 MB is the measured 840 MB of non-heap, plus the OS, plus enough page cache to keep the git working set warm.
 artemis_heap_reserve_mb: 1800
 
+# Heap of each Artemis container in a docker install, in MB. The settings above size the heap from the host's memory,
+# which only works for one JVM per host: a docker install also runs the database, the broker, Valkey and the build
+# containers next to it, and a multi-node install runs artemis_node_count JVMs. Each of them needs about 1 GB outside
+# the heap on top of this (measured on an idle docker node: 2 GB resident at a 1 GB heap), so budget roughly
+# artemis_node_count * (artemis_docker_heap_mb + 1024) for Artemis alone.
+artemis_docker_heap_mb: 3072
+artemis_docker_initial_heap_mb: 1024
+
 # Ceiling on direct (off-heap) buffers, in MB. Not a tuning knob so much as a missing bound: the JDK defaults
 # MaxDirectMemorySize to MaxHeapSize, so on a node that does not set it netty and the valkey client are entitled to a
 # second copy of the heap in native memory, and nothing in the JVM stops them before the kernel does. Artemis peaks in
@@ -187,12 +194,6 @@ enable_science_event_logging: false
 push_notification_relay: "https://hermes-prod.artemis.cit.tum.de"
 
 artemis_maven_mirror_url: "https://reposilite.aet.cit.tum.de/releases"
-
-sentry:
-  dsn: ""
-# send_default_pii: false
-# traces_sample_rate: 0.0
-# environment: 'local'
 
 #theia:
 #  portal_url: https://theia-yannik.k8s.ase.cit.tum.de
@@ -344,24 +345,17 @@ artemis_passkey_require_for_administrator_features: false
 #  url:
 #  user:
 #  password:
-#
-#registry:  #FIXME Multinode
-#  url:
 
-# Define node local hazelcast_address - Uses wireguard net by default
-hazelcast_address: "{% if is_multinode_install is defined and is_multinode_install | bool == true and not use_docker %}[{{ wireguard_interface_address }}]{% endif %}"
-
-artemis_eureka_urls: "{% if registry.url is defined and registry.url is not none %}http://admin:${jhipster.registry.password}@{{ registry.url }}:8761/eureka/{% endif
-  %}"
-artemis_eureka_instance_id: "{{ node_id }}"
-
-artemis_valkey_client_name: "{{ artemis_eureka_instance_id }}"
+# The node's identity in Redis. Artemis also shows it as the node's name in the admin overview. It must be unique per
+# node and start with `artemis`, because Artemis ignores Redis clients with any other name when it looks for live nodes.
+artemis_valkey_client_name: "artemis-{{ node_id }}"
 
 node_short_name: unnamed-artemis-node
 node_display_name: Unnamed Artemis Node
 
 # Connection details of the host running the `valkey` role. `host` is that
 # host's WireGuard address, unbracketed - Spring adds the brackets itself.
+# Required for a multi-node install: Redis carries all cross-node state there.
 #valkey:
 #  host:
 #  port:
@@ -408,6 +402,21 @@ artemis_local_llm_deployment_enabled: false
 #     model: openai/gpt-oss-120b
 #     completions_path: /api/chat/completions
 #     temperature: 0.3
+
+##############################################################################
+# Metis Configuration
+##############################################################################
+# Comprehension checks for programming exercises. Define `metis` to enable it.
+# metis:
+#   llm:
+#     base_url: https://logos.aet.cit.tum.de/v1 # OpenAI-compatible root including the version prefix
+#     api_key:
+#     model: openai/gpt-oss-120b
+#     # LOCAL: the endpoint runs on university-owned hardware, so students with local or cloud AI consent take part.
+#     # CLOUD: only students with cloud AI consent take part.
+#     hosting: LOCAL
+#   generation:
+#     enable_delay_minutes: 10 # Artemis default; 0 makes generated checks available right away
 
 ##############################################################################
 # Atlas Configuration
@@ -523,11 +532,6 @@ artemis_computed_is_core_node: "{{ not (continuous_integration.localci is define
 # only read by beans in that profile, so a core node gets none of them.
 artemis_computed_is_build_agent: "{{ continuous_integration.localci is defined and continuous_integration.localci is not none and continuous_integration.localci.is_build_agent
   | default(false) }}"
-
-# Whether Hazelcast is the distributed data provider. A valkey host means Redis carries the cross-node state
-# instead, and Artemis then creates no Hazelcast configuration and forces the Eureka client off at startup - so
-# the Hazelcast interface, the Eureka discovery settings and the registry password have no reader on such a node.
-artemis_computed_uses_hazelcast: "{{ is_multinode_install | bool and (valkey is not defined or valkey is none) }}"
 
 # Compute Spring Profiles from set variables.
 # LDAP, Athena, Apollon, and Atlas have moved from Spring profiles to module-feature
