@@ -12,3 +12,10 @@ management_network_ipv6: "2a09:80c0:ac18:9800::/64"
 # Monitoring Service
 monitoring_host_ipv4: "131.159.89.160"
 monitoring_host_ipv6: "2a09:80c0:89:1::32"
+
+# Destinations that containers started by Docker must not reach. The rules are added to the DOCKER-USER chain of the
+# 'nodes' rule set. Both lists of a family have to be set for rules to be generated.
+firewall_container_subnets_ipv4: []
+firewall_container_subnets_ipv6: []
+firewall_container_restricted_destinations_ipv4: []
+firewall_container_restricted_destinations_ipv6: []

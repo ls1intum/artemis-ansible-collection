@@ -45,6 +45,20 @@ whether Docker's `MASQUERADE` rule is still present. If it is missing, Docker is
 can reinstall its rules. Note that this restart stops running containers, which on a build agent
 means losing the builds that are currently in flight.
 
+## Restricting the destinations of containers
+
+The `nodes` rule set can limit where containers on the Docker bridge networks may connect to. Set the subnets Docker
+assigns to its networks and the destinations that are off limits, per address family:
+
+```yaml
+firewall_container_subnets_ipv4: ["192.168.0.0/16"]
+firewall_container_restricted_destinations_ipv4: ["10.0.0.0/24"]
+```
+
+A rule is generated for every subnet and destination pair in the `DOCKER-USER` chain. Nothing is generated while one of the two
+lists of a family is empty, which is the default. The rules do not apply to containers that use the network of the host,
+and applying changed rules restarts Docker as described above, so roll them out one build agent at a time.
+
 ## Example Usage
 
 Here is an example playbook for the Artemis nodes:
