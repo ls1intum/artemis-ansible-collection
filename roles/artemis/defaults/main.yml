@@ -439,6 +439,17 @@ artemis_local_llm_deployment_enabled: false
 
 artemis_hyperion_enabled: false
 
+# Smart Quizzes (quiz question pool): the pool reaches its models only through its own self-hosted,
+# OpenAI-compatible endpoint, never through spring_ai, and stays off without this block. Artemis
+# refuses cloud provider hosts and models outside allowed_models (default: openai/gpt-oss-120b only).
+# hyperion_quiz_pool:
+#   base_url: https://logos.aet.cit.tum.de/v1 # OpenAI-compatible root including the version prefix
+#   api_key:
+#   generator_model: openai/gpt-oss-120b
+#   judge_model: openai/gpt-oss-120b
+#   allowed_models: [openai/gpt-oss-120b] # optional; the only model allowed by default, widen it only deliberately
+#   timeout: 5m # optional; HTTP timeout of one model call
+
 # LLM model costs for usage tracking, EUR per million tokens (OpenAI list price USD x 0.92).
 # Override or add entries in your inventory as needed.
 artemis_llm_cost:

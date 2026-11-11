@@ -199,6 +199,31 @@ artemis.hyperion.enabled
 
 > The `spring_ai.azure_openai.*` inventory variables render the unified `spring.ai.openai.*` properties; the variable namespace is kept for backward compatibility.
 
+Smart Quizzes (Hyperion quiz question pool) configuration:
+
+The pool sends lecture material only to its own self-hosted, OpenAI-compatible endpoint and never uses `spring_ai`. Without `hyperion_quiz_pool` the pool stays off. Artemis refuses cloud provider hosts and models outside `allowed_models`, which defaults to `openai/gpt-oss-120b` only, so the endpoint must serve that model, for example Logos or a vLLM server inside your institution.
+
+```yaml
+hyperion_quiz_pool:
+  base_url: "https://logos.aet.cit.tum.de/v1" # OpenAI-compatible root including the version prefix
+  api_key: "{{ vault_quiz_pool_api_key }}"     # empty if the endpoint needs none
+  generator_model: "openai/gpt-oss-120b"
+  judge_model: "openai/gpt-oss-120b"
+  allowed_models: ["openai/gpt-oss-120b"]     # optional; defaults to openai/gpt-oss-120b only
+  timeout: "5m"                                 # optional
+```
+
+Rendered into application-prod.yml and `artemis.env`:
+
+```text
+artemis.hyperion.quiz-pool.base-url
+artemis.hyperion.quiz-pool.api-key
+artemis.hyperion.quiz-pool.generator-model
+artemis.hyperion.quiz-pool.judge-model
+artemis.hyperion.quiz-pool.allowed-models   # openai/gpt-oss-120b unless allowed_models is set
+artemis.hyperion.quiz-pool.timeout          # only when timeout is set
+```
+
 Iris configuration:
 ```
 iris:

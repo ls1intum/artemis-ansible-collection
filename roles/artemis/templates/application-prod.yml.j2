@@ -485,6 +485,18 @@ artemis:
 
   hyperion:
     enabled: {{ artemis_hyperion_enabled | lower }}
+{% if hyperion_quiz_pool is defined %}
+    quiz-pool:
+      base-url: {{ hyperion_quiz_pool.base_url | quote }}
+      api-key: {{ hyperion_quiz_pool.api_key | default('', true) | quote }}
+      generator-model: {{ hyperion_quiz_pool.generator_model | quote }}
+      judge-model: {{ hyperion_quiz_pool.judge_model | quote }}
+{% set quiz_pool_allowed_models = hyperion_quiz_pool.allowed_models | default(['openai/gpt-oss-120b'], true) %}
+      allowed-models: {{ (quiz_pool_allowed_models if quiz_pool_allowed_models is string else quiz_pool_allowed_models | join(',')) | quote }}
+{% if hyperion_quiz_pool.timeout is defined %}
+      timeout: {{ hyperion_quiz_pool.timeout }}
+{% endif %}
+{% endif %}
 
 {% if artemis_llm_cost is defined %}
   llm:
