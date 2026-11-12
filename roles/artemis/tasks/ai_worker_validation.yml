@@ -34,14 +34,3 @@
   when:
     - artemis_computed_is_core_node | bool
     - artemis_aiworker_enabled | bool or artemis_computed_is_generation_coordinator | bool
-
-- name: Require an explicit Hazelcast authoring membership
-  ansible.builtin.assert:
-    that:
-      - artemis_hazelcast_expected_data_member_count is integer
-      - artemis_hazelcast_expected_data_member_count > 0
-    fail_msg: Configure the actual Hazelcast data-member count on every core node before enabling authoring.
-  when:
-    - artemis_computed_is_core_node | bool
-    - artemis_computed_uses_hazelcast | bool
-    - artemis_aiworker_enabled | bool or artemis_hyperion_exercise_generation_enabled | bool

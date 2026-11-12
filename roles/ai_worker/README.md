@@ -82,7 +82,6 @@ required when the distributed-data encoding changes; do not mix runtime versions
 | --- | --- |
 | `artemis_hyperion_agent` | Optional native `artemis.hyperion.agent` settings on core: token/duration budgets and named effort profiles. Artemis defaults apply when unset; core sends the resolved profile to the worker. |
 | `artemis_hyperion_generation` | Optional native `artemis.hyperion.generation` settings on core: concurrency, retention and shutdown settings. Artemis defaults apply when unset. |
-| `artemis_hazelcast_expected_data_member_count` | Actual number of Hazelcast data members. Required for multi-node Hazelcast authoring; the YAML and Docker paths set the same count. |
 | `artemis_aiworker_ids` | Worker IDs admitted by each coordinator. Defaults to the `ai_worker_id` of every `generation_workers` host; set it explicitly when the workers are in another inventory. |
 | `ai_worker_model_base_url`, `ai_worker_model`, `ai_worker_model_api_key`, `ai_worker_model_timeout` | Worker-local model connection. Use HTTPS. Set `ai_worker_microsoft_foundry` for a Foundry custom domain. |
 | `ai_worker_model_options` | Allowed defaults: `temperature`, `top-p`, `max-tokens`, `max-completion-tokens`, and `reasoning-effort`. Connection settings and retries cannot be overridden here. An explicit core effort profile governs the run's model/options. |
@@ -116,23 +115,13 @@ provider configuration is needed. The authoritative store must use AOF,
 `appendfsync always`, and `maxmemory-policy noeviction`. Inventory validation is
 not a check of the live server's effective settings.
 
-For Hazelcast, leave `valkey` unset and use the same `registry.url` and
-`artemis_jhipster_registry_password` as core and Build Agents. Set
-`artemis_eureka_urls` to override the shared discovery URL (for example, for HTTPS
-or a non-default port). The default URL uses the registry password through a
-Spring property reference, not a password embedded in the inventory URL.
-On the core inventory, use the collection's multi-node Hazelcast/Eureka setup
-(`is_multinode_install: true`) and set `artemis_hazelcast_expected_data_member_count`
-to the actual data-member count on every member. All data members must use the
-same count and the same exercise-generation flag before authoring starts. An intentional single core
-with a remote worker uses a count of `1`; workers and Build Agents do not count.
-A missing count fails validation before deployment. The worker is a fetch-only
-Eureka/Hazelcast client, not a data member. Core
-members must advertise addresses reachable from the worker.
+Current collection deployments use Redis/Valkey for cross-node state. The collection no longer
+provisions the JHipster registry or Hazelcast core clusters. The worker's legacy Eureka settings
+are only for an existing externally managed cluster on a compatible Artemis release; they do not
+restore Hazelcast deployment support to the core role.
 
 **Do not share an authoritative provider across environments.** Worker IDs alone
-do not isolate all distributed maps and topics. Use separate Redis/Valkey stores,
-or separate Eureka/Hazelcast deployments and networks. All three environments
+do not isolate all distributed maps and topics. Use separate Redis/Valkey stores and networks. All three environments
 use the runtime's production cluster mode; an inventory name is not a namespace.
 
 ## After deployment

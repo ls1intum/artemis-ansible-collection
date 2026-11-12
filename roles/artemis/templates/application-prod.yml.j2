@@ -548,11 +548,6 @@ artemis:
 {% if artemis_computed_is_core_node or (artemis_CORS_allowed_origins is defined and artemis_CORS_allowed_origins is not none) %}
 jhipster:
 
-{% if artemis_computed_is_core_node and artemis_computed_uses_hazelcast | bool and artemis_hazelcast_expected_data_member_count is not none %}
-  cache:
-    hazelcast:
-      expected-data-member-count: {{ artemis_hazelcast_expected_data_member_count | int }}
-{% endif %}
 
 {% if artemis_computed_is_core_node and artemis_jhipster_jwt is not none %}
   security:
