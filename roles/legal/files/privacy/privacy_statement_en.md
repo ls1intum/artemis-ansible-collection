@@ -211,29 +211,6 @@ As part of the use of Artemis, the following data required for the conduct of te
 **Retention period:** Exercise submissions are retained for up to 5 years after the end of the respective semester, insofar as statutory retention periods (e.g. for examination data
 pursuant to the APSO) require this.
 
-### Error analysis and performance monitoring (Sentry)
-
-To ensure stable and high-performing operation of the platform, Artemis may use the open-source tool Sentry for the following purposes:
-
-* **Error analysis:** Recording of JavaScript errors including stack traces in the user's browser, in order to detect and fix technical problems promptly.
-* **Performance monitoring:** Recording of page load times and API response times in order to identify bottlenecks and improve the user experience. This records which pages and
-  modules are accessed and what the response times of the network calls are.
-
-The following data may be collected:
-
-* IP address (anonymized or minimized where possible)
-* Browser and operating system information
-* Accessed URL and time of access
-* Technical error messages and stack traces
-* Page load and network timings
-
-This is **not** mouse or click tracking. No individual clicks or mouse movements are recorded. The Sentry headers visible in HTTP requests (e.g. `sentry-trace`, `baggage`) serve
-exclusively for tracing correlation, i.e. the mapping of a page view to the associated backend requests.
-
-**Data sovereignty:** Sentry runs on its own instance within the IT infrastructure of TUM. **No data is transferred to external or cloud services.**
-
-**Retention period:** Sentry data is automatically deleted after 90 days.
-
 ### Scientific evaluation of usage behavior (Science endpoint)
 
 **Note: This functionality is currently disabled (since 19.02.2026) and will only be reactivated after a data-protection-compliant opt-in mechanism has been implemented.**

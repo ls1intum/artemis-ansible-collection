@@ -78,10 +78,6 @@ spring:
       client-name: {{ artemis_valkey_client_name }}
 {% endif %}
 
-{% if artemis_computed_uses_hazelcast | bool and hazelcast_address is defined %}
-  hazelcast:
-    interface: "{{ hazelcast_address }}"
-{% endif %}
 {% if artemis_computed_is_core_node %}
 
 {% if spring_ai is defined and spring_ai.azure_openai is defined
@@ -476,9 +472,12 @@ artemis:
 {% endif %}
 {% endif %}
 
-{% if tum_live_base_url is defined and tum_live_base_url is not none %}
+{% if tum_live is defined and tum_live is not none %}
   tum-live:
-    api-base-url: {{ tum_live_base_url }}
+    integration-enabled: {{ tum_live.integration_enabled | default(true) | lower }}
+    api-base-url: {{ tum_live.api_base_url }}
+    web-base-url: {{ tum_live.web_base_url }}
+    api-key: {{ tum_live.api_key }}
 {% endif %}
 
 {% if enable_science_event_logging is defined %}
@@ -546,7 +545,7 @@ artemis:
 {% endif %}
 {% endif %}
 
-{% if artemis_computed_is_core_node or (artemis_computed_uses_hazelcast | bool and artemis_jhipster_registry_password is not none) or (artemis_CORS_allowed_origins is defined and artemis_CORS_allowed_origins is not none) %}
+{% if artemis_computed_is_core_node or (artemis_CORS_allowed_origins is defined and artemis_CORS_allowed_origins is not none) %}
 jhipster:
 
 {% if artemis_computed_is_core_node and artemis_computed_uses_hazelcast | bool and artemis_hazelcast_expected_data_member_count is not none %}
@@ -569,35 +568,11 @@ jhipster:
     allowed-origins: {{ artemis_CORS_allowed_origins }}
 {% endif %}
 
-{% if artemis_computed_uses_hazelcast | bool and artemis_jhipster_registry_password is not none %}
-  registry:
-    password: {{ artemis_jhipster_registry_password }}
-{% endif %}
-
 {% if artemis_computed_is_core_node %}
   mail:
     base-url: {{ artemis_server_url }}
     from: '{{artemis_notification_from}} <{{ artemis_notification_email | default([artemis_email.split("@")[0], "+notification@", artemis_email.split("@")[1]]|join()) }}>'
 {% endif %}
-{% endif %}
-
-{% if sentry.dsn | default('') | length %}
-sentry:
-  dsn: {{ sentry.dsn | quote }}
-  send-default-pii: {{ sentry.send_default_pii | default(false)}}
-  traces-sample-rate: {{ sentry.traces_sample_rate | default(0.0) }}
-{% if sentry.environment is defined and sentry.environment|length %}
-  environment: {{ sentry.environment }}
-{% elif is_testserver is defined and is_testserver is sameas true %}
-  environment: test
-{% elif is_testserver is defined and is_testserver is sameas false %}
-  environment: prod
-{% else %}
-  environment: local
-{% endif %}
-{% else %}
-sentry:
-  dsn:
 {% endif %}
 
 {% if artemis_computed_is_core_node %}
@@ -632,28 +607,6 @@ helios:
         secret-key: {{ endpoint.secret_key }}
 {% endfor %}
 {% endif %}
-{% endif %}
-
-{% set uses_eureka_discovery = artemis_computed_uses_hazelcast | bool and artemis_eureka_urls is defined and hazelcast_address is defined and hazelcast_address is not none and hazelcast_address != "" %}
-{% if uses_eureka_discovery or (is_multinode_install and artemis_computed_is_core_node and artemis_eureka_instance_id is defined and artemis_eureka_instance_id != "") %}
-# Eureka exists here for one purpose: finding Hazelcast members. A Redis deployment discovers nothing through it
-# and Artemis turns the client off at startup anyway (RedisDiscoveryEnvironmentPostProcessor), so a Redis core node
-# keeps only instanceId - NodeRegistryService and PyrisJobService read it as the node's identity - and a Redis
-# build agent, which runs neither, gets no block at all.
-eureka:
-{% if uses_eureka_discovery %}
-  client:
-    enabled: true
-    service-url:
-      defaultZone: {{ artemis_eureka_urls }}
-{% endif %}
-  instance:
-{% if uses_eureka_discovery %}
-    prefer-ip-address: true
-    ip-address: "{{ hazelcast_address }}"
-    appname: Artemis
-{% endif %}
-    instanceId: Artemis:{{ artemis_eureka_instance_id }}
 {% endif %}
 
 logging:

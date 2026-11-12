@@ -242,15 +242,19 @@ the shared directory, preserving the exercise/submission/result hierarchy and fi
 with each core's restart to capture late writes. Verify the shared copies before deleting the old local files.
 The role configures the storage path; operators perform the file migration.
 
-Registry Configuration (Hazelcast clusters only):
+Valkey configuration (required for multi-node setups):
 ```
-artemis_jhipster_registry_password: "your_registry_password" # Set this to the password for the JHipster registry in a multi-node setup
+valkey:
+  host: "your_valkey_wireguard_address" # Unbracketed WireGuard address of the host running the valkey role
+  port: 6379
+  username: "artemis"
+  password: "your_valkey_password"
 ```
-The Token can be generated with: `openssl rand -base64 64`
 
-Eureka, and with it the JHipster registry, exists only so that Hazelcast members can find each other. A cluster
-with `valkey` configured runs on Redis instead: Artemis turns the Eureka client off at startup there, so neither
-the registry password nor the Eureka and Hazelcast addresses are written into the node configuration at all.
+Redis carries all cross-node state of a cluster. The JHipster registry, and with it Hazelcast clustering through
+Eureka discovery, has been removed, so a multi-node install without `valkey` fails the variable checks.
+`registry`, `artemis_jhipster_registry_password`, `hazelcast_address`, `artemis_eureka_instance_id` and `sentry`
+are no longer read and can be dropped from your inventory. Each node's name is now its `artemis_valkey_client_name`.
 
 Active MQ configuration:
 ```

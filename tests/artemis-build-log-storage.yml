@@ -7,7 +7,6 @@
     - ../roles/artemis/defaults/main.yml
   vars:
     artemis_computed_is_core_node: true
-    artemis_computed_uses_hazelcast: false
     artemis_operator_name: Example operator
     artemis_operator_admin_name: Example administrator
     artemis_university_name: Example university
