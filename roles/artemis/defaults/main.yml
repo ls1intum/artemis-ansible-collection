@@ -422,10 +422,8 @@ artemis_local_llm_deployment_enabled: false
 ##############################################################################
 #atlas:
 #  enabled:
-#  atlasml:
+#  atlasllm:
 #    enabled:
-#    base-url:
-#    auth-token:
 
 ##############################################################################
 # Hyperion / Spring AI (Azure OpenAI) Configuration
