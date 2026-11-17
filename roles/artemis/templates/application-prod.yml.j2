@@ -395,11 +395,9 @@ artemis:
   atlas:
     enabled: {{ atlas.enabled | lower }}
 
-{% if atlas.atlasml is defined and atlas.atlasml.enabled %}
-    atlasml:
-      enabled: {{ atlas.atlasml.enabled | lower }}
-      base-url: {{ atlas.atlasml.base-url }}
-      auth-token: {{ atlas.atlasml.auth-token }}
+{% if atlas.atlasllm is defined and atlas.atlasllm.enabled is defined %}
+    atlasllm:
+      enabled: {{ atlas.atlasllm.enabled | lower }}
 {% endif %}
 {% endif %}
 
