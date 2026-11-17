@@ -41,12 +41,16 @@
     mode: "644"
   notify: Restart broker
 
+# The broker scripts and the command line utilities read ARTEMIS_HOME from separate profiles.
 - name: Ensure correct broker version is installed
   become: true
   lineinfile:
-    path: "{{ activemq_working_directory }}/etc/artemis.profile"
+    path: "{{ activemq_working_directory }}/etc/{{ item }}"
     regexp: "^ARTEMIS_HOME="
-    line: "ARTEMIS_HOME='/opt/activemq-distribution/apache-artemis-{{ activemq_version }}'"
+    line: "ARTEMIS_HOME='{{ activemq_install_directory }}/apache-artemis-{{ activemq_version }}'"
+  loop:
+    - artemis.profile
+    - artemis-utility.profile
   notify: Restart broker
 
 - name: Enable broker service

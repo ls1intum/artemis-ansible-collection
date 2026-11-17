@@ -2,7 +2,7 @@
 - name: Check if activemq has been installed in the current version
   become: true
   stat:
-    path: /opt/activemq-distribution/apache-artemis-{{ activemq_version }}
+    path: "{{ activemq_install_directory }}/apache-artemis-{{ activemq_version }}"
   register: activemq_install_result
 
 - name: Create activemq installation directory
@@ -14,11 +14,26 @@
   notify: Restart broker
   when: not activemq_install_result.stat.exists
 
-- name: Download and extract activemq {{ activemq_version }}
+- name: Download activemq {{ activemq_version }} and verify its checksum
+  become: true
+  get_url:
+    url: "{{ activemq_download_url }}"
+    dest: "{{ activemq_install_directory }}/apache-artemis-{{ activemq_version }}-bin.tar.gz"
+    checksum: "sha512:{{ activemq_download_url }}.sha512"
+    mode: "644"
+  when: not activemq_install_result.stat.exists
+
+- name: Extract activemq {{ activemq_version }}
   become: true
   unarchive:
-    src: https://dlcdn.apache.org/activemq/activemq-artemis/{{ activemq_version }}/apache-artemis-{{ activemq_version }}-bin.tar.gz
-    dest: /opt/activemq-distribution
+    src: "{{ activemq_install_directory }}/apache-artemis-{{ activemq_version }}-bin.tar.gz"
+    dest: "{{ activemq_install_directory }}"
     remote_src: true
   notify: Restart broker
   when: not activemq_install_result.stat.exists
+
+- name: Remove the downloaded activemq archive
+  become: true
+  file:
+    path: "{{ activemq_install_directory }}/apache-artemis-{{ activemq_version }}-bin.tar.gz"
+    state: absent
