@@ -82,6 +82,19 @@
     - spring_ai is not defined or spring_ai.azure_openai is not defined
 
 ##############################################################################
+# Check TUM Live Variables
+##############################################################################
+
+# Caught here rather than through a rendered config: with only the old variable set, the template block is skipped
+# and the integration silently disappears.
+- name: Check that the replaced tum_live_base_url is not used
+  fail:
+    msg: >-
+      tum_live_base_url was replaced by the `tum_live` dictionary (api_base_url, web_base_url, api_key and
+      optionally integration_enabled). Move the URL to tum_live.api_base_url and remove tum_live_base_url.
+  when: tum_live_base_url is defined
+
+##############################################################################
 # Check localci Variables
 ##############################################################################
 
