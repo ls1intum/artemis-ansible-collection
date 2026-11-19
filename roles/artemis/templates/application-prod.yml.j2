@@ -319,7 +319,8 @@ artemis:
 
 {% if continuous_integration.localci is defined %}
 {% set localci_network = continuous_integration.localci.build_agent_network | default(none) %}
-{% if artemis_computed_is_build_agent | bool or localci_network is not none or continuous_integration.localci.proxy is defined or continuous_integration.localci.image_cleanup is defined %}
+{% set localci_isolation_targets = continuous_integration.localci.network_isolation_check_targets | default([], true) %}
+{% if artemis_computed_is_build_agent | bool or localci_network is not none or continuous_integration.localci.proxy is defined or continuous_integration.localci.image_cleanup is defined or localci_isolation_targets | length > 0 %}
   continuous-integration:
 {% if localci_network is not none %}
     build-agent-network:
@@ -335,6 +336,13 @@ artemis:
         - "{{ trusted_proxy }}"
 {% endfor %}
 {% endif %}
+{% endif %}
+{% if localci_isolation_targets | length > 0 %}
+    network-isolation-check:
+      targets:
+{% for target in localci_isolation_targets %}
+        - "{{ target }}"
+{% endfor %}
 {% endif %}
 {% if artemis_computed_is_build_agent %}
     specify-concurrent-builds: {{ (continuous_integration.localci.concurrent_build_size is defined) | lower }}
