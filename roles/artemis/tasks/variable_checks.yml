@@ -171,3 +171,12 @@
       or valkey.port is not defined or valkey.port is none
       or valkey.username is not defined or valkey.username is none
       or valkey.password is not defined or valkey.password is none
+
+- name: Check that the lifetime of agent access tokens is a positive number of days
+  fail:
+    msg: >-
+      artemis_agent_access_max_lifetime_in_days must be a whole number of days of at least 1, but it is
+      "{{ artemis_agent_access_max_lifetime_in_days }}".
+  when:
+    - artemis_agent_access_enabled | bool
+    - (artemis_agent_access_max_lifetime_in_days | string) is not match('^[1-9][0-9]*$')
