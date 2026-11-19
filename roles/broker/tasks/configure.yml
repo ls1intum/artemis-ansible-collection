@@ -7,9 +7,7 @@
 
 - name: Create broker in {{ activemq_working_directory }} (NOT IDEMPOTENT)
   become: true
-  command: ./artemis create --user {{ activemq_username }} --password {{ activemq_password }} --require-login --force {{ activemq_working_directory }} --java-options
-    "-Xms{{ (activemq_system_ram_proportion * ansible_memory_mb.real.total) | int }}m -Xmx{{ (activemq_system_ram_proportion * ansible_memory_mb.real.total) | int
-    }}m"
+  command: ./artemis create --user {{ activemq_username }} --password {{ activemq_password }} --require-login --force {{ activemq_working_directory }}
   args:
     chdir: "{{ activemq_install_directory }}/apache-artemis-{{ activemq_version }}/bin"
   notify: Restart broker
@@ -41,12 +39,28 @@
     mode: "644"
   notify: Restart broker
 
+# The broker scripts and the command line utilities read ARTEMIS_HOME from separate profiles.
 - name: Ensure correct broker version is installed
   become: true
   lineinfile:
-    path: "{{ activemq_working_directory }}/etc/artemis.profile"
+    path: "{{ activemq_working_directory }}/etc/{{ item }}"
     regexp: "^ARTEMIS_HOME="
-    line: "ARTEMIS_HOME='/opt/activemq-distribution/apache-artemis-{{ activemq_version }}'"
+    line: "ARTEMIS_HOME='{{ activemq_install_directory }}/apache-artemis-{{ activemq_version }}'"
+  loop:
+    - artemis.profile
+    - artemis-utility.profile
+  notify: Restart broker
+
+# The start script passes JAVA_ARGS_APPEND after JAVA_ARGS, so these values win over any heap flags in JAVA_ARGS.
+# Managing the heap here keeps it correct when the instance is upgraded or the host's memory changes.
+- name: Set the broker heap size
+  become: true
+  lineinfile:
+    path: "{{ activemq_working_directory }}/etc/artemis.profile"
+    regexp: "^JAVA_ARGS_APPEND="
+    line: "JAVA_ARGS_APPEND=\"-Xms{{ activemq_heap_size_mb }}m -Xmx{{ activemq_heap_size_mb }}m\""
+  vars:
+    activemq_heap_size_mb: "{{ (activemq_system_ram_proportion * ansible_memory_mb.real.total) | int }}"
   notify: Restart broker
 
 - name: Enable broker service
