@@ -18,6 +18,8 @@
     src: rules_{{ firewall_hostgroup }}.v4.j2
     dest: /etc/iptables/rules.v4
     mode: "644"
+    # A rule set that iptables-restore refuses must not replace the file that is loaded at boot
+    validate: "sh -c 'iptables-restore --test < %s'"
   register: copy4
 
 - name: Copy rules.v6
@@ -26,6 +28,7 @@
     src: rules_{{ firewall_hostgroup }}.v6.j2
     dest: /etc/iptables/rules.v6
     mode: "644"
+    validate: "sh -c 'ip6tables-restore --test < %s'"
   register: copy6
 
 # Only reload when the rule set actually changed. `iptables-restore` without `--noflush`
@@ -59,6 +62,9 @@
   check_mode: false
   when: "'docker.service' in ansible_facts.services"
 
+# One restart for both cases, so that a change of both rule files does not restart Docker twice and stop the builds twice. The IPv4 rules are missing when the MASQUERADE rule
+# is gone. Loading the IPv6 rules removes the chains that Docker installed for IPv6, which the check above does not see, so a change of them also restarts Docker when the rules
+# for the IPv6 container subnets are used.
 - name: Restart docker to reinstall its iptables rules
   become: true
   service:
@@ -66,5 +72,6 @@
     state: restarted
   when:
     - "'docker.service' in ansible_facts.services"
-    - docker_nat_rules.stdout is defined
-    - "'MASQUERADE' not in docker_nat_rules.stdout"
+    - >-
+      (docker_nat_rules.stdout is defined and 'MASQUERADE' not in docker_nat_rules.stdout)
+      or (copy6.changed and firewall_container_subnets_ipv6 | length > 0)
