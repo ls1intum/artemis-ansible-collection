@@ -15,8 +15,7 @@
         is_core_node: true
         is_build_agent: false
     is_multinode_install: true
-    deimos:
-      llm: { base_url: https://logos.example.org/v1, api_key: old, model: gpt-oss, completions_path: /chat/completions, temperature: 0.3 }
+    deimos: {}
     artemis_llm:
       endpoints:
         logos:
@@ -31,10 +30,16 @@
       hyperion.llm-presets.default: large
       hyperion.llm-presets.faq-rewrite: large
       weaviate.embedding-llm-preset: embed
+      deimos.llm-preset: large
+    yaml_text: "{{ lookup('ansible.builtin.template', '../roles/artemis/templates/application-prod.yml.j2') }}"
+    env_lines: "{{ lookup('ansible.builtin.template', '../roles/artemis/templates/artemis.env.j2').splitlines() }}"
   tasks:
     - name: Verify the YAML configuration
       ansible.builtin.assert:
         that:
+          # from_yaml keeps only the last of two equal keys, so count the llm lines in the text
+          - yaml_text.splitlines() | select('match', '^  llm:$') | list | length == 1
+          - config.artemis.llm.keys() | list == ['endpoints', 'presets']
           - config.artemis.llm.endpoints.logos['base-url'] == 'https://logos.example.org/v1'
           - "config.artemis.llm.endpoints.logos['api-key'] == 'secret: with colon'"
           - config.artemis.llm.endpoints.logos['prices-usd-per-million'][0].model == 'gpt-6.1-terra'
@@ -42,11 +47,11 @@
           - config.artemis.llm.presets.embed.model == 'Qwen/Qwen3-Embedding-8B'
           - config.artemis['hyperion.llm-presets.default'] == 'large'
           - config.artemis['weaviate.embedding-llm-preset'] == 'embed'
-          # the cost block of older Artemis versions stays in the same llm map
-          - config.artemis.llm['model-costs'] | length > 0
-          - config.artemis.deimos.llm.model == 'gpt-oss'
+          - config.artemis['deimos.llm-preset'] == 'large'
+          - config.artemis.deimos.keys() | list == ['enabled']
+          - config.spring.ai is not defined
       vars:
-        config: "{{ lookup('ansible.builtin.template', '../roles/artemis/templates/application-prod.yml.j2') | from_yaml }}"
+        config: "{{ yaml_text | from_yaml }}"
 
     - name: Verify the environment variables
       ansible.builtin.assert:
@@ -59,13 +64,12 @@
           - "\"ARTEMIS_HYPERION_LLMPRESETS_DEFAULT='large'\" in env_lines"
           - "\"ARTEMIS_HYPERION_LLMPRESETS_FAQREWRITE='large'\" in env_lines"
           - "\"ARTEMIS_WEAVIATE_EMBEDDINGLLMPRESET='embed'\" in env_lines"
+          - "\"ARTEMIS_DEIMOS_LLMPRESET='large'\" in env_lines"
+          - "\"ARTEMIS_DEIMOS_ENABLED='true'\" in env_lines"
           - env_lines | select('match', '^ARTEMIS_LLM_') | select('search', '^\\s|\\s$') | list | length == 0
-          - "\"ARTEMIS_DEIMOS_LLM_MODEL='gpt-oss'\" in env_lines"
-      vars:
-        env_lines: "{{ lookup('ansible.builtin.template', '../roles/artemis/templates/artemis.env.j2').splitlines() }}"
+          - env_lines | select('match', '^(SPRING_AI_|ARTEMIS_LLM_MODELCOSTS_|ARTEMIS_DEIMOS_LLM_)') | list | length == 0
 
-# from_yaml keeps only the last of two equal keys, so these cases also count the llm lines in the text
-- name: Verify the configuration without a catalog and with Deimos on presets only
+- name: Verify the configuration without a catalog
   hosts: localhost
   connection: local
   gather_facts: false
@@ -81,21 +85,15 @@
         is_core_node: true
         is_build_agent: false
     is_multinode_install: true
-    deimos: {}
-    artemis_llm_assignments:
-      deimos.llm-preset: deimos
     yaml_text: "{{ lookup('ansible.builtin.template', '../roles/artemis/templates/application-prod.yml.j2') }}"
     env_lines: "{{ lookup('ansible.builtin.template', '../roles/artemis/templates/artemis.env.j2').splitlines() }}"
   tasks: &without_catalog_tasks
-    - name: Verify one llm map with only the cost block and no Deimos model settings
+    - name: Verify that no llm map and no LLM environment variables are rendered
       ansible.builtin.assert:
         that:
-          - yaml_text.splitlines() | select('match', '^  llm:$') | list | length == 1
-          - (yaml_text | from_yaml).artemis.llm.keys() | list == ['model-costs']
-          - (yaml_text | from_yaml).artemis.deimos.keys() | list == ['enabled']
-          - (yaml_text | from_yaml).artemis['deimos.llm-preset'] == 'deimos'
-          - "\"ARTEMIS_DEIMOS_ENABLED='true'\" in env_lines"
-          - env_lines | select('match', '^ARTEMIS_(LLM_ENDPOINTS|LLM_PRESETS|DEIMOS_LLM)_') | list | length == 0
+          - yaml_text.splitlines() | select('match', '^  llm:$') | list | length == 0
+          - (yaml_text | from_yaml).artemis.llm is not defined
+          - env_lines | select('match', '^ARTEMIS_LLM_') | list | length == 0
 
 - name: Verify the configuration with an empty catalog
   hosts: localhost
@@ -107,3 +105,38 @@
     <<: *without_catalog_vars
     artemis_llm: {}
   tasks: *without_catalog_tasks
+
+- name: Verify that the variables of older Artemis versions stop the role
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    artemis_database_password: example
+    artemis_internal_admin_password: example
+    artemis_jhipster_jwt: example
+    artemis_computed_is_core_node: false
+    is_multinode_install: false
+    spring_ai:
+      azure_openai: { api_key: old, endpoint: https://logos.example.org/v1, deployment_name: gpt-5.4-mini }
+    artemis_llm_cost:
+      gpt-5-mini: { input_cost_per_million_eur: 0.23, output_cost_per_million_eur: 1.84 }
+    deimos:
+      llm: { base_url: https://logos.example.org/v1, api_key: old, model: gpt-oss }
+    weaviate:
+      enabled: true
+      open_ai_base_url: https://logos.example.org/
+      gpu_api_key: old
+  tasks:
+    - name: Run the check of the replaced LLM variables
+      block:
+        - name: Include the variable checks of the role
+          ansible.builtin.include_tasks: ../roles/artemis/tasks/variable_checks.yml
+        - name: Fail because the check did not stop the role
+          ansible.builtin.fail:
+            msg: The replaced LLM variables did not stop the role
+      rescue:
+        - name: Verify that the check of the replaced LLM variables stopped the role
+          ansible.builtin.assert:
+            that:
+              - ansible_failed_task.name == 'Check that the replaced LLM variables are not used'
+              - "'spring_ai, artemis_llm_cost, deimos.llm, weaviate.open_ai_base_url, weaviate.gpu_api_key' in ansible_failed_result.msg"

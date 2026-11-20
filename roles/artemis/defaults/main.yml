@@ -391,22 +391,14 @@ artemis_local_llm_deployment_enabled: false
 #  grpc_port: 50051
 #  scheme: https
 #  collection_prefix:
-#  vectorizer_module: text2vec-openai
-#  open_ai_embedding_model:
-#  open_ai_base_url:
-#  gpu_api_key:
+#  vectorizer_module: text2vec-openai # needs the weaviate.embedding-llm-preset assignment
 #  api_key:
 
 ##############################################################################
 # Deimos Configuration
 ##############################################################################
-# deimos:
-#   llm:
-#     base_url: https://gpu.aet.cit.tum.de
-#     api_key:
-#     model: openai/gpt-oss-120b
-#     completions_path: /api/chat/completions
-#     temperature: 0.3
+# Define `deimos` to enable it; its model is the deimos.llm-preset assignment.
+# deimos: {}
 
 ##############################################################################
 # Metis Configuration
@@ -432,24 +424,13 @@ artemis_local_llm_deployment_enabled: false
 #    enabled:
 
 ##############################################################################
-# Hyperion / Spring AI (Azure OpenAI) Configuration
+# Hyperion Configuration
 ##############################################################################
-# Define Spring AI configuration once under spring_ai.azure_openai.
-# Hyperion is enabled via the application property artemis.hyperion.enabled,
-# controlled here with the variable 'artemis_hyperion_enabled'.
-# Example Spring AI configuration:
-#
-#spring_ai:
-#  azure_openai:
-#    api_key: ""
-#    endpoint: "https://your-resource-name.openai.azure.com/"
-#    deployment_name: "gpt-5-mini"
-#    temperature: 1.0
-
+# Sets artemis.hyperion.enabled; its models are the hyperion.llm-presets.* assignments.
 artemis_hyperion_enabled: false
 
 ##############################################################################
-# LLM catalog and preset assignments (Artemis 10.8 and later)
+# LLM catalog and preset assignments
 ##############################################################################
 # Artemis' own keys below artemis.llm, see https://docs.artemis.tum.de/admin/llm-configuration.
 # Names of endpoints and presets use only lowercase letters and digits.
@@ -464,37 +445,6 @@ artemis_hyperion_enabled: false
 # Preset assignments as keys below artemis, e.g. hyperion.llm-presets.default or deimos.llm-preset.
 #artemis_llm_assignments:
 #  hyperion.llm-presets.default: large
-
-# LLM model costs for usage tracking, EUR per million tokens (OpenAI list price USD x 0.92).
-# Override or add entries in your inventory as needed.
-artemis_llm_cost:
-  gpt-5-mini:        # $0.25 / $2.00
-    input_cost_per_million_eur: 0.23
-    output_cost_per_million_eur: 1.84
-  gpt-5-nano:        # $0.05 / $0.40
-    input_cost_per_million_eur: 0.046
-    output_cost_per_million_eur: 0.37
-  gpt-5.1:           # $1.25 / $10.00
-    input_cost_per_million_eur: 1.15
-    output_cost_per_million_eur: 9.20
-  gpt-5.2:           # $1.75 / $14.00
-    input_cost_per_million_eur: 1.61
-    output_cost_per_million_eur: 12.88
-  gpt-5.3:           # $1.75 / $14.00 (chat, not Codex)
-    input_cost_per_million_eur: 1.61
-    output_cost_per_million_eur: 12.88
-  gpt-5.4-mini:      # $0.75 / $4.50
-    input_cost_per_million_eur: 0.69
-    output_cost_per_million_eur: 4.14
-  gpt-5.4-nano:      # $0.20 / $1.25
-    input_cost_per_million_eur: 0.18
-    output_cost_per_million_eur: 1.15
-  gpt-5.4:           # $2.50 / $15.00
-    input_cost_per_million_eur: 2.30
-    output_cost_per_million_eur: 13.80
-  gpt-5.5:           # $5.00 / $30.00
-    input_cost_per_million_eur: 4.60
-    output_cost_per_million_eur: 27.60
 
 ##############################################################################
 # CORS Configuration

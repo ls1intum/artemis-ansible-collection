@@ -58,31 +58,31 @@
     - artemis_computed_is_core_node | bool
     - metadata_value | lower in ['anonymous university', 'anonymous university admin'] or metadata_value is match('^<.*>$')
 
-- name: Check Spring AI Azure OpenAI configuration completeness (optional)
-  fail:
-    msg: "spring_ai.azure_openai defined but missing one of: api_key, endpoint, deployment_name"
-  when:
-    - spring_ai is defined
-    - spring_ai.azure_openai is defined
-    - spring_ai.azure_openai.api_key is not defined
-        or spring_ai.azure_openai.api_key is none
-        or spring_ai.azure_openai.api_key | length == 0
-        or spring_ai.azure_openai.endpoint is not defined
-        or spring_ai.azure_openai.endpoint is none
-        or spring_ai.azure_openai.endpoint | length == 0
-        or spring_ai.azure_openai.deployment_name is not defined
-        or spring_ai.azure_openai.deployment_name is none
-        or spring_ai.azure_openai.deployment_name | length == 0
-
 - name: Warn if Hyperion enabled but no language model is configured
   debug:
     msg: >-
-      Hyperion is enabled (artemis_hyperion_enabled=true) but neither artemis_llm with artemis_llm_assignments (Artemis 10.8+)
-      nor spring_ai.azure_openai (Artemis 10.7 and earlier) is configured. Hyperion features may not work, and Artemis 10.8 does not start.
+      Hyperion is enabled (artemis_hyperion_enabled=true) but artemis_llm or artemis_llm_assignments is not configured.
+      Artemis does not start without a preset assignment for Hyperion.
   when:
     - artemis_hyperion_enabled | default(false)
-    - spring_ai is not defined or spring_ai.azure_openai is not defined
     - artemis_llm is not defined or artemis_llm_assignments is not defined
+
+# Caught here rather than through a rendered config: the templates no longer render these variables, so their values
+# would silently disappear.
+- name: Check that the replaced LLM variables are not used
+  fail:
+    msg: >-
+      These variables configured language models before Artemis 10.8 and are no longer rendered: {{ artemis_old_llm_variables | join(', ') }}.
+      Configure the models in artemis_llm and assign them in artemis_llm_assignments, see the README of this role.
+  vars:
+    artemis_old_llm_variables: >-
+      {{ (['spring_ai'] if spring_ai is defined else [])
+         + (['artemis_llm_cost'] if artemis_llm_cost is defined else [])
+         + (['deimos.llm'] if deimos.llm is defined else [])
+         + (weaviate | default({}, true) | dict2items | map(attribute='key')
+            | select('in', ['open_ai_embedding_model', 'open_ai_base_url', 'gpu_api_key'])
+            | map('regex_replace', '^', 'weaviate.') | list) }}
+  when: artemis_old_llm_variables | length > 0
 
 ##############################################################################
 # Check TUM Live Variables

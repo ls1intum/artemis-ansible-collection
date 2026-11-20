@@ -167,11 +167,12 @@ athena:
   secret: "athena_secret"
 ```
 
-LLM configuration (Artemis 10.8 and later):
+LLM configuration:
 
-Artemis 10.8 reads all language model settings from one catalog under `artemis.llm` (endpoints and presets) and from preset
+Artemis reads all language model settings from one catalog under `artemis.llm` (endpoints and presets) and from preset
 assignments in each module, see the [Artemis documentation](https://docs.artemis.tum.de/admin/llm-configuration). Define the
-catalog in `artemis_llm` with Artemis' own key names, and the assignments in `artemis_llm_assignments` as keys below `artemis`:
+catalog in `artemis_llm` with Artemis' own key names, and the assignments in `artemis_llm_assignments` as keys below `artemis`.
+Hyperion itself is switched on with `artemis_hyperion_enabled: true`:
 
 ```yaml
 artemis_llm:
@@ -186,45 +187,14 @@ artemis_llm:
 artemis_llm_assignments:
   hyperion.llm-presets.default: large
   weaviate.embedding-llm-preset: embed
-```
-
-Both are rendered into `application-prod.yml` and `artemis.env` (environment variable names without dashes, list entries by
-index). Names of endpoints and presets use only lowercase letters and digits. Artemis 10.7 and earlier ignore both variables, and
-Artemis 10.8 ignores the Spring AI variables below and only logs a warning, so an inventory can carry both while its servers move
-to 10.8. Remove `spring_ai`, `artemis_llm_cost`, `deimos.llm` and the Weaviate `open_ai_*` / `gpu_api_key` values once every server
-runs 10.8.
-
-Hyperion (Azure OpenAI / Spring AI) configuration for Artemis 10.7 and earlier:
-
-Define two parts:
-1. Configure Spring AI globally under `spring_ai:`.
-2. Enable Hyperion via `artemis_hyperion_enabled: true` (sets `artemis.hyperion.enabled=true`).
-
-```yaml
-spring_ai:
-  azure_openai:
-    api_key: "{{ vault_azure_openai_api_key }}"
-    endpoint: "https://my-azure-openai-resource.openai.azure.com/"
-    deployment_name: "gpt-5-mini"
-    temperature: 1.0
 
 artemis_hyperion_enabled: true
 ```
-Rendered into application-prod.yml under `spring_ai` and exported in `artemis.env` only if `spring_ai.azure_openai` is fully configured with non-empty `api_key`, `endpoint`, and `deployment_name`:
 
-```text
-spring.ai.model.chat = openai
-spring.ai.openai.api-key
-spring.ai.openai.base-url            # from spring_ai.azure_openai.endpoint
-spring.ai.openai.microsoft-foundry   # default true
-spring.ai.openai.timeout             # default 5m
-spring.ai.openai.chat.model          # from spring_ai.azure_openai.deployment_name
-spring.ai.openai.chat.temperature
-
-artemis.hyperion.enabled
-```
-
-> The `spring_ai.azure_openai.*` inventory variables render the unified `spring.ai.openai.*` properties; the variable namespace is kept for backward compatibility.
+Both are rendered into `application-prod.yml` and `artemis.env` (environment variable names without dashes, list entries by
+index). Names of endpoints and presets use only lowercase letters and digits. This needs Artemis 10.8 or later. The variables
+of older versions (`spring_ai`, `artemis_llm_cost`, `deimos.llm` and the Weaviate `open_ai_embedding_model`, `open_ai_base_url`
+and `gpu_api_key`) are no longer rendered, and the role stops if one of them is still set.
 
 Iris configuration:
 ```
