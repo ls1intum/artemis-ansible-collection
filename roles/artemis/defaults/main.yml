@@ -448,6 +448,23 @@ artemis_local_llm_deployment_enabled: false
 
 artemis_hyperion_enabled: false
 
+##############################################################################
+# LLM catalog and preset assignments (Artemis 10.8 and later)
+##############################################################################
+# Artemis' own keys below artemis.llm, see https://docs.artemis.tum.de/admin/llm-configuration.
+# Names of endpoints and presets use only lowercase letters and digits.
+#artemis_llm:
+#  endpoints:
+#    logos:
+#      base-url: https://logos.aet.cit.tum.de/v1
+#      api-key:
+#  presets:
+#    large: { endpoint: logos, model: gpt-6.1-terra, api: responses, reasoning-effort: medium }
+#
+# Preset assignments as keys below artemis, e.g. hyperion.llm-presets.default or deimos.llm-preset.
+#artemis_llm_assignments:
+#  hyperion.llm-presets.default: large
+
 # LLM model costs for usage tracking, EUR per million tokens (OpenAI list price USD x 0.92).
 # Override or add entries in your inventory as needed.
 artemis_llm_cost:

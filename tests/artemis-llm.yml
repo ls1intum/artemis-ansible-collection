@@ -1,0 +1,61 @@
+---
+- name: Verify the LLM catalog and preset assignments
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars_files:
+    - ../roles/artemis/defaults/main.yml
+  vars:
+    artemis_computed_is_core_node: true
+    artemis_operator_name: Example operator
+    artemis_operator_admin_name: Example administrator
+    artemis_university_name: Example university
+    continuous_integration:
+      localci:
+        is_core_node: true
+        is_build_agent: false
+    is_multinode_install: true
+    artemis_llm:
+      endpoints:
+        logos:
+          base-url: https://logos.example.org/v1
+          api-key: "secret: with colon"
+          prices-usd-per-million:
+            - { model: gpt-6.1-terra, input: 1.0, output: 5.0 }
+      presets:
+        large: { endpoint: logos, model: gpt-6.1-terra, api: responses, reasoning-effort: medium }
+        embed: { endpoint: logos, model: Qwen/Qwen3-Embedding-8B, api: embeddings }
+    artemis_llm_assignments:
+      hyperion.llm-presets.default: large
+      hyperion.llm-presets.faq-rewrite: large
+      weaviate.embedding-llm-preset: embed
+  tasks:
+    - name: Verify the YAML configuration
+      ansible.builtin.assert:
+        that:
+          - config.artemis.llm.endpoints.logos['base-url'] == 'https://logos.example.org/v1'
+          - "config.artemis.llm.endpoints.logos['api-key'] == 'secret: with colon'"
+          - config.artemis.llm.endpoints.logos['prices-usd-per-million'][0].model == 'gpt-6.1-terra'
+          - config.artemis.llm.presets.large.model == 'gpt-6.1-terra'
+          - config.artemis.llm.presets.embed.model == 'Qwen/Qwen3-Embedding-8B'
+          - config.artemis['hyperion.llm-presets.default'] == 'large'
+          - config.artemis['weaviate.embedding-llm-preset'] == 'embed'
+          # the cost block of older Artemis versions stays in the same llm map
+          - config.artemis.llm['model-costs'] | length > 0
+      vars:
+        config: "{{ lookup('ansible.builtin.template', '../roles/artemis/templates/application-prod.yml.j2') | from_yaml }}"
+
+    - name: Verify the environment variables
+      ansible.builtin.assert:
+        that:
+          - "\"ARTEMIS_LLM_ENDPOINTS_LOGOS_BASEURL='https://logos.example.org/v1'\" in env_lines"
+          - "\"ARTEMIS_LLM_ENDPOINTS_LOGOS_APIKEY='secret: with colon'\" in env_lines"
+          - "\"ARTEMIS_LLM_ENDPOINTS_LOGOS_PRICESUSDPERMILLION_0_MODEL='gpt-6.1-terra'\" in env_lines"
+          - "\"ARTEMIS_LLM_PRESETS_LARGE_REASONINGEFFORT='medium'\" in env_lines"
+          - "\"ARTEMIS_LLM_PRESETS_EMBED_MODEL='Qwen/Qwen3-Embedding-8B'\" in env_lines"
+          - "\"ARTEMIS_HYPERION_LLMPRESETS_DEFAULT='large'\" in env_lines"
+          - "\"ARTEMIS_HYPERION_LLMPRESETS_FAQREWRITE='large'\" in env_lines"
+          - "\"ARTEMIS_WEAVIATE_EMBEDDINGLLMPRESET='embed'\" in env_lines"
+          - env_lines | select('match', '^ARTEMIS_LLM_') | select('search', '^\\s|\\s$') | list | length == 0
+      vars:
+        env_lines: "{{ lookup('ansible.builtin.template', '../roles/artemis/templates/artemis.env.j2').splitlines() }}"

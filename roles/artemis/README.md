@@ -167,7 +167,34 @@ athena:
   secret: "athena_secret"
 ```
 
-Hyperion (Azure OpenAI / Spring AI) configuration:
+LLM configuration (Artemis 10.8 and later):
+
+Artemis 10.8 reads all language model settings from one catalog under `artemis.llm` (endpoints and presets) and from preset
+assignments in each module, see the [Artemis documentation](https://docs.artemis.tum.de/admin/llm-configuration). Define the
+catalog in `artemis_llm` with Artemis' own key names, and the assignments in `artemis_llm_assignments` as keys below `artemis`:
+
+```yaml
+artemis_llm:
+  endpoints:
+    logos:
+      base-url: https://logos.example.org/v1
+      api-key: "{{ vault_logos_api_key }}"
+  presets:
+    large: { endpoint: logos, model: gpt-6.1-terra, api: responses, reasoning-effort: medium }
+    embed: { endpoint: logos, model: Qwen/Qwen3-Embedding-8B, api: embeddings }
+
+artemis_llm_assignments:
+  hyperion.llm-presets.default: large
+  weaviate.embedding-llm-preset: embed
+```
+
+Both are rendered into `application-prod.yml` and `artemis.env` (environment variable names without dashes, list entries by
+index). Names of endpoints and presets use only lowercase letters and digits. Artemis 10.7 and earlier ignore both variables, and
+Artemis 10.8 ignores the Spring AI variables below and only logs a warning, so an inventory can carry both while its servers move
+to 10.8. Remove `spring_ai`, `artemis_llm_cost`, `deimos.llm` and the Weaviate `open_ai_*` / `gpu_api_key` values once every server
+runs 10.8.
+
+Hyperion (Azure OpenAI / Spring AI) configuration for Artemis 10.7 and earlier:
 
 Define two parts:
 1. Configure Spring AI globally under `spring_ai:`.

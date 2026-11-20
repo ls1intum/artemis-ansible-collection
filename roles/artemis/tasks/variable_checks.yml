@@ -74,12 +74,15 @@
         or spring_ai.azure_openai.deployment_name is none
         or spring_ai.azure_openai.deployment_name | length == 0
 
-- name: Warn if Hyperion enabled but Spring AI Azure OpenAI not configured
+- name: Warn if Hyperion enabled but no language model is configured
   debug:
-    msg: "Hyperion is enabled (artemis_hyperion_enabled=true) but spring_ai.azure_openai is not configured. Hyperion features may not work."
+    msg: >-
+      Hyperion is enabled (artemis_hyperion_enabled=true) but neither artemis_llm with artemis_llm_assignments (Artemis 10.8+)
+      nor spring_ai.azure_openai (Artemis 10.7 and earlier) is configured. Hyperion features may not work, and Artemis 10.8 does not start.
   when:
     - artemis_hyperion_enabled | default(false)
     - spring_ai is not defined or spring_ai.azure_openai is not defined
+    - artemis_llm is not defined or artemis_llm_assignments is not defined
 
 ##############################################################################
 # Check TUM Live Variables
