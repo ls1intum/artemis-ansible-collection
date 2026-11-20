@@ -80,25 +80,6 @@ spring:
 
 {% if artemis_computed_is_core_node %}
 
-{% if spring_ai is defined and spring_ai.azure_openai is defined
-      and spring_ai.azure_openai.api_key | default('') | length > 0
-      and spring_ai.azure_openai.endpoint | default('') | length > 0
-      and spring_ai.azure_openai.deployment_name | default('') | length > 0 %}
-  ai:
-    model:
-      chat: openai
-    openai:
-      api-key: {{ spring_ai.azure_openai.api_key | quote }}
-      base-url: {{ spring_ai.azure_openai.endpoint | quote }}
-      # true routes auth as an Azure api-key header; set false for plain OpenAI-compatible endpoints.
-      microsoft-foundry: {{ spring_ai.azure_openai.microsoft_foundry | default(true) | lower }}
-      # tool-calling loops can exceed the 60s default
-      timeout: {{ spring_ai.azure_openai.timeout | default('5m') }}
-      chat:
-        model: {{ spring_ai.azure_openai.deployment_name | quote }}
-        temperature: {{ spring_ai.azure_openai.temperature | default(1.0) }}
-{% endif %}
-
 {% if shared_monitoring_host_v4 is not none %}
   prometheus:
     monitoringIp: "{{ shared_monitoring_host_v4 }}"
@@ -431,15 +412,6 @@ artemis:
     scheme: {{ weaviate.scheme | default('https') }}
     collection-prefix: {{ weaviate.collection_prefix | default('') }}
     vectorizer-module: {{ weaviate.vectorizer_module | default('none') }}
-{% if weaviate.open_ai_embedding_model is defined %}
-    open-ai-embedding-model: {{ weaviate.open_ai_embedding_model }}
-{% endif %}
-{% if weaviate.open_ai_base_url is defined %}
-    open-ai-base-url: {{ weaviate.open_ai_base_url }}
-{% endif %}
-{% if weaviate.gpu_api_key is defined %}
-    gpu-api-key: {{ weaviate.gpu_api_key }}
-{% endif %}
 {% if weaviate.api_key is defined %}
     api-key: {{ weaviate.api_key }}
 {% endif %}
@@ -448,12 +420,6 @@ artemis:
 {% if deimos is defined %}
   deimos:
     enabled: true
-    llm:
-      base-url: {{ deimos.llm.base_url }}
-      api-key: {{ deimos.llm.api_key }}
-      model: {{ deimos.llm.model }}
-      completions-path: {{ deimos.llm.completions_path }}
-      temperature: {{ deimos.llm.temperature }}
 {% endif %}
 
 {% if metis is defined %}
@@ -487,17 +453,15 @@ artemis:
   hyperion:
     enabled: {{ artemis_hyperion_enabled | lower }}
 
-{% if artemis_llm_cost is defined %}
+{% if artemis_llm | default({}, true) | length > 0 %}
   llm:
-    model-costs:
-{# Keys are bracket-quoted so dotted model names (e.g. gpt-5.4) bind to literal map keys
-   instead of being parsed as a nested path (gpt-5 -> 4) by Spring relaxed binding. #}
-{% for model, cost in artemis_llm_cost.items() %}
-      "[{{ model }}]":
-        input-cost-per-million-eur: {{ cost.input_cost_per_million_eur }}
-        output-cost-per-million-eur: {{ cost.output_cost_per_million_eur }}
-{% endfor %}
+    {{ artemis_llm | to_nice_yaml(indent=2, width=1000) | indent(4) | trim }}
 {% endif %}
+
+{# Preset assignments of the modules, as dotted keys below artemis, e.g. hyperion.llm-presets.default: large. #}
+{% for key, preset in (artemis_llm_assignments | default({}, true)).items() %}
+  {{ key }}: {{ preset | to_json }}
+{% endfor %}
 
   telemetry:
     enabled: {{ artemis_telemetry_enabled | lower }}

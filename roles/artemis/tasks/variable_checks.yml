@@ -58,28 +58,14 @@
     - artemis_computed_is_core_node | bool
     - metadata_value | lower in ['anonymous university', 'anonymous university admin'] or metadata_value is match('^<.*>$')
 
-- name: Check Spring AI Azure OpenAI configuration completeness (optional)
-  fail:
-    msg: "spring_ai.azure_openai defined but missing one of: api_key, endpoint, deployment_name"
-  when:
-    - spring_ai is defined
-    - spring_ai.azure_openai is defined
-    - spring_ai.azure_openai.api_key is not defined
-        or spring_ai.azure_openai.api_key is none
-        or spring_ai.azure_openai.api_key | length == 0
-        or spring_ai.azure_openai.endpoint is not defined
-        or spring_ai.azure_openai.endpoint is none
-        or spring_ai.azure_openai.endpoint | length == 0
-        or spring_ai.azure_openai.deployment_name is not defined
-        or spring_ai.azure_openai.deployment_name is none
-        or spring_ai.azure_openai.deployment_name | length == 0
-
-- name: Warn if Hyperion enabled but Spring AI Azure OpenAI not configured
+- name: Warn if Hyperion enabled but no language model is configured
   debug:
-    msg: "Hyperion is enabled (artemis_hyperion_enabled=true) but spring_ai.azure_openai is not configured. Hyperion features may not work."
+    msg: >-
+      Hyperion is enabled (artemis_hyperion_enabled=true) but artemis_llm or artemis_llm_assignments is not configured.
+      Artemis does not start without a preset assignment for Hyperion.
   when:
     - artemis_hyperion_enabled | default(false)
-    - spring_ai is not defined or spring_ai.azure_openai is not defined
+    - artemis_llm is not defined or artemis_llm_assignments is not defined
 
 ##############################################################################
 # Check TUM Live Variables
