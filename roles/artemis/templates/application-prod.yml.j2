@@ -459,7 +459,7 @@ artemis:
 {% endif %}
 
 {# Preset assignments of the modules, as dotted keys below artemis, e.g. hyperion.llm-presets.default: large. #}
-{% for key, preset in (artemis_llm_assignments | default({})).items() %}
+{% for key, preset in (artemis_llm_assignments | default({}, true)).items() %}
   {{ key }}: {{ preset | to_json }}
 {% endfor %}
 

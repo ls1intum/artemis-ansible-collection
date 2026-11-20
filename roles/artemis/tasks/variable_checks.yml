@@ -67,23 +67,6 @@
     - artemis_hyperion_enabled | default(false)
     - artemis_llm is not defined or artemis_llm_assignments is not defined
 
-# Caught here rather than through a rendered config: the templates no longer render these variables, so their values
-# would silently disappear.
-- name: Check that the replaced LLM variables are not used
-  fail:
-    msg: >-
-      These variables configured language models before Artemis 10.8 and are no longer rendered: {{ artemis_old_llm_variables | join(', ') }}.
-      Configure the models in artemis_llm and assign them in artemis_llm_assignments, see the README of this role.
-  vars:
-    artemis_old_llm_variables: >-
-      {{ (['spring_ai'] if spring_ai is defined else [])
-         + (['artemis_llm_cost'] if artemis_llm_cost is defined else [])
-         + (['deimos.llm'] if deimos.llm is defined else [])
-         + (weaviate | default({}, true) | dict2items | map(attribute='key')
-            | select('in', ['open_ai_embedding_model', 'open_ai_base_url', 'gpu_api_key'])
-            | map('regex_replace', '^', 'weaviate.') | list) }}
-  when: artemis_old_llm_variables | length > 0
-
 ##############################################################################
 # Check TUM Live Variables
 ##############################################################################

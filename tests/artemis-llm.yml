@@ -106,16 +106,28 @@
     artemis_llm: {}
   tasks: *without_catalog_tasks
 
+- name: Verify the configuration with a blank assignments block
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars_files:
+    - ../roles/artemis/defaults/main.yml
+  vars:
+    <<: *without_catalog_vars
+    artemis_llm_assignments:
+  tasks: *without_catalog_tasks
+
+# Runs the role's entry point without setup_system and update_artemis_config, as a Docker host that only re-renders
+# artemis.env does, so the check must not depend on those flags.
 - name: Verify that the variables of older Artemis versions stop the role
   hosts: localhost
   connection: local
   gather_facts: false
   vars:
-    artemis_database_password: example
-    artemis_internal_admin_password: example
-    artemis_jhipster_jwt: example
-    artemis_computed_is_core_node: false
-    is_multinode_install: false
+    setup_system: false
+    update_artemis_config: false
+    restart_artemis: false
+    use_docker: false
     spring_ai:
       azure_openai: { api_key: old, endpoint: https://logos.example.org/v1, deployment_name: gpt-5.4-mini }
     artemis_llm_cost:
@@ -125,12 +137,13 @@
     weaviate:
       enabled: true
       open_ai_base_url: https://logos.example.org/
-      gpu_api_key: old
+      # a value that cannot be resolved any more must not hide the name of the replaced key
+      gpu_api_key: "{{ removed_vault_value }}"
   tasks:
-    - name: Run the check of the replaced LLM variables
+    - name: Run the role's entry point
       block:
-        - name: Include the variable checks of the role
-          ansible.builtin.include_tasks: ../roles/artemis/tasks/variable_checks.yml
+        - name: Include the role's entry point
+          ansible.builtin.include_tasks: ../roles/artemis/tasks/main.yml
         - name: Fail because the check did not stop the role
           ansible.builtin.fail:
             msg: The replaced LLM variables did not stop the role
@@ -140,3 +153,41 @@
             that:
               - ansible_failed_task.name == 'Check that the replaced LLM variables are not used'
               - "'spring_ai, artemis_llm_cost, deimos.llm, weaviate.open_ai_base_url, weaviate.gpu_api_key' in ansible_failed_result.msg"
+
+- name: Verify that custom headers stop the role on Docker hosts
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    use_docker: true
+    artemis_llm:
+      endpoints:
+        plain: { base-url: https://logos.example.org/v1 }
+        gateway: { base-url: https://gateway.example.org/v1, custom-headers: { X-Api-Key: secret } }
+  tasks:
+    - name: Run the LLM checks
+      block:
+        - name: Include the LLM checks of the role
+          ansible.builtin.include_tasks: ../roles/artemis/tasks/llm_checks.yml
+        - name: Fail because the check did not stop the role
+          ansible.builtin.fail:
+            msg: The custom headers did not stop the role
+      rescue:
+        - name: Verify that the check of the custom headers stopped the role for the gateway endpoint
+          ansible.builtin.assert:
+            that:
+              - ansible_failed_task.name == 'Check that no LLM endpoint sets custom headers on Docker hosts'
+              - ansible_failed_result.results | selectattr('failed', 'defined') | selectattr('failed') | map(attribute='item') | list == ['gateway']
+
+- name: Verify that custom headers are allowed without Docker
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    use_docker: false
+    artemis_llm:
+      endpoints:
+        gateway: { base-url: https://gateway.example.org/v1, custom-headers: { X-Api-Key: secret } }
+  tasks:
+    - name: Include the LLM checks of the role
+      ansible.builtin.include_tasks: ../roles/artemis/tasks/llm_checks.yml

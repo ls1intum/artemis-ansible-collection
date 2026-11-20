@@ -194,7 +194,8 @@ artemis_hyperion_enabled: true
 Both are rendered into `application-prod.yml` and `artemis.env` (environment variable names without dashes, list entries by
 index). Names of endpoints and presets use only lowercase letters and digits. This needs Artemis 10.8 or later. The variables
 of older versions (`spring_ai`, `artemis_llm_cost`, `deimos.llm` and the Weaviate `open_ai_embedding_model`, `open_ai_base_url`
-and `gpu_api_key`) are no longer rendered, and the role stops if one of them is still set.
+and `gpu_api_key`) are no longer rendered, and the role stops if one of them is still set. On Docker hosts the role also stops
+if an endpoint sets `custom-headers`, because environment variable names cannot carry the exact header names.
 
 Iris configuration:
 ```

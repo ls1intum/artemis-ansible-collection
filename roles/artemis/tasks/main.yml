@@ -30,6 +30,9 @@
     - artemis_build_version is not none
     - artemis_build_version != ""
 
+- name: Check the LLM variables
+  ansible.builtin.include_tasks: llm_checks.yml
+
 # Check if variables are set correctly
 - include_tasks: variable_checks.yml
   when: (setup_system | bool) or (update_artemis_config | bool)
