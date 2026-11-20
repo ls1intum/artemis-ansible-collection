@@ -448,12 +448,15 @@ artemis:
 {% if deimos is defined %}
   deimos:
     enabled: true
+{# deimos.llm configures Artemis 10.7 and earlier; 10.8 uses the deimos.llm-preset assignment instead. #}
+{% if deimos.llm is defined %}
     llm:
       base-url: {{ deimos.llm.base_url }}
       api-key: {{ deimos.llm.api_key }}
       model: {{ deimos.llm.model }}
       completions-path: {{ deimos.llm.completions_path }}
       temperature: {{ deimos.llm.temperature }}
+{% endif %}
 {% endif %}
 
 {% if metis is defined %}
@@ -487,16 +490,14 @@ artemis:
   hyperion:
     enabled: {{ artemis_hyperion_enabled | lower }}
 
-{% if artemis_llm_cost is defined or artemis_llm is defined %}
+{# The catalog (Artemis 10.8+) and the cost block of older versions share one llm map. #}
+{% set artemis_llm_catalog = artemis_llm | default({}, true) %}
+{% if artemis_llm_catalog | length > 0 or artemis_llm_cost is defined %}
   llm:
-{% if artemis_llm is defined %}
-    {{ artemis_llm | to_nice_yaml(indent=2, width=1000) | indent(4) | trim }}
-{% endif %}
+{% if artemis_llm_catalog | length > 0 %}
+    {{ artemis_llm_catalog | to_nice_yaml(indent=2, width=1000) | indent(4) | trim }}
 {% endif %}
 {% if artemis_llm_cost is defined %}
-{% if artemis_llm is not defined %}
-  llm:
-{% endif %}
     model-costs:
 {# Keys are bracket-quoted so dotted model names (e.g. gpt-5.4) bind to literal map keys
    instead of being parsed as a nested path (gpt-5 -> 4) by Spring relaxed binding. #}
@@ -505,6 +506,7 @@ artemis:
         input-cost-per-million-eur: {{ cost.input_cost_per_million_eur }}
         output-cost-per-million-eur: {{ cost.output_cost_per_million_eur }}
 {% endfor %}
+{% endif %}
 {% endif %}
 
 {# Preset assignments of the modules (Artemis 10.8+), as dotted keys below artemis, e.g. hyperion.llm-presets.default: large. #}

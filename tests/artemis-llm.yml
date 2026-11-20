@@ -15,6 +15,8 @@
         is_core_node: true
         is_build_agent: false
     is_multinode_install: true
+    deimos:
+      llm: { base_url: https://logos.example.org/v1, api_key: old, model: gpt-oss, completions_path: /chat/completions, temperature: 0.3 }
     artemis_llm:
       endpoints:
         logos:
@@ -42,6 +44,7 @@
           - config.artemis['weaviate.embedding-llm-preset'] == 'embed'
           # the cost block of older Artemis versions stays in the same llm map
           - config.artemis.llm['model-costs'] | length > 0
+          - config.artemis.deimos.llm.model == 'gpt-oss'
       vars:
         config: "{{ lookup('ansible.builtin.template', '../roles/artemis/templates/application-prod.yml.j2') | from_yaml }}"
 
@@ -57,5 +60,50 @@
           - "\"ARTEMIS_HYPERION_LLMPRESETS_FAQREWRITE='large'\" in env_lines"
           - "\"ARTEMIS_WEAVIATE_EMBEDDINGLLMPRESET='embed'\" in env_lines"
           - env_lines | select('match', '^ARTEMIS_LLM_') | select('search', '^\\s|\\s$') | list | length == 0
+          - "\"ARTEMIS_DEIMOS_LLM_MODEL='gpt-oss'\" in env_lines"
       vars:
         env_lines: "{{ lookup('ansible.builtin.template', '../roles/artemis/templates/artemis.env.j2').splitlines() }}"
+
+# from_yaml keeps only the last of two equal keys, so these cases also count the llm lines in the text
+- name: Verify the configuration without a catalog and with Deimos on presets only
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars_files:
+    - ../roles/artemis/defaults/main.yml
+  vars: &without_catalog_vars
+    artemis_computed_is_core_node: true
+    artemis_operator_name: Example operator
+    artemis_operator_admin_name: Example administrator
+    artemis_university_name: Example university
+    continuous_integration:
+      localci:
+        is_core_node: true
+        is_build_agent: false
+    is_multinode_install: true
+    deimos: {}
+    artemis_llm_assignments:
+      deimos.llm-preset: deimos
+    yaml_text: "{{ lookup('ansible.builtin.template', '../roles/artemis/templates/application-prod.yml.j2') }}"
+    env_lines: "{{ lookup('ansible.builtin.template', '../roles/artemis/templates/artemis.env.j2').splitlines() }}"
+  tasks: &without_catalog_tasks
+    - name: Verify one llm map with only the cost block and no Deimos model settings
+      ansible.builtin.assert:
+        that:
+          - yaml_text.splitlines() | select('match', '^  llm:$') | list | length == 1
+          - (yaml_text | from_yaml).artemis.llm.keys() | list == ['model-costs']
+          - (yaml_text | from_yaml).artemis.deimos.keys() | list == ['enabled']
+          - (yaml_text | from_yaml).artemis['deimos.llm-preset'] == 'deimos'
+          - "\"ARTEMIS_DEIMOS_ENABLED='true'\" in env_lines"
+          - env_lines | select('match', '^ARTEMIS_(LLM_ENDPOINTS|LLM_PRESETS|DEIMOS_LLM)_') | list | length == 0
+
+- name: Verify the configuration with an empty catalog
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars_files:
+    - ../roles/artemis/defaults/main.yml
+  vars:
+    <<: *without_catalog_vars
+    artemis_llm: {}
+  tasks: *without_catalog_tasks
