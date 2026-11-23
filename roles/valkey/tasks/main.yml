@@ -72,7 +72,7 @@
       when:
         - valkey_existing_config.stat.exists
         - >-
-          (valkey_current_config.content | b64decode | regex_findall('(?im)^[ \t]*appendonly[ \t]+(yes|no)\b')
+          (valkey_current_config.content | b64decode | regex_findall('(?im)^[ \t]*appendonly[ \t]+(yes|no)(?:[ \t\r#]|$)')
           | last | default('no') | lower) != 'yes'
       block:
         - name: Read persistence status from the running Valkey instance
