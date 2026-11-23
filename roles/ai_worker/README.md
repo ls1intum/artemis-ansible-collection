@@ -30,7 +30,7 @@ Production generation is disabled until an operator enables it.
    inventory; the examples are not a complete Artemis installation.
 2. Supply `artemis_release_version`, the Artemis release tag of core. See
    [release.example.yml](../../examples/ai_worker/release.example.yml).
-3. Store `vault_valkey_password` and `vault_ai_worker_model_api_key` in a separate
+3. Store `vault_valkey_password` and `vault_llm_api_key` in a separate
    encrypted Vault file for that environment. Never reuse production keys in test.
 4. Apply the core variables with your existing Artemis playbook on **every**
    exercise-writing node. A writer needs the generation guard, not model access:
@@ -83,25 +83,24 @@ required when the distributed-data encoding changes; do not mix runtime versions
 | `artemis_hyperion_agent` | Optional native `artemis.hyperion.agent` settings on core: token/duration budgets and named effort profiles. Artemis defaults apply when unset; core sends the resolved profile to the worker. |
 | `artemis_hyperion_generation` | Optional native `artemis.hyperion.generation` settings on core: concurrency, retention and shutdown settings. Artemis defaults apply when unset. |
 | `artemis_aiworker_ids` | Worker IDs admitted by each coordinator. Defaults to the `ai_worker_id` of every `generation_workers` host; set it explicitly when the workers are in another inventory. |
-| `ai_worker_model_base_url`, `ai_worker_model`, `ai_worker_model_api_key`, `ai_worker_model_timeout` | Worker-local model connection. Use HTTPS. Set `ai_worker_microsoft_foundry` for a Foundry custom domain. |
-| `ai_worker_model_options` | Allowed defaults: `temperature`, `top-p`, `max-tokens`, `max-completion-tokens`, and `reasoning-effort`. Connection settings and retries cannot be overridden here. An explicit core effort profile governs the run's model/options. |
+| `ai_worker_llm` | The LLM catalog (`artemis.llm` endpoints and presets) of the worker. Defaults to `artemis_llm`, the catalog of core: the worker resolves the presets that core assigns to exercise generation by name, so both need the same catalog. Those presets need `max-retries: 0`. Requires Artemis 10.8 or later. |
 | `ai_worker_image` | Defaults to the Artemis release image of `artemis_version`. Override only with the same release, for example pinned by digest. |
 | `ai_worker_slots`, `ai_worker_memory`, `ai_worker_cpus` | Supervisor capacity and container limits. |
 | `ai_worker_sandbox_memory_bytes`, `ai_worker_sandbox_cpu_quota`, `ai_worker_sandbox_pids`, `ai_worker_runtime` | Per-sandbox limits. The host needs room for the supervisor, concurrent sandboxes and the OS. Example limits are not load-test results. |
 
-The worker uses the current [Spring AI OpenAI properties](https://docs.spring.io/spring-ai/reference/api/chat/openai-chat.html):
-`spring.ai.openai.chat.model`, rather than relying on the legacy `chat.options.model` alias. For an
-OpenAI-compatible endpoint, include `/v1` in the base URL when its API requires
-that prefix; the SDK appends `/chat/completions`. Use the provider root for
-Foundry with `ai_worker_microsoft_foundry: true`.
+The worker reads its models from the presets of the `artemis.llm` catalog, like core
+(see the `artemis` role and the Artemis page LLM configuration). Core sends the preset
+of a run by name, and the worker refuses a run whose preset it does not have or that
+retries in the SDK. The variables of Artemis 10.7 (`ai_worker_model*` and
+`ai_worker_microsoft_foundry`) are no longer rendered, and the role stops if one of them
+is still set.
 
 The core role renders the same nested agent/generation settings in its YAML and
 Docker paths. Docker uses `SPRING_APPLICATION_JSON` to preserve profile names;
-do not override that variable separately. Without effort profiles, runs use
-`ai_worker_model`; if you define profiles, set each profile's model to a deployment
-available through that environment's worker endpoint.
-Prices are operator-supplied: the examples use `artemis_llm_cost: {}` so stale
-collection price defaults are not presented as measured generation costs.
+do not override that variable separately. Without effort profiles, runs use the preset assigned to
+`hyperion.agent.llm-preset`; a profile may name its own `llm-preset`. Every preset that
+core assigns to generation must be in the worker's catalog. Prices come from the provider
+or from the endpoint's `prices-usd-per-million`, as on core.
 
 The worker disables SDK retries for generation accounting. Accounting follows the
 worker's retry policy and delivered usage evidence. Core retry settings remain

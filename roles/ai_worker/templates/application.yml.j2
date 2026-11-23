@@ -17,22 +17,14 @@ spring:
       password: {{ valkey.password | to_json }}
       client-name: {{ ('aiworker-' ~ ai_worker_id) | to_json }}
 {% endif %}
-  ai:
-    model:
-      chat: {{ 'openai' if ai_worker_model_api_key | length > 0 else 'none' }}
-    openai:
-      api-key: {{ ai_worker_model_api_key | to_json }}
-      base-url: {{ ai_worker_model_base_url | to_json }}
-      microsoft-foundry: {{ ai_worker_microsoft_foundry | bool | lower }}
-      max-retries: 0
-      timeout: {{ ai_worker_model_timeout | to_json }}
-      chat: {{ ai_worker_model_options | combine({'model': ai_worker_model, 'max-retries': 0}) | to_json }}
 logging:
   logback:
     rollingpolicy:
       max-file-size: 8MB
       total-size-cap: 32MB
 artemis:
+  llm:
+    {{ ai_worker_llm | to_nice_yaml(indent=2, width=1000) | indent(4) | trim }}
   distributed-data:
     provider: {{ ('redis' if uses_redis else 'hazelcast') | to_json }}
   aiworker:

@@ -21,9 +21,7 @@ ai_worker_cpus: 2
 artemis_eureka_urls: "{% if registry.url is defined and registry.url is not none %}http://admin:${jhipster.registry.password}@{{ registry.url }}:8761/eureka/{% endif %}"
 artemis_jhipster_registry_password: ""
 
-ai_worker_model_base_url: ""
-ai_worker_model: ""
-ai_worker_model_api_key: ""
-ai_worker_model_timeout: 5m
-ai_worker_model_options: {}
-ai_worker_microsoft_foundry: false
+# The LLM catalog of Artemis 10.8 (artemis.llm: endpoints and presets). The worker resolves the presets that core assigns
+# to exercise generation in its own catalog, so it uses the catalog of core. Those presets need max-retries 0, on the
+# preset or its endpoint; Artemis checks this on core at startup and on the worker when a run starts.
+ai_worker_llm: "{{ artemis_llm | default({}) }}"
