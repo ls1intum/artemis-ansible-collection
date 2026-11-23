@@ -51,7 +51,7 @@
       valkey_install_method must be "tarball" (the official build from
       download.valkey.io) or "package" (the distribution packages).
 
-- name: Verify persistence before changing an existing Valkey installation
+- name: Verify persistence before enabling AOF on an existing Valkey installation
   when: valkey_appendonly | bool
   block:
     - name: Check for an existing Valkey configuration
@@ -60,8 +60,20 @@
         path: "{{ valkey_config_file }}"
       register: valkey_existing_config
 
-    - name: Check that the existing Valkey store already has a healthy AOF
+    - name: Read the current persistence configuration
+      become: true
+      ansible.builtin.slurp:
+        src: "{{ valkey_config_file }}"
+      register: valkey_current_config
       when: valkey_existing_config.stat.exists
+      no_log: true
+
+    - name: Check that the existing Valkey store already has a healthy AOF
+      when:
+        - valkey_existing_config.stat.exists
+        - >-
+          (valkey_current_config.content | b64decode | regex_findall('(?im)^[ \t]*appendonly[ \t]+(yes|no)\b')
+          | last | default('no') | lower) != 'yes'
       block:
         - name: Read persistence status from the running Valkey instance
           ansible.builtin.command:

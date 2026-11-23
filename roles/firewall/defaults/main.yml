@@ -5,6 +5,10 @@ wireguard_port: 51820
 
 firewall_hostgroup: default # Can be 'nodes', 'proxy' or left blank for default rules
 
+# Optional IPv6 WireGuard source-to-TCP-port mapping for the default firewall.
+# Each listed source may reach only its designated service through wg0.
+firewall_wireguard_ipv6_restricted_sources: {}
+
 # Management Networks - used to allow SSH / HTTP access to Hosts and services
 management_network_ipv4: "172.24.152.0/24"
 management_network_ipv6: "2a09:80c0:ac18:9800::/64"

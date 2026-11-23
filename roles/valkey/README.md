@@ -248,8 +248,9 @@ validation cannot detect an unapplied or manually altered server configuration.
 For an existing RDB-only store, back up the RDB snapshot and enable AOF on the
 running instance with `CONFIG SET appendonly yes` before applying Ansible. Wait
 for the initial rewrite to finish successfully and check `INFO persistence`.
-The role checks the running instance before changing an existing configuration
-when `valkey_appendonly` is enabled. See the [Valkey persistence guide](https://valkey.io/docs/topics/persistence/).
+Apply the playbook promptly and keep the server running until then. The role
+checks the running instance before switching an existing configuration to AOF.
+See the [Valkey persistence guide](https://valkey.io/docs/topics/persistence/).
 Do not use automatic promotion of asynchronous replicas for this workload:
 persistence on a primary does not guarantee replication of acknowledged slots.
 Recover a lost/corrupt store only with writers stopped and interrupted saves
