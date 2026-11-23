@@ -87,6 +87,7 @@ required when the distributed-data encoding changes; do not mix runtime versions
 | `ai_worker_model_options` | Allowed defaults: `temperature`, `top-p`, `max-tokens`, `max-completion-tokens`, and `reasoning-effort`. Connection settings and retries cannot be overridden here. An explicit core effort profile governs the run's model/options. |
 | `ai_worker_image` | Defaults to the Artemis release image of `artemis_version`. Override only with the same release, for example pinned by digest. |
 | `ai_worker_slots`, `ai_worker_memory`, `ai_worker_cpus` | Supervisor capacity and container limits. |
+| `ai_worker_extra_java_options` | Further JVM options of the worker, passed as `_JAVA_OPTIONS`. Defaults to `-XX:-UseBASE64Intrinsics`, which mitigates CVE-2026-114938 on worker images with a JDK older than 25.0.5.1. Set it to an empty string once every deployed image runs on 25.0.5.1 or newer. |
 | `ai_worker_sandbox_memory_bytes`, `ai_worker_sandbox_cpu_quota`, `ai_worker_sandbox_pids`, `ai_worker_runtime` | Per-sandbox limits. The host needs room for the supervisor, concurrent sandboxes and the OS. Example limits are not load-test results. |
 
 The worker uses the current [Spring AI OpenAI properties](https://docs.spring.io/spring-ai/reference/api/chat/openai-chat.html):

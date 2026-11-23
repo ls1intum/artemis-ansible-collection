@@ -14,6 +14,7 @@
       - ai_worker_sandbox_cpu_quota | int > 0
       - ai_worker_sandbox_pids | int > 0
       - ai_worker_cpus | float > 0
+      - ai_worker_extra_java_options is string
       - ai_worker_model_options is mapping
       - ai_worker_model_options.keys() | difference(['temperature', 'top-p', 'max-tokens', 'max-completion-tokens', 'reasoning-effort']) | length == 0
       - ai_worker_runtime | length > 0

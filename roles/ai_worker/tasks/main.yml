@@ -71,8 +71,9 @@
     volumes:
       - "{{ ai_worker_docker_socket }}:/var/run/docker.sock"
       - "{{ ai_worker_directory }}/application.yml:/config/application.yml:ro"
-    env:
-      SPRING_CONFIG_ADDITIONAL_LOCATION: file:/config/application.yml
+    # The image sets no _JAVA_OPTIONS of its own, so these options only add to the JVM flags of its command.
+    env: "{{ {'SPRING_CONFIG_ADDITIONAL_LOCATION': 'file:/config/application.yml'}
+      | combine({'_JAVA_OPTIONS': ai_worker_extra_java_options} if ai_worker_extra_java_options | length > 0 else {}) }}"
     log_driver: json-file
     log_options:
       max-size: 10m
