@@ -17,9 +17,6 @@ ai_worker_sandbox_pids: 256
 # The Artemis image fixes a 5 GB maximum heap; leave room for metaspace, direct buffers and /tmp.
 ai_worker_memory: 8g
 ai_worker_cpus: 2
-# Further JVM options of the worker, passed as _JAVA_OPTIONS. The Base64 intrinsics stay off as long as the worker
-# image can run on a JDK older than 25.0.5.1 (CVE-2026-114938); set this to an empty string afterwards.
-ai_worker_extra_java_options: "-XX:-UseBASE64Intrinsics"
 # Match the core nodes' DistributedDataProvider; the worker never hosts a data member.
 artemis_eureka_urls: "{% if registry.url is defined and registry.url is not none %}http://admin:${jhipster.registry.password}@{{ registry.url }}:8761/eureka/{% endif %}"
 artemis_jhipster_registry_password: ""
