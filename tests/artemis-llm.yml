@@ -66,7 +66,7 @@
           - "\"ARTEMIS_WEAVIATE_EMBEDDINGLLMPRESET='embed'\" in env_lines"
           - "\"ARTEMIS_DEIMOS_LLMPRESET='large'\" in env_lines"
           - "\"ARTEMIS_DEIMOS_ENABLED='true'\" in env_lines"
-          - env_lines | select('match', '^ARTEMIS_LLM_') | select('search', '^\\s|\\s$') | list | length == 0
+          - env_lines | select('match', '^\\s*ARTEMIS_LLM_') | select('search', '^\\s|\\s$') | list | length == 0
           - env_lines | select('match', '^(SPRING_AI_|ARTEMIS_LLM_MODELCOSTS_|ARTEMIS_DEIMOS_LLM_)') | list | length == 0
 
 - name: Verify the configuration without a catalog
@@ -93,7 +93,7 @@
         that:
           - yaml_text.splitlines() | select('match', '^  llm:$') | list | length == 0
           - (yaml_text | from_yaml).artemis.llm is not defined
-          - env_lines | select('match', '^ARTEMIS_LLM_') | list | length == 0
+          - env_lines | select('match', '^\\s*ARTEMIS_LLM_') | list | length == 0
 
 - name: Verify the configuration with an empty catalog
   hosts: localhost
