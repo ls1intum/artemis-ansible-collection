@@ -85,6 +85,7 @@ required when the distributed-data encoding changes; do not mix runtime versions
 | `artemis_aiworker_ids` | Worker IDs admitted by each coordinator. Defaults to the `ai_worker_id` of every `generation_workers` host; set it explicitly when the workers are in another inventory. |
 | `ai_worker_llm` | The LLM catalog (`artemis.llm` endpoints and presets) of the worker. Defaults to `artemis_llm`, the catalog of core: the worker resolves the presets that core assigns to exercise generation by name, so both need the same catalog. Those presets need `max-retries: 0`. Requires Artemis 10.8 or later. |
 | `ai_worker_image` | Defaults to the Artemis release image of `artemis_version`. Override only with the same release, for example pinned by digest. |
+| `ai_worker_network_mode` | Defaults to Docker's `bridge`. On a dedicated Linux VM, use `host` if the supervisor needs the host's WireGuard routes. Generated-code sandboxes still use their own network settings. |
 | `ai_worker_slots`, `ai_worker_memory`, `ai_worker_cpus` | Supervisor capacity and container limits. |
 | `ai_worker_sandbox_memory_bytes`, `ai_worker_sandbox_cpu_quota`, `ai_worker_sandbox_pids`, `ai_worker_runtime` | Per-sandbox limits. The host needs room for the supervisor, concurrent sandboxes and the OS. Example limits are not load-test results. |
 

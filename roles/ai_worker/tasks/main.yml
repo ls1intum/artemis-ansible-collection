@@ -50,6 +50,7 @@
     name: ai-worker
     image: "{{ ai_worker_image }}"
     state: started
+    network_mode: "{{ ai_worker_network_mode }}"
     restart_policy: unless-stopped
     restart: "{{ ai_worker_configuration.changed }}"
     user: "1000:1000"

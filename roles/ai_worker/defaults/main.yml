@@ -8,6 +8,7 @@ ai_worker_image: "ghcr.io/ls1intum/artemis:{{ artemis_version | default('') }}"
 # Empty: use Artemis's independently versioned default sandbox, as for Build Agent build images.
 ai_worker_sandbox_image: ""
 ai_worker_docker_socket: /var/run/docker.sock
+ai_worker_network_mode: bridge
 ai_worker_directory: /opt/ai-worker
 ai_worker_slots: 1
 ai_worker_runtime: runc
