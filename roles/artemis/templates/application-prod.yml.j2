@@ -178,6 +178,11 @@ artemis:
 {% endfor %}
 {% endif %}
 {% endif %}
+{% if artemis_agent_access_enabled | bool %}
+  agent-access:
+    enabled: true
+    max-lifetime-in-days: {{ artemis_agent_access_max_lifetime_in_days | int }}
+{% endif %}
   user-management:
 {% if artemis_oidc is defined and artemis_oidc.enabled | default(false) %}
     oidc:
