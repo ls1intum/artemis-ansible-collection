@@ -305,6 +305,10 @@ artemis_agent_access_max_lifetime_in_days: 90
 #    build_agent_network:
 #      allowed_ranges: [] # e.g. ["10.0.0.0/8"]
 #      trusted_proxies: [] # e.g. ["10.0.0.1"]
+# #  Optional. Services that a build agent checks at start-up that build containers cannot reach, as host:port. The queue store and the cluster port are
+# #  checked without being listed. A name is tested through every address that it resolves to, on the agent and inside the container, so listing the store by its name
+# #  also covers its IPv4 address when the name has an IPv4 record. List any other address as host:port, for example 10.0.0.5:6379 or [fd00::5]:6379. The check only reports (an error in the log); it does not change a build.
+#    network_isolation_check_targets: [] # e.g. ["valkey.example.org:6379"]
 #    proxy:
 #      http_proxy: "http://proxy:8080"
 #      https_proxy: "http://proxy:8080"
