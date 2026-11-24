@@ -202,19 +202,19 @@ server {
     # new build is a new URL and a cached copy cannot go stale. They are kept for
     # proxy_cache_client_bundle_valid.
     #
-    # Unversioned files: the theme override (theme-dark.css) is built as a bundle that is not injected
-    # into index.html, which Angular never hashes, and the service worker files (ngsw.json,
-    # ngsw-worker.js) must keep their names to be found at all. The cache key leaves out the query string
-    # on purpose, so a client's cache-busting parameter cannot reach them, and without a short lifetime a
-    # release would be served as the previous one for the whole of proxy_cache_client_bundle_valid. That
-    # happened on 2026-10-15: gzip clients got the dark theme and the service worker manifest of releases
-    # 10.0 and 9.9.3 for weeks. They are kept for proxy_cache_client_bundle_unversioned_valid and
-    # revalidated against the node afterwards, which answers 304 while the file is unchanged.
+    # Unversioned files: the service worker files (ngsw.json, ngsw-worker.js) must keep their names to be
+    # found at all. The cache key leaves out the query string on purpose, so a client's cache-busting
+    # parameter cannot reach them, and without a short lifetime a release would be served as the previous
+    # one for the whole of proxy_cache_client_bundle_valid. That happened on 2026-10-15: gzip clients got
+    # the service worker manifest of releases 10.0 and 9.9.3 for weeks, and the stylesheet of the dark
+    # theme, which was an unversioned file (theme-dark.css) until Artemis 10.8. They are kept for
+    # proxy_cache_client_bundle_unversioned_valid and revalidated against the node afterwards, which
+    # answers 304 while the file is unchanged.
     #
     # The regexes deliberately anchor the file name to the first path segment. They must not grow into
     # something that also matches /api/..., because a regex location beats a prefix location: it would
     # take the rate-limited endpoints below out of their zones with no other sign that it had happened.
-{% set proxy_cache_unversioned_match %}^/(?:theme-[a-z]+\.css|ngsw[^/]*\.js(?:on)?)(?:\.map)?${% endset %}
+{% set proxy_cache_unversioned_match %}^/ngsw[^/]*\.js(?:on)?(?:\.map)?${% endset %}
 {% set proxy_cache_versioned_match %}^/(?:[^/]+\.(?:js|css)|media/){% endset %}
 {% for cached in [{'match': proxy_cache_unversioned_match, 'valid': proxy_cache_client_bundle_unversioned_valid}, {'match': proxy_cache_versioned_match, 'valid': proxy_cache_client_bundle_valid}] %}
     location ~* {{ cached.match }} {
