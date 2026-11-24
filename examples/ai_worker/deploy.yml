@@ -1,0 +1,6 @@
+---
+- name: Deploy isolated authoring workers
+  hosts: generation_workers
+  gather_facts: false
+  roles:
+    - ls1intum.artemis.ai_worker

@@ -6,6 +6,10 @@
 :FORWARD DROP [0:0]
 :OUTPUT ACCEPT [0:0]
 -A INPUT -i lo -m comment --comment "Allow lo interface" -j ACCEPT
+{% for source, port in firewall_wireguard_ipv6_restricted_sources.items() %}
+-A INPUT -i wg0 -s {{ source }}/128 -p tcp --dport {{ port }} -j ACCEPT
+-A INPUT -i wg0 -s {{ source }}/128 -j DROP
+{% endfor %}
 -A INPUT -i wg0 -m comment --comment "Allow wg0 interface" -j ACCEPT
 -A INPUT -p ipv6-icmp -m comment --comment "Allow icmpv6" -j ACCEPT
 -A INPUT -p udp -d fe80::/64 -m conntrack --ctstate NEW --dport 546 -m comment --comment "Allow DHCPv6" -j ACCEPT

@@ -1,0 +1,133 @@
+# AI Worker
+
+Deploy the Artemis generation worker, not a broker service or a LocalCI Build Agent.
+Like Build Agents, the worker runs the normal Artemis image of the release
+(`ghcr.io/ls1intum/artemis:{{ artemis_version }}`), so core and worker always run the
+same release. The role starts it with the `prod,aiworker` Spring profiles, disables the
+image's HTTP health check and gives it 8 GB of memory, because the image fixes a 5 GB JVM heap.
+These profiles apply in **all** environments; do not replace `prod` with Spring's `test` profile.
+
+The worker runs the Hyperion workload `hyperion-generation`, version `1`, profile
+`java-gradle`; these are Artemis defaults, not role variables. Despite its name, the
+profile verifies Java exercises built with Gradle or Maven. Like a Build Agent's build images, the
+sandbox has its own toolchain version. Artemis ships the default; the worker reuses its local image
+or pulls it when missing. An Artemis upgrade does not require a new sandbox image.
+Leave `ai_worker_sandbox_image` empty for normal deployments. Override it with a versioned tag or
+registry digest only for a private registry or custom sandbox. Sandbox versions are published
+separately by Artemis maintainers; operators do not build images per Artemis release.
+Generation stays disabled in the core role by default.
+
+## Test, staging and production
+
+Use one [inventory](../../examples/ai_worker/inventories) per environment. The
+examples use separate hosts, provider endpoints, worker IDs, model endpoints,
+models and capacity. They contain no credentials or usable image digests.
+Production generation is disabled until an operator enables it.
+
+1. Copy the selected inventory into your deployment repository. Replace every
+   `example.invalid` address. Copy [deploy.yml](../../examples/ai_worker/deploy.yml)
+   into your deployment repository as `ai-worker.yml`. Add these groups and variables to your normal core
+   inventory; the examples are not a complete Artemis installation.
+2. Supply `artemis_release_version`, the Artemis release tag of core. See
+   [release.example.yml](../../examples/ai_worker/release.example.yml).
+3. Store `vault_valkey_password` and `vault_llm_api_key` in a separate
+   encrypted Vault file for that environment. Never reuse production keys in test.
+4. Apply the core variables with your existing Artemis playbook on **every**
+   exercise-writing node. A writer needs the generation guard, not model access:
+   `artemis_hyperion_exercise_generation_enabled: true` and
+   `artemis_hyperion_enabled: false` are valid on a writer-only node. For bare-metal
+   updates, set `update_artemis_config: true` and `restart_artemis: true` after
+   draining authoring. An eligible
+   `core,localci,localvc` coordinator also needs Hyperion and the worker IDs.
+5. Deploy the worker on a dedicated Docker host or VM. Do not use the Docker
+   daemon of core, a database, or an ordinary Build Agent. This role targets a
+   rootful Docker daemon without
+   [user-namespace remapping](https://docs.docker.com/engine/security/rootless/uid-gid-mapping/)
+   on that dedicated host. A different socket path does
+   not establish isolation; shared-host rootless deployment is outside this role.
+
+Until the role is released, install a reviewed collection commit, not `main` or
+an older published version. Set `COLLECTION_COMMIT` to that commit. `--force`
+replaces an installed copy with the same collection version.
+
+```sh
+ansible-galaxy collection install \
+  "git+https://github.com/ls1intum/artemis-ansible-collection.git,${COLLECTION_COMMIT:?set a reviewed collection commit}" --force
+```
+
+For example, with that collection installed:
+
+```sh
+# Use staging or prod in place of test. Select exactly one environment.
+ansible-playbook -i inventories/test/hosts.yml ai-worker.yml \
+  -e @release.yml -e @inventories/test/vault.yml --vault-id test@prompt
+```
+
+The host needs Docker and Python `requests` for the Ansible Docker modules.
+The role does not provision Docker, VMs, provider services, networks or firewalls.
+Use a private provider network (for example WireGuard); do not expose Redis or
+the Docker API to the public network. Permit supervisor traffic only to its
+provider, approved model endpoint and image registry. The generated-code containers have no network and receive no model key.
+The supervisor has no published HTTP port. Its Docker socket grants host control.
+Docker rotates stdout logs. The inherited Spring file log is capped separately
+inside the supervisor's temporary filesystem (8 MB per file, 32 MB of archives).
+
+Before replacing a running worker, stop new authoring and drain active assignments
+and core persistence. The role does not drain jobs or disable admission automatically. A coordinated core/worker update is
+required when the distributed-data encoding changes; do not mix runtime versions.
+
+## Configuration
+
+| Variables | Effect |
+| --- | --- |
+| `artemis_hyperion_agent` | Optional native `artemis.hyperion.agent` settings on core: token/duration budgets and named effort profiles. Artemis defaults apply when unset; core sends the resolved profile to the worker. |
+| `artemis_hyperion_generation` | Optional native `artemis.hyperion.generation` settings on core: concurrency, retention and shutdown settings. Artemis defaults apply when unset. |
+| `artemis_aiworker_ids` | Worker IDs admitted by each coordinator. Defaults to the `ai_worker_id` of every `generation_workers` host; set it explicitly when the workers are in another inventory. |
+| `ai_worker_llm` | The LLM catalog (`artemis.llm` endpoints and presets) of the worker. Defaults to `artemis_llm`, the catalog of core: the worker resolves the presets that core assigns to exercise generation by name, so both need the same catalog. Those presets need `max-retries: 0`. Requires Artemis 10.8 or later. |
+| `ai_worker_image` | Defaults to the Artemis release image of `artemis_version`. Override only with the same release, for example pinned by digest. |
+| `ai_worker_network_mode` | Defaults to Docker's `bridge`. On a dedicated Linux VM, use `host` if the supervisor needs the host's WireGuard routes. Generated-code sandboxes still use their own network settings. |
+| `ai_worker_slots`, `ai_worker_memory`, `ai_worker_cpus` | Supervisor capacity and container limits. |
+| `ai_worker_sandbox_memory_bytes`, `ai_worker_sandbox_cpu_quota`, `ai_worker_sandbox_pids`, `ai_worker_runtime` | Per-sandbox limits. The host needs room for the supervisor, concurrent sandboxes and the OS. Example limits are not load-test results. |
+
+The worker reads its models from the presets of the `artemis.llm` catalog, like core
+(see the `artemis` role and the Artemis page LLM configuration). Core sends the preset
+of a run by name, and the worker refuses a run whose preset it does not have or that
+retries in the SDK. The variables of Artemis 10.7 (`ai_worker_model*` and
+`ai_worker_microsoft_foundry`) are no longer rendered, and the role stops if one of them
+is still set.
+
+The core role renders the same nested agent/generation settings in its YAML and
+Docker paths. Docker uses `SPRING_APPLICATION_JSON` to preserve profile names;
+do not override that variable separately. Without effort profiles, runs use the preset assigned to
+`hyperion.agent.llm-preset`; a profile may name its own `llm-preset`. Every preset that
+core assigns to generation must be in the worker's catalog. Prices come from the provider
+or from the endpoint's `prices-usd-per-million`, as on core.
+
+The worker disables SDK retries for generation accounting. Accounting follows the
+worker's retry policy and delivered usage evidence. Core retry settings remain
+unchanged, so unrelated core AI features keep their configured retry policy.
+
+## Provider isolation
+
+As with Build Agents, a configured `valkey` map selects Redis. The worker reads
+the same `host`, `port`, `username` and `password` as core. No separate worker
+provider configuration is needed. The authoritative store must use AOF,
+`appendfsync always`, and `maxmemory-policy noeviction`. Inventory validation is
+not a check of the live server's effective settings.
+
+Current collection deployments use Redis/Valkey for cross-node state. The collection no longer
+provisions the JHipster registry or Hazelcast core clusters. The worker's legacy Eureka settings
+are only for an existing externally managed cluster on a compatible Artemis release; they do not
+restore Hazelcast deployment support to the core role.
+
+**Do not share an authoritative provider across environments.** Worker IDs alone
+do not isolate all distributed maps and topics. Use separate Redis/Valkey stores and networks. All three environments
+use the runtime's production cluster mode; an inventory name is not a namespace.
+
+## After deployment
+
+After a real role deployment and explicit generation opt-in on core and all
+writers, check capacity from core and generate a small exercise,
+confirm solution/template LocalCI scores of 100/0, cancel another run, and undo a
+saved run. Check the effective provider durability settings. Template tests and a
+running container do not establish this live acceptance.

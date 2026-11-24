@@ -13,6 +13,7 @@
 - name: Validate valkey configuration
   assert:
     that:
+      - valkey_appendfsync in ["always", "everysec", "no"]
       - valkey.username is defined and valkey.username | length > 0
       - valkey.password is defined and valkey.password is not none and valkey.password | length > 0
       - valkey.admin_username is defined and valkey.admin_username | length > 0
@@ -49,6 +50,61 @@
     fail_msg: >-
       valkey_install_method must be "tarball" (the official build from
       download.valkey.io) or "package" (the distribution packages).
+
+- name: Verify persistence before enabling AOF on an existing Valkey installation
+  when: valkey_appendonly | bool
+  block:
+    - name: Check for an existing Valkey configuration
+      become: true
+      ansible.builtin.stat:
+        path: "{{ valkey_config_file }}"
+      register: valkey_existing_config
+
+    - name: Read the current persistence configuration
+      become: true
+      ansible.builtin.slurp:
+        src: "{{ valkey_config_file }}"
+      register: valkey_current_config
+      when: valkey_existing_config.stat.exists
+      no_log: true
+
+    - name: Check that the existing Valkey store already has a healthy AOF
+      when:
+        - valkey_existing_config.stat.exists
+        - >-
+          (valkey_current_config.content | b64decode | regex_findall('(?im)^[ \t]*appendonly[ \t]+(yes|no)(?:[ \t\r#]|$)')
+          | last | default('no') | lower) != 'yes'
+      block:
+        - name: Read persistence status from the running Valkey instance
+          ansible.builtin.command:
+            argv:
+              - "{{ valkey_server_binary | dirname }}/valkey-cli"
+              - --user
+              - "{{ valkey.admin_username }}"
+              - -p
+              - "{{ valkey.port | string }}"
+              - INFO
+              - persistence
+          environment:
+            REDISCLI_AUTH: "{{ valkey.admin_password }}"
+          register: valkey_persistence
+          changed_when: false
+          failed_when: false
+          check_mode: false
+          no_log: true
+
+        - name: Require a completed AOF migration before restarting Valkey
+          ansible.builtin.assert:
+            that:
+              - valkey_persistence.rc | default(1) == 0
+              - "'aof_enabled:1' in valkey_persistence.stdout_lines | default([])"
+              - "'aof_rewrite_in_progress:0' in valkey_persistence.stdout_lines | default([])"
+              - "'aof_rewrite_scheduled:0' in valkey_persistence.stdout_lines | default([])"
+              - "'aof_last_bgrewrite_status:ok' in valkey_persistence.stdout_lines | default([])"
+              - "'aof_last_write_status:ok' in valkey_persistence.stdout_lines | default([])"
+            fail_msg: >-
+              Could not confirm a healthy AOF on the running Valkey instance. Verify local admin access,
+              then follow the Valkey role's AOF migration instructions before applying this playbook.
 
 # Every client connection is a file descriptor, plus the ones Valkey needs for
 # itself; a maxclients above the limit is silently capped at startup.
