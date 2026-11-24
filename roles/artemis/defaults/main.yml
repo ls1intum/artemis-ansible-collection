@@ -144,6 +144,10 @@ artemis_max_direct_memory_mb: 512
 # JVM outgrows its machine without ever reporting a heap problem.
 artemis_max_metaspace_mb: 512
 
+# Further JVM options for the Docker deployment, appended to _JAVA_OPTIONS in artemis.env. The Base64 intrinsics stay
+# off as long as the deployed images can run on a JDK older than 25.0.5.1; set this to an empty string afterwards.
+artemis_docker_extra_java_options: "-XX:-UseBASE64Intrinsics"
+
 # netty samples buffer allocations to detect leaks, and each sample allocates a Throwable to capture where the buffer
 # came from. On a node under exam load that is pure overhead: one 2000-student benchmark run recorded 179,032 of these
 # records. Set to "simple" (netty's own default) or "paranoid" when actually hunting a buffer leak.
