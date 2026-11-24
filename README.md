@@ -5,6 +5,31 @@ This collection contains all ansible roles necessary to deploy [Artemis](https:/
 > This is a work in progress repository - Please open issues if you encounter problems.
 
 # Installation
+
+## Artemis 10.8
+
+Use Collection **2.6.0** for Artemis 10.8. It supports the
+[LLM catalog and preset assignments](https://docs.artemis.tum.de/admin/llm-configuration/).
+Collection 2.5.0 uses the earlier LLM settings. When upgrading an existing
+installation to 10.8, migrate the LLM settings in your inventory before deploying.
+
+Once 2.6.0 is published on Ansible Galaxy, install it with:
+
+```sh
+ansible-galaxy collection install ls1intum.artemis:2.6.0
+```
+
+Until then, install the compatible Collection directly from this Git commit:
+
+```sh
+ansible-galaxy collection install git+https://github.com/ls1intum/artemis-ansible-collection.git,05936935ddfef98b226e8138f54d84057b12dff5
+```
+
+The pinned Git commit still reports `2.5.0` in the installation output.
+If replacing a previously installed Collection, add `--force` to the install
+command. Then follow the [dependency installation steps](#install-dependencies).
+For older Artemis releases, keep the Collection version compatible with that release.
+
 ## Installation via [ansible-galaxy](https://galaxy.ansible.com/ls1intum/artemis):
 
 ```
