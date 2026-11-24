@@ -9,13 +9,19 @@ artemis_user_uid: 1337
 artemis_user_gid: 1337
 
 # jdk.yml task
-jdk_openjdk_version: 17
+jdk_openjdk_version: 25
 
 # broker.yml task
-activemq_version: 2.44.0
+activemq_version: 2.57.0
 activemq_install_directory: /opt/activemq-distribution
+# 2.57.0 is published under artemis/artemis. 2.44.0 and older releases are under activemq/activemq-artemis.
+# dlcdn.apache.org only keeps the current release; use https://archive.apache.org/dist/artemis/artemis for older ones.
+activemq_download_base_url: https://dlcdn.apache.org/artemis/artemis
+activemq_download_url: "{{ activemq_download_base_url }}/{{ activemq_version }}/apache-artemis-{{ activemq_version }}-bin.tar.gz"
 
-activemq_system_ram_proportion: 0.8
+# Share of the system RAM used as the broker's Java heap. The rest is left for direct buffers, the socket buffers of
+# the client connections and the operating system.
+activemq_system_ram_proportion: 0.5
 activemq_force_reinstall: false # The broker will not be reinstalled if it already exists, unless this option is set
 
 # configure.yml task
