@@ -81,5 +81,11 @@ weaviate_enable_automated_backups: true
 weaviate_backup_schedule: "0 2 * * *"
 
 # Backup retention period in days
-# Old backups will be automatically deleted
+# Old backups will be automatically deleted, and so are snapshot directories that an aborted backup left behind
 weaviate_backup_retention_days: 7
+
+# Disk usage in percent of the file system of the backup directory at which a backup is not started any more
+# The backups lie on the disk of the Weaviate data, and a backup needs room for its snapshot and its archive at the same
+# time (together about twice the size of the data). Weaviate sets its shards read-only at 90 % and then refuses writes,
+# so a backup must never be the one to take the disk there.
+weaviate_backup_max_disk_usage_percent: 80
