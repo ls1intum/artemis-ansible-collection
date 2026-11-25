@@ -166,3 +166,12 @@
   when:
     - artemis_agent_access_enabled | bool
     - (artemis_agent_access_max_lifetime_in_days | string) is not match('^[1-9][0-9]*$')
+
+- name: Check that the statement timeout of the Liquibase connection is a duration PostgreSQL understands
+  fail:
+    msg: >-
+      artemis_database_liquibase_statement_timeout must be empty or a whole number with an optional unit of ms, s, min, h or d,
+      for example 30min, but it is "{{ artemis_database_liquibase_statement_timeout }}".
+  when:
+    - (artemis_database_liquibase_statement_timeout | default('') | string) | length > 0
+    - (artemis_database_liquibase_statement_timeout | string) is not match('^[0-9]+(ms|s|min|h|d)?$')

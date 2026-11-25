@@ -52,6 +52,12 @@ spring:
         # prepStmtCacheSize, prepStmtCacheSqlLimit, useServerPrepStmts - are not properties this driver knows, so
         # it ignored all four and the cache ran at its default the whole time.
         preparedStatementCacheQueries: {{ artemis_database_prep_stmt_cache_size | default(400) }}
+{% if artemis_database_liquibase_statement_timeout | default('') | string | length > 0 %}
+  liquibase:
+    # A connection of its own for the migrations, so that they run with a statement_timeout that differs from the application's: the
+    # options parameter of the PostgreSQL driver sets it for this connection only. The user and the password are those of the data source.
+    url: "jdbc:postgresql://{{ artemis_database_host }}:{{ artemis_database_port }}/{{ artemis_database_dbname }}?sslmode=disable&options=-c%20statement_timeout={{ artemis_database_liquibase_statement_timeout }}"
+{% endif %}
   jpa:
     # The dialect must be named, because the prod profile turns off hibernate.boot.allow_jdbc_metadata_access and
     # Hibernate therefore never asks the database what it is talking to. The WAR's config/application-prod.yml sets
