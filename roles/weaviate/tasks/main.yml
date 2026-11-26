@@ -104,6 +104,7 @@
     mode: "770"
   loop:
     - backup.sh
+    - backup-cleanup.sh
     - restore.sh
     - weaviate-docker.sh
 
@@ -127,7 +128,7 @@
     name: "Weaviate backup cleanup"
     minute: "30"
     hour: "3"
-    job: "find {{ weaviate_backup_directory }} -name 'backup-*.tar.gz' -mtime +{{ weaviate_backup_retention_days }} -delete"
+    job: "cd {{ weaviate_working_directory }} && ./backup-cleanup.sh >> {{ weaviate_working_directory }}/backup.log 2>&1"
     user: "{{ weaviate_user_name }}"
     state: present
   when: weaviate_enable_automated_backups | bool

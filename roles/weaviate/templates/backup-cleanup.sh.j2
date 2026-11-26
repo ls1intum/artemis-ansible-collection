@@ -1,0 +1,25 @@
+#!/bin/bash
+# Deletes the backups that are older than the retention period, so that they do not fill the disk of the Weaviate data.
+# Weaviate sets its shards read-only at 90 % disk usage.
+set -u
+
+BACKUP_DIR="{{ weaviate_backup_directory }}"
+RETENTION_DAYS={{ weaviate_backup_retention_days }}
+# The backup directory as the Weaviate container sees it (BACKUP_FILESYSTEM_PATH)
+CONTAINER_BACKUP_DIR="/var/lib/weaviate/backups"
+
+status=0
+
+# The archives of the backups
+find "$BACKUP_DIR" -maxdepth 1 -type f -name 'backup-*.tar.gz' -mtime +"$RETENTION_DAYS" -delete || status=1
+
+# The archive that backup.sh is writing is removed by it when it ends. One that is still there after a day is left over
+# from a backup that was killed.
+find "$BACKUP_DIR" -maxdepth 1 -type f -name '.backup-*.tar.gz.*' -mtime +1 -delete || status=1
+
+# The snapshots. Weaviate creates them as container root, and backup.sh removes each one after archiving it, as root through the
+# container. A snapshot that is still there after the retention period is left over from a backup that ended before that, and as
+# the cron user cannot delete it, it would stay for good and fill the disk.
+docker exec --user 0 weaviate find "$CONTAINER_BACKUP_DIR" -mindepth 1 -maxdepth 1 -type d -name 'backup-*' -mtime +"$RETENTION_DAYS" -exec rm -rf -- {} + || status=1
+
+exit $status

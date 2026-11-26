@@ -23,6 +23,21 @@ BACKUP_DIR="{{ weaviate_backup_directory }}"
 # Create backups directory if it doesn't exist
 mkdir -p "$BACKUP_DIR"
 
+# The snapshot and its archive exist next to each other for a while and lie on the disk of the Weaviate data. Weaviate sets
+# its shards read-only at 90 % disk usage, so do not start a backup that could take the disk there.
+MAX_DISK_USAGE={{ weaviate_backup_max_disk_usage_percent }}
+DISK_USAGE=$(df --output=pcent "$BACKUP_DIR" | tail -n1 | tr -dc '0-9')
+if [ -z "$DISK_USAGE" ]; then
+    echo "Error: could not read the disk usage of $BACKUP_DIR"
+    exit 1
+fi
+if [ "$DISK_USAGE" -ge "$MAX_DISK_USAGE" ]; then
+    echo "Error: disk usage of $BACKUP_DIR is ${DISK_USAGE}%, not below ${MAX_DISK_USAGE}%, so no backup is started."
+    echo "A backup needs room for its snapshot and its archive at once, and Weaviate sets its shards read-only at 90%."
+    echo "Free disk space, or lower weaviate_backup_retention_days."
+    exit 1
+fi
+
 # Generate backup ID with timestamp
 BACKUP_ID="backup-$(date +%Y%m%d-%H%M%S)"
 echo "Backup ID: $BACKUP_ID"

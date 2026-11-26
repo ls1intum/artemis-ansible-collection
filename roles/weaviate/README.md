@@ -220,6 +220,15 @@ cd /opt/weaviate
 
 Backups are stored in `/opt/weaviate/backups/` as compressed tar.gz files.
 
+The backups lie on the same disk as the Weaviate data, and while a backup runs its snapshot and its archive exist side by side.
+Weaviate sets its shards read-only at 90 % disk usage and stops accepting writes, so:
+
+- `backup.sh` does not start a backup when the disk usage of the backup directory is at `weaviate_backup_max_disk_usage_percent`
+  (default 80) or above, and says so in `backup.log`.
+- `backup-cleanup.sh` runs daily at 03:30. It deletes archives older than `weaviate_backup_retention_days`, and it also deletes
+  snapshot directories and temporary archives that an aborted backup left behind. Weaviate creates the snapshots as container root,
+  which is why the script removes them through `docker exec --user 0 weaviate`.
+
 ### Restore from Backup
 
 List available backups:
