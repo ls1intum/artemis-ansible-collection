@@ -176,6 +176,12 @@ artemis_database_max_pool_size: 30
 # evicts constantly and it re-parses on every miss.
 artemis_database_prep_stmt_cache_size: 400
 
+# statement_timeout of the connection that runs the Liquibase migrations, for example 30min. Empty keeps the migrations on the connection of the
+# application, with the timeout of the database. Set it where the database has a statement_timeout that is shorter than the longest migration
+# needs, because a migration can run one statement for minutes on a large table. A number is milliseconds; 0 removes the limit for the migrations.
+# It only applies to PostgreSQL and needs a restart of the core nodes, which run the migrations when they start.
+artemis_database_liquibase_statement_timeout: ""
+
 artemis_database_host: localhost
 artemis_database_port: 5432 # The port that the database is reachable on (Postgres default: 5432)
 artemis_database_dbname: artemis
