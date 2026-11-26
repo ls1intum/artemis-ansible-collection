@@ -62,9 +62,9 @@ fastcgi_read_timeout: "900s"
 #
 # Nearly everything cached is versioned in its URL - Angular emits content-hashed names for JavaScript,
 # CSS and the media they reference - so a cached copy cannot go stale: a new build is a new URL, and the
-# entries the old build left behind are never asked for again. The exceptions are the theme override
-# (theme-dark.css) and the service worker files (ngsw.json, ngsw-worker.js), which Angular does not hash;
-# they are cached for proxy_cache_client_bundle_unversioned_valid instead.
+# entries the old build left behind are never asked for again. The exceptions are the service worker
+# files (ngsw.json, ngsw-worker.js), which Angular does not hash; they are cached for
+# proxy_cache_client_bundle_unversioned_valid instead.
 #
 # Worth having because nothing else absorbs that load. Artemis serves its own static content, and
 # compresses it (server.compression), so without a cache every chunk request costs a node a read out of
@@ -82,8 +82,8 @@ proxy_cache_client_bundle_keys_zone_size: 20m
 # How long a content-hashed file is served from the cache. The proxy ignores the Cache-Control and
 # Expires headers of the node, so this is the lifetime, not a floor.
 proxy_cache_client_bundle_valid: 30d
-# How long the files whose names do not change between releases (theme-dark.css, ngsw.json,
-# ngsw-worker.js) are served without asking a node. After that the entry is revalidated, which costs a
+# How long the files whose names do not change between releases (ngsw.json, ngsw-worker.js) are
+# served without asking a node. After that the entry is revalidated, which costs a
 # conditional request answered with 304 while the file is unchanged. This is also the longest a release
 # can be served as the previous one, so keep it short.
 proxy_cache_client_bundle_unversioned_valid: 5m
