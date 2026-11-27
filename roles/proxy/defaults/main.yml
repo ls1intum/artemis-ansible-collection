@@ -58,6 +58,12 @@ proxy_read_timeout: "900s"
 fastcgi_send_timeout: "900s"
 fastcgi_read_timeout: "900s"
 
+# Compression level (1-9) of the responses that nginx compresses itself. Artemis compresses only the content types
+# listed in its server.compression.mime-types; the rest, notably the JavaScript of the client, is compressed by nginx
+# on its way out. nginx's own default is 1, which makes that JavaScript markedly larger than level 6 does, while
+# levels above 6 save almost nothing more and cost more CPU.
+proxy_gzip_comp_level: 6
+
 # Answer the client bundle from nginx's own cache instead of proxying every request to a node.
 #
 # Nearly everything cached is versioned in its URL - Angular emits content-hashed names for JavaScript,

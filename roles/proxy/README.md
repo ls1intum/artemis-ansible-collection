@@ -23,6 +23,7 @@ To configure the role, you need to set the required variables in your Ansible pl
 - `proxy_read_timeout`: The read timeout for nginx.
 - `fastcgi_send_timeout`: The send timeout for FastCGI.
 - `fastcgi_read_timeout`: The read timeout for FastCGI.
+- `proxy_gzip_comp_level`: The `gzip_comp_level` of nginx, from 1 to 9. Defaults to `6`. It applies to the responses that nginx compresses itself, such as the JavaScript of the client, which Artemis does not compress; nginx's own default of 1 leaves that JavaScript much larger.
 - `proxy_allowed_ranges`: Restricts Artemis to clients from the listed IP ranges; everyone else gets the maintenance page. Empty by default, which serves everyone. See [Restricting access to an IP range](#restricting-access-to-an-ip-range).
 
 Default variables can be found in the `defaults/main.yml` file.
