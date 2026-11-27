@@ -31,3 +31,8 @@ activemq_password: "{{ broker.password }}"
 
 # Configure the borker ip address - by default it uses the wireguard network
 activemq_ip_address: "{{ wireguard_interface_address }}"
+
+# Units the broker is started after. The broker binds activemq_ip_address, which by default is the WireGuard address of
+# the host and only exists once wg-quick@wg0 has finished. Ordering only, no dependency: if the unit does not exist on
+# this host (for example because activemq_ip_address is not a WireGuard address) systemd ignores it.
+activemq_after_units: wg-quick@wg0.service
