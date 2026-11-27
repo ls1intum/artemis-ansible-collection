@@ -42,7 +42,7 @@
 # The broker binds activemq_ip_address, which is the WireGuard address by default and only exists once wg-quick@wg0 has
 # finished. Without the ordering the broker can start before it, fail to bind and stay down after a reboot.
 # A drop-in instead of the unit file so that adding the ordering does not restart a running broker: it takes effect
-# at the next boot.
+# at the next boot. "Enable broker service" below reloads systemd.
 - name: Ensure the broker.service drop-in directory exists
   become: true
   file:
@@ -64,13 +64,6 @@
       # Ordering only, no dependency: a unit that does not exist on this host is ignored.
       [Unit]
       After={{ activemq_after_units }}
-  register: broker_after_units_dropin
-
-- name: Reload systemd so the broker ordering is known
-  become: true
-  systemd:
-    daemon_reload: true
-  when: broker_after_units_dropin is changed
 
 # The broker scripts and the command line utilities read ARTEMIS_HOME from separate profiles.
 - name: Ensure correct broker version is installed
