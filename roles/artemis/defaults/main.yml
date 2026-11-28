@@ -446,6 +446,9 @@ artemis_hyperion_agent: {}
 artemis_hyperion_generation: {}
 
 ##############################################################################
+# Course Home AI welcomes are opt-in on core nodes. Assign local and/or cloud presets below when enabled.
+artemis_course_home_ai_enabled: false
+
 # LLM catalog and preset assignments
 ##############################################################################
 # Artemis' own keys below artemis.llm, see https://docs.artemis.tum.de/admin/llm-configuration.

@@ -471,6 +471,12 @@ artemis:
     destination: {{ artemis_telemetry_destination }}
 {% endif %}
 
+{% if artemis_computed_is_core_node and artemis_course_home_ai_enabled | bool %}
+  course-home:
+    ai:
+      enabled: true
+{% endif %}
+
   hyperion:
     enabled: {{ artemis_hyperion_enabled | bool | lower }}
     exercise-generation:
