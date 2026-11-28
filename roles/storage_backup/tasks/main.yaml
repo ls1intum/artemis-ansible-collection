@@ -13,6 +13,7 @@
   environment:
     BORG_PASSPHRASE: "{{ storage_backup_password }}"
     BORG_RSH: "ssh -i {{ storage_backup_borg_ssh_identity }}"
+  no_log: true
   register: init_borg_output
   changed_when: init_borg_output.rc != 2
   failed_when: init_borg_output.rc not in [0, 2]
@@ -22,11 +23,9 @@
   ansible.builtin.command: borg key export --paper ssh://{{ storage_backup_borg_server_user }}@{{ storage_backup_borg_server_url }}:{{ storage_backup_borg_server_port }}{{ storage_backup_borg_server_user_home }}/{{ storage_backup_borg_repo_name }}
   environment:
     BORG_RSH: "ssh -i {{ storage_backup_borg_ssh_identity }}"
+    BORG_PASSPHRASE: "{{ storage_backup_password }}"
+  no_log: true
   register: borg_keys
-
-- name: Print encryption keys
-  ansible.builtin.debug:
-    msg: "{{ borg_keys.stdout }}"
 
 - name: Write keys to file
   ansible.builtin.copy:
@@ -35,6 +34,7 @@
     mode: "600"
   delegate_to: localhost
   become: false
+  no_log: true
 
 - name: Deploy storage backup script
   become: true
