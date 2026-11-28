@@ -25,13 +25,15 @@
             - { model: gpt-6.1-terra, input: 1.0, output: 5.0 }
       presets:
         large: { endpoint: logos, model: gpt-6.1-terra, api: responses, reasoning-effort: medium }
+        welcomecloud: { endpoint: logos, model: cloud-model, api: chat-completions }
         embed: { endpoint: logos, model: Qwen/Qwen3-Embedding-8B, api: embeddings }
     artemis_llm_assignments:
       hyperion.llm-presets.default: large
       hyperion.llm-presets.faq-rewrite: large
       weaviate.embedding-llm-preset: embed
       deimos.llm-preset: large
-      course-home.ai.llm-preset: large
+      course-home.ai.local-llm-preset: large
+      course-home.ai.cloud-llm-preset: welcomecloud
     yaml_text: "{{ lookup('ansible.builtin.template', '../roles/artemis/templates/application-prod.yml.j2') }}"
     env_lines: "{{ lookup('ansible.builtin.template', '../roles/artemis/templates/artemis.env.j2').splitlines() }}"
   tasks:
@@ -40,7 +42,6 @@
       vars:
         <<: &course_home_ai_settings
           artemis_course_home_ai_enabled: true
-          artemis_course_home_ai_location: LOCAL
         use_docker: false
 
     - name: Verify the YAML configuration
@@ -60,8 +61,8 @@
           - config.artemis.deimos.keys() | list == ['enabled']
           - config.spring.ai is not defined
           - config.artemis['course-home'].ai.enabled
-          - config.artemis['course-home'].ai.location == 'LOCAL'
-          - config.artemis['course-home.ai.llm-preset'] == 'large'
+          - config.artemis['course-home.ai.local-llm-preset'] == 'large'
+          - config.artemis['course-home.ai.cloud-llm-preset'] == 'welcomecloud'
       vars:
         <<: *course_home_ai_settings
         config: "{{ yaml_text | from_yaml }}"
@@ -83,9 +84,9 @@
           - >-
             "ARTEMIS_COURSEHOME_AI_ENABLED='true'" in env_lines
           - >-
-            "ARTEMIS_COURSEHOME_AI_LOCATION='LOCAL'" in env_lines
+            "ARTEMIS_COURSEHOME_AI_LOCALLLMPRESET='large'" in env_lines
           - >-
-            "ARTEMIS_COURSEHOME_AI_LLMPRESET='large'" in env_lines
+            "ARTEMIS_COURSEHOME_AI_CLOUDLLMPRESET='welcomecloud'" in env_lines
           - env_lines | select('match', '^\\s*ARTEMIS_LLM_') | select('search', '^\\s|\\s$') | list | length == 0
           - env_lines | select('match', '^(SPRING_AI_|ARTEMIS_LLM_MODELCOSTS_|ARTEMIS_DEIMOS_LLM_)') | list | length == 0
 
