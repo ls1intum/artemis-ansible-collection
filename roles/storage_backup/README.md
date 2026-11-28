@@ -1,6 +1,6 @@
 # Storage Backup
 
-This role adds a cron job to the Storage host which creates regular Storage backups. The encryption keys will be saved to `./decryption_Keys.txt` on the localhost.
+This role adds a cron job to the Storage host which creates regular Storage backups. The encryption keys will be saved to `./decryption_keys.txt` on the localhost.
 
 ## Requirements
 You need a borg server at `storage_backup_borg_server_url` with an ssh key set up. The borg server should be added to the known_hosts of the Artemis Storage host.
@@ -44,3 +44,5 @@ Here is an example playbook:
       vars:
         storage_backup_password: "your_storage_backup_password"
 ```
+
+Before opening the first course, [rehearse restoring the database and files together](../db_backup/restore-rehearsal.md).
