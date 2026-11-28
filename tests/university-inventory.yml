@@ -15,7 +15,7 @@
   tasks:
     - name: Load the native role defaults and validate the example inventory
       ansible.builtin.import_role:
-        name: "{{ playbook_dir }}/../roles/artemis"
+        name: artemis
         tasks_from: variable_checks.yml
 
     - name: Verify core and worker agree on the distributed queue and Git URL

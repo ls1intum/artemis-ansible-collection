@@ -5,8 +5,20 @@ Use a disposable installation with the university's planned Artemis configuratio
 ## Create a recovery point
 
 1. From an Artemis checkout containing the [trial grading check](https://github.com/ls1intum/Artemis/tree/develop/supporting_scripts/trial), run `node supporting_scripts/trial/verify-grading.mjs` against the disposable installation. A remote test listener can be reached through a loopback SSH tunnel. Set the port and the internal test administrator credentials as described in the trial guide. Keep the exercise ID and passing commit hash. Add a small course attachment and save its checksum if the installation stores uploaded files.
-2. Drain builds and stop the **rehearsal** application's writers, including workers, before taking both backups. Keep PostgreSQL and storage available. Independently scheduled database and file backups can capture different points in time. Include every configured repository, upload and file-storage path. Back up the deployment inventory, keys and configuration separately. The database dump contains no cluster-wide roles.
-3. Run the installed database backup script with `-d` and the storage backup script with `-s`. Set distinct paths such as `/opt/backup-database.sh` and `/opt/backup-storage.sh` if the roles share a host. Record the resulting dump filename and Borg archive name together. Retain a protected copy of this pair outside the installation, along with access to the Borg repository, passphrase and recovery key. Restart the source rehearsal installation only after both backups finish.
+2. Drain builds and stop the **rehearsal** application's writers, including workers, before taking the backups. Keep PostgreSQL and storage available. Independently scheduled database and file backups can capture different points in time. Include every configured repository, upload and file-storage path. Back up the deployment inventory, keys and configuration separately. The database dump contains no cluster-wide roles.
+3. Run the installed database backup script with `-d` and the storage backup script with `-s`. Set distinct paths such as `/opt/backup-database.sh` and `/opt/backup-storage.sh` if the roles share a host. Record the resulting dump filename and Borg archive name together. Retain a protected copy of this pair outside the installation, along with access to the Borg repository, passphrase and recovery key. If the installation uses Valkey, capture its state as described below while the writers are still stopped. Restart the source installation after the whole recovery point is secure.
+
+### Capture the two-host university build queue
+
+The [university inventory](../../examples/university/README.md) uses Valkey RDB snapshots on the core with append-only persistence disabled. With both Artemis services stopped, use the core's local administrative account to create a synchronous snapshot. Check that `SAVE` returns `OK`.
+
+```bash
+valkey-cli --user admin --askpass SAVE
+sudo valkey-check-rdb /var/lib/valkey/dump.rdb
+sudo sha256sum /var/lib/valkey/dump.rdb
+```
+
+Copy the validated `dump.rdb` to protected off-host storage. Record its checksum with the database dump and Borg archive. Keep the encrypted inventory containing the application and admin ACL passwords with the recovery credentials. If you enabled append-only persistence, stop Valkey after draining the application and preserve its entire data directory, including the append-only manifest and all segments. Restore it with the source persistence configuration.
 
 ## Restore into empty destinations
 
@@ -31,6 +43,17 @@ restore_tree=$(mktemp -d)
 ```
 
 Borg stores the source directory inside the archive. For example, a backup of `/srv/artemis` extracts beneath `$restore_tree/srv/artemis`. Mount or copy **its contents** into the empty recovery data directory, preserving ownership and permissions. Check that the Artemis service account can read and write its repositories and uploads. Reconnect any additional restored mounts before starting the application and its dedicated worker.
+
+For the two-host university deployment, provision Valkey on the isolated recovery core with the source version and encrypted inventory. Give both recovered Artemis nodes the recovery core's private address and matching application credential. Keep the admin credential on the core. With both Artemis services still stopped, stop `valkey-server` on the recovery core. Verify the snapshot against the recorded checksum, then install it in the fresh Valkey data directory and test the authenticated connection.
+
+```bash
+sudo install -o valkey -g valkey -m 0600 "$RECOVERED_RDB" /var/lib/valkey/dump.rdb
+sudo valkey-check-rdb /var/lib/valkey/dump.rdb
+sudo systemctl start valkey-server
+valkey-cli --user artemis --askpass PING
+```
+
+Expect `PONG`. Start the recovered Artemis core and its dedicated worker, and confirm the worker has registered before submitting a build.
 
 ## Prove the course can be taught again
 

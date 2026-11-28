@@ -1,5 +1,0 @@
----
-collections:
-  - name: https://github.com/ls1intum/artemis-ansible-collection.git
-    type: git
-    version: f3145b856e319edca8d87b833b8033a90f564316

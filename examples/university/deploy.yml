@@ -16,6 +16,7 @@
         enabled: true
 
     - name: Create the Artemis database owner
+      become: true
       become_user: postgres
       community.postgresql.postgresql_user:
         name: "{{ artemis_database_username }}"
@@ -23,6 +24,7 @@
       no_log: true
 
     - name: Create the Artemis database
+      become: true
       become_user: postgres
       community.postgresql.postgresql_db:
         name: "{{ artemis_database_dbname }}"
