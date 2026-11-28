@@ -22,7 +22,7 @@ Here is an example playbook:
 ```yaml
 - hosts: db
   roles:
-    - role: ls1intum.db_backup
+    - role: ls1intum.artemis.db_backup
       vars:
         artemis_database_dbname: "artemis"
         artemis_database_backup_dir: "/opt/backup"
@@ -30,3 +30,5 @@ Here is an example playbook:
         artemis_database_backup_minute: 30
         artemis_database_backup_hour: 4
 ```
+
+Before opening the first course, [restore the dump alongside the matching storage backup](restore-rehearsal.md) and grade a submission on the recovered instance.

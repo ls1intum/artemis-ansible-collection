@@ -1,0 +1,96 @@
+---
+- name: Prepare the Artemis core database and distributed build queue
+  hosts: core
+  become: true
+  tasks:
+    - name: Install PostgreSQL 18 and its Ansible driver
+      ansible.builtin.apt:
+        name: [postgresql-18, python3-psycopg2, acl]
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Start PostgreSQL
+      ansible.builtin.service:
+        name: postgresql
+        state: started
+        enabled: true
+
+    - name: Create the Artemis database owner
+      become: true
+      become_user: postgres
+      community.postgresql.postgresql_user:
+        name: "{{ artemis_database_username }}"
+        password: "{{ artemis_database_password }}"
+      no_log: true
+
+    - name: Create the Artemis database
+      become: true
+      become_user: postgres
+      community.postgresql.postgresql_db:
+        name: "{{ artemis_database_dbname }}"
+        owner: "{{ artemis_database_username }}"
+
+    - name: Install Valkey on the private interface
+      ansible.builtin.include_role:
+        name: ls1intum.artemis.valkey
+      vars:
+        valkey_wireguard_address: "{{ university_core_private_address }}"
+        valkey_after_units: network-online.target
+        valkey: "{{ university_valkey | combine({'admin_username': 'admin', 'admin_password': vault_valkey_admin_password}) }}"
+
+- name: Prepare Docker for the isolated build worker
+  hosts: workers
+  become: true
+  tasks:
+    - name: Check the private path from the worker to the core queue
+      ansible.builtin.wait_for:
+        host: "{{ university_valkey.host }}"
+        port: "{{ university_valkey.port }}"
+        timeout: 15
+
+    - name: Install Docker and ACL support
+      ansible.builtin.apt:
+        name: [docker.io, acl]
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Start Docker
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Create the Artemis service overrides directory
+      ansible.builtin.file:
+        path: /etc/systemd/system/artemis.service.d
+        state: directory
+        mode: "0755"
+
+    - name: Select the native architecture for Docker build images
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/artemis.service.d/worker.conf
+        mode: "0644"
+        content: |
+          [Service]
+          Environment=ARTEMIS_CONTINUOUSINTEGRATION_IMAGEARCHITECTURE={{ 'arm64' if ansible_facts.architecture == 'aarch64' else 'amd64' }}
+
+- name: Install and start the Artemis core
+  hosts: core
+  become: true
+  roles:
+    - ls1intum.artemis.artemis
+
+- name: Install and start the Artemis build worker
+  hosts: workers
+  become: true
+  roles:
+    - ls1intum.artemis.artemis
+  post_tasks:
+    - name: Wait for the build worker to reach readiness
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ artemis_server_port }}/management/health/readiness"
+        return_content: true
+      register: worker_readiness
+      until: worker_readiness.status == 200 and worker_readiness.json.status | default('') == 'UP'
+      retries: 120
+      delay: 5

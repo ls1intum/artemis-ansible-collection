@@ -1,0 +1,31 @@
+---
+artemis_version: "10.8"
+artemis_server_url: https://artemis.example.edu
+artemis_email: artemis-support@example.edu
+artemis_account_login_info: university account
+
+# Reachable over the private network from both VMs.
+university_core_private_address: 192.0.2.10
+university_valkey:
+  host: "{{ university_core_private_address }}"
+  port: 6379
+  username: artemis
+  password: "{{ vault_valkey_password }}"
+valkey: "{{ university_valkey }}"
+
+is_multinode_install: true
+use_docker: false
+setup_system: true
+update_artemis_config: true
+download_artemis_application: true
+restart_artemis: true
+# The native role uses this account to own its downloaded WAR even with no deployment user.
+artemis_deployment_user_name: artemis
+artemis_ssh_priv_key_value: null
+artemis_ssh_key_path: null
+version_control:
+  localvc:
+    url: "{{ artemis_server_url }}"
+    repo_storage_base_path: /opt/artemis/data/git
+    build_agent_use_ssh: false
+    repository_authentication_mechanisms: token

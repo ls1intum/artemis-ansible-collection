@@ -1,4 +1,6 @@
 #!/bin/bash
+set -euo pipefail
+umask 077
 
 database=false
 prune=false
@@ -18,15 +20,21 @@ while getopts ":dph" opt; do case ${opt} in
     h ) usage; exit 0;;
     d ) database=true;;
     p ) prune=true;;
-    \? ) printf "Invalid Option: -$OPTARG\n\n" 1>&2; logs_help; exit 1;;
+    \? ) printf "Invalid Option: -$OPTARG\n\n" 1>&2; usage; exit 1;;
 esac; done
 if [ $OPTIND -eq 1 ]; then printf "Invalid Option: $(basename $0) requires options.\nRun $(basename $0) -h for help.\n" 1>&2; exit 1; fi
 shift $((OPTIND -1))
 
-if [ $prune = true ]; then # Prune old backups
-    find {{ artemis_database_backup_dir }} -mtime +{{ artemis_database_backup_retention }} -type f -delete
+backup_dir={{ artemis_database_backup_dir | quote }}
+
+if [ "$database" = true ]; then
+    archive="$backup_dir/artemis_database_dump_$(date +%Y-%m-%d_%H_%M_%S).sql.gz"
+    temporary=$(mktemp "$archive.partial.XXXXXX")
+    trap 'rm -f -- "$temporary"' EXIT
+    sudo -u postgres pg_dump --dbname={{ artemis_database_dbname | quote }} --format=plain | gzip --best > "$temporary"
+    mv -- "$temporary" "$archive"
 fi
 
-if [ $database = true ]; then # Database Backup
-    sudo -u postgres pg_dump --dbname={{ artemis_database_dbname }} --format=plain | gzip --best > {{ artemis_database_backup_dir }}/artemis_database_dump_`date +%Y-%m-%d"_"%H_%M_%S`.sql.gz
+if [ "$prune" = true ]; then
+    find "$backup_dir" -maxdepth 1 -type f -name 'artemis_database_dump_*.sql.gz' -mtime +{{ artemis_database_backup_retention }} -delete
 fi

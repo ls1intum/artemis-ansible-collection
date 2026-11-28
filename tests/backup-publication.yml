@@ -1,0 +1,140 @@
+---
+- name: Verify database and file backup failure handling
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars_files:
+    - ../roles/db_backup/defaults/main.yml
+    - ../roles/storage_backup/defaults/main.yml
+  tasks:
+    - name: Create a temporary test directory
+      ansible.builtin.tempfile:
+        state: directory
+      register: scratch
+
+    - name: Exercise the rendered backup script
+      block:
+        - name: Render the script against the temporary database backup directory
+          ansible.builtin.template:
+            src: ../roles/db_backup/templates/backup.sh.j2
+            dest: "{{ scratch.path }}/backup.sh"
+            mode: "0700"
+          vars:
+            artemis_database_backup_dir: "{{ scratch.path }}"
+
+        - name: Stand in for sudo and pg_dump without needing a database or elevated privileges
+          ansible.builtin.copy:
+            dest: "{{ scratch.path }}/sudo"
+            mode: "0700"
+            content: |
+              #!/bin/sh
+              printf '%s\n' 'sample dump data'
+              exit "${DUMP_EXIT_CODE:-0}"
+
+        - name: Simulate a dump failure after the database has emitted output
+          ansible.builtin.command: "{{ scratch.path }}/backup.sh -d"
+          environment:
+            PATH: "{{ scratch.path }}:{{ lookup('env', 'PATH') }}"
+            DUMP_EXIT_CODE: "3"
+          register: interrupted_dump
+          failed_when: interrupted_dump.rc == 0
+          changed_when: false
+
+        - name: Find complete or partial backup files
+          ansible.builtin.find:
+            paths: "{{ scratch.path }}"
+            patterns: "*.sql.gz*"
+            hidden: true
+          register: failed_files
+
+        - name: A failed dump leaves no archive
+          ansible.builtin.assert:
+            that: failed_files.matched == 0
+
+        - name: Create a successful backup
+          ansible.builtin.command: "{{ scratch.path }}/backup.sh -d"
+          environment:
+            PATH: "{{ scratch.path }}:{{ lookup('env', 'PATH') }}"
+
+        - name: Find published archives
+          ansible.builtin.find:
+            paths: "{{ scratch.path }}"
+            patterns: "*.sql.gz"
+          register: archives
+
+        - name: Check the archive count and access mode
+          ansible.builtin.assert:
+            that:
+              - archives.matched == 1
+              - archives.files[0].mode == '0600'
+
+        - name: Read back the compressed dump
+          ansible.builtin.command:
+            argv: [gzip, -dc, "{{ archives.files[0].path }}"]
+          register: restored
+          changed_when: false
+
+        - name: Verify dump contents
+          ansible.builtin.assert:
+            that: restored.stdout == 'sample dump data'
+
+        - name: Seed an expired archive and an unrelated file in the backup directory
+          ansible.builtin.file:
+            path: "{{ scratch.path }}/{{ item }}"
+            state: touch
+            mode: "0600"
+            modification_time: "200001010000.00"
+          loop:
+            - artemis_database_dump_2000-01-01_00_00_00.sql.gz
+            - unrelated.sql.gz
+
+        - name: Prune expired database dumps
+          ansible.builtin.command: "{{ scratch.path }}/backup.sh -p"
+
+        - name: Check which archives remain after pruning
+          ansible.builtin.find:
+            paths: "{{ scratch.path }}"
+            patterns: "*.sql.gz"
+          register: retained
+
+        - name: Retain the new backup and the unrelated file
+          ansible.builtin.assert:
+            that: (retained.files | map(attribute='path') | map('basename') | sort) == ([archives.files[0].path | basename, 'unrelated.sql.gz'] | sort)
+
+        - name: Render the storage backup script
+          ansible.builtin.template:
+            src: ../roles/storage_backup/templates/backup.sh.j2
+            dest: "{{ scratch.path }}/storage-backup.sh"
+            mode: "0700"
+
+        - name: Stand in for Borg and fail the archive operation
+          ansible.builtin.copy:
+            dest: "{{ scratch.path }}/borg"
+            mode: "0700"
+            content: |
+              #!/bin/sh
+              echo "$1" >> "$BORG_CALL_LOG"
+              [ "$1" != create ] || exit 2
+
+        - name: Simulate an inaccessible storage backup repository
+          ansible.builtin.command: "{{ scratch.path }}/storage-backup.sh -sp"
+          environment:
+            PATH: "{{ scratch.path }}:{{ lookup('env', 'PATH') }}"
+            BORG_CALL_LOG: "{{ scratch.path }}/borg.calls"
+          register: storage_result
+          failed_when: storage_result.rc != 2
+          changed_when: false
+
+        - name: Read the list of Borg operations
+          ansible.builtin.slurp:
+            src: "{{ scratch.path }}/borg.calls"
+          register: borg_calls
+
+        - name: A failed create operation skips pruning
+          ansible.builtin.assert:
+            that: (borg_calls.content | b64decode).splitlines() == ['create']
+      always:
+        - name: Clean up temporary test data
+          ansible.builtin.file:
+            path: "{{ scratch.path }}"
+            state: absent

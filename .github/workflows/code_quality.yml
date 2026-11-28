@@ -20,6 +20,14 @@ jobs:
         run: python -m pip install -r requirements.txt
       - name: Verify build log storage configuration
         run: ansible-playbook -i localhost, tests/artemis-build-log-storage.yml
+      - name: Verify database and storage backup publication
+        run: ansible-playbook -i localhost, tests/backup-publication.yml
+      - name: Render the university inventory on the controller
+        env:
+          ANSIBLE_ROLES_PATH: ./roles
+        run: ansible-playbook -i examples/university/hosts.yml tests/university-inventory.yml
+      - name: Verify exercise sharing configuration
+        run: ansible-playbook -i localhost, tests/artemis-sharing.yml
       - name: Verify the LLM catalog and preset assignments
         run: ansible-playbook -i localhost, tests/artemis-llm.yml
 
