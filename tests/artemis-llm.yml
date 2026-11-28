@@ -31,9 +31,18 @@
       hyperion.llm-presets.faq-rewrite: large
       weaviate.embedding-llm-preset: embed
       deimos.llm-preset: large
+      course-home.ai.llm-preset: large
     yaml_text: "{{ lookup('ansible.builtin.template', '../roles/artemis/templates/application-prod.yml.j2') }}"
     env_lines: "{{ lookup('ansible.builtin.template', '../roles/artemis/templates/artemis.env.j2').splitlines() }}"
   tasks:
+    - name: Validate the Course Home settings
+      ansible.builtin.include_tasks: ../roles/artemis/tasks/llm_checks.yml
+      vars:
+        <<: &course_home_ai_settings
+          artemis_course_home_ai_enabled: true
+          artemis_course_home_ai_location: LOCAL
+        use_docker: false
+
     - name: Verify the YAML configuration
       ansible.builtin.assert:
         that:
@@ -50,10 +59,15 @@
           - config.artemis['deimos.llm-preset'] == 'large'
           - config.artemis.deimos.keys() | list == ['enabled']
           - config.spring.ai is not defined
+          - config.artemis['course-home'].ai.enabled
+          - config.artemis['course-home'].ai.location == 'LOCAL'
+          - config.artemis['course-home.ai.llm-preset'] == 'large'
       vars:
+        <<: *course_home_ai_settings
         config: "{{ yaml_text | from_yaml }}"
 
     - name: Verify the environment variables
+      vars: *course_home_ai_settings
       ansible.builtin.assert:
         that:
           - "\"ARTEMIS_LLM_ENDPOINTS_LOGOS_BASEURL='https://logos.example.org/v1'\" in env_lines"
@@ -66,6 +80,12 @@
           - "\"ARTEMIS_WEAVIATE_EMBEDDINGLLMPRESET='embed'\" in env_lines"
           - "\"ARTEMIS_DEIMOS_LLMPRESET='large'\" in env_lines"
           - "\"ARTEMIS_DEIMOS_ENABLED='true'\" in env_lines"
+          - >-
+            "ARTEMIS_COURSEHOME_AI_ENABLED='true'" in env_lines
+          - >-
+            "ARTEMIS_COURSEHOME_AI_LOCATION='LOCAL'" in env_lines
+          - >-
+            "ARTEMIS_COURSEHOME_AI_LLMPRESET='large'" in env_lines
           - env_lines | select('match', '^\\s*ARTEMIS_LLM_') | select('search', '^\\s|\\s$') | list | length == 0
           - env_lines | select('match', '^(SPRING_AI_|ARTEMIS_LLM_MODELCOSTS_|ARTEMIS_DEIMOS_LLM_)') | list | length == 0
 
@@ -88,11 +108,13 @@
     yaml_text: "{{ lookup('ansible.builtin.template', '../roles/artemis/templates/application-prod.yml.j2') }}"
     env_lines: "{{ lookup('ansible.builtin.template', '../roles/artemis/templates/artemis.env.j2').splitlines() }}"
   tasks: &without_catalog_tasks
-    - name: Verify that no llm map and no LLM environment variables are rendered
+    - name: Verify that optional LLM configuration is omitted
       ansible.builtin.assert:
         that:
           - yaml_text.splitlines() | select('match', '^  llm:$') | list | length == 0
           - (yaml_text | from_yaml).artemis.llm is not defined
+          - (yaml_text | from_yaml).artemis['course-home'] is not defined
+          - env_lines | select('match', '^ARTEMIS_COURSEHOME_AI_') | list | length == 0
           - env_lines | select('match', '^\\s*ARTEMIS_LLM_') | list | length == 0
 
 - name: Verify the configuration with an empty catalog

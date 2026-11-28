@@ -197,6 +197,19 @@ of older versions (`spring_ai`, `artemis_llm_cost`, `deimos.llm` and the Weaviat
 and `gpu_api_key`) are no longer rendered, and the role stops if one of them is still set. On Docker hosts the role also stops
 if an endpoint sets `custom-headers`, because environment variable names cannot carry the exact header names.
 
+Course Home AI welcomes are off by default. To enable them on core nodes with Artemis 10.8 or later, set:
+
+```yaml
+artemis_course_home_ai_enabled: true
+artemis_course_home_ai_location: LOCAL
+artemis_llm_assignments:
+  course-home.ai.llm-preset: welcome
+```
+
+Define the assigned chat preset in `artemis_llm.presets`. Use `LOCAL` for an approved local inference endpoint and `CLOUD` for an
+external provider. The location controls which student AI preferences permit generated welcomes. See the
+[Course Home AI documentation](https://docs.artemis.tum.de/admin/course-home-ai/).
+
 Iris configuration:
 ```
 iris:

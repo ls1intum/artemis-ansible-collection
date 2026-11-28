@@ -16,6 +16,20 @@
             | map('regex_replace', '^', 'weaviate.') | list) }}
   when: artemis_old_llm_variables | length > 0
 
+- name: Validate Course Home AI settings on core nodes
+  ansible.builtin.assert:
+    that:
+      - artemis_course_home_ai_location | default('') in ['LOCAL', 'CLOUD']
+      - course_home_preset in (artemis_llm | default({}, true)).get('presets', {})
+    fail_msg: >-
+      Set artemis_course_home_ai_location to LOCAL or CLOUD and assign an existing chat preset to
+      course-home.ai.llm-preset in artemis_llm_assignments before enabling Course Home AI.
+  vars:
+    course_home_preset: "{{ (artemis_llm_assignments | default({}, true)).get('course-home.ai.llm-preset', '') }}"
+  when:
+    - artemis_course_home_ai_enabled | default(false) | bool
+    - artemis_computed_is_core_node | bool
+
 # Environment variable names lose the dashes and the case of map keys, so a header such as X-Api-Key would reach
 # Artemis as xapikey.
 - name: Check that no LLM endpoint sets custom headers on Docker hosts
