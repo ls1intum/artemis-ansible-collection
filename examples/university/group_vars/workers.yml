@@ -1,0 +1,16 @@
+---
+node_id: 2
+node_short_name: worker-1
+node_display_name: University build worker
+is_build_agent: true
+continuous_integration:
+  localci:
+    is_core_node: false
+    is_build_agent: true
+    concurrent_build_size: 1
+# The pinned role checks that these variables exist on all nodes. The native
+# buildagent template omits all three. Keep actual core credentials off workers.
+artemis_database_password: unused-on-build-agent
+artemis_internal_admin_password: unused-on-build-agent
+artemis_jhipster_jwt: unused-on-build-agent
+artemis_system_ram_proportion: 0.25

@@ -1,0 +1,48 @@
+---
+- name: Render both native profiles from the university inventory locally
+  hosts: core:workers
+  connection: local
+  gather_facts: false
+  vars:
+    vault_artemis_admin_password: fixture-admin
+    vault_artemis_database_password: fixture-database
+    vault_artemis_jwt: fixture-jwt
+    vault_valkey_password: fixture-queue
+    artemis_operator_name: Campus Computing
+    artemis_operator_admin_name: Alex Example
+    artemis_university_name: North Campus Institute
+    config: "{{ lookup('ansible.builtin.template', '../roles/artemis/templates/application-prod.yml.j2') | from_yaml }}"
+  tasks:
+    - name: Load the native role defaults and validate the example inventory
+      ansible.builtin.import_role:
+        name: "{{ playbook_dir }}/../roles/artemis"
+        tasks_from: variable_checks.yml
+
+    - name: Verify core and worker agree on the distributed queue and Git URL
+      ansible.builtin.assert:
+        that:
+          - config.artemis['distributed-data'].provider == 'redis'
+          - config.spring.data.redis.host == university_core_private_address
+          - config.spring.data.redis.password == vault_valkey_password
+          - config.artemis['version-control'].url == artemis_server_url
+          - config.artemis['version-control']['build-agent-use-ssh'] == false
+
+    - name: Verify the PostgreSQL core with local exercise repositories
+      when: "'core' in group_names"
+      ansible.builtin.assert:
+        that:
+          - artemis_spring_profiles.split(',') | sort == ['core', 'localci', 'localvc', 'prod', 'scheduling']
+          - config.spring.datasource.url == 'jdbc:postgresql://127.0.0.1:5432/artemis?sslmode=disable'
+          - config.spring.datasource.password == vault_artemis_database_password
+          - config.artemis['version-control']['local-vcs-repo-path'] == '/opt/artemis/data/git'
+          - config.artemis.sharing is not defined
+
+    - name: Verify the dedicated worker receives its build settings and no core credentials
+      when: "'workers' in group_names"
+      ansible.builtin.assert:
+        that:
+          - artemis_spring_profiles == 'prod,buildagent'
+          - config.artemis['continuous-integration']['concurrent-build-size'] == 1
+          - config.spring.datasource is not defined
+          - config.artemis['user-management'] is not defined
+          - config.jhipster is not defined or config.jhipster.security is not defined

@@ -49,6 +49,10 @@ Each role includes a readme and default configuration. Consult these for more in
 Our Ansible configuration for the TUM Artemis Production, Staging and Test environments are public at [github.com/ls1intum/artemis-ansible](https://github.com/ls1intum/artemis-ansible).
 Use them as examples for how to use this collection and as a reference for deploying Artemis.
 
+## First university installation
+
+The [two-VM university example](examples/university/README.md) includes a pinned inventory and a deployment playbook for a PostgreSQL-backed Artemis core and a dedicated LocalCI build worker.
+
 ## Isolated AI workers
 
 The optional [`ai_worker` role](roles/ai_worker/README.md) deploys the
@@ -97,8 +101,9 @@ virtualenv venv
 pip3 install -r requirements.txt
 ```
 
-Run the build log storage template regression test locally without changing any hosts:
+Run the build log storage and university inventory template checks on the controller:
 
 ```bash
 ansible-playbook -i localhost, tests/artemis-build-log-storage.yml
+ansible-playbook -i examples/university/hosts.yml tests/university-inventory.yml
 ```

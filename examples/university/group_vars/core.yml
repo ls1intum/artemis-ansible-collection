@@ -1,0 +1,26 @@
+---
+node_id: 1
+is_build_agent: false
+continuous_integration:
+  localci:
+    is_core_node: true
+    is_build_agent: false
+
+artemis_operator_name: "<organization operating Artemis>"
+artemis_operator_admin_name: "<administrator name>"
+artemis_university_name: "<university name>"
+artemis_internal_admin_password: "{{ vault_artemis_admin_password }}"
+artemis_jhipster_jwt: "{{ vault_artemis_jwt }}"
+artemis_database_host: 127.0.0.1
+artemis_database_username: artemis
+artemis_database_dbname: artemis
+artemis_database_password: "{{ vault_artemis_database_password }}"
+artemis_repo_basepath: /opt/artemis/data
+artemis_external_password_provider: null
+artemis_telemetry_enabled: false
+artemis_send_admin_details: false
+push_notification_relay: null
+artemis_maven_mirror_url: https://repo.maven.apache.org/maven2
+# Leave memory for PostgreSQL, Valkey, and the page cache on this VM.
+artemis_system_ram_proportion: 0.35
+valkey_maxmemory: 512mb
