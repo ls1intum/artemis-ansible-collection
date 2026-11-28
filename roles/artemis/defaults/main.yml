@@ -503,6 +503,7 @@ artemis_internal_ip_allowlist: []
 # Sharing Configuration
 ##############################################################################
 #sharing:
+#  enabled: true  # Set to false to disable sharing and omit the connection details.
 #  url: "https://dev-exchange.codeability-austria.uibk.ac.at/"
 #  apikey: ""
 #  actionname: "Export to Artemis@testInstance"

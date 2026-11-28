@@ -234,10 +234,13 @@ artemis:
       account-name: {{ artemis_account_login_info }}
 {% if sharing is defined %}
   sharing:
-    enabled: true
+{% set sharing_enabled = sharing.enabled | default(true) | bool %}
+    enabled: {{ sharing_enabled | lower }}
+{% if sharing_enabled %}
     serverurl: {{ sharing.url }}
     apikey: {{ sharing.apikey }}
     actionname: {{ sharing.actionname }}
+{% endif %}
 {% endif %}
 {% if artemis_global_search_enabled is defined %}
   global-search:
